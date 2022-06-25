@@ -5,16 +5,16 @@ const Rejected = () => {
   const { rejected } = useTasks();
 
   return (
-    <>
-      <Divider variant="dashed" pt={6} />
-      <Box filter="blur(1px)">
+    <Box mt={10}>
+      <Divider variant="dashed" />
+      <Box filter="blur(1px)" py={5}>
         <List spacing={2}>
           {rejected.map((task) => (
             <Task key={task.id} task={task} />
           ))}
         </List>
       </Box>
-    </>
+    </Box>
   );
 };
 

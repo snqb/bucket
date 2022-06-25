@@ -1,8 +1,15 @@
 import {
+  Box,
+  Button,
+  Divider,
+  Flex,
+  IconButton,
   Input,
   InputGroup,
+  InputLeftAddon,
   InputLeftElement,
   InputRightAddon,
+  InputRightElement,
   Text,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
@@ -10,8 +17,12 @@ import { FormEventHandler, useRef, useState } from "react";
 import { useTasks } from "../data/useTasks";
 import { nanoid } from "nanoid";
 
-const Adder = () => {
-  const { addTask } = useTasks();
+interface Props {
+  today?: boolean;
+}
+
+const Adder = ({ today = false }: Props) => {
+  const { addTask: addTaskToBucket, addTaskToday } = useTasks();
   const [emoji, setEmoji] = useState("🌊");
   const [text, setText] = useState("");
 
@@ -32,25 +43,32 @@ const Adder = () => {
     }
   };
 
-  const onAdd = () => {
-    if (text) {
-      addTask({
-        id: nanoid(),
-        title: {
-          text,
-          emoji,
-        },
-        createdAt: new Date(),
-      });
+  const onAdd = ({ today } = { today: false }) => {
+    if (!text) return;
 
+    const task = {
+      id: nanoid(),
+      title: {
+        text,
+        emoji,
+      },
+      createdAt: new Date(),
+    };
+
+    const adder = today ? addTaskToday : addTaskToBucket;
+
+    try {
+      adder(task);
+    } catch (e) {
+      alert("dev is stupid, text him t.me/snqba");
+    } finally {
       setText("");
       setEmoji("🌊");
     }
-    console.log(text, emoji);
   };
 
   return (
-    <InputGroup>
+    <InputGroup variant="outline" size="md">
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
         borderStyle="dashed"
@@ -65,12 +83,24 @@ const Adder = () => {
         type="text"
         placeholder="empty your head bro"
       />
-      <InputRightAddon
-        onClick={onAdd}
-        children={<Text color="green.500">✔️</Text>}
-      />
+      {today && (
+        <InputRightAddon
+          onClick={() => onAdd({ today: true })}
+          borderRadius="none"
+          children="😭"
+        />
+      )}
+
+      <InputRightAddon onClick={() => onAdd()} children="🪣" />
     </InputGroup>
   );
+
+  // return (
+  //   <InputGroup>
+
+  //     <InputRightElement onClick={onAdd} children={} />
+  //   </InputGroup>
+  // );
 };
 
 export default Adder;
