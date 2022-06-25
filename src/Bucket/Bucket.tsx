@@ -5,7 +5,7 @@ const Bucket = () => {
   const { bucket } = useTasks();
 
   return (
-    <div>
+    <div id="bucket">
       <List spacing={2}>
         {bucket.map((task) => (
           <Task task={task} />
@@ -21,7 +21,7 @@ const Task = ({ task }: { task: ITask }) => {
   const { moveToToday } = useTasks();
 
   return (
-    <ListItem>
+    <ListItem background="gray.50" p={2} borderRadius="lg" >
       <Flex justifyContent="space-between">
         <Box as="span">
           {task.title.emoji}

@@ -2314,6 +2314,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource/lato@npm:^4.5.8":
+  version: 4.5.8
+  resolution: "@fontsource/lato@npm:4.5.8"
+  checksum: 73ad91ebaca40ff771b3e7b6c38847dead7b6df5ec61f837c3a787a3e08a0bc8ce2cf7f92e2c574165124d552afe9e6dd081f2cabcfb46dd826474f934f510ba
+  languageName: node
+  linkType: hard
+
+"@fontsource/open-sans@npm:^4.5.10":
+  version: 4.5.10
+  resolution: "@fontsource/open-sans@npm:4.5.10"
+  checksum: 32f9d5f7b4b18c1efe86aec0d3aabfbdd37821b09b4cb8bcc8d98553e057c79ef583c9646618d329ffb6e9db3152f32b8e7b5926822d499191f12f9abd86e2b2
+  languageName: node
+  linkType: hard
+
+"@fontsource/raleway@npm:^4.5.9":
+  version: 4.5.9
+  resolution: "@fontsource/raleway@npm:4.5.9"
+  checksum: 3fae75f4ef4a7f386e45f98dbe4e6a6cc1c15f92864aeb91c4da129858718f1a3c0e14b10f48aecdfae5c557c874f85b0645bb52c029f58674c675e2dbc963e7
+  languageName: node
+  linkType: hard
+
 "@gar/promisify@npm:^1.1.3":
   version: 1.1.3
   resolution: "@gar/promisify@npm:1.1.3"
@@ -5358,6 +5379,9 @@ __metadata:
     "@chakra-ui/react": ^2.2.1
     "@emotion/react": ^11
     "@emotion/styled": ^11
+    "@fontsource/lato": ^4.5.8
+    "@fontsource/open-sans": ^4.5.10
+    "@fontsource/raleway": ^4.5.9
     "@types/react": ^18.0.0
     "@types/react-dom": ^18.0.0
     "@types/react-transition-group": ^4

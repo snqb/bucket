@@ -41,32 +41,29 @@ const Task = ({ task }: { task: ITask }) => {
 
   if (mode === "default") {
     return (
-      <Box
+      <ListItem
         onClick={() => {
           setMode("do");
         }}
+        p={2}
+        background="gray.50"
+        borderRadius="lg"
       >
-        <ListItem
-          onClick={() => {
-            setMode("do");
-          }}
-        >
-          <Flex justify="space-between" align="center">
-            <Flex>
-              {task.title.emoji}
-              {task.title.text}
-            </Flex>
-            <Box flex={1} maxW="30px">
-              <Progress
-                size="md"
-                value={progress}
-                borderRadius="4px"
-                colorScheme="orange"
-              />
-            </Box>
+        <Flex justify="space-between" align="center">
+          <Flex>
+            {task.title.emoji}
+            {task.title.text}
           </Flex>
-        </ListItem>
-      </Box>
+          <Box flex={1} maxW="30px">
+            <Progress
+              size="md"
+              value={progress}
+              borderRadius="4px"
+              colorScheme="orange"
+            />
+          </Box>
+        </Flex>
+      </ListItem>
     );
   }
 

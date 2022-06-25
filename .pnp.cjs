@@ -36,6 +36,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chakra-ui/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.2.1"],\
             ["@emotion/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:11.9.3"],\
             ["@emotion/styled", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:11.9.3"],\
+            ["@fontsource/lato", "npm:4.5.8"],\
+            ["@fontsource/open-sans", "npm:4.5.10"],\
+            ["@fontsource/raleway", "npm:4.5.9"],\
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
@@ -4377,6 +4380,33 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@fontsource/lato", [\
+        ["npm:4.5.8", {\
+          "packageLocation": "./.yarn/cache/@fontsource-lato-npm-4.5.8-a1c64bbb96-73ad91ebac.zip/node_modules/@fontsource/lato/",\
+          "packageDependencies": [\
+            ["@fontsource/lato", "npm:4.5.8"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fontsource/open-sans", [\
+        ["npm:4.5.10", {\
+          "packageLocation": "./.yarn/cache/@fontsource-open-sans-npm-4.5.10-250b757f19-32f9d5f7b4.zip/node_modules/@fontsource/open-sans/",\
+          "packageDependencies": [\
+            ["@fontsource/open-sans", "npm:4.5.10"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["@fontsource/raleway", [\
+        ["npm:4.5.9", {\
+          "packageLocation": "./.yarn/cache/@fontsource-raleway-npm-4.5.9-d74eb392a7-3fae75f4ef.zip/node_modules/@fontsource/raleway/",\
+          "packageDependencies": [\
+            ["@fontsource/raleway", "npm:4.5.9"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@gar/promisify", [\
         ["npm:1.1.3", {\
           "packageLocation": "./.yarn/cache/@gar-promisify-npm-1.1.3-ac1a325862-4059f790e2.zip/node_modules/@gar/promisify/",\
@@ -7952,6 +7982,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@chakra-ui/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.2.1"],\
             ["@emotion/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:11.9.3"],\
             ["@emotion/styled", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:11.9.3"],\
+            ["@fontsource/lato", "npm:4.5.8"],\
+            ["@fontsource/open-sans", "npm:4.5.10"],\
+            ["@fontsource/raleway", "npm:4.5.9"],\
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
