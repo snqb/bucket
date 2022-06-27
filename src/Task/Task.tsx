@@ -51,8 +51,7 @@ const Task = ({ task }: { task: ITask }) => {
       >
         <Flex justify="space-between" align="center">
           <Flex>
-            {task.title.emoji}
-            {task.title.text}
+            {task.title.emoji} {task.title.text}
           </Flex>
           <Box flex={1} maxW="30px">
             <Progress

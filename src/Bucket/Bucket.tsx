@@ -46,8 +46,7 @@ const Task = ({ task }: { task: ITask }) => {
     <ListItem background="gray.50" p={2} borderRadius="lg">
       <Flex justifyContent="space-between">
         <Box as="span">
-          {task.title.emoji}
-          {task.title.text}
+          {task.title.emoji} {task.title.text}
         </Box>
 
         <Box onClick={() => moveToToday(task)} as="span" fontSize={16}>
