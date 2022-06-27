@@ -35,9 +35,6 @@ const TodayView = () => {
           </List>
         </TransitionGroup>
       </List>
-      <Center>
-        <Text fontSize="1xl">↓</Text>
-      </Center>
     </Flex>
   );
 };
@@ -50,8 +47,6 @@ const Empty = () => {
       <Flex direction="column" textAlign="center">
         <Text fontSize="6xl">YO</Text>
         <Text fontSize="6xl">BRO</Text>
-        <Text fontSize="6xl">🪣</Text>
-        <Text fontSize="6xl">👇</Text>
         <Text fontSize="6xl">🪣</Text>
         <Text fontSize="6xl">👇</Text>
         <Text fontSize="6xl">🪣</Text>
