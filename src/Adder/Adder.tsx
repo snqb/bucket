@@ -71,6 +71,7 @@ const Adder = ({ today = false }: Props) => {
     <InputGroup variant="outline" size="md">
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
+        textTransform="lowercase"
         borderStyle="dashed"
         value={text}
         onChange={handleChange}
