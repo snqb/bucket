@@ -14,9 +14,9 @@ export default defineConfig({
       "apple-touch-icon.png",
     ],
     manifest: {
-      name: "slowlife",
-      short_name: "slowlife",
-      description: "slow life",
+      name: "bucket",
+      short_name: "bucket",
+      description: "bucket it!",
       theme_color: "#ffffff",
       icons: [
         {
