@@ -1,9 +1,21 @@
-import { Center, Divider, Flex, List, Text } from "@chakra-ui/react";
+import { Center, Divider, Flex, Heading, List, Text, VStack } from "@chakra-ui/react";
 import { useTasks } from "../data/useTasks";
 import Task from "../Task";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
+import Adder from "../Adder";
 
 const Today = () => {
+  return (
+    <VStack spacing={3} align="stretch" sx={{ minHeight: "80vh" }} py={3}>
+      <Heading as="h1">Today</Heading>
+      <Adder today />
+
+      <TodayView />
+    </VStack>
+  );
+};
+
+const TodayView = () => {
   const { today } = useTasks();
 
   if (today.length === 0) {
