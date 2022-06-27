@@ -56,6 +56,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["use-long-press", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.0.2"],\
             ["vite", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.9.12"],\
             ["vite-plugin-pwa", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:0.12.0"],\
+            ["workbox-build", "npm:6.5.3"],\
+            ["workbox-core", "npm:6.5.3"],\
+            ["workbox-precaching", "npm:6.5.3"],\
+            ["workbox-routing", "npm:6.5.3"],\
+            ["workbox-strategies", "npm:6.5.3"],\
+            ["workbox-window", "npm:6.5.3"],\
             ["zustand", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.0.0-rc.1"]\
           ],\
           "linkType": "SOFT"\
@@ -8002,6 +8008,12 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["use-long-press", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.0.2"],\
             ["vite", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.9.12"],\
             ["vite-plugin-pwa", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:0.12.0"],\
+            ["workbox-build", "npm:6.5.3"],\
+            ["workbox-core", "npm:6.5.3"],\
+            ["workbox-precaching", "npm:6.5.3"],\
+            ["workbox-routing", "npm:6.5.3"],\
+            ["workbox-strategies", "npm:6.5.3"],\
+            ["workbox-window", "npm:6.5.3"],\
             ["zustand", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.0.0-rc.1"]\
           ],\
           "linkType": "SOFT"\
@@ -8679,7 +8691,9 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             "@types/vite",\
             "@types/workbox-build",\
             "@types/workbox-window",\
-            "vite"\
+            "vite",\
+            "workbox-build",\
+            "workbox-window"\
           ],\
           "linkType": "HARD"\
         }]\

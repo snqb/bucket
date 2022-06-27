@@ -2,6 +2,7 @@ import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
+import { registerSW } from "virtual:pwa-register";
 
 const theme = extendTheme({
   black: "#090a0b",
@@ -138,3 +139,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </ChakraProvider>
   </React.StrictMode>
 );
+
+if ("serviceWorker" in navigator) {
+  // && !/localhost/.test(window.location)) {
+  registerSW();
+}

@@ -5399,6 +5399,12 @@ __metadata:
     use-long-press: ^2.0.2
     vite: ^2.9.9
     vite-plugin-pwa: ^0.12.0
+    workbox-build: ^6.5.3
+    workbox-core: ^6.5.3
+    workbox-precaching: ^6.5.3
+    workbox-routing: ^6.5.3
+    workbox-strategies: ^6.5.3
+    workbox-window: ^6.5.3
     zustand: ^4.0.0-rc.1
   languageName: unknown
   linkType: soft
@@ -6091,7 +6097,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-core@npm:6.5.3":
+"workbox-core@npm:6.5.3, workbox-core@npm:^6.5.3":
   version: 6.5.3
   resolution: "workbox-core@npm:6.5.3"
   checksum: b898da6d990642eaac7ad38db0d8379ef42d8de5fd6636ac859d79ec6f15d41e1b1bc6dce6dfc8b0e0b38094c0af8e29b2e8c2461666ea67cacd59dc5f53b45e
@@ -6129,7 +6135,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-precaching@npm:6.5.3":
+"workbox-precaching@npm:6.5.3, workbox-precaching@npm:^6.5.3":
   version: 6.5.3
   resolution: "workbox-precaching@npm:6.5.3"
   dependencies:
@@ -6163,7 +6169,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-routing@npm:6.5.3":
+"workbox-routing@npm:6.5.3, workbox-routing@npm:^6.5.3":
   version: 6.5.3
   resolution: "workbox-routing@npm:6.5.3"
   dependencies:
@@ -6172,7 +6178,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"workbox-strategies@npm:6.5.3":
+"workbox-strategies@npm:6.5.3, workbox-strategies@npm:^6.5.3":
   version: 6.5.3
   resolution: "workbox-strategies@npm:6.5.3"
   dependencies:
