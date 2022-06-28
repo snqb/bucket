@@ -7,8 +7,8 @@ import { registerSW } from "virtual:pwa-register";
 const theme = extendTheme({
   black: "#090a0b",
   fonts: {
-    heading: `'Lato', sans-serif`,
-    body: `'Lato', sans-serif`,
+    heading: `system-ui, 'Lato', sans-serif`,
+    body: `system-ui, 'Lato', sans-serif`,
   },
   gray: {
     "50": "#f9fafa",
