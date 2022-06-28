@@ -1,11 +1,13 @@
 import {
   Box,
   Flex,
+  IconButton,
   ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Progress,
@@ -13,6 +15,7 @@ import {
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
+  Spacer,
   useDisclosure,
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
@@ -26,7 +29,7 @@ interface Props {
 }
 
 const Task = ({ task, canMoveUp = false }: Props) => {
-  const { rejectTask, moveToToday } = useTasks();
+  const { rejectTask, moveToToday, moveToBucketFromToday } = useTasks();
 
   const {
     isOpen,
@@ -117,11 +120,26 @@ const Task = ({ task, canMoveUp = false }: Props) => {
                 <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
               </Slider>
             </ModalBody>
+            {!canMoveUp && (
+              <Flex py={1} justify="space-between">
+                <Spacer />
+                <IconButton
+                  onClick={() => moveToBucketFromToday(task)}
+                  size="xs"
+                  variant="outline"
+                  p={3}
+                  icon={<Emoji _="🪣🪣🪣" />}
+                  aria-label="⬇️ 🪣 ⬇️"
+                />
+              </Flex>
+            )}
           </ModalContent>
         </Modal>
       </ListItem>
     </>
   );
 };
+
+const Emoji = ({ _ }: { _: string }) => <>{_}</>;
 
 export default Task;

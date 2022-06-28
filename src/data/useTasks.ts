@@ -22,6 +22,7 @@ interface TasksState {
   rejected: ITaskId[];
   addTask: (task: ITask) => void;
   addTaskToday: (task: ITask) => void;
+  moveToBucketFromToday: (task: ITask) => void;
   rejectTask: (taskId: ITaskId) => void;
   moveToToday: (task: ITask) => void;
 }
@@ -36,6 +37,13 @@ const useStore = create<TasksState, any>(
         set(
           produce((draft) => {
             draft.today.push(task.id);
+          })
+        );
+      },
+      moveToBucketFromToday: (task) => {
+        set(
+          produce((draft) => {
+            draft.today = R.without([task.id], draft.today);
           })
         );
       },
@@ -75,6 +83,7 @@ export const useTasks = () => {
     rejected,
     moveToToday,
     addTaskToday,
+    moveToBucketFromToday,
   } = useStore();
 
   const todaySet = new Set(today);
@@ -102,5 +111,6 @@ export const useTasks = () => {
     rejectTask,
     moveToToday,
     addTaskToday,
+    moveToBucketFromToday,
   };
 };
