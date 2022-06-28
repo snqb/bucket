@@ -5,6 +5,7 @@ import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 
 const theme = extendTheme({
+  useSystemColorMode: true,
   black: "#090a0b",
   fonts: {
     heading: `system-ui, 'Lato', sans-serif`,

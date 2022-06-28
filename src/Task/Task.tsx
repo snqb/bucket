@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalFooter,
+  Text,
   ModalHeader,
   ModalOverlay,
   Progress,
@@ -17,6 +17,7 @@ import {
   SliderTrack,
   Spacer,
   useDisclosure,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
@@ -30,6 +31,7 @@ interface Props {
 
 const Task = ({ task, canMoveUp = false }: Props) => {
   const { rejectTask, moveToToday, moveToBucketFromToday } = useTasks();
+  const bg = useColorModeValue('gray.50', 'gray.900')
 
   const {
     isOpen,
@@ -52,7 +54,7 @@ const Task = ({ task, canMoveUp = false }: Props) => {
         as={motion.li}
         onClick={openSlider}
         p={2}
-        background="gray.50"
+        background={bg}
         borderRadius="lg"
         exit={{ opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -64,7 +66,9 @@ const Task = ({ task, canMoveUp = false }: Props) => {
       >
         <Flex justify="space-between" align="center">
           <Flex>
-            {task.title.emoji} {task.title.text}
+            <Text>
+              {task.title.emoji} {task.title.text}
+            </Text>
           </Flex>
           {canMoveUp ? (
             <Box px={1}>
