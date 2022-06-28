@@ -1,6 +1,7 @@
 import produce from "immer";
 import create from "zustand";
 import { persist } from "zustand/middleware";
+import * as R from "ramda";
 
 type Title = {
   text: string;
@@ -17,8 +18,8 @@ type ITaskId = ITask["id"];
 
 interface TasksState {
   tasks: ITask[];
-  today: ITask[];
-  rejected: ITask[];
+  today: ITaskId[];
+  rejected: ITaskId[];
   addTask: (task: ITask) => void;
   addTaskToday: (task: ITask) => void;
   rejectTask: (taskId: ITaskId) => void;
@@ -34,8 +35,7 @@ const useStore = create<TasksState, any>(
       moveToToday: (task) => {
         set(
           produce((draft) => {
-            draft.tasks = draft.tasks.filter((t: ITask) => t.id !== task.id);
-            draft.today.push(task);
+            draft.today.push(task.id);
           })
         );
       },
@@ -52,12 +52,9 @@ const useStore = create<TasksState, any>(
           })
         ),
       rejectTask: (taskId) => {
-        const tasks = get().tasks;
-        const today = get().today;
         set(
           produce((draft) => {
-            draft.rejected.push(today.find((it) => it.id === taskId));
-            draft.today = today.filter((task) => task.id !== taskId);
+            draft.rejected.push(taskId);
           })
         );
       },
@@ -80,12 +77,29 @@ export const useTasks = () => {
     addTaskToday,
   } = useStore();
 
+  const todaySet = new Set(today);
+  const rejectedSet = new Set(rejected);
+
+  const hasInToday = (task: ITask) => todaySet.has(task.id);
+  const hasInRejected = (task: ITask) => rejectedSet.has(task.id);
+
+  const todayTasks = R.pipe(
+    R.filter(hasInToday),
+    R.reject(hasInRejected)
+  )(tasks);
+
+  const rejectedTasks = R.filter(hasInRejected)(tasks);
+  const bucketTasks = R.pipe(
+    R.reject(hasInToday),
+    R.reject(hasInRejected)
+  )(tasks);
+
   return {
-    bucket: tasks,
-    today,
+    bucket: bucketTasks,
+    today: todayTasks,
+    rejected: rejectedTasks,
     addTask,
     rejectTask,
-    rejected,
     moveToToday,
     addTaskToday,
   };
