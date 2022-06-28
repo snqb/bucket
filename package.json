@@ -19,6 +19,7 @@
     "framer-motion": "^6",
     "immer": "^9.0.15",
     "nanoid": "^4.0.0",
+    "ramda": "^0.28.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-transition-group": "^4.4.2",
@@ -26,6 +27,7 @@
     "zustand": "^4.0.0-rc.1"
   },
   "devDependencies": {
+    "@types/ramda": "^0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@types/react-transition-group": "^4",

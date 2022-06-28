@@ -1,8 +1,17 @@
-import { Center, Divider, Flex, Heading, List, Text, VStack } from "@chakra-ui/react";
+import {
+  Center,
+  Divider,
+  Flex,
+  Heading,
+  List,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useTasks } from "../data/useTasks";
 import Task from "../Task";
 import { CSSTransition, TransitionGroup } from "react-transition-group";
 import Adder from "../Adder";
+import { AnimatePresence } from "framer-motion";
 
 const Today = () => {
   return (
@@ -25,15 +34,11 @@ const TodayView = () => {
   return (
     <Flex h="100%" direction="column" justify="space-between">
       <List spacing={2}>
-        <TransitionGroup>
-          <List spacing={2}>
-            {today.map((task) => (
-              <CSSTransition key={task.id} timeout={1000}>
-                <Task task={task} />
-              </CSSTransition>
-            ))}
-          </List>
-        </TransitionGroup>
+        <AnimatePresence>
+          {today.map((task) => (
+            <Task key={task.id} task={task} />
+          ))}
+        </AnimatePresence>
       </List>
     </Flex>
   );

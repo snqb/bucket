@@ -39,6 +39,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@fontsource/lato", "npm:4.5.8"],\
             ["@fontsource/open-sans", "npm:4.5.10"],\
             ["@fontsource/raleway", "npm:4.5.9"],\
+            ["@types/ramda", "npm:0.28.14"],\
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
@@ -49,6 +50,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["immer", "npm:9.0.15"],\
             ["nanoid", "npm:4.0.0"],\
             ["prettier", "npm:2.7.1"],\
+            ["ramda", "npm:0.28.0"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"],\
             ["react-transition-group", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.4.2"],\
@@ -4745,6 +4747,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/ramda", [\
+        ["npm:0.28.14", {\
+          "packageLocation": "./.yarn/cache/@types-ramda-npm-0.28.14-f538bab060-b962383ba6.zip/node_modules/@types/ramda/",\
+          "packageDependencies": [\
+            ["@types/ramda", "npm:0.28.14"],\
+            ["ts-toolbelt", "npm:6.15.5"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@types/react", [\
         ["npm:18.0.14", {\
           "packageLocation": "./.yarn/cache/@types-react-npm-18.0.14-8bf0a6b01e-608eb57a38.zip/node_modules/@types/react/",\
@@ -7443,6 +7455,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["ramda", [\
+        ["npm:0.28.0", {\
+          "packageLocation": "./.yarn/cache/ramda-npm-0.28.0-6a5fe8f6cc-44ea6e5010.zip/node_modules/ramda/",\
+          "packageDependencies": [\
+            ["ramda", "npm:0.28.0"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["randombytes", [\
         ["npm:2.1.0", {\
           "packageLocation": "./.yarn/cache/randombytes-npm-2.1.0-e3da76bccf-d779499376.zip/node_modules/randombytes/",\
@@ -7991,6 +8012,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@fontsource/lato", "npm:4.5.8"],\
             ["@fontsource/open-sans", "npm:4.5.10"],\
             ["@fontsource/raleway", "npm:4.5.9"],\
+            ["@types/ramda", "npm:0.28.14"],\
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
@@ -8001,6 +8023,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["immer", "npm:9.0.15"],\
             ["nanoid", "npm:4.0.0"],\
             ["prettier", "npm:2.7.1"],\
+            ["ramda", "npm:0.28.0"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"],\
             ["react-transition-group", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.4.2"],\
@@ -8348,6 +8371,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["tr46", "npm:1.0.1"],\
             ["punycode", "npm:2.1.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["ts-toolbelt", [\
+        ["npm:6.15.5", {\
+          "packageLocation": "./.yarn/cache/ts-toolbelt-npm-6.15.5-e42f89942f-24ad00cfd9.zip/node_modules/ts-toolbelt/",\
+          "packageDependencies": [\
+            ["ts-toolbelt", "npm:6.15.5"]\
           ],\
           "linkType": "HARD"\
         }]\

@@ -1,4 +1,5 @@
 import { Heading, List, VStack } from "@chakra-ui/react";
+import { AnimatePresence } from "framer-motion";
 import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
 import Rejected from "../Rejected";
@@ -30,9 +31,11 @@ const BucketView = () => {
   return (
     <div id="bucket">
       <List spacing={2}>
-        {bucket.map((task) => (
-          <Task key={task.id} task={task} canMoveUp />
-        ))}
+        <AnimatePresence>
+          {bucket.map((task) => (
+            <Task key={task.id} task={task} canMoveUp />
+          ))}
+        </AnimatePresence>
       </List>
     </div>
   );
