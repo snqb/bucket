@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { motion } from "framer-motion";
+import { motion, useDragControls } from "framer-motion";
 import { useState } from "react";
 
 interface Props {
@@ -27,6 +27,8 @@ interface Props {
 
 const Task = ({ task, canMoveUp = false }: Props) => {
   const { rejectTask, moveToToday } = useTasks();
+  const dragControls = useDragControls()
+
   const {
     isOpen,
     onClose: closeSlider,
@@ -52,6 +54,7 @@ const Task = ({ task, canMoveUp = false }: Props) => {
         borderRadius="lg"
         exit={{ opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
+        dragControls={dragControls}
       >
         <Flex justify="space-between" align="center">
           <Flex>
@@ -60,21 +63,22 @@ const Task = ({ task, canMoveUp = false }: Props) => {
           {canMoveUp ? (
             <Box px={1}>
               <Box
-                as={motion.div}
+                as={motion.span}
                 whileDrag={{
-                  opacity: [0.9, 0.7],
-                  scaleY: [1.2, 1],
-                  scaleX: [0.8, 1],
+                  opacity: [0.9, 0.7, 1],
+                  scaleY: 1.2,
+                  scaleX: 0.8
                 }}
                 drag="y"
-                dragConstraints={{ top: 10, bottom: 10 }}
+                dragConstraints={{ top: 1, bottom: 1 }}
                 whileTap={{ scale: 1.5 }}
-                dragElastic={0.8}
                 // @ts-ignore
                 onDragEnd={(_: any, info: any) => {
                   console.log(info);
                   if (info.delta.y < 0) {
                     moveToToday(task);
+                  } else if (info.delta.y > 0) {
+                    rejectTask(task.id);
                   }
                 }}
                 padding="2"
