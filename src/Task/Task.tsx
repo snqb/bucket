@@ -60,6 +60,7 @@ const Task = ({ task, canMoveUp = false }: Props) => {
         whileTap={{
           opacity: 0.5,
         }}
+        userSelect="none"
       >
         <Flex justify="space-between" align="center">
           <Flex>

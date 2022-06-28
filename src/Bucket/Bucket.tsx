@@ -9,6 +9,7 @@ const Bucket = () => {
   return (
     <VStack spacing={3} align="stretch" sx={{ minHeight: "90vh" }} py={3}>
       <Heading
+        userSelect="none"
         as="h1"
         onClick={() => {
           document.getElementById("bucket")?.scrollIntoView({

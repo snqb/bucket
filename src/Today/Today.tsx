@@ -16,7 +16,9 @@ import { AnimatePresence } from "framer-motion";
 const Today = () => {
   return (
     <VStack spacing={3} align="stretch" sx={{ minHeight: "80vh" }} py={3}>
-      <Heading as="h1">Today</Heading>
+      <Heading userSelect="none" as="h1">
+        Today
+      </Heading>
       <Adder today />
 
       <TodayView />
@@ -48,7 +50,7 @@ export default Today;
 
 const Empty = () => {
   return (
-    <Center>
+    <Center userSelect="none">
       <Flex direction="column" textAlign="center">
         <Text fontSize="6xl">YO</Text>
         <Text fontSize="6xl">BRO</Text>
