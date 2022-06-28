@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { motion, useDragControls } from "framer-motion";
+import { motion } from "framer-motion";
 import { useState } from "react";
 
 interface Props {
@@ -27,7 +27,6 @@ interface Props {
 
 const Task = ({ task, canMoveUp = false }: Props) => {
   const { rejectTask, moveToToday } = useTasks();
-  const dragControls = useDragControls()
 
   const {
     isOpen,
@@ -54,7 +53,10 @@ const Task = ({ task, canMoveUp = false }: Props) => {
         borderRadius="lg"
         exit={{ opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        dragControls={dragControls}
+        initial={{ opacity: 0.3 }}
+        whileTap={{
+          opacity: 0.5,
+        }}
       >
         <Flex justify="space-between" align="center">
           <Flex>
@@ -64,14 +66,14 @@ const Task = ({ task, canMoveUp = false }: Props) => {
             <Box px={1}>
               <Box
                 as={motion.span}
-                whileDrag={{
-                  opacity: [0.9, 0.7, 1],
-                  scaleY: 1.2,
-                  scaleX: 0.8
-                }}
                 drag="y"
-                dragConstraints={{ top: 1, bottom: 1 }}
-                whileTap={{ scale: 1.5 }}
+                dragSnapToOrigin
+                dragConstraints={{ top: 4, bottom: 4 }}
+                whileDrag={{
+                  scaleY: 1.2,
+                  scaleX: 0.8,
+                }}
+                whileTap={{ scale: 1.2 }}
                 // @ts-ignore
                 onDragEnd={(_: any, info: any) => {
                   console.log(info);
@@ -84,8 +86,8 @@ const Task = ({ task, canMoveUp = false }: Props) => {
                 padding="2"
                 bgGradient="radial-gradient(circle, rgba(0,0,0,1) 20%, rgba(108,188,233,1) 25%, rgba(255,255,255,1) 35%, rgba(17,1,162,1) 45%);"
                 borderRadius="full"
-                width="4"
-                height="4"
+                width="5"
+                height="5"
                 display="flex"
               />
             </Box>
