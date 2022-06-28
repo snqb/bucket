@@ -1,6 +1,6 @@
 import {
-  Box,
   Flex,
+  IconButton,
   ListItem,
   Modal,
   ModalBody,
@@ -19,8 +19,13 @@ import { ITask, useTasks } from "../data/useTasks";
 
 import { useState } from "react";
 
-const Task = ({ task }: { task: ITask }) => {
-  const { rejectTask } = useTasks();
+interface Props {
+  task: ITask;
+  canMoveUp?: boolean;
+}
+
+const Task = ({ task, canMoveUp = false }: Props) => {
+  const { rejectTask, moveToToday } = useTasks();
   const [mode, setMode] = useState("default");
   const { isOpen, onClose } = useDisclosure({ isOpen: true });
   const [progress, setProgress] = useState(0);
@@ -53,14 +58,26 @@ const Task = ({ task }: { task: ITask }) => {
           <Flex>
             {task.title.emoji} {task.title.text}
           </Flex>
-          <Box flex={1} maxW="30px">
+          <Flex gap={1} align="center">
+            {canMoveUp && (
+              <IconButton
+                variant="ghost"
+                aria-label="⬆️"
+                icon={<Emoji _="⬆️" />}
+                onClick={() => moveToToday(task)}
+              >
+                ⬆️
+              </IconButton>
+            )}
             <Progress
-              size="md"
+              filter="blur(20px)"
+              flex={1}
+              minWidth="32px"
               value={progress}
               borderRadius="4px"
               colorScheme="orange"
             />
-          </Box>
+          </Flex>
         </Flex>
       </ListItem>
     );
@@ -88,5 +105,7 @@ const Task = ({ task }: { task: ITask }) => {
     </Modal>
   );
 };
+
+const Emoji = ({ _: emoji }: { _: string }) => <>{emoji}</>;
 
 export default Task;

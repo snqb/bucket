@@ -1,21 +1,12 @@
 import {
-  Box,
-  Button,
-  Divider,
-  Flex,
-  IconButton,
   Input,
-  InputGroup,
-  InputLeftAddon,
-  InputLeftElement,
-  InputRightAddon,
-  InputRightElement,
-  Text,
+  InputGroup, InputLeftElement,
+  InputRightAddon
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
-import { FormEventHandler, useRef, useState } from "react";
-import { useTasks } from "../data/useTasks";
 import { nanoid } from "nanoid";
+import { FormEventHandler, useState } from "react";
+import { useTasks } from "../data/useTasks";
 
 interface Props {
   today?: boolean;
