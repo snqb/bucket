@@ -21,7 +21,6 @@ interface TasksState {
   today: ITaskId[];
   rejected: ITaskId[];
   addTask: (task: ITask) => void;
-  addTaskToday: (task: ITask) => void;
   moveToBucketFromToday: (task: ITask) => void;
   rejectTask: (taskId: ITaskId) => void;
   moveToToday: (task: ITask) => void;
@@ -29,7 +28,7 @@ interface TasksState {
 
 const useStore = create<TasksState, any>(
   persist(
-    (set, get) => ({
+    (set) => ({
       tasks: [],
       today: [],
       rejected: [],
@@ -51,12 +50,6 @@ const useStore = create<TasksState, any>(
         set(
           produce((draft) => {
             draft.tasks.push(task);
-          })
-        ),
-      addTaskToday: (task) =>
-        set(
-          produce((draft) => {
-            draft.today.push(task);
           })
         ),
       rejectTask: (taskId) => {
@@ -82,7 +75,6 @@ export const useTasks = () => {
     today,
     rejected,
     moveToToday,
-    addTaskToday,
     moveToBucketFromToday,
   } = useStore();
 
@@ -110,7 +102,6 @@ export const useTasks = () => {
     addTask,
     rejectTask,
     moveToToday,
-    addTaskToday,
     moveToBucketFromToday,
   };
 };

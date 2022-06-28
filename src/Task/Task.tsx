@@ -80,7 +80,6 @@ const Task = ({ task, canMoveUp = false }: Props) => {
                 whileTap={{ scale: 1.2 }}
                 // @ts-ignore
                 onDragEnd={(_: any, info: any) => {
-                  console.log(info);
                   if (info.delta.y < 0) {
                     moveToToday(task);
                   } else if (info.delta.y > 0) {

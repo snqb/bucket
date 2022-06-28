@@ -1,7 +1,8 @@
 import {
   Input,
-  InputGroup, InputLeftElement,
-  InputRightAddon
+  InputGroup,
+  InputLeftElement,
+  InputRightAddon,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { nanoid } from "nanoid";
@@ -13,7 +14,7 @@ interface Props {
 }
 
 const Adder = ({ today = false }: Props) => {
-  const { addTask: addTaskToBucket, addTaskToday } = useTasks();
+  const { addTask, moveToToday } = useTasks();
   const [emoji, setEmoji] = useState("🌊");
   const [text, setText] = useState("");
 
@@ -46,10 +47,12 @@ const Adder = ({ today = false }: Props) => {
       createdAt: new Date(),
     };
 
-    const adder = today ? addTaskToday : addTaskToBucket;
-
     try {
-      adder(task);
+      addTask(task);
+
+      if (today) {
+        moveToToday(task);
+      }
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {
