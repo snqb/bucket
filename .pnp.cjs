@@ -53,8 +53,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ramda", "npm:0.28.0"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"],\
+            ["react-flip-move", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:3.0.4"],\
+            ["react-merge-refs", "npm:2.0.1"],\
             ["react-transition-group", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.4.2"],\
             ["typescript", "patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=7ad353"],\
+            ["use-double-click", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:1.0.5"],\
             ["use-long-press", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.0.2"],\
             ["vite", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.9.12"],\
             ["vite-plugin-pwa", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:0.12.0"],\
@@ -7540,6 +7543,32 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["react-flip-move", [\
+        ["npm:3.0.4", {\
+          "packageLocation": "./.yarn/cache/react-flip-move-npm-3.0.4-728773a9f4-048295a674.zip/node_modules/react-flip-move/",\
+          "packageDependencies": [\
+            ["react-flip-move", "npm:3.0.4"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:3.0.4", {\
+          "packageLocation": "./.yarn/__virtual__/react-flip-move-virtual-2571e99156/0/cache/react-flip-move-npm-3.0.4-728773a9f4-048295a674.zip/node_modules/react-flip-move/",\
+          "packageDependencies": [\
+            ["react-flip-move", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:3.0.4"],\
+            ["@types/react", "npm:18.0.14"],\
+            ["@types/react-dom", "npm:18.0.5"],\
+            ["react", "npm:18.2.0"],\
+            ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"]\
+          ],\
+          "packagePeers": [\
+            "@types/react-dom",\
+            "@types/react",\
+            "react-dom",\
+            "react"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["react-focus-lock", [\
         ["npm:2.9.1", {\
           "packageLocation": "./.yarn/cache/react-focus-lock-npm-2.9.1-4c80040ff8-4dbc2166ac.zip/node_modules/react-focus-lock/",\
@@ -7573,6 +7602,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageLocation": "./.yarn/cache/react-is-npm-16.13.1-a9b9382b4f-f7a19ac349.zip/node_modules/react-is/",\
           "packageDependencies": [\
             ["react-is", "npm:16.13.1"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["react-merge-refs", [\
+        ["npm:2.0.1", {\
+          "packageLocation": "./.yarn/cache/react-merge-refs-npm-2.0.1-e038520c6a-c0b6fdb384.zip/node_modules/react-merge-refs/",\
+          "packageDependencies": [\
+            ["react-merge-refs", "npm:2.0.1"]\
           ],\
           "linkType": "HARD"\
         }]\
@@ -8026,8 +8064,11 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["ramda", "npm:0.28.0"],\
             ["react", "npm:18.2.0"],\
             ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"],\
+            ["react-flip-move", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:3.0.4"],\
+            ["react-merge-refs", "npm:2.0.1"],\
             ["react-transition-group", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:4.4.2"],\
             ["typescript", "patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=7ad353"],\
+            ["use-double-click", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:1.0.5"],\
             ["use-long-press", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.0.2"],\
             ["vite", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:2.9.12"],\
             ["vite-plugin-pwa", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:0.12.0"],\
@@ -8579,6 +8620,32 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           ],\
           "packagePeers": [\
             "@types/react",\
+            "react"\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
+      ["use-double-click", [\
+        ["npm:1.0.5", {\
+          "packageLocation": "./.yarn/cache/use-double-click-npm-1.0.5-c266902382-e4046cc046.zip/node_modules/use-double-click/",\
+          "packageDependencies": [\
+            ["use-double-click", "npm:1.0.5"]\
+          ],\
+          "linkType": "SOFT"\
+        }],\
+        ["virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:1.0.5", {\
+          "packageLocation": "./.yarn/__virtual__/use-double-click-virtual-0934504754/0/cache/use-double-click-npm-1.0.5-c266902382-e4046cc046.zip/node_modules/use-double-click/",\
+          "packageDependencies": [\
+            ["use-double-click", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:1.0.5"],\
+            ["@types/react", "npm:18.0.14"],\
+            ["@types/react-dom", "npm:18.0.5"],\
+            ["react", "npm:18.2.0"],\
+            ["react-dom", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:18.2.0"]\
+          ],\
+          "packagePeers": [\
+            "@types/react-dom",\
+            "@types/react",\
+            "react-dom",\
             "react"\
           ],\
           "linkType": "HARD"\

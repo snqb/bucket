@@ -78,22 +78,14 @@ export const useTasks = () => {
     moveToBucketFromToday,
   } = useStore();
 
-  const todaySet = new Set(today);
-  const rejectedSet = new Set(rejected);
-
-  const hasInToday = (task: ITask) => todaySet.has(task.id);
-  const hasInRejected = (task: ITask) => rejectedSet.has(task.id);
-
-  const todayTasks = R.pipe(
-    R.filter(hasInToday),
-    R.reject(hasInRejected)
-  )(tasks);
+  const hasInToday = (task: ITask) => today.includes(task.id);
+  const hasInRejected = (task: ITask) => rejected.includes(task.id);
 
   const rejectedTasks = R.filter(hasInRejected)(tasks);
-  const bucketTasks = R.pipe(
-    R.reject(hasInToday),
-    R.reject(hasInRejected)
-  )(tasks);
+  const nonRejected = R.reject(hasInRejected)(tasks);
+
+  const todayTasks = R.filter(hasInToday)(nonRejected);
+  const bucketTasks = R.reject(hasInToday)(nonRejected);
 
   return {
     bucket: bucketTasks,
@@ -103,5 +95,6 @@ export const useTasks = () => {
     rejectTask,
     moveToToday,
     moveToBucketFromToday,
+    isToday: hasInToday,
   };
 };

@@ -7,7 +7,6 @@ import "@fontsource/lato";
 function App() {
   return (
     <Container py={4}>
-      <Today />
       <Bucket />
     </Container>
   );

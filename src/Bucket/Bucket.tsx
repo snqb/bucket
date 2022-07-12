@@ -1,9 +1,9 @@
 import { Heading, List, VStack } from "@chakra-ui/react";
-import { AnimatePresence } from "framer-motion";
 import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
 import Rejected from "../Rejected";
 import Task from "../Task";
+import FlipMove from "react-flip-move";
 
 const Bucket = () => {
   return (
@@ -27,16 +27,19 @@ const Bucket = () => {
 };
 
 const BucketView = () => {
-  const { bucket } = useTasks();
+  const { bucket, today } = useTasks();
 
   return (
     <div id="bucket">
       <List spacing={2}>
-        <AnimatePresence>
-          {bucket.map((task) => (
-            <Task key={task.id} task={task} canMoveUp />
+        <FlipMove>
+          {today.map((task) => (
+            <Task highlighted key={`today-${task.id}`} task={task} />
           ))}
-        </AnimatePresence>
+          {bucket.map((task) => (
+            <Task key={task.id} task={task} />
+          ))}
+        </FlipMove>
       </List>
     </div>
   );

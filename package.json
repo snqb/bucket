@@ -22,7 +22,10 @@
     "ramda": "^0.28.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
+    "react-flip-move": "^3.0.4",
+    "react-merge-refs": "^2.0.1",
     "react-transition-group": "^4.4.2",
+    "use-double-click": "^1.0.5",
     "use-long-press": "^2.0.2",
     "zustand": "^4.0.0-rc.1"
   },

@@ -4988,6 +4988,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-flip-move@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "react-flip-move@npm:3.0.4"
+  peerDependencies:
+    react: ">=16.3.x"
+    react-dom: ">=16.3.x"
+  checksum: 048295a674b3c044539250aa1f2a5e9d60dea2f8fd859bd9ad2785b7b0676a8b2caebe9c1510ff3584b882316d76d6573dc28fdfc0cca5ddcc58c89fcd2da466
+  languageName: node
+  linkType: hard
+
 "react-focus-lock@npm:^2.9.1":
   version: 2.9.1
   resolution: "react-focus-lock@npm:2.9.1"
@@ -5012,6 +5022,13 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
+  languageName: node
+  linkType: hard
+
+"react-merge-refs@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "react-merge-refs@npm:2.0.1"
+  checksum: c0b6fdb384a92e9b2bb7d56128244a2db97b9343c0dcae70f172352c3732312266c078495902707e45f523625afcba78996a22edea3a8e7b2b17fe97347059fe
   languageName: node
   linkType: hard
 
@@ -5412,8 +5429,11 @@ __metadata:
     ramda: ^0.28.0
     react: ^18.0.0
     react-dom: ^18.0.0
+    react-flip-move: ^3.0.4
+    react-merge-refs: ^2.0.1
     react-transition-group: ^4.4.2
     typescript: ^4.6.3
+    use-double-click: ^1.0.5
     use-long-press: ^2.0.2
     vite: ^2.9.9
     vite-plugin-pwa: ^0.12.0
@@ -5900,6 +5920,16 @@ __metadata:
     "@types/react":
       optional: true
   checksum: 7913df383a5a6fcb399212eedefaac2e0c6f843555202d4e3010bac3848afe38ecaa3d0d6500ad1d936fbeffd637e6c517e68edb024af5e6beca7f27f3ce7b21
+  languageName: node
+  linkType: hard
+
+"use-double-click@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "use-double-click@npm:1.0.5"
+  peerDependencies:
+    react: ">=16.8"
+    react-dom: ">=16.8"
+  checksum: e4046cc046fd6adb63864b440bea0dad45c717f5ba52fdf10d13f144c46d48876eb11be5a4ec3c14dec4175412e5d1c0ffbb1f0a3b3380477ff5cbb9d2420332
   languageName: node
   linkType: hard
 

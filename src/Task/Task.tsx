@@ -21,48 +21,59 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { forwardRef, useRef, useState } from "react";
+import useDoubleClick from "use-double-click";
+import { mergeRefs } from "react-merge-refs";
 
 interface Props {
   task: ITask;
   canMoveUp?: boolean;
+  highlighted?: boolean;
 }
 
-const Task = ({ task, canMoveUp = false }: Props) => {
-  const { rejectTask, moveToToday, moveToBucketFromToday } = useTasks();
-  const bg = useColorModeValue('gray.50', 'gray.900')
+const Task = forwardRef(
+  ({ task, canMoveUp = false, highlighted = false }: Props, ref: any) => {
+    const { rejectTask, moveToToday, moveToBucketFromToday, today, isToday } =
+      useTasks();
+    const bg = useColorModeValue("gray.50", "gray.900");
+    const taskRef = useRef(ref);
 
-  const {
-    isOpen,
-    onClose: closeSlider,
-    onOpen: openSlider,
-  } = useDisclosure({ defaultIsOpen: false });
-  const [progress, setProgress] = useState(0);
+    const {
+      isOpen,
+      onClose: closeSlider,
+      onOpen: openSlider,
+    } = useDisclosure({ defaultIsOpen: false });
+    const [progress, setProgress] = useState(0);
 
-  const onProgress = (progress: number) => {
-    setProgress(progress);
+    useDoubleClick({
+      onSingleClick: openSlider,
+      onDoubleClick: () => {
+        if (isToday(task)) {
+          moveToBucketFromToday(task);
+        } else {
+          moveToToday(task);
+        }
+      },
+      ref: taskRef,
+      latency: 200,
+    });
 
-    if (progress === 100) {
-      rejectTask(task.id);
-    }
-  };
+    const onProgress = (progress: number) => {
+      setProgress(progress);
 
-  return (
-    <>
+      if (progress === 100) {
+        rejectTask(task.id);
+      }
+    };
+
+    return (
       <ListItem
-        as={motion.li}
-        onClick={openSlider}
+        ref={mergeRefs([ref, taskRef])}
         p={2}
         background={bg}
         borderRadius="lg"
-        exit={{ opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        initial={{ opacity: 0.3 }}
-        whileTap={{
-          opacity: 0.5,
-        }}
         userSelect="none"
+        border={highlighted ? "1px solid orange" : "iniital"}
       >
         <Flex justify="space-between" align="center">
           <Flex>
@@ -70,42 +81,13 @@ const Task = ({ task, canMoveUp = false }: Props) => {
               {task.title.emoji} {task.title.text}
             </Text>
           </Flex>
-          {canMoveUp ? (
-            <Box px={1}>
-              <Box
-                as={motion.span}
-                drag="y"
-                dragSnapToOrigin
-                dragConstraints={{ top: 4, bottom: 4 }}
-                whileDrag={{
-                  scaleY: 1.2,
-                  scaleX: 0.8,
-                }}
-                whileTap={{ scale: 1.2 }}
-                // @ts-ignore
-                onDragEnd={(_: any, info: any) => {
-                  if (info.delta.y < 0) {
-                    moveToToday(task);
-                  } else if (info.delta.y > 0) {
-                    rejectTask(task.id);
-                  }
-                }}
-                padding="2"
-                bgGradient="radial-gradient(circle, rgba(0,0,0,1) 20%, rgba(108,188,233,1) 25%, rgba(255,255,255,1) 35%, rgba(17,1,162,1) 45%);"
-                borderRadius="full"
-                width="5"
-                height="5"
-                display="flex"
-              />
-            </Box>
-          ) : (
-            <Progress
-              minWidth="32px"
-              value={progress}
-              borderRadius="4px"
-              colorScheme="orange"
-            />
-          )}
+
+          <Progress
+            minWidth="32px"
+            value={progress}
+            borderRadius="4px"
+            colorScheme="orange"
+          />
         </Flex>
         <Modal isCentered onClose={closeSlider} size="xs" isOpen={isOpen}>
           <ModalOverlay backdropFilter="blur(10px) hue-rotate(90deg)" />
@@ -140,9 +122,9 @@ const Task = ({ task, canMoveUp = false }: Props) => {
           </ModalContent>
         </Modal>
       </ListItem>
-    </>
-  );
-};
+    );
+  }
+);
 
 const Emoji = ({ _ }: { _: string }) => <>{_}</>;
 
