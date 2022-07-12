@@ -89,13 +89,6 @@ const Adder = ({ today = false }: Props) => {
       <InputRightAddon onClick={() => onAdd()} children="🪣" />
     </InputGroup>
   );
-
-  // return (
-  //   <InputGroup>
-
-  //     <InputRightElement onClick={onAdd} children={} />
-  //   </InputGroup>
-  // );
 };
 
 export default Adder;

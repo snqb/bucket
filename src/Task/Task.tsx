@@ -112,19 +112,6 @@ const Task = forwardRef(
                 <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
               </Slider>
             </ModalBody>
-            {!canMoveUp && (
-              <Flex py={1} justify="space-between">
-                <Spacer />
-                <IconButton
-                  onClick={() => moveToBucketFromToday(task)}
-                  size="xs"
-                  variant="outline"
-                  p={3}
-                  icon={<Emoji _="🪣🪣🪣" />}
-                  aria-label="⬇️ 🪣 ⬇️"
-                />
-              </Flex>
-            )}
           </ModalContent>
         </Modal>
       </ListItem>
