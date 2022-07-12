@@ -37,8 +37,13 @@ const Task = forwardRef(
     { task, canMoveUp = false, highlighted = false, ...restItemProps }: Props,
     ref: any
   ) => {
-    const { rejectTask, moveToToday, moveToBucketFromToday, today, isToday } =
-      useTasks();
+    const {
+      rejectTask,
+      moveToToday,
+      moveToBucketFromToday,
+      isToday,
+      saveProgress,
+    } = useTasks();
     const bg = useColorModeValue("gray.50", "gray.900");
     const taskRef = useRef(ref);
 
@@ -46,8 +51,11 @@ const Task = forwardRef(
       isOpen,
       onClose: closeSlider,
       onOpen: openSlider,
-    } = useDisclosure({ defaultIsOpen: false });
-    const [progress, setProgress] = useState(0);
+    } = useDisclosure({
+      defaultIsOpen: false,
+      onClose: () => saveProgress(task.id, progress),
+    });
+    const [progress, setProgress] = useState(task.progress ?? 0);
 
     useDoubleClick({
       onSingleClick: openSlider,

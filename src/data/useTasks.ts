@@ -12,6 +12,7 @@ export type ITask = {
   id: string;
   title: Title;
   createdAt: Date;
+  progress: number;
 };
 
 type ITaskId = ITask["id"];
@@ -24,6 +25,7 @@ interface TasksState {
   moveToBucketFromToday: (task: ITask) => void;
   rejectTask: (taskId: ITaskId) => void;
   moveToToday: (task: ITask) => void;
+  saveProgress: (taskId: ITaskId, progress: number) => void;
 }
 
 const useStore = create<TasksState, any>(
@@ -59,6 +61,13 @@ const useStore = create<TasksState, any>(
           })
         );
       },
+      saveProgress: (taskId, progress) =>
+        set(
+          produce((draft) => {
+            const task = draft.tasks.find((task: ITask) => task.id === taskId);
+            task.progress = progress;
+          })
+        ),
     }),
     {
       name: "tasks",
@@ -76,6 +85,7 @@ export const useTasks = () => {
     rejected,
     moveToToday,
     moveToBucketFromToday,
+    saveProgress,
   } = useStore();
 
   const hasInToday = (task: ITask) => today.includes(task.id);
@@ -96,5 +106,6 @@ export const useTasks = () => {
     moveToToday,
     moveToBucketFromToday,
     isToday: hasInToday,
+    saveProgress,
   };
 };

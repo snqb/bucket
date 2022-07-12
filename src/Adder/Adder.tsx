@@ -45,6 +45,7 @@ const Adder = ({ today = false }: Props) => {
         emoji,
       },
       createdAt: new Date(),
+      progress: 0,
     };
 
     try {
