@@ -47,6 +47,7 @@ const BucketView = () => {
   return (
     <div id="bucket">
       <List spacing={2}>
+        {/* @ts-ignore */}
         <FlipMove>
           {today.map((task) => (
             <Task highlighted key={`today-${task.id}`} task={task} />
