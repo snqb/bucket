@@ -18,6 +18,7 @@ import {
   Spacer,
   useDisclosure,
   useColorModeValue,
+  ListItemProps,
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
@@ -25,14 +26,17 @@ import { forwardRef, useRef, useState } from "react";
 import useDoubleClick from "use-double-click";
 import { mergeRefs } from "react-merge-refs";
 
-interface Props {
+interface Props extends ListItemProps {
   task: ITask;
   canMoveUp?: boolean;
   highlighted?: boolean;
 }
 
 const Task = forwardRef(
-  ({ task, canMoveUp = false, highlighted = false }: Props, ref: any) => {
+  (
+    { task, canMoveUp = false, highlighted = false, ...restItemProps }: Props,
+    ref: any
+  ) => {
     const { rejectTask, moveToToday, moveToBucketFromToday, today, isToday } =
       useTasks();
     const bg = useColorModeValue("gray.50", "gray.900");
@@ -74,6 +78,7 @@ const Task = forwardRef(
         borderRadius="lg"
         userSelect="none"
         border={highlighted ? "1px solid orange" : "iniital"}
+        {...restItemProps}
       >
         <Flex justify="space-between" align="center">
           <Flex>

@@ -50,10 +50,10 @@ const BucketView = () => {
         {/* @ts-ignore */}
         <FlipMove>
           {today.map((task) => (
-            <Task highlighted key={`today-${task.id}`} task={task} />
+            <Task mb={2} highlighted key={`today-${task.id}`} task={task} />
           ))}
           {bucket.map((task) => (
-            <Task key={task.id} task={task} />
+            <Task mb={2} key={task.id} task={task} />
           ))}
         </FlipMove>
       </List>
