@@ -29,7 +29,7 @@ const Bucket = () => {
         >
           🪣Bucket
         </Heading>
-        <Button variant="ghost" size="xs" onClick={toggleColorMode}>
+        <Button variant="outline" size="xs" onClick={toggleColorMode}>
           {colorMode === "light" ? "🌙" : "🌞"}
         </Button>
       </Flex>
