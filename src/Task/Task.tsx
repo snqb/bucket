@@ -78,6 +78,7 @@ const Task = forwardRef(
         borderRadius="lg"
         userSelect="none"
         border={highlighted ? "1px solid orange" : "iniital"}
+        textTransform="lowercase"
         {...restItemProps}
       >
         <Flex justify="space-between" align="center">
