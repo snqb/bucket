@@ -43,6 +43,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
+            ["@types/use-double-click", "npm:1.0.1"],\
             ["@use-gesture/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:10.2.16"],\
             ["@vitejs/plugin-react", "npm:1.3.2"],\
             ["emoji-from-text", "npm:1.1.12"],\
@@ -4820,6 +4821,16 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["@types/use-double-click", [\
+        ["npm:1.0.1", {\
+          "packageLocation": "./.yarn/cache/@types-use-double-click-npm-1.0.1-c0808b7595-d0de36915d.zip/node_modules/@types/use-double-click/",\
+          "packageDependencies": [\
+            ["@types/use-double-click", "npm:1.0.1"],\
+            ["@types/react", "npm:18.0.14"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["@use-gesture/core", [\
         ["npm:10.2.16", {\
           "packageLocation": "./.yarn/cache/@use-gesture-core-npm-10.2.16-897617b485-f9ee9023a4.zip/node_modules/@use-gesture/core/",\
@@ -8054,6 +8065,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["@types/react", "npm:18.0.14"],\
             ["@types/react-dom", "npm:18.0.5"],\
             ["@types/react-transition-group", "npm:4.4.5"],\
+            ["@types/use-double-click", "npm:1.0.1"],\
             ["@use-gesture/react", "virtual:1d622636e91aefca4d043a35dae54974ea2b422337df9549587bef21effc8dac2734e027edd9bb073134683a8b68503d5b750bde47991a4150f50166450202b2#npm:10.2.16"],\
             ["@vitejs/plugin-react", "npm:1.3.2"],\
             ["emoji-from-text", "npm:1.1.12"],\
