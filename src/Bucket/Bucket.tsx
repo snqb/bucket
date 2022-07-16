@@ -27,7 +27,7 @@ const Bucket = () => {
             });
           }}
         >
-          🪣Bucket
+          🪣 Bucket
         </Heading>
         <Button variant="outline" size="xs" onClick={toggleColorMode}>
           {colorMode === "light" ? "🌙" : "🌞"}
