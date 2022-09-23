@@ -17,10 +17,8 @@ export type ITask = {
   wasSentTo: TaskTravelDestination;
 };
 
-type ITaskId = ITask["id"];
-
 interface State {
-  tasks: Record<ITaskId, ITask>;
+  tasks: Record<ITask["id"], ITask>;
   addTask: (task: ITask) => void;
   todayIt: (task: ITask) => void;
   untodayIt: (task: ITask) => void;
@@ -49,14 +47,14 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
         R.set<State, ITask>(R.lensPath(["tasks", task.id]), task, state()),
       set
     ),
-    todayIt: R.pipe(sendTaskTo("today"), set),
-    untodayIt: R.pipe(sendTaskTo("bucket"), set),
-    killIt: R.pipe(sendTaskTo("graveyard"), set),
     save: R.pipe(
       (task: ITask, progress: number) =>
         R.set<State, number>(lensTaskProp(task, "progress"), progress, state()),
       set
     ),
+    todayIt: R.pipe(sendTaskTo("today"), set),
+    untodayIt: R.pipe(sendTaskTo("bucket"), set),
+    killIt: R.pipe(sendTaskTo("graveyard"), set),
   };
 };
 
@@ -80,11 +78,11 @@ export const useTasks = () => {
 
   const tasks = R.values(tasksAsObject);
 
-  const graveyard = tasks.filter((task) => task.wasSentTo === "graveyard");
-  const today = tasks.filter((task) => task.wasSentTo === "today");
-  const bucket = tasks.filter((task) => task.wasSentTo === "bucket");
+  const graveyard = R.filter(R.propEq("wasSentTo", "graveyard"), tasks);
+  const today = R.filter(R.propEq("wasSentTo", "today"), tasks);
+  const bucket = R.filter(R.propEq("wasSentTo", "bucket"), tasks);
 
-  const isToday = (task: ITask) => task.wasSentTo === "today";
+  const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
 
   return {
     bucket,
