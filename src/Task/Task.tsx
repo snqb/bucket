@@ -53,7 +53,7 @@ const Task = forwardRef(
       onOpen: openSlider,
     } = useDisclosure({
       defaultIsOpen: false,
-      onClose: () => saveProgress(task.id, progress),
+      onClose: () => saveProgress(task, progress),
     });
     const [progress, setProgress] = useState(task.progress ?? 0);
 
@@ -74,7 +74,7 @@ const Task = forwardRef(
       setProgress(progress);
 
       if (progress === 100) {
-        rejectTask(task.id);
+        rejectTask(task);
       }
     };
 
@@ -126,7 +126,5 @@ const Task = forwardRef(
     );
   }
 );
-
-const Emoji = ({ _ }: { _: string }) => <>{_}</>;
 
 export default Task;

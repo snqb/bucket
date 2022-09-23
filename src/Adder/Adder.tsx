@@ -6,8 +6,8 @@ import {
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { nanoid } from "nanoid";
-import { FormEventHandler, useState } from "react";
-import { useTasks } from "../data/useTasks";
+import { ChangeEventHandler, useState } from "react";
+import { ITask, useTasks } from "../data/useTasks";
 
 interface Props {
   today?: boolean;
@@ -18,15 +18,15 @@ const Adder = ({ today = false }: Props) => {
   const [emoji, setEmoji] = useState("🌊");
   const [text, setText] = useState("");
 
-  const handleChange: FormEventHandler = (e) => {
-    const text = (e.target as any).value;
-
+  const handleChange: ChangeEventHandler<HTMLInputElement> = ({
+    currentTarget: { value: text },
+  }) => {
     setText(text);
   };
 
-  const handleInputChange: FormEventHandler = (e) => {
-    const text = (e.target as any).value;
-
+  const handleInputChange: ChangeEventHandler<HTMLInputElement> = ({
+    currentTarget: { value: text },
+  }) => {
     if (text) {
       const _emoji = getEmojiFromText(text, true)?.match?.emoji.char;
       setEmoji(_emoji);
@@ -38,7 +38,7 @@ const Adder = ({ today = false }: Props) => {
   const onAdd = ({ today } = { today: false }) => {
     if (!text) return;
 
-    const task = {
+    const task: ITask = {
       id: nanoid(),
       title: {
         text,
@@ -46,6 +46,7 @@ const Adder = ({ today = false }: Props) => {
       },
       createdAt: new Date(),
       progress: 0,
+      wasSentTo: "bucket",
     };
 
     try {
@@ -66,18 +67,18 @@ const Adder = ({ today = false }: Props) => {
     <InputGroup variant="outline" size="md">
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
-        textTransform="lowercase"
-        borderStyle="dashed"
+        type="text"
         value={text}
+        textTransform="lowercase"
+        placeholder="empty your head bro"
+        borderStyle="dashed"
         onChange={handleChange}
-        onKeyDown={(e) => {
-          if (e.key === "Enter") {
+        onKeyDown={({ key }) => {
+          if (key === "Enter") {
             onAdd();
           }
         }}
         onInput={handleInputChange}
-        type="text"
-        placeholder="empty your head bro"
       />
       {today && (
         <InputRightAddon
