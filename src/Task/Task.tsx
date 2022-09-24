@@ -1,30 +1,25 @@
 import {
-  Box,
-  Flex,
-  IconButton,
   ListItem,
+  ListItemProps,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  Text,
   ModalHeader,
   ModalOverlay,
-  Progress,
   Slider,
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
-  Spacer,
-  useDisclosure,
+  Text,
   useColorModeValue,
-  ListItemProps,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
 import { forwardRef, useRef, useState } from "react";
-import useDoubleClick from "use-double-click";
 import { mergeRefs } from "react-merge-refs";
+import useDoubleClick from "use-double-click";
 
 interface Props extends ListItemProps {
   task: ITask;
@@ -44,7 +39,13 @@ const Task = forwardRef(
       isToday,
       saveProgress,
     } = useTasks();
-    const bg = useColorModeValue("gray.50", "gray.900");
+    // these two below are for dark mode
+    const filledPartOfBg = useColorModeValue(
+      "var(--chakra-colors-gray-50)",
+      "var(--chakra-colors-gray-900)"
+    );
+    const emptyParOfBg = useColorModeValue("#56D2DA", "#3489A0");
+
     const taskRef = useRef(ref);
 
     const {
@@ -82,27 +83,18 @@ const Task = forwardRef(
       <ListItem
         ref={mergeRefs([ref, taskRef])}
         p={2}
-        background={bg}
         borderRadius="lg"
         userSelect="none"
         border={highlighted ? "1px solid orange" : "iniital"}
         textTransform="lowercase"
+        background={`linear-gradient(90deg, ${emptyParOfBg} ${Math.floor(
+          progress / 1
+        )}%, ${filledPartOfBg} ${progress}%);`}
         {...restItemProps}
       >
-        <Flex justify="space-between" align="center">
-          <Flex>
-            <Text>
-              {task.title.emoji} {task.title.text}
-            </Text>
-          </Flex>
-
-          <Progress
-            minWidth="32px"
-            value={progress}
-            borderRadius="4px"
-            colorScheme="orange"
-          />
-        </Flex>
+        <Text>
+          {task.title.emoji} {task.title.text}
+        </Text>
         <Modal isCentered onClose={closeSlider} size="xs" isOpen={isOpen}>
           <ModalOverlay backdropFilter="blur(10px) hue-rotate(90deg)" />
           <ModalContent p={2}>
