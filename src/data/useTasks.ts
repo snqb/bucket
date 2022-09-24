@@ -77,7 +77,6 @@ const useStore = create<State>(
 export const useTasks = () => {
   const {
     tasks: tasksAsObject,
-    killIt: rejectTask,
     todayIt: moveToToday,
     save: saveProgress,
     untodayIt,
@@ -96,7 +95,6 @@ export const useTasks = () => {
     bucket,
     today,
     rejected: graveyard,
-    rejectTask,
     moveToToday,
     moveToBucketFromToday: untodayIt,
     isToday,

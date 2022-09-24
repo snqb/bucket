@@ -1,4 +1,5 @@
 import {
+  Button,
   Flex,
   ListItem,
   ListItemProps,
@@ -35,7 +36,7 @@ const Task = forwardRef(
     ref: any
   ) => {
     const {
-      rejectTask,
+      killIt,
       moveToToday,
       moveToBucketFromToday,
       isToday,
@@ -82,7 +83,7 @@ const Task = forwardRef(
       setProgress(progress);
 
       if (progress === 100) {
-        rejectTask(task);
+        killIt(task);
       }
     };
 
@@ -124,6 +125,17 @@ const Task = forwardRef(
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="if you wanna say more"
                 />
+
+                <Flex justify="flex-end">
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    colorScheme="pink"
+                    onClick={() => killIt(task)}
+                  >
+                    🔪 {"   "} f* it
+                  </Button>
+                </Flex>
               </Flex>
             </ModalBody>
           </ModalContent>
