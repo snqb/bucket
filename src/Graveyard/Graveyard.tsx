@@ -1,15 +1,18 @@
-import { Box, Divider, Flex, List, ListItem } from "@chakra-ui/react";
+import { Box, Divider, Flex, Heading, List, ListItem } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-const Rejected = () => {
-  const { rejected } = useTasks();
+const Graveyard = () => {
+  const { graveyard } = useTasks();
 
   return (
     <Box mt={10}>
       <Divider variant="dashed" />
+      <Heading mt={2} userSelect="none" as="h4" size="md">
+        🪦 {'  '} Graveyard
+      </Heading>
       <Box filter="blur(1px)" py={5}>
         <List spacing={2}>
-          {rejected.map((task) => (
+          {graveyard.map((task) => (
             <Task key={task.id} task={task} />
           ))}
         </List>
@@ -18,7 +21,7 @@ const Rejected = () => {
   );
 };
 
-export default Rejected;
+export default Graveyard;
 
 const Task = ({ task }: { task: ITask }) => {
   return (

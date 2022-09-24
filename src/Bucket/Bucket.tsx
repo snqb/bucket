@@ -6,11 +6,11 @@ import {
   useColorMode,
   VStack,
 } from "@chakra-ui/react";
+import FlipMove from "react-flip-move";
 import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
-import Rejected from "../Rejected";
+import Graveyard from "../Graveyard";
 import Task from "../Task";
-import FlipMove from "react-flip-move";
 
 const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -18,15 +18,7 @@ const Bucket = () => {
   return (
     <VStack spacing={3} align="stretch" sx={{ minHeight: "90vh" }} py={3}>
       <Flex justify="space-between" alignItems="center">
-        <Heading
-          userSelect="none"
-          as="h1"
-          onClick={() => {
-            document.getElementById("bucket")?.scrollIntoView({
-              behavior: "smooth",
-            });
-          }}
-        >
+        <Heading userSelect="none" as="h1">
           🪣 Bucket
         </Heading>
         <Button variant="outline" size="xs" onClick={toggleColorMode}>
@@ -36,7 +28,7 @@ const Bucket = () => {
 
       <BucketView />
       <Adder />
-      <Rejected />
+      <Graveyard />
     </VStack>
   );
 };

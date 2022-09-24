@@ -94,7 +94,7 @@ export const useTasks = () => {
   return {
     bucket,
     today,
-    rejected: graveyard,
+    graveyard,
     moveToToday,
     moveToBucketFromToday: untodayIt,
     isToday,
