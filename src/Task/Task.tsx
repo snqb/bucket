@@ -1,4 +1,5 @@
 import {
+  Flex,
   ListItem,
   ListItemProps,
   Modal,
@@ -12,6 +13,7 @@ import {
   SliderThumb,
   SliderTrack,
   Text,
+  Textarea,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -38,6 +40,7 @@ const Task = forwardRef(
       moveToBucketFromToday,
       isToday,
       saveProgress,
+      describe,
     } = useTasks();
     // these two below are for dark mode
     const filledPartOfBg = useColorModeValue(
@@ -45,6 +48,7 @@ const Task = forwardRef(
       "var(--chakra-colors-gray-900)"
     );
     const emptyParOfBg = useColorModeValue("#56D2DA", "#3489A0");
+    const [description, setDescription] = useState(task.description ?? "");
 
     const taskRef = useRef(ref);
 
@@ -54,7 +58,10 @@ const Task = forwardRef(
       onOpen: openSlider,
     } = useDisclosure({
       defaultIsOpen: false,
-      onClose: () => saveProgress(task, progress),
+      onClose: () => {
+        saveProgress(task, progress);
+        describe(task, description);
+      },
     });
     const [progress, setProgress] = useState(task.progress ?? 0);
 
@@ -101,16 +108,23 @@ const Task = forwardRef(
             <ModalHeader>{task.title.text}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Slider
-                aria-label={`progress of ${task.title.text}`}
-                defaultValue={progress}
-                onChangeEnd={onProgress}
-              >
-                <SliderTrack bg="red.100">
-                  <SliderFilledTrack bg="tomato" />
-                </SliderTrack>
-                <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
-              </Slider>
+              <Flex direction="column" gap={5}>
+                <Slider
+                  aria-label={`progress of ${task.title.text}`}
+                  defaultValue={progress}
+                  onChangeEnd={onProgress}
+                >
+                  <SliderTrack bg="red.100">
+                    <SliderFilledTrack bg="tomato" />
+                  </SliderTrack>
+                  <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
+                </Slider>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="if you wanna say more"
+                />
+              </Flex>
             </ModalBody>
           </ModalContent>
         </Modal>

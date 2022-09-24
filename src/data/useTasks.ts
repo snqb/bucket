@@ -15,6 +15,7 @@ export type ITask = {
   createdAt: Date;
   progress: number;
   wasSentTo: TaskTravelDestination;
+  description?: string;
 };
 
 interface State {
@@ -22,8 +23,9 @@ interface State {
   addTask: (task: ITask) => void;
   todayIt: (task: ITask) => void;
   untodayIt: (task: ITask) => void;
-  killIt: (taskId: ITask) => void;
-  save: (taskId: ITask, progress: number) => void;
+  killIt: (task: ITask) => void;
+  save: (task: ITask, progress: number) => void;
+  describe: (task: ITask, description: string) => void;
 }
 
 const reducer = (set: SetState<State>, state: GetState<State>) => {
@@ -55,6 +57,12 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
     todayIt: R.pipe(sendTaskTo("today"), set),
     untodayIt: R.pipe(sendTaskTo("bucket"), set),
     killIt: R.pipe(sendTaskTo("graveyard"), set),
+    describe: (task: ITask, description: string) =>
+      R.set<State, string>(
+        lensTaskProp(task, "description"),
+        description,
+        state()
+      ),
   };
 };
 
@@ -69,11 +77,11 @@ const useStore = create<State>(
 export const useTasks = () => {
   const {
     tasks: tasksAsObject,
-    addTask,
     killIt: rejectTask,
     todayIt: moveToToday,
     save: saveProgress,
     untodayIt,
+    ...rest
   } = useStore();
 
   const tasks = R.values(tasksAsObject);
@@ -88,11 +96,21 @@ export const useTasks = () => {
     bucket,
     today,
     rejected: graveyard,
-    addTask,
     rejectTask,
     moveToToday,
     moveToBucketFromToday: untodayIt,
     isToday,
     saveProgress,
+    ...rest,
   };
 };
+
+// <Flex justify="flex-end">
+//   <Button
+//     onClick={() => rejectTask(task)}
+//     variant="outline"
+//     colorScheme="pink"
+//   >
+//     🔪{"  "}f* it!
+//   </Button>
+// </Flex>
