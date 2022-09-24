@@ -71,7 +71,8 @@ const Adder = ({ today = false }: Props) => {
         value={text}
         textTransform="lowercase"
         placeholder="empty your head bro"
-        borderStyle="dashed"
+        variant="flushed"
+        // borderStyle="dashed"
         onChange={handleChange}
         onKeyDown={({ key }) => {
           if (key === "Enter") {

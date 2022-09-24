@@ -45,11 +45,11 @@ const Task = forwardRef(
       describe,
     } = useTasks();
     // these two below are for dark mode
-    const filledPartOfBg = useColorModeValue(
+    const bgEmptyBar = useColorModeValue(
       "var(--chakra-colors-gray-50)",
       "var(--chakra-colors-gray-900)"
     );
-    const emptyParOfBg = useColorModeValue("#56D2DA", "#3489A0");
+    const bgFullBar = useColorModeValue("#5ABCEE", "#2C65AE");
     const [description, setDescription] = useState(task.description ?? "");
 
     const taskRef = useRef(ref);
@@ -96,9 +96,9 @@ const Task = forwardRef(
         userSelect="none"
         border={highlighted ? "1px solid orange" : "iniital"}
         textTransform="lowercase"
-        background={`linear-gradient(90deg, ${emptyParOfBg} ${Math.floor(
+        background={`linear-gradient(90deg, ${bgFullBar} ${Math.floor(
           progress / 1
-        )}%, ${filledPartOfBg} ${progress}%);`}
+        )}%, ${bgEmptyBar} ${progress}%);`}
         {...restItemProps}
       >
         <Text>

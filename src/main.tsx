@@ -4,12 +4,24 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 
+import { mode } from "@chakra-ui/theme-tools";
+
 const theme = extendTheme({
   useSystemColorMode: true,
+  styles: {
+    global: (props: any) => ({
+      body: {
+        bg: mode("#ffffff", "#000000")(props),
+      },
+    }),
+  },
   black: "#090a0b",
   fonts: {
     heading: `system-ui, 'Lato', sans-serif`,
     body: `system-ui, 'Lato', sans-serif`,
+  },
+  colors: {
+    body: "#000000",
   },
   gray: {
     "50": "#f9fafa",

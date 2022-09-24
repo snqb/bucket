@@ -16,9 +16,9 @@ const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <VStack spacing={3} align="stretch" sx={{ minHeight: "90vh" }} py={3}>
+    <VStack  align="stretch" sx={{ minHeight: "90vh" }} py={4}>
       <Flex justify="space-between" alignItems="center">
-        <Heading userSelect="none" as="h1">
+        <Heading userSelect="none" as="h1" mb={5}>
           🪣 Bucket
         </Heading>
         <Button variant="outline" size="xs" onClick={toggleColorMode}>
@@ -38,14 +38,14 @@ const BucketView = () => {
 
   return (
     <div id="bucket">
-      <List spacing={2}>
+      <List>
         {/* @ts-ignore */}
         <FlipMove>
           {today.map((task) => (
-            <Task mb={2} highlighted key={`today-${task.id}`} task={task} />
+            <Task mb={3} highlighted key={`today-${task.id}`} task={task} />
           ))}
           {bucket.map((task) => (
-            <Task mb={2} key={task.id} task={task} />
+            <Task mb={3} key={task.id} task={task} />
           ))}
         </FlipMove>
       </List>
