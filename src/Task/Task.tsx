@@ -1,5 +1,6 @@
 import {
   Button,
+  Divider,
   Flex,
   ListItem,
   ListItemProps,
@@ -109,33 +110,39 @@ const Task = forwardRef(
             <ModalHeader>{task.title.text}</ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Flex direction="column" gap={5}>
-                <Slider
-                  aria-label={`progress of ${task.title.text}`}
-                  defaultValue={progress}
-                  onChangeEnd={onProgress}
-                >
-                  <SliderTrack bg="red.100">
-                    <SliderFilledTrack bg="tomato" />
-                  </SliderTrack>
-                  <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
-                </Slider>
-                <Textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="if you wanna say more"
-                />
-
-                <Flex justify="flex-end">
+              <Flex direction="column" gap={2}>
+                <Flex direction="column" align="flex-end" gap={1}>
+                  <Slider
+                    aria-label={`progress of ${task.title.text}`}
+                    defaultValue={progress}
+                    onChangeEnd={onProgress}
+                  >
+                    <SliderTrack bg="red.100">
+                      <SliderFilledTrack bg="tomato" />
+                    </SliderTrack>
+                    <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
+                  </Slider>
                   <Button
                     size="xs"
-                    variant="outline"
+                    variant="ghost"
                     colorScheme="pink"
                     onClick={() => killIt(task)}
                   >
                     🔪 {"   "} f* it
                   </Button>
                 </Flex>
+
+                <Divider borderStyle="dashed" />
+
+                <Textarea
+                  size="sm"
+                  rows={1}
+                  value={description}
+                  focusBorderColor="gray.400"
+                  borderStyle="dashed"
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="describe the thing if you wanna"
+                />
               </Flex>
             </ModalBody>
           </ModalContent>
