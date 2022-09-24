@@ -1,4 +1,4 @@
-import { Box, Divider, Flex, Heading, List, ListItem } from "@chakra-ui/react";
+import { Box, Divider, Flex, Text, List, ListItem } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
 const Graveyard = () => {
@@ -7,9 +7,9 @@ const Graveyard = () => {
   return (
     <Box mt={10}>
       <Divider variant="dashed" />
-      <Heading mt={2} userSelect="none" as="h4" size="md">
+      <Text mt={2} userSelect="none" as="h4" size="md">
         🪦 {'  '} Graveyard
-      </Heading>
+      </Text>
       <Box filter="blur(1px)" py={5}>
         <List spacing={2}>
           {graveyard.map((task) => (
