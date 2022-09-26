@@ -70,7 +70,9 @@ const Task = forwardRef(
                   <Box as="span">{task.title.emoji}</Box>
                 )}
                 <Box mr={1} />
-                {task.title.text}
+                <Box as="span" fontSize="large">
+                  {task.title.text}
+                </Box>
               </AccordionButton>
             </Text>
             <Slider
@@ -124,6 +126,7 @@ const Task = forwardRef(
             </Slider>
             <AccordionPanel px={0} pt={2} py={3}>
               <ResizableTextarea
+                color="#dadada"
                 variant="outline"
                 defaultValue={task.description}
                 focusBorderColor="transparent"
