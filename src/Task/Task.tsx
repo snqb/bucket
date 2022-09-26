@@ -94,9 +94,10 @@ const Task = forwardRef(
               mt={isExpanded ? 3 : 1}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
-              onChangeEnd={onProgress}
+              onChange={onProgress}
               height="16px"
               pointerEvents={isExpanded ? "initial" : "none"}
+              step={5}
             >
               <SliderTrack
                 css={
@@ -123,17 +124,22 @@ const Task = forwardRef(
                     : ""
                 }
                 bg="blue.200"
-                height="10px"
+                // I really like how shitty this line of code is, so I'm gonna keep it
+                height={`1${isExpanded ? "0" : ""}px`}
               >
                 <SliderFilledTrack bg="blue.600" />
               </SliderTrack>
               {isExpanded && (
-                <SliderThumb mt={-1} boxSize={5}>
+                <SliderThumb
+                  mt={progress % 10 === 0 ? -1 : 0}
+                  boxSize={5}
+                  transition="margin 500ms ease-in-out"
+                >
                   🚢
                 </SliderThumb>
               )}
             </Slider>
-            <AccordionPanel px={0} py={2}>
+            <AccordionPanel px={0} pt={2} py={3}>
               <ResizableTextarea
                 variant="outline"
                 defaultValue={task.description}
