@@ -1,23 +1,21 @@
 import {
   AccordionButton,
   AccordionItem,
+  AccordionItemProps,
   AccordionPanel,
   Box,
-  ListItemProps,
   Slider,
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
   Text,
-  useColorModeValue,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
 import { forwardRef, useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
 
-interface Props extends ListItemProps {
+interface Props extends AccordionItemProps {
   task: ITask;
   canMoveUp?: boolean;
   highlighted?: boolean;
@@ -36,25 +34,8 @@ const Task = forwardRef(
       saveProgress,
       describe,
     } = useTasks();
-    // these two below are for dark mode
-    const bgEmptyBar = useColorModeValue(
-      "var(--chakra-colors-gray-50)",
-      "var(--chakra-colors-gray-900)"
-    );
-    const bgFullBar = useColorModeValue("#5ABCEE", "#2C65AE");
     const [description, setDescription] = useState(task.description ?? "");
 
-    const {
-      isOpen,
-      onClose: closeSlider,
-      onOpen: openSlider,
-    } = useDisclosure({
-      defaultIsOpen: false,
-      onClose: () => {
-        saveProgress(task, progress);
-        describe(task, description);
-      },
-    });
     const [progress, setProgress] = useState(task.progress ?? 0);
 
     const onProgress = (progress: number) => {
@@ -66,8 +47,6 @@ const Task = forwardRef(
       }
     };
 
-    console.log(task);
-
     return (
       <AccordionItem
         p={0}
@@ -75,11 +54,12 @@ const Task = forwardRef(
         borderRadius="lg"
         userSelect="none"
         textTransform="lowercase"
+        {...restItemProps}
       >
         {({ isExpanded }) => (
           <>
             <Text>
-              <AccordionButton p={1}>
+              <AccordionButton p={0}>
                 {isExpanded ? (
                   <Box as="span" transform="rotate(45deg)">
                     {task.title.emoji}
@@ -92,7 +72,7 @@ const Task = forwardRef(
               </AccordionButton>
             </Text>
             <Slider
-              mt={isExpanded ? 3 : 1}
+              mt={isExpanded ? 3 : 0}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
               onChangeEnd={onProgress}

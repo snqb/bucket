@@ -7,7 +7,6 @@ import {
   useColorMode,
   VStack,
 } from "@chakra-ui/react";
-import FlipMove from "react-flip-move";
 import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
 import Graveyard from "../Graveyard";
@@ -36,19 +35,14 @@ const Bucket = () => {
 
 const BucketView = () => {
   const { bucket, today } = useTasks();
+  console.log(bucket.length);
 
   return (
     <div id="bucket">
       <Accordion allowToggle>
-        {/* @ts-ignore */}
-        <FlipMove>
-          {today.map((task) => (
-            <Task mb={3} highlighted key={`today-${task.id}`} task={task} />
-          ))}
-          {bucket.map((task) => (
-            <Task mb={3} key={task.id} task={task} />
-          ))}
-        </FlipMove>
+        {bucket.map((task) => (
+          <Task mb={3} key={task.id} task={task} />
+        ))}
       </Accordion>
     </div>
   );
