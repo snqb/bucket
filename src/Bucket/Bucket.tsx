@@ -19,11 +19,11 @@ const Bucket = () => {
   return (
     <VStack justify="end" align="stretch" py={4}>
       <Flex direction="column" justify="end">
-        <Flex justify="space-between" alignItems="center">
+        <Flex justify="space-between">
           <Heading userSelect="none" as="h1" mb={5}>
             🪣 Bucket
           </Heading>
-          <Button variant="outline" size="xs" onClick={toggleColorMode}>
+          <Button p={0} variant="ghost" fontSize="24px" onClick={toggleColorMode}>
             {colorMode === "light" ? "🌙" : "🌞"}
           </Button>
         </Flex>
