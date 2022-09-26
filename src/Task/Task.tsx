@@ -4,8 +4,6 @@ import {
   AccordionPanel,
   Box,
   ListItemProps,
-  Progress,
-  ScaleFade,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -16,9 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { forwardRef, useRef, useState } from "react";
-import { mergeRefs } from "react-merge-refs";
-import useDoubleClick from "use-double-click";
+import { forwardRef, useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends ListItemProps {
@@ -48,8 +44,6 @@ const Task = forwardRef(
     const bgFullBar = useColorModeValue("#5ABCEE", "#2C65AE");
     const [description, setDescription] = useState(task.description ?? "");
 
-    const taskRef = useRef(ref);
-
     const {
       isOpen,
       onClose: closeSlider,
@@ -63,19 +57,6 @@ const Task = forwardRef(
     });
     const [progress, setProgress] = useState(task.progress ?? 0);
 
-    useDoubleClick({
-      onSingleClick: openSlider,
-      onDoubleClick: () => {
-        if (isToday(task)) {
-          moveToBucketFromToday(task);
-        } else {
-          moveToToday(task);
-        }
-      },
-      ref: taskRef,
-      latency: 200,
-    });
-
     const onProgress = (progress: number) => {
       setProgress(progress);
 
@@ -88,13 +69,11 @@ const Task = forwardRef(
 
     return (
       <AccordionItem
-        ref={mergeRefs([ref, taskRef])}
         p={0}
         border="none"
         borderRadius="lg"
         userSelect="none"
         textTransform="lowercase"
-        {...restItemProps}
       >
         {({ isExpanded }) => (
           <>
@@ -111,54 +90,45 @@ const Task = forwardRef(
                 {task.title.text}
               </AccordionButton>
             </Text>
-            <ScaleFade reverse initialScale={0} in={!isExpanded}>
-              <Progress
-                isAnimated={false}
-                height="1px"
-                mt={2}
-                colorScheme="blue"
-                size="xs"
-                value={progress}
-              />
-            </ScaleFade>
-            <ScaleFade reverse initialScale={0} in={isExpanded}>
-              <Slider
-                aria-label={`progress of ${task.title.text}`}
-                defaultValue={progress}
-                onChangeEnd={onProgress}
-                height="16px"
+            <Slider
+              mt={isExpanded ? 3 : 1}
+              aria-label={`progress of ${task.title.text}`}
+              defaultValue={progress}
+              onChangeEnd={onProgress}
+              height="16px"
+              pointerEvents={isExpanded ? "initial" : "none"}
+            >
+              <SliderTrack
+                css={`
+                  --mask: radial-gradient(
+                        21.09px at 50% calc(100% + 18px),
+                        #0000 calc(99% - 1px),
+                        #000 calc(101% - 1px) 99%,
+                        #0000 101%
+                      )
+                      calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
+                      repeat-x,
+                    radial-gradient(
+                        21.09px at 50% -18px,
+                        #0000 calc(99% - 1px),
+                        #000 calc(101% - 1px) 99%,
+                        #0000 101%
+                      )
+                      50% calc(50% + 5.5px) / 40px 11px repeat-x;
+                  -webkit-mask: var(--mask);
+                  mask: var(--mask);
+                `}
+                bg="blue.200"
+                height="10px"
               >
-                <SliderTrack
-                  css={`
-                    --mask: radial-gradient(
-                          21.09px at 50% calc(100% + 18px),
-                          #0000 calc(99% - 1px),
-                          #000 calc(101% - 1px) 99%,
-                          #0000 101%
-                        )
-                        calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
-                        repeat-x,
-                      radial-gradient(
-                          21.09px at 50% -18px,
-                          #0000 calc(99% - 1px),
-                          #000 calc(101% - 1px) 99%,
-                          #0000 101%
-                        )
-                        50% calc(50% + 5.5px) / 40px 11px repeat-x;
-                    -webkit-mask: var(--mask);
-                    mask: var(--mask);
-                  `}
-                  bg="blue.200"
-                  height="10px"
-                >
-                  <SliderFilledTrack bg="blue.600" />
-                </SliderTrack>
+                <SliderFilledTrack bg="blue.600" />
+              </SliderTrack>
+              {isExpanded && (
                 <SliderThumb mt={-1} boxSize={5}>
                   🚢
                 </SliderThumb>
-              </Slider>
-            </ScaleFade>
-
+              )}
+            </Slider>
             <AccordionPanel px={0} py={2}>
               <ResizableTextarea
                 variant="outline"
