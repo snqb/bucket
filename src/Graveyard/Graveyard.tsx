@@ -1,20 +1,27 @@
 import { Box, Flex, List, ListItem, Text } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
+import * as R from "ramda";
+
+const random = R.curry((min: number, max: number) => {
+  const range = max - min;
+  const random = Math.random() * range + min;
+  return Math.floor(random);
+});
 
 const Graveyard = () => {
   const { graveyard } = useTasks();
 
   return (
-    <Box mt={10}>
+    <Box >
       <Box filter="blur(1px)" py={5}>
-        <Text mt={2} userSelect="none" as="h4" size="lg">
+        <Text my={2} userSelect="none" as="h4" size="lg">
           🪦 🪦 🪦
         </Text>
-        <List spacing={2}>
+        <Flex wrap="wrap" gap={5}>
           {graveyard.map((task) => (
             <Task key={task.id} task={task} />
           ))}
-        </List>
+        </Flex>
       </Box>
     </Box>
   );
@@ -24,13 +31,9 @@ export default Graveyard;
 
 const Task = ({ task }: { task: ITask }) => {
   return (
-    <ListItem>
-      <Flex justifyContent="space-between">
-        <Box as="span">
-          {task.title.emoji}
-          {task.title.text}
-        </Box>
-      </Flex>
-    </ListItem>
+    <Box mr={random(8, 16)} as="span">
+      {task.title.emoji}
+      {task.title.text}
+    </Box>
   );
 };

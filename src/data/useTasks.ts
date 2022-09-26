@@ -95,6 +95,7 @@ export const useTasks = () => {
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
 
   return {
+    tasks,
     bucket,
     today,
     graveyard,

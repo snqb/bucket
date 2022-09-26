@@ -1,9 +1,10 @@
 import {
   Accordion,
   Button,
+  Center,
   Flex,
   Heading,
-  List,
+  Text,
   useColorMode,
   VStack,
 } from "@chakra-ui/react";
@@ -14,20 +15,26 @@ import Task from "../Task";
 
 const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
+  const { tasks, today } = useTasks();
 
   return (
-    <VStack align="stretch" sx={{ minHeight: "90vh" }} py={4}>
-      <Flex justify="space-between" alignItems="center">
-        <Heading userSelect="none" as="h1" mb={5}>
-          🪣 Bucket
-        </Heading>
-        <Button variant="outline" size="xs" onClick={toggleColorMode}>
-          {colorMode === "light" ? "🌙" : "🌞"}
-        </Button>
+    <VStack justify="end" align="stretch" sx={{ minHeight: "90vh" }} py={4}>
+      <Flex direction="column" justify="end" minH="90vh">
+        {tasks.length === 0 && <Empty />}
+
+        <Flex justify="space-between" alignItems="center">
+          <Heading userSelect="none" as="h1" mb={5}>
+            🪣 Bucket
+          </Heading>
+          <Button variant="outline" size="xs" onClick={toggleColorMode}>
+            {colorMode === "light" ? "🌙" : "🌞"}
+          </Button>
+        </Flex>
+
+        <BucketView />
+        <Adder />
       </Flex>
 
-      <BucketView />
-      <Adder />
       <Graveyard />
     </VStack>
   );
@@ -49,3 +56,15 @@ const BucketView = () => {
 };
 
 export default Bucket;
+
+const Empty = () => {
+  return (
+    <Flex m={10} direction="column" textAlign="center">
+      <Text fontSize="6xl">YES</Text>
+      <Text fontSize="6xl">IT'S</Text>
+      <Text fontSize="6xl">UPSIDE</Text>
+      <Text fontSize="6xl">DOWN🙄</Text>
+      <Text fontSize="6xl">👇</Text>
+    </Flex>
+  );
+};
