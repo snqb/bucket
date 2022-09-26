@@ -104,11 +104,11 @@ const Task = forwardRef(
                 `
                     : ""
                 }
-                bg="blue.200"
+                bg="#ebebeb"
                 // I really like how shitty this line of code is, so I'm gonna keep it
                 height={`1${isExpanded ? "0" : ""}px`}
               >
-                <SliderFilledTrack bg="blue.600" />
+                <SliderFilledTrack bg="#2C65AE" />
               </SliderTrack>
               {isExpanded && (
                 <SliderThumb bg="transparent" mt={-1} boxSize={10}>
