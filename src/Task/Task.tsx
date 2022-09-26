@@ -94,7 +94,7 @@ const Task = forwardRef(
               mt={isExpanded ? 3 : 1}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
-              onChange={onProgress}
+              onChangeEnd={onProgress}
               height="16px"
               pointerEvents={isExpanded ? "initial" : "none"}
               step={5}
@@ -131,7 +131,7 @@ const Task = forwardRef(
               </SliderTrack>
               {isExpanded && (
                 <SliderThumb
-                  mt={progress % 10 === 0 ? -1 : 0}
+                  mt={progress % 10 === 0 ? -1 : 1}
                   boxSize={5}
                   transition="margin 500ms ease-in-out"
                 >
