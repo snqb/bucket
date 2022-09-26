@@ -18,8 +18,8 @@ const Bucket = () => {
   const { tasks, today } = useTasks();
 
   return (
-    <VStack justify="end" align="stretch" sx={{ minHeight: "90vh" }} py={4}>
-      <Flex direction="column" justify="end" minH="90vh">
+    <VStack justify="end" align="stretch" sx={{ minHeight: "75vh" }} py={4}>
+      <Flex direction="column" justify="end">
         {tasks.length === 0 && <Empty />}
 
         <Flex justify="space-between" alignItems="center">
@@ -35,7 +35,7 @@ const Bucket = () => {
         <Adder />
       </Flex>
 
-      <Graveyard />
+      {/* <Graveyard /> */}
     </VStack>
   );
 };
