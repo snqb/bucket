@@ -3,17 +3,15 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightAddon,
+  InputRightElement,
+  Kbd,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { nanoid } from "nanoid";
 import { ChangeEventHandler, useState } from "react";
 import { ITask, useTasks } from "../data/useTasks";
 
-interface Props {
-  today?: boolean;
-}
-
-const Adder = ({ today = false }: Props) => {
+const Adder = () => {
   const { addTask, moveToToday } = useTasks();
   const [emoji, setEmoji] = useState("🌊");
   const [text, setText] = useState("");
@@ -35,7 +33,7 @@ const Adder = ({ today = false }: Props) => {
     }
   };
 
-  const onAdd = ({ today } = { today: false }) => {
+  const onAdd = () => {
     if (!text) return;
 
     const task: ITask = {
@@ -51,10 +49,6 @@ const Adder = ({ today = false }: Props) => {
 
     try {
       addTask(task);
-
-      if (today) {
-        moveToToday(task);
-      }
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {
@@ -72,7 +66,6 @@ const Adder = ({ today = false }: Props) => {
         textTransform="lowercase"
         placeholder="empty your head bro"
         variant="flushed"
-        // borderStyle="dashed"
         onChange={handleChange}
         onKeyDown={({ key }) => {
           if (key === "Enter") {
@@ -81,15 +74,7 @@ const Adder = ({ today = false }: Props) => {
         }}
         onInput={handleInputChange}
       />
-      {today && (
-        <InputRightAddon
-          onClick={() => onAdd({ today: true })}
-          borderRadius="none"
-          children="😭"
-        />
-      )}
-
-      <InputRightAddon onClick={() => onAdd()} children="🪣" />
+      <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
     </InputGroup>
   );
 };
