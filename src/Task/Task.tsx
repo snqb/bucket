@@ -117,8 +117,9 @@ const Task = forwardRef(
               {isExpanded && (
                 <SliderThumb
                   mt={-1}
-                  boxSize={5}
+                  boxSize={8}
                   transition="margin 500ms ease-in-out"
+                  bg="transparent"
                 >
                   🪣
                 </SliderThumb>
