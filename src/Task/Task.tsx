@@ -59,6 +59,7 @@ const Task = forwardRef(
 
     const onProgress = (progress: number) => {
       setProgress(progress);
+      saveProgress(task, progress);
 
       if (progress === 100) {
         killIt(task);
