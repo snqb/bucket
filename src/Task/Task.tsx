@@ -10,6 +10,7 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Progress,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -96,14 +97,19 @@ const Task = forwardRef(
         userSelect="none"
         border={highlighted ? "1px solid orange" : "iniital"}
         textTransform="lowercase"
-        background={`linear-gradient(90deg, ${bgFullBar} ${Math.floor(
-          progress / 1
-        )}%, ${bgEmptyBar} ${progress}%);`}
         {...restItemProps}
       >
         <Text>
           {task.title.emoji} {task.title.text}
         </Text>
+        <Progress
+          height="1px"
+          mt={2}
+          colorScheme="blue"
+          size="xs"
+          value={progress}
+        />
+
         <Modal isCentered onClose={closeSlider} size="xs" isOpen={isOpen}>
           <ModalOverlay backdropFilter="blur(10px) hue-rotate(90deg)" />
           <ModalContent p={2}>
