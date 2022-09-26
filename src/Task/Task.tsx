@@ -99,7 +99,9 @@ const Task = forwardRef(
               pointerEvents={isExpanded ? "initial" : "none"}
             >
               <SliderTrack
-                css={`
+                css={
+                  isExpanded
+                    ? `
                   --mask: radial-gradient(
                         21.09px at 50% calc(100% + 18px),
                         #0000 calc(99% - 1px),
@@ -117,7 +119,9 @@ const Task = forwardRef(
                       50% calc(50% + 5.5px) / 40px 11px repeat-x;
                   -webkit-mask: var(--mask);
                   mask: var(--mask);
-                `}
+                `
+                    : ""
+                }
                 bg="blue.200"
                 height="10px"
               >
