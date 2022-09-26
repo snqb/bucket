@@ -44,8 +44,8 @@ const BucketView = () => {
   return (
     <div id="bucket">
       <Accordion allowToggle>
-        {bucket.map((task) => (
-          <Task mb={3} key={task.id} task={task} />
+        {bucket.map((task, index) => (
+          <Task tabIndex={index} mb={3} key={task.id} task={task} />
         ))}
       </Accordion>
     </div>
