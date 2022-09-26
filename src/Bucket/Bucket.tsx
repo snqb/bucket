@@ -15,13 +15,10 @@ import Task from "../Task";
 
 const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
-  const { tasks, today } = useTasks();
 
   return (
-    <VStack justify="end" align="stretch" sx={{ minHeight: "75vh" }} py={4}>
+    <VStack justify="end" align="stretch" py={4}>
       <Flex direction="column" justify="end">
-        {tasks.length === 0 && <Empty />}
-
         <Flex justify="space-between" alignItems="center">
           <Heading userSelect="none" as="h1" mb={5}>
             🪣 Bucket
@@ -56,15 +53,3 @@ const BucketView = () => {
 };
 
 export default Bucket;
-
-const Empty = () => {
-  return (
-    <Flex m={10} direction="column" textAlign="center">
-      <Text fontSize="6xl">YES</Text>
-      <Text fontSize="6xl">IT'S</Text>
-      <Text fontSize="6xl">UPSIDE</Text>
-      <Text fontSize="6xl">DOWN🙄</Text>
-      <Text fontSize="6xl">👇</Text>
-    </Flex>
-  );
-};
