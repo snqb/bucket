@@ -39,8 +39,6 @@ const Task = forwardRef(
     const [progress, setProgress] = useState(task.progress ?? 0);
 
     const onProgress = (progress: number) => {
-      window.navigator.vibrate(200);
-
       setProgress(progress);
       saveProgress(task, progress);
 
@@ -113,7 +111,7 @@ const Task = forwardRef(
                 <SliderFilledTrack bg="blue.600" />
               </SliderTrack>
               {isExpanded && (
-                <SliderThumb mt={-1} boxSize={8}>
+                <SliderThumb bg="transparent" mt={-1} boxSize={10}>
                   🪣
                 </SliderThumb>
               )}
