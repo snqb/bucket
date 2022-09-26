@@ -1,22 +1,16 @@
 import {
-  Button,
-  Divider,
-  Flex,
-  ListItem,
+  AccordionButton,
+  AccordionItem,
+  AccordionPanel,
+  Box,
   ListItemProps,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalHeader,
-  ModalOverlay,
   Progress,
+  ScaleFade,
   Slider,
   SliderFilledTrack,
   SliderThumb,
   SliderTrack,
   Text,
-  Textarea,
   useColorModeValue,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -25,6 +19,7 @@ import { ITask, useTasks } from "../data/useTasks";
 import { forwardRef, useRef, useState } from "react";
 import { mergeRefs } from "react-merge-refs";
 import useDoubleClick from "use-double-click";
+import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends ListItemProps {
   task: ITask;
@@ -89,58 +84,95 @@ const Task = forwardRef(
       }
     };
 
+    console.log(task);
+
     return (
-      <ListItem
+      <AccordionItem
         ref={mergeRefs([ref, taskRef])}
-        p={2}
+        p={0}
+        border="none"
         borderRadius="lg"
         userSelect="none"
-        border={highlighted ? "1px solid orange" : "iniital"}
         textTransform="lowercase"
         {...restItemProps}
       >
-        <Text>
-          {task.title.emoji} {task.title.text}
-        </Text>
-        <Progress
-          height="1px"
-          mt={2}
-          colorScheme="blue"
-          size="xs"
-          value={progress}
-        />
+        {({ isExpanded }) => (
+          <>
+            <Text>
+              <AccordionButton p={1}>
+                {isExpanded ? (
+                  <Box as="span" transform="rotate(45deg)">
+                    {task.title.emoji}
+                  </Box>
+                ) : (
+                  <Box as="span">{task.title.emoji}</Box>
+                )}
+                <Box mr={1} />
+                {task.title.text}
+              </AccordionButton>
+            </Text>
+            <ScaleFade reverse initialScale={0} in={!isExpanded}>
+              <Progress
+                isAnimated={false}
+                height="1px"
+                mt={2}
+                colorScheme="blue"
+                size="xs"
+                value={progress}
+              />
+            </ScaleFade>
+            <ScaleFade reverse initialScale={0} in={isExpanded}>
+              <Slider
+                aria-label={`progress of ${task.title.text}`}
+                defaultValue={progress}
+                onChangeEnd={onProgress}
+                height="16px"
+              >
+                <SliderTrack
+                  css={`
+                    --mask: radial-gradient(
+                          21.09px at 50% calc(100% + 18px),
+                          #0000 calc(99% - 1px),
+                          #000 calc(101% - 1px) 99%,
+                          #0000 101%
+                        )
+                        calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
+                        repeat-x,
+                      radial-gradient(
+                          21.09px at 50% -18px,
+                          #0000 calc(99% - 1px),
+                          #000 calc(101% - 1px) 99%,
+                          #0000 101%
+                        )
+                        50% calc(50% + 5.5px) / 40px 11px repeat-x;
+                    -webkit-mask: var(--mask);
+                    mask: var(--mask);
+                  `}
+                  bg="blue.200"
+                  height="10px"
+                >
+                  <SliderFilledTrack bg="blue.600" />
+                </SliderTrack>
+                <SliderThumb mt={-1} boxSize={5}>
+                  🚢
+                </SliderThumb>
+              </Slider>
+            </ScaleFade>
 
-        <Modal isCentered onClose={closeSlider} size="xs" isOpen={isOpen}>
-          <ModalOverlay backdropFilter="blur(10px) hue-rotate(90deg)" />
-          <ModalContent p={2}>
-            <ModalHeader>{task.title.text}</ModalHeader>
-            <ModalCloseButton />
-            <ModalBody>
-              <Flex direction="column" align="flex-start" gap={4}>
-                <Slider
-                  aria-label={`progress of ${task.title.text}`}
-                  defaultValue={progress}
-                  onChangeEnd={onProgress}
-                >
-                  <SliderTrack bg="red.100">
-                    <SliderFilledTrack bg="tomato" />
-                  </SliderTrack>
-                  <SliderThumb boxSize={8}>{task.title.emoji}</SliderThumb>
-                </Slider>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  borderStyle="dotted"
-                  colorScheme="pink"
-                  onClick={() => killIt(task)}
-                >
-                  🔪 {"   "} f* it
-                </Button>
-              </Flex>
-            </ModalBody>
-          </ModalContent>
-        </Modal>
-      </ListItem>
+            <AccordionPanel px={0} py={2}>
+              <ResizableTextarea
+                variant="outline"
+                defaultValue={task.description}
+                focusBorderColor="transparent"
+                placeholder="if you wanna put some more"
+                p={0}
+                border="none"
+                onChange={(e) => describe(task, e.target.value)}
+              />
+            </AccordionPanel>
+          </>
+        )}
+      </AccordionItem>
     );
   }
 );

@@ -57,12 +57,15 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
     todayIt: R.pipe(sendTaskTo("today"), set),
     untodayIt: R.pipe(sendTaskTo("bucket"), set),
     killIt: R.pipe(sendTaskTo("graveyard"), set),
-    describe: (task: ITask, description: string) =>
-      R.set<State, string>(
-        lensTaskProp(task, "description"),
-        description,
-        state()
-      ),
+    describe: R.pipe(
+      (task: ITask, description: string) =>
+        R.set<State, string>(
+          lensTaskProp(task, "description"),
+          description,
+          state()
+        ),
+      set
+    ),
   };
 };
 

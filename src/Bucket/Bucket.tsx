@@ -1,4 +1,5 @@
 import {
+  Accordion,
   Button,
   Flex,
   Heading,
@@ -16,7 +17,7 @@ const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <VStack  align="stretch" sx={{ minHeight: "90vh" }} py={4}>
+    <VStack align="stretch" sx={{ minHeight: "90vh" }} py={4}>
       <Flex justify="space-between" alignItems="center">
         <Heading userSelect="none" as="h1" mb={5}>
           🪣 Bucket
@@ -38,7 +39,7 @@ const BucketView = () => {
 
   return (
     <div id="bucket">
-      <List>
+      <Accordion allowToggle>
         {/* @ts-ignore */}
         <FlipMove>
           {today.map((task) => (
@@ -48,7 +49,7 @@ const BucketView = () => {
             <Task mb={3} key={task.id} task={task} />
           ))}
         </FlipMove>
-      </List>
+      </Accordion>
     </div>
   );
 };
