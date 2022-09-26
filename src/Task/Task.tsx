@@ -113,12 +113,7 @@ const Task = forwardRef(
                 <SliderFilledTrack bg="blue.600" />
               </SliderTrack>
               {isExpanded && (
-                <SliderThumb
-                  mt={-1}
-                  boxSize={8}
-                  transition="margin 500ms ease-in-out"
-                  bg="transparent"
-                >
+                <SliderThumb mt={-1} boxSize={8}>
                   🪣
                 </SliderThumb>
               )}
