@@ -39,6 +39,8 @@ const Task = forwardRef(
     const [progress, setProgress] = useState(task.progress ?? 0);
 
     const onProgress = (progress: number) => {
+      window.navigator.vibrate(200);
+
       setProgress(progress);
       saveProgress(task, progress);
 
