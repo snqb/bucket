@@ -34,7 +34,6 @@ const Task = forwardRef(
       saveProgress,
       describe,
     } = useTasks();
-    const [description, setDescription] = useState(task.description ?? "");
 
     const [progress, setProgress] = useState(task.progress ?? 0);
 
@@ -142,8 +141,8 @@ export default Task;
 
 const randomColor = () => {
   // biased towards bluer values
-  const R = Math.floor(Math.random() * 256) / 2;
-  const G = Math.floor(Math.random() * 256) / 3;
+  const R = Math.floor(Math.random() * 256) / 1.5;
+  const G = Math.floor(Math.random() * 256) / 10;
   const B = Math.floor(Math.random() * 256);
 
   return `rgb(${R}, ${G}, ${B})`;
