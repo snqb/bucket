@@ -17,22 +17,21 @@ const Bucket = () => {
   const { colorMode, toggleColorMode } = useColorMode();
 
   return (
-    <VStack justify="end" align="stretch" py={4}>
-      <Flex direction="column" justify="end">
-        <Flex justify="space-between">
-          <Heading userSelect="none" as="h1" mb={5}>
-            🪣 Bucket
-          </Heading>
-          <Button p={0} variant="ghost" fontSize="24px" onClick={toggleColorMode}>
-            {colorMode === "light" ? "🌙" : "🌞"}
-          </Button>
-        </Flex>
-
-        <BucketView />
-        <Adder />
+    <VStack minH="100vh" align="stretch" py={4}>
+      <Flex justify="space-between">
+        <Heading userSelect="none" as="h1" mb={5}>
+          🪣 Bucket
+        </Heading>
+        <Button p={0} variant="ghost" fontSize="24px" onClick={toggleColorMode}>
+          {colorMode === "light" ? "🌙" : "🌞"}
+        </Button>
       </Flex>
 
-      {/* <Graveyard /> */}
+      <BucketView />
+      <Adder />
+      <Flex mt="500px">
+        <Graveyard />
+      </Flex>
     </VStack>
   );
 };
@@ -45,7 +44,7 @@ const BucketView = () => {
     <div id="bucket">
       <Accordion allowToggle>
         {bucket.map((task, index) => (
-          <Task tabIndex={index} mb={3} key={task.id} task={task} />
+          <Task tabIndex={index} mb={2} key={task.id} task={task} />
         ))}
       </Accordion>
     </div>
