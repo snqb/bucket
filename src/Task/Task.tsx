@@ -58,7 +58,7 @@ const Task = forwardRef(
         {...restItemProps}
       >
         {({ isExpanded }) => (
-          <>
+          <Box py={isExpanded ? 4 : 0}>
             <Text>
               <AccordionButton p={0}>
                 {isExpanded ? (
@@ -82,31 +82,8 @@ const Task = forwardRef(
               step={5}
             >
               <SliderTrack
-                css={
-                  isExpanded
-                    ? `
-                  --mask: radial-gradient(
-                        21.09px at 50% calc(100% + 18px),
-                        #0000 calc(99% - 1px),
-                        #000 calc(101% - 1px) 99%,
-                        #0000 101%
-                      )
-                      calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
-                      repeat-x,
-                    radial-gradient(
-                        21.09px at 50% -18px,
-                        #0000 calc(99% - 1px),
-                        #000 calc(101% - 1px) 99%,
-                        #0000 101%
-                      )
-                      50% calc(50% + 5.5px) / 40px 11px repeat-x;
-                  -webkit-mask: var(--mask);
-                  mask: var(--mask);
-                `
-                    : ""
-                }
+                css={isExpanded ? wavyMask : ""}
                 bg="#ebebeb"
-                // I really like how shitty this line of code is, so I'm gonna keep it
                 height={`${isExpanded ? 10 : 3}px`}
               >
                 <SliderFilledTrack bg={gradient} />
@@ -130,7 +107,7 @@ const Task = forwardRef(
                 onChange={(e) => describe(task, e.target.value)}
               />
             </AccordionPanel>
-          </>
+          </Box>
         )}
       </AccordionItem>
     );
@@ -154,3 +131,23 @@ const getRandomGradient = () => {
 
   return `linear-gradient(to right, ${first}, ${second})`;
 };
+
+const wavyMask = `
+--mask: radial-gradient(
+      21.09px at 50% calc(100% + 18px),
+      #0000 calc(99% - 1px),
+      #000 calc(101% - 1px) 99%,
+      #0000 101%
+    )
+    calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
+    repeat-x,
+  radial-gradient(
+      21.09px at 50% -18px,
+      #0000 calc(99% - 1px),
+      #000 calc(101% - 1px) 99%,
+      #0000 101%
+    )
+    50% calc(50% + 5.5px) / 40px 11px repeat-x;
+-webkit-mask: var(--mask);
+mask: var(--mask);
+`;
