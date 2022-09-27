@@ -108,7 +108,7 @@ const Task = forwardRef(
                 }
                 bg="#ebebeb"
                 // I really like how shitty this line of code is, so I'm gonna keep it
-                height={`1${isExpanded ? "0" : ""}px`}
+                height={`${isExpanded ? 10 : 3}px`}
               >
                 <SliderFilledTrack bg={gradient} />
               </SliderTrack>
@@ -143,7 +143,7 @@ export default Task;
 const randomColor = () => {
   // biased towards bluer values
   const R = Math.floor(Math.random() * 256) / 2;
-  const G = Math.floor(Math.random() * 256) / 2;
+  const G = Math.floor(Math.random() * 256) / 3;
   const B = Math.floor(Math.random() * 256);
 
   return `rgb(${R}, ${G}, ${B})`;
