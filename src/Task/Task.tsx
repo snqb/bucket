@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { forwardRef, useState } from "react";
+import { forwardRef, useMemo, useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
@@ -37,6 +37,8 @@ const Task = forwardRef(
     const [description, setDescription] = useState(task.description ?? "");
 
     const [progress, setProgress] = useState(task.progress ?? 0);
+
+    const gradient = useMemo(() => getRandomGradient(), []);
 
     const onProgress = (progress: number) => {
       setProgress(progress);
@@ -108,7 +110,7 @@ const Task = forwardRef(
                 // I really like how shitty this line of code is, so I'm gonna keep it
                 height={`1${isExpanded ? "0" : ""}px`}
               >
-                <SliderFilledTrack bg="#2C65AE" />
+                <SliderFilledTrack bg={gradient} />
               </SliderTrack>
               {isExpanded && (
                 <SliderThumb bg="transparent" mt={-1} boxSize={10}>
@@ -116,15 +118,15 @@ const Task = forwardRef(
                 </SliderThumb>
               )}
             </Slider>
-            <AccordionPanel px={0} pt={2} py={3}>
+            <AccordionPanel px={0} pt={1} py={3}>
               <ResizableTextarea
+                p={0}
                 fontSize="smaller"
                 color="#bababa"
                 variant="outline"
                 defaultValue={task.description}
                 focusBorderColor="transparent"
                 placeholder="if you wanna put some more"
-                p={0}
                 border="none"
                 onChange={(e) => describe(task, e.target.value)}
               />
@@ -137,3 +139,19 @@ const Task = forwardRef(
 );
 
 export default Task;
+
+const randomColor = () => {
+  // biased towards bluer values
+  const R = Math.floor(Math.random() * 256) / 2;
+  const G = Math.floor(Math.random() * 256) / 2;
+  const B = Math.floor(Math.random() * 256);
+
+  return `rgb(${R}, ${G}, ${B})`;
+};
+
+const getRandomGradient = () => {
+  const first = randomColor();
+  const second = randomColor();
+
+  return `linear-gradient(to right, ${first}, ${second})`;
+};
