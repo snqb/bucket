@@ -7,6 +7,7 @@ import { registerSW } from "virtual:pwa-register";
 import { mode } from "@chakra-ui/theme-tools";
 
 const theme = extendTheme({
+  initialColorMode: 'dark',
   useSystemColorMode: true,
   styles: {
     global: (props: any) => ({
