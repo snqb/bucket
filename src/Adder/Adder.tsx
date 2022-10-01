@@ -61,6 +61,7 @@ const Adder = () => {
     <InputGroup variant="outline" size="md">
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
+        id="adder"
         type="text"
         value={text}
         textTransform="lowercase"
