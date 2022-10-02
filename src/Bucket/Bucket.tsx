@@ -71,7 +71,7 @@ const BucketView = () => {
           <Task tabIndex={index} mb={2} key={task.id} task={task} />
         ))}
       </Accordion>
-    </d>
+    </div>
   );
 };
 
