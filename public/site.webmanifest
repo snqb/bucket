@@ -1,6 +1,6 @@
 {
-  "name": "",
-  "short_name": "",
+  "name": "bucket",
+  "short_name": "bucket",
   "icons": [
     {
       "src": "public/manifest-icon-192.maskable.png",
