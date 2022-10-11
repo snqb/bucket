@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { forwardRef, useMemo, useState } from "react";
+import { forwardRef, useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
@@ -22,23 +22,27 @@ interface Props extends AccordionItemProps {
   highlighted?: boolean;
 }
 
+const gradient = `linear-gradient(to right, 
+  #00C6FB, 
+  #3DBBFF, 
+  #6CADFF, 
+  #979DFC, 
+  #BA8BEA,
+  #C783DE,
+  #D778CF,
+  #E965AD,
+  #F15787,
+  #ED525F,
+  #DF5737)`;
+
 const Task = forwardRef(
   (
     { task, canMoveUp = false, highlighted = false, ...restItemProps }: Props,
     ref: any
   ) => {
-    const {
-      killIt,
-      moveToToday,
-      moveToBucketFromToday,
-      isToday,
-      saveProgress,
-      describe,
-    } = useTasks();
+    const { killIt, saveProgress, describe } = useTasks();
 
     const [progress, setProgress] = useState(task.progress ?? 0);
-
-    const gradient = useMemo(() => getRandomGradient(), []);
 
     const onProgress = (progress: number) => {
       setProgress(progress);
@@ -124,22 +128,6 @@ const EmojiThing = ({
       {children}
     </Box>
   );
-};
-
-const randomColor = () => {
-  // biased towards bluer values
-  const R = Math.floor(Math.random() * 256) / 1.5;
-  const G = Math.floor(Math.random() * 256) / 10;
-  const B = Math.floor(Math.random() * 256);
-
-  return `rgb(${R}, ${G}, ${B})`;
-};
-
-const getRandomGradient = () => {
-  const first = randomColor();
-  const second = randomColor();
-
-  return `linear-gradient(to right, ${first}, ${second})`;
 };
 
 const wavyMask = `
