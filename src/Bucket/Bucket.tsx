@@ -20,7 +20,7 @@ const Bucket = () => {
     <Box position="relative">
       <VStack minH="100vh" align="stretch" py={4}>
         <Flex justify="space-between">
-          <Heading userSelect="none" as="h1" mb={5}>
+          <Heading userSelect="none" as="h1" ml={1} mb={7}>
             🪣 Bucket
           </Heading>
           <Button
