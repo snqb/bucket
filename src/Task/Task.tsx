@@ -4,6 +4,7 @@ import {
   AccordionItemProps,
   AccordionPanel,
   Box,
+  BoxProps,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -59,19 +60,12 @@ const Task = forwardRef(
       >
         {({ isExpanded }) => (
           <Box py={isExpanded ? 4 : 0}>
-            <Text>
-              <AccordionButton p={0}>
-                {isExpanded ? (
-                  <Box as="span" transform="rotate(45deg)">
-                    {task.title.emoji}
-                  </Box>
-                ) : (
-                  <Box as="span">{task.title.emoji}</Box>
-                )}
-                <Box mr={1} />
-                {task.title.text}
-              </AccordionButton>
-            </Text>
+            <AccordionButton p={0} fontWeight={500}>
+              <EmojiThing mr={2} isTilted={isExpanded}>
+                {task.title.emoji}
+              </EmojiThing>
+              <Text fontWeight={500}>{task.title.text}</Text>
+            </AccordionButton>
             <Slider
               mt={isExpanded ? 3 : 0}
               aria-label={`progress of ${task.title.text}`}
@@ -115,6 +109,22 @@ const Task = forwardRef(
 );
 
 export default Task;
+
+const EmojiThing = ({
+  children,
+  isTilted,
+  ...props
+}: BoxProps & { isTilted: boolean }) => {
+  return (
+    <Box
+      as="span"
+      transform={isTilted ? "rotate(45deg)" : "initial"}
+      {...props}
+    >
+      {children}
+    </Box>
+  );
+};
 
 const randomColor = () => {
   // biased towards bluer values
