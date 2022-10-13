@@ -89,7 +89,7 @@ export const useTasks = () => {
   const tasks = R.values(tasksAsObject);
 
   const graveyard = R.compose(
-    R.reverse,
+    R.reverse<ITask>,
     R.sortBy<ITask>(R.prop("createdAt")),
     R.filter(R.propEq("wasSentTo", "graveyard"))
   )(tasks);

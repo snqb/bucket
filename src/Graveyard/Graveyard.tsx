@@ -4,13 +4,14 @@ import { ITask, useTasks } from "../data/useTasks";
 const Graveyard = () => {
   const { graveyard } = useTasks();
   const { isOpen, onToggle } = useDisclosure();
+  const isClosed = !isOpen;
 
   return (
-    <Box filter={isOpen ? "blur(1px)" : "initial"} py={5}>
+    <Box filter={isClosed ? "blur(1px)" : "initial"} py={5}>
       <Heading my={2} userSelect="none" as="h4" size="lg" onClick={onToggle}>
-        {isOpen ? "🙈" : "🙉"} Graveyard
+        {isClosed ? "🙈" : "🙉"} Graveyard
       </Heading>
-      <Flex wrap="wrap" gap={5} justify="center">
+      <Flex wrap="wrap" gap={3} justify="center">
         {graveyard.map((task) => (
           <Task key={task.id} task={task} />
         ))}
