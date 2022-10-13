@@ -68,9 +68,9 @@ const Adder = () => {
         placeholder="empty your head bro"
         variant="flushed"
         onChange={handleChange}
-        onKeyDown={({ key }) => {
-          if (key === "Enter") {
-            onAdd();
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            onAdd()
           }
         }}
         onInput={handleInputChange}
@@ -81,3 +81,4 @@ const Adder = () => {
 };
 
 export default Adder;
+

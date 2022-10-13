@@ -77,17 +77,21 @@ const Task = forwardRef(
               onChange={onProgress}
               height="16px"
               pointerEvents={isExpanded ? "initial" : "none"}
-              step={5}
+              step={0.5}
             >
               <SliderTrack
-                css={isExpanded ? wavyMask : ""}
+                // css={isExpanded ? wavyMask : ""}
                 bg="#ebebeb"
-                height={`${isExpanded ? 10 : 3}px`}
+                height={`${isExpanded ? 15 : 3}px`}
               >
-                <SliderFilledTrack bg={gradient} />
+                <SliderFilledTrack
+                  bg={isExpanded ? `url(/wave.png), ${gradient}` : gradient}
+                  backgroundSize="contain"
+                  backgroundBlendMode="color-burn"
+                />
               </SliderTrack>
               {isExpanded && (
-                <SliderThumb bg="transparent" mt={-1} boxSize={10}>
+                <SliderThumb bg="#ebebeb" boxSize={8} ml={-1}>
                   🪣
                 </SliderThumb>
               )}
@@ -130,6 +134,10 @@ const EmojiThing = ({
   );
 };
 
+const x = `
+  --mask: radial-gradient()
+`;
+
 const wavyMask = `
 --mask: radial-gradient(
       21.09px at 50% calc(100% + 18px),
@@ -137,7 +145,7 @@ const wavyMask = `
       #000 calc(101% - 1px) 99%,
       #0000 101%
     )
-    calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
+      calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
     repeat-x,
   radial-gradient(
       21.09px at 50% -18px,
