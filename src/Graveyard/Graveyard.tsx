@@ -1,28 +1,20 @@
-import { Box, Flex, List, ListItem, Text } from "@chakra-ui/react";
+import { Box, Flex, Heading, Text, useDisclosure } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
-import * as R from "ramda";
-
-const random = R.curry((min: number, max: number) => {
-  const range = max - min;
-  const random = Math.random() * range + min;
-  return Math.floor(random);
-});
 
 const Graveyard = () => {
   const { graveyard } = useTasks();
+  const { isOpen, onToggle } = useDisclosure();
 
   return (
-    <Box >
-      <Box filter="blur(1px)" py={5}>
-        <Text my={2} userSelect="none" as="h4" size="lg">
-          🪦 🪦 🪦
-        </Text>
-        <Flex wrap="wrap" gap={5}>
-          {graveyard.map((task) => (
-            <Task key={task.id} task={task} />
-          ))}
-        </Flex>
-      </Box>
+    <Box filter={isOpen ? "blur(1px)" : "initial"} py={5}>
+      <Heading my={2} userSelect="none" as="h4" size="lg" onClick={onToggle}>
+        {isOpen ? "🙈" : "🙉"} Graveyard
+      </Heading>
+      <Flex wrap="wrap" gap={5} justify="center">
+        {graveyard.map((task) => (
+          <Task key={task.id} task={task} />
+        ))}
+      </Flex>
     </Box>
   );
 };
@@ -31,9 +23,14 @@ export default Graveyard;
 
 const Task = ({ task }: { task: ITask }) => {
   return (
-    <Box mr={random(8, 16)} as="span">
-      {task.title.emoji}
-      {task.title.text}
-    </Box>
+    <Flex m={2} direction="column" align="center" justify="center" gap={0.75}>
+      <Heading as="h6" fontSize="2xl">
+        {task.title.emoji}
+      </Heading>
+      <Text fontSize="small">
+        {new Date(task.createdAt).toLocaleDateString()}-?
+      </Text>
+      <Text fontStyle="oblique">{task.title.text}</Text>
+    </Flex>
   );
 };
