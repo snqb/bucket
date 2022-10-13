@@ -81,18 +81,32 @@ const Task = forwardRef(
             >
               <SliderTrack
                 // css={isExpanded ? wavyMask : ""}
-                bg="#ebebeb"
+                bg={
+                  isExpanded
+                    ? `url(/wave3.png), var(--chakra-colors-gray-300)`
+                    : "gray.200"
+                }
                 height={`${isExpanded ? 15 : 3}px`}
+                backgroundSize="contain"
+                backgroundBlendMode="multiply"
+                // borderRadius="4px"
               >
                 <SliderFilledTrack
-                  bg={isExpanded ? `url(/wave.png), ${gradient}` : gradient}
+                  bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
                   backgroundSize="contain"
-                  backgroundBlendMode="color-burn"
+                  backgroundBlendMode="multiply"
                 />
               </SliderTrack>
               {isExpanded && (
-                <SliderThumb bg="#ebebeb" boxSize={8} ml={-1}>
-                  🪣
+                <SliderThumb
+                  bg="rgba(240, 240, 240, 0.4)"
+                  boxSize={8}
+                  ml={-3}
+                  mt={-2}
+                >
+                  <Box as="span" transform="scaleX(-1)">
+                    🏊‍♀️
+                  </Box>
                 </SliderThumb>
               )}
             </Slider>
