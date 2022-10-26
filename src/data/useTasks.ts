@@ -1,3 +1,4 @@
+import localforage from "localforage";
 import * as R from "ramda";
 import create, { GetState, SetState } from "zustand";
 import { persist } from "zustand/middleware";
@@ -13,6 +14,7 @@ export type ITask = {
   id: string;
   title: Title;
   createdAt: Date;
+  killedAt?: Date;
   progress: number;
   wasSentTo: TaskTravelDestination;
   description?: string;
@@ -69,11 +71,15 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
   };
 };
 
+localforage.setDriver(localforage.INDEXEDDB);
+
 const useStore = create<State>(
   // @ts-ignore dunno what's going on, don't wanna be spending time on that too
   persist(reducer, {
     name: "bucket",
     version: 2,
+    // @ts-ignore
+    getStorage: () => localforage,
   })
 );
 
@@ -83,6 +89,7 @@ export const useTasks = () => {
     todayIt: moveToToday,
     save: saveProgress,
     untodayIt,
+    killIt,
     ...rest
   } = useStore();
 
@@ -98,6 +105,8 @@ export const useTasks = () => {
   const bucket = R.filter(R.propEq("wasSentTo", "bucket"), tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
+  const killAndWrite = (task: ITask) =>
+    killIt(R.assoc("killedAt", new Date(), task));
 
   return {
     tasks,
@@ -108,6 +117,7 @@ export const useTasks = () => {
     moveToBucketFromToday: untodayIt,
     isToday,
     saveProgress,
+    killIt: killAndWrite,
     ...rest,
   };
 };
