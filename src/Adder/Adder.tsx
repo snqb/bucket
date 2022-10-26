@@ -1,18 +1,18 @@
 import {
+  forwardRef,
   Input,
   InputGroup,
+  InputGroupProps,
   InputLeftElement,
-  InputRightAddon,
   InputRightElement,
-  Kbd,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { nanoid } from "nanoid";
 import { ChangeEventHandler, useState } from "react";
 import { ITask, useTasks } from "../data/useTasks";
 
-const Adder = () => {
-  const { addTask, moveToToday } = useTasks();
+const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
+  const { addTask } = useTasks();
   const [emoji, setEmoji] = useState("🌊");
   const [text, setText] = useState("");
 
@@ -58,7 +58,7 @@ const Adder = () => {
   };
 
   return (
-    <InputGroup variant="outline" size="md">
+    <InputGroup variant="outline" size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
         id="adder"
@@ -69,8 +69,8 @@ const Adder = () => {
         variant="flushed"
         onChange={handleChange}
         onKeyDown={(event) => {
-          if (event.key === 'Enter') {
-            onAdd()
+          if (event.key === "Enter") {
+            onAdd();
           }
         }}
         onInput={handleInputChange}
@@ -78,7 +78,6 @@ const Adder = () => {
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
     </InputGroup>
   );
-};
+});
 
 export default Adder;
-
