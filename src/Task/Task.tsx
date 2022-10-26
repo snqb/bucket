@@ -36,10 +36,12 @@ const gradient = `linear-gradient(to right,
   #DF5737)`;
 
 const Task = forwardRef(
-  (
-    { task, canMoveUp = false, highlighted = false, ...restItemProps }: Props,
-    ref: any
-  ) => {
+  ({
+    task,
+    canMoveUp = false,
+    highlighted = false,
+    ...restItemProps
+  }: Props) => {
     const { killIt, saveProgress, describe } = useTasks();
 
     const [progress, setProgress] = useState(task.progress ?? 0);
@@ -68,14 +70,17 @@ const Task = forwardRef(
               <EmojiThing mr={2} isTilted={isExpanded}>
                 {task.title.emoji}
               </EmojiThing>
-              <Text fontWeight={500}>{task.title.text}</Text>
+              <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
+                {task.title.text}
+              </Text>
             </AccordionButton>
             <Slider
-              mt={isExpanded ? 3 : 0}
+              focusThumbOnChange={false}
+              mt={isExpanded ? 6 : 0}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
               onChange={onProgress}
-              height="16px"
+              height="24px"
               pointerEvents={isExpanded ? "initial" : "none"}
               step={0.5}
             >
