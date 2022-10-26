@@ -8,13 +8,14 @@ export default defineConfig({
     strategies: 'injectManifest',
     srcDir: 'src',
     filename: 'sw.ts',
-    registerType: "autoUpdate",
+    registerType: "prompt",
 
     includeAssets: [
       "favicon.svg",
       "favicon.ico",
       "robots.txt",
       "apple-touch-icon.png",
+      "wave3.png"
     ],
     manifest: {
       name: "Bucket",

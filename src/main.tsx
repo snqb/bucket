@@ -163,5 +163,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
 
 if ("serviceWorker" in navigator) {
   // && !/localhost/.test(window.location)) {
-  registerSW();
+  registerSW({ onNeedRefresh() {}, onOfflineReady() {} });
 }
