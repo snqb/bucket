@@ -1,12 +1,6 @@
 import {
   Accordion,
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  useColorMode,
-  VStack,
+  Box, Flex, IconButton, VStack
 } from "@chakra-ui/react";
 import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
@@ -14,25 +8,9 @@ import Graveyard from "../Graveyard";
 import Task from "../Task";
 
 const Bucket = () => {
-  const { colorMode, toggleColorMode } = useColorMode();
-
   return (
     <Box position="relative">
       <VStack minH="100vh" align="stretch" py={4}>
-        <Flex justify="space-between">
-          <Heading userSelect="none" as="h1" ml={1} mb={7}>
-            🪣 Bucket
-          </Heading>
-          <Button
-            p={0}
-            variant="ghost"
-            fontSize="24px"
-            onClick={toggleColorMode}
-          >
-            {colorMode === "light" ? "🌙" : "🌞"}
-          </Button>
-        </Flex>
-
         <BucketView />
         <Adder />
         <Flex mt="500px">
