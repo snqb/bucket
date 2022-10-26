@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { nanoid } from "nanoid";
-import { ChangeEventHandler, useState } from "react";
+import { ChangeEventHandler, useEffect, useRef, useState } from "react";
 import { ITask, useTasks } from "../data/useTasks";
 
 const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {

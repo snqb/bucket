@@ -1,17 +1,15 @@
 import {
-  Box,
   Container,
   Heading,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
-  Tabs,
+  Tabs
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
-import Adder from "./Adder";
 
 function App() {
   return (
@@ -30,10 +28,6 @@ function App() {
           </TabPanel>
         </TabPanels>
       </Tabs>
-
-      <Box width="90%" position="fixed" bottom="5vh">
-        <Adder />
-      </Box>
     </Container>
   );
 }
@@ -42,8 +36,10 @@ const MyTab = (props: any) => {
   return (
     <Tab
       as={Heading}
-      fontSize="small"
-      _selected={{ fontSize: "2xl" }}
+      fontSize="xx-small"
+      color="gray.200"
+      _focusVisible={false}
+      _selected={{ fontSize: "3xl", color: "white" }}
       {...props}
     />
   );
