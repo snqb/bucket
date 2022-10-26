@@ -1,5 +1,4 @@
 import {
-  Container,
   Heading,
   Tab,
   TabList,
@@ -13,22 +12,20 @@ import "@fontsource/lato";
 
 function App() {
   return (
-    <Container position="relative" py={4}>
-      <Tabs variant="unstyled">
-        <TabList>
-          <MyTab>🪣 Bucket</MyTab>
-          <MyTab>⏳🥊 Today</MyTab>
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <Bucket />
-          </TabPanel>
-          <TabPanel>
-            <p>coming soon..</p>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </Container>
+    <Tabs variant="unstyled">
+      <TabList>
+        <MyTab>🪣 Bucket</MyTab>
+        <MyTab>⏳🥊 Today</MyTab>
+      </TabList>
+      <TabPanels>
+        <TabPanel>
+          <Bucket />
+        </TabPanel>
+        <TabPanel>
+          <p>coming soon..</p>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   );
 }
 
