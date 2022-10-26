@@ -71,15 +71,13 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
   };
 };
 
-localforage.setDriver(localforage.INDEXEDDB);
-
 const useStore = create<State>(
   // @ts-ignore dunno what's going on, don't wanna be spending time on that too
   persist(reducer, {
     name: "bucket",
     version: 2,
     // @ts-ignore
-    getStorage: () => localforage,
+    getStorage: () => localStorage,
   })
 );
 
