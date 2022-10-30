@@ -8,7 +8,7 @@ type Title = {
   emoji: string;
 };
 
-type TaskTravelDestination = "bucket" | "graveyard" | "today";
+type TaskTravelDestination = "bucket" | "graveyard" | "today" | "shuffle";
 
 export type ITask = {
   id: string;
@@ -24,7 +24,9 @@ interface State {
   tasks: Record<ITask["id"], ITask>;
   addTask: (task: ITask) => void;
   todayIt: (task: ITask) => void;
-  untodayIt: (task: ITask) => void;
+  bucketIt: (task: ITask) => void;
+  pinInShuffle: (task: ITask) => void;
+  unpinInShuffle: (task: ITask) => void;
   killIt: (task: ITask) => void;
   save: (task: ITask, progress: number) => void;
   describe: (task: ITask, description: string) => void;
@@ -57,8 +59,9 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
       set
     ),
     todayIt: R.pipe(sendTaskTo("today"), set),
-    untodayIt: R.pipe(sendTaskTo("bucket"), set),
+    bucketIt: R.pipe(sendTaskTo("bucket"), set),
     killIt: R.pipe(sendTaskTo("graveyard"), set),
+    pinInShuffle: R.pipe(sendTaskTo("shuffle"), set),
     describe: R.pipe(
       (task: ITask, description: string) =>
         R.set<State, string>(
@@ -86,7 +89,7 @@ export const useTasks = () => {
     tasks: tasksAsObject,
     todayIt: moveToToday,
     save: saveProgress,
-    untodayIt,
+    bucketIt,
     killIt,
     ...rest
   } = useStore();
@@ -100,7 +103,8 @@ export const useTasks = () => {
   )(tasks);
 
   const today = R.filter(R.propEq("wasSentTo", "today"), tasks);
-  const bucket = R.filter(R.propEq("wasSentTo", "bucket"), tasks);
+  const shuffle = R.filter(R.propEq("wasSentTo", "shuffle"), tasks);
+  const bucket = R.reject(R.propEq("wasSentTo", "graveyard"), tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
   const killAndWrite = (task: ITask) =>
@@ -111,8 +115,9 @@ export const useTasks = () => {
     bucket,
     today,
     graveyard,
+    shuffle,
     moveToToday,
-    moveToBucketFromToday: untodayIt,
+    bucketIt,
     isToday,
     saveProgress,
     killIt: killAndWrite,

@@ -4,25 +4,26 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Tabs
+  Tabs,
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
+import Shuffle from "./Shuffle";
 
 function App() {
   return (
     <Tabs variant="unstyled">
       <TabList>
         <MyTab>🪣 Bucket</MyTab>
-        <MyTab>⏳🥊 Today</MyTab>
+        <MyTab>🔀 Shuffle</MyTab>
       </TabList>
       <TabPanels>
         <TabPanel>
           <Bucket />
         </TabPanel>
         <TabPanel>
-          <p>coming soon..</p>
+          <Shuffle />
         </TabPanel>
       </TabPanels>
     </Tabs>

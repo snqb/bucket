@@ -5,6 +5,7 @@ import {
   AccordionPanel,
   Box,
   BoxProps,
+  IconButton,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -13,13 +14,12 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { forwardRef, useState } from "react";
+import { useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
   task: ITask;
-  canMoveUp?: boolean;
-  highlighted?: boolean;
+  hasPin?: boolean; // yup this sucks
 }
 
 const gradient = `linear-gradient(to right, 
@@ -35,105 +35,117 @@ const gradient = `linear-gradient(to right,
   #ED525F,
   #DF5737)`;
 
-const Task = forwardRef(
-  ({
-    task,
-    canMoveUp = false,
-    highlighted = false,
-    ...restItemProps
-  }: Props) => {
-    const { killIt, saveProgress, describe } = useTasks();
+const Task = ({ task, hasPin = false, ...restItemProps }: Props) => {
+  const { killIt, saveProgress, describe, pinInShuffle, bucketIt } = useTasks();
 
-    const [progress, setProgress] = useState(task.progress ?? 0);
+  const [progress, setProgress] = useState(task.progress ?? 0);
 
-    const onProgress = (progress: number) => {
-      setProgress(progress);
-      saveProgress(task, progress);
+  const onProgress = (progress: number) => {
+    setProgress(progress);
+    saveProgress(task, progress);
 
-      if (progress === 100) {
-        killIt(task);
-      }
-    };
+    if (progress === 100) {
+      killIt(task);
+    }
+  };
 
-    return (
-      <AccordionItem
-        p={0}
-        border="none"
-        borderRadius="lg"
-        userSelect="none"
-        textTransform="lowercase"
-        {...restItemProps}
-      >
-        {({ isExpanded }) => (
-          <Box py={isExpanded ? 4 : 0}>
-            <AccordionButton p={0} fontWeight={500}>
-              <EmojiThing mr={2} isTilted={isExpanded}>
-                {task.title.emoji}
-              </EmojiThing>
-              <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
-                {task.title.text}
-              </Text>
-            </AccordionButton>
-            <Slider
-              focusThumbOnChange={false}
-              mt={isExpanded ? 6 : 0}
-              aria-label={`progress of ${task.title.text}`}
-              defaultValue={progress}
-              onChange={onProgress}
-              height="24px"
-              pointerEvents={isExpanded ? "initial" : "none"}
-              step={0.5}
-            >
-              <SliderTrack
-                // css={isExpanded ? wavyMask : ""}
-                bg={
-                  isExpanded
-                    ? `url(/wave3.png), var(--chakra-colors-gray-300)`
-                    : "gray.200"
+  return (
+    <AccordionItem
+      p={0}
+      border="none"
+      borderRadius="lg"
+      userSelect="none"
+      textTransform="lowercase"
+      {...restItemProps}
+    >
+      {({ isExpanded }) => (
+        <Box py={isExpanded ? 4 : 0}>
+          <AccordionButton p={0} fontWeight={500}>
+            <EmojiThing mr={2} isTilted={isExpanded}>
+              {task.title.emoji}
+            </EmojiThing>
+            <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
+              {task.title.text}
+            </Text>
+            {hasPin && (
+              <IconButton
+                variant="ghost"
+                ml="auto"
+                aria-label={"📌"}
+                icon={<>📌</>}
+                filter={
+                  task.wasSentTo === "shuffle" ? "sepia(0.1)" : "grayscale(1)"
                 }
-                height={`${isExpanded ? 15 : 3}px`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (task.wasSentTo === "bucket") {
+                    pinInShuffle(task);
+                  } else {
+                    bucketIt(task);
+                  }
+                }}
+              />
+            )}
+          </AccordionButton>
+          <Slider
+            focusThumbOnChange={false}
+            mt={isExpanded ? 6 : 0}
+            aria-label={`progress of ${task.title.text}`}
+            defaultValue={progress}
+            onChange={onProgress}
+            height="24px"
+            pointerEvents={isExpanded ? "initial" : "none"}
+            step={0.5}
+          >
+            <SliderTrack
+              // css={isExpanded ? wavyMask : ""}
+              bg={
+                isExpanded
+                  ? `url(/wave3.png), var(--chakra-colors-gray-300)`
+                  : "gray.200"
+              }
+              height={`${isExpanded ? 15 : 3}px`}
+              backgroundSize="contain"
+              backgroundBlendMode="multiply"
+              // borderRadius="4px"
+            >
+              <SliderFilledTrack
+                bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
                 backgroundSize="contain"
                 backgroundBlendMode="multiply"
-                // borderRadius="4px"
-              >
-                <SliderFilledTrack
-                  bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
-                  backgroundSize="contain"
-                  backgroundBlendMode="multiply"
-                />
-              </SliderTrack>
-              {isExpanded && (
-                <SliderThumb
-                  bg="rgba(240, 240, 240, 0.4)"
-                  boxSize={8}
-                  ml={-3}
-                  mt={-2}
-                >
-                  <Box as="span" transform="scaleX(-1)">
-                    🏊‍♀️
-                  </Box>
-                </SliderThumb>
-              )}
-            </Slider>
-            <AccordionPanel px={0} pt={1} py={3}>
-              <ResizableTextarea
-                p={0}
-                fontSize="smaller"
-                color="#bababa"
-                variant="outline"
-                defaultValue={task.description}
-                focusBorderColor="transparent"
-                placeholder="if you wanna put some more"
-                border="none"
-                onChange={(e) => describe(task, e.target.value)}
               />
-            </AccordionPanel>
-          </Box>
-        )}
-      </AccordionItem>
-    );
-  }
-);
+            </SliderTrack>
+            {isExpanded && (
+              <SliderThumb
+                bg="rgba(240, 240, 240, 0.4)"
+                boxSize={8}
+                ml={-3}
+                mt={-2}
+              >
+                <Box as="span" transform="scaleX(-1)">
+                  🏊‍♀️
+                </Box>
+              </SliderThumb>
+            )}
+          </Slider>
+          <AccordionPanel px={0} pt={1} py={3}>
+            <ResizableTextarea
+              p={0}
+              fontSize="smaller"
+              color="#bababa"
+              variant="outline"
+              defaultValue={task.description}
+              focusBorderColor="transparent"
+              placeholder="if you wanna put some more"
+              border="none"
+              onChange={(e) => describe(task, e.target.value)}
+            />
+          </AccordionPanel>
+        </Box>
+      )}
+    </AccordionItem>
+  );
+};
 
 export default Task;
 
