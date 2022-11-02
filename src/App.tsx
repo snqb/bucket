@@ -42,7 +42,7 @@ function App() {
         </TabPanels>
       </Tabs>
       <Flex
-        position="fixed"
+        position="sticky"
         width="100%"
         p={1}
         bottom="0"
