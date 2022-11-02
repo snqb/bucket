@@ -47,7 +47,9 @@ function App() {
         </SwipeableViews>
       </Tabs>
       <Flex
-        position="sticky"
+        id="bottom"
+        position="fixed"
+        _focus={{ position: "absolute" }}
         width="100%"
         p={1}
         bottom="0"
