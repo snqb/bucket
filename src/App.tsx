@@ -48,7 +48,7 @@ function App() {
         bottom="0"
         height="10vh"
         justifySelf="flex-end"
-        background="rgba(0, 0, 0, 0.8)"
+        background="black"
       >
         <Adder />
       </Flex>
