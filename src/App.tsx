@@ -1,20 +1,23 @@
-import {
-  Container,
-  Heading,
-  Flex,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-} from "@chakra-ui/react";
+import { Box, Flex, Heading, Tab, TabList, Tabs } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
-import Shuffle from "./Shuffle";
+import { useState } from "react";
+import SwipeableViews from "react-swipeable-views";
 import Adder from "./Adder";
+import Shuffle from "./Shuffle";
 
 function App() {
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleChange = (newValue: number) => {
+    setTabIndex(newValue);
+  };
+
+  const handleChangeIndex = (index: number) => {
+    setTabIndex(index);
+  };
+
   return (
     <Flex
       // position="relative"
@@ -24,22 +27,24 @@ function App() {
     >
       <Tabs
         defaultIndex={1}
+        index={tabIndex}
+        onChange={handleChange}
         align="end"
         boxSizing="content-box"
         variant="unstyled"
       >
         <TabList minH={50} _hover={{ cursor: "pointer" }}>
-          <MyTab>🪣 Bucket</MyTab>
-          <MyTab>🔀 Shuffle</MyTab>
+          <HeadingTab>🪣 Bucket</HeadingTab>
+          <HeadingTab>🔀 Shuffle</HeadingTab>
         </TabList>
-        <TabPanels>
-          <TabPanel>
+        <SwipeableViews index={tabIndex} onChangeIndex={handleChangeIndex}>
+          <SwipablePanel>
             <Bucket />
-          </TabPanel>
-          <TabPanel>
+          </SwipablePanel>
+          <SwipablePanel>
             <Shuffle />
-          </TabPanel>
-        </TabPanels>
+          </SwipablePanel>
+        </SwipeableViews>
       </Tabs>
       <Flex
         position="sticky"
@@ -56,7 +61,9 @@ function App() {
   );
 }
 
-const MyTab = (props: any) => {
+export default App;
+
+const HeadingTab = (props: any) => {
   return (
     <Tab
       as={Heading}
@@ -72,4 +79,18 @@ const MyTab = (props: any) => {
   );
 };
 
-export default App;
+function SwipablePanel(props: any) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`full-width-tabpanel-${index}`}
+      aria-labelledby={`full-width-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
