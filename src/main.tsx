@@ -13,11 +13,10 @@ import { mode } from "@chakra-ui/theme-tools";
 
 const theme: ThemeConfig = extendTheme({
   initialColorMode: "dark",
-  useSystemColorMode: false,
   styles: {
     global: (props: any) => ({
       body: {
-        bg: mode("#ffffff", "#000000")(props),
+        bg: mode("#000000", "#000000")(props),
       },
     }),
   },
@@ -25,9 +24,6 @@ const theme: ThemeConfig = extendTheme({
   fonts: {
     heading: `system-ui, 'Lato', sans-serif`,
     body: `system-ui, 'Lato', sans-serif`,
-  },
-  colors: {
-    body: "#000000",
   },
   gray: {
     "50": "#f9fafa",
