@@ -6,6 +6,10 @@ const Graveyard = () => {
   const { isOpen, onToggle } = useDisclosure();
   const isClosed = !isOpen;
 
+  if (graveyard.length < 1) {
+    return null;
+  }
+
   return (
     <Box filter={isClosed ? "blur(1px)" : "initial"} py={5}>
       <Heading my={2} userSelect="none" as="h4" size="lg" onClick={onToggle}>
