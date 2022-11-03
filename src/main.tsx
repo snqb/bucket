@@ -17,10 +17,10 @@ const theme: ThemeConfig = extendTheme({
     global: (props: any) => ({
       body: {
         bg: mode("#000000", "#000000")(props),
+        color: "white",
       },
     }),
   },
-  black: "#090a0b",
   fonts: {
     heading: `system-ui, 'Lato', sans-serif`,
     body: `system-ui, 'Lato', sans-serif`,
