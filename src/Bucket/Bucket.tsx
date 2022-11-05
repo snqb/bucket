@@ -1,4 +1,5 @@
 import { Accordion, Box, Flex, VStack } from "@chakra-ui/react";
+import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
 import Graveyard from "../Graveyard";
 import Task from "../Task";
@@ -8,6 +9,7 @@ const Bucket = () => {
     <Box position="relative">
       <VStack align="stretch" py={2}>
         <BucketView />
+        <Adder />
 
         <Flex mt="500px">
           <Graveyard />

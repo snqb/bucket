@@ -75,17 +75,6 @@ const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
         onChange={handleChange}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         onInput={handleInputChange}
-        onFocus={() => {
-          window.scrollTo(0, 0);
-          document.body.scrollTop = 0;
-          document.getElementById("bottom")!.style.position = "absolute";
-        }}
-        onBlur={() => {
-          requestAnimationFrame(() => {
-            document.getElementById("bottom")!.style.position = "fixed";
-            document.getElementById("bottom")!.style.bottom = "20px";
-          });
-        }}
       />
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
     </InputGroup>

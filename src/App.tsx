@@ -1,4 +1,13 @@
-import { Box, Flex, Heading, Tab, TabList, Tabs } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  Heading,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
+} from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
@@ -8,16 +17,6 @@ import Adder from "./Adder";
 import Shuffle from "./Shuffle";
 
 function App() {
-  const [tabIndex, setTabIndex] = useState(0);
-
-  const handleChange = (newValue: number) => {
-    setTabIndex(newValue);
-  };
-
-  const handleChangeIndex = (index: number) => {
-    setTabIndex(index);
-  };
-
   return (
     <Flex
       // position="relative"
@@ -27,8 +26,6 @@ function App() {
     >
       <Tabs
         defaultIndex={1}
-        index={tabIndex}
-        onChange={handleChange}
         align="end"
         boxSizing="content-box"
         variant="unstyled"
@@ -37,28 +34,15 @@ function App() {
           <HeadingTab>🪣 Bucket</HeadingTab>
           <HeadingTab>🔀 Shuffle</HeadingTab>
         </TabList>
-        <SwipeableViews index={tabIndex} onChangeIndex={handleChangeIndex}>
-          <SwipablePanel>
+        <TabPanels>
+          <TabPanel>
             <Bucket />
-          </SwipablePanel>
-          <SwipablePanel>
+          </TabPanel>
+          <TabPanel>
             <Shuffle />
-          </SwipablePanel>
-        </SwipeableViews>
+          </TabPanel>
+        </TabPanels>
       </Tabs>
-      <Flex
-        id="bottom"
-        position="fixed"
-        _focus={{ position: "absolute" }}
-        width="100%"
-        p={1}
-        bottom="0"
-        height="10vh"
-        justifySelf="flex-end"
-        background="black"
-      >
-        <Adder />
-      </Flex>
     </Flex>
   );
 }
