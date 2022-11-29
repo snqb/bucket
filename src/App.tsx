@@ -6,30 +6,34 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Tabs
+  Tabs,
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
 import Shuffle from "./Shuffle";
+import { useTasks } from "./data/useTasks";
 
 function App() {
+  const { bucket } = useTasks();
+
+  const hasEnoughTasksForShuffle = bucket.length > 4;
+
   return (
     <Flex
-      // position="relative"
       px={[1, 5, 10, 20, 300]}
       py={[1, 1, 1, 1, 1, 10]}
       direction="column"
     >
       <Tabs
-        defaultIndex={1}
+        defaultIndex={0}
         align="end"
         boxSizing="content-box"
         variant="unstyled"
       >
         <TabList minH={50} _hover={{ cursor: "pointer" }}>
           <HeadingTab>🪣 Bucket</HeadingTab>
-          <HeadingTab>🔀 Shuffle</HeadingTab>
+          {hasEnoughTasksForShuffle && <HeadingTab>🔀 Shuffle</HeadingTab>}
         </TabList>
         <TabPanels>
           <TabPanel>
