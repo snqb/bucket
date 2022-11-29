@@ -3,6 +3,7 @@ import Adder from "../Adder";
 import { useTasks } from "../data/useTasks";
 import Graveyard from "../Graveyard";
 import Task from "../Task";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Bucket = () => {
   return (
@@ -21,10 +22,11 @@ const Bucket = () => {
 
 const BucketView = () => {
   const { bucket } = useTasks();
+  const parent = useAutoAnimate({ duration: 200 });
 
   return (
     <div id="bucket">
-      <Accordion allowToggle>
+      <Accordion allowToggle ref={parent as any}>
         {bucket.map((task, index) => (
           <Task tabIndex={index} mb={4} key={task.id} task={task} />
         ))}
