@@ -95,7 +95,7 @@ const Task = ({ task, hasPin = false, ...restItemProps }: Props) => {
             onChange={onProgress}
             height="24px"
             pointerEvents={isExpanded ? "initial" : "none"}
-            step={0.5}
+            step={2}
           >
             <SliderTrack
               // css={isExpanded ? wavyMask : ""}
