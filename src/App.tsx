@@ -6,14 +6,11 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  Tabs,
+  Tabs
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
-import { useState } from "react";
-import SwipeableViews from "react-swipeable-views";
-import Adder from "./Adder";
 import Shuffle from "./Shuffle";
 
 function App() {
