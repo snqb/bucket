@@ -14,8 +14,9 @@ import {
 } from "@chakra-ui/react";
 import { ITask, useTasks } from "../data/useTasks";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ResizableTextarea } from "./ResizableTextarea";
+import { useDebouncedCallback } from "use-debounce";
 
 interface Props extends AccordionItemProps {
   task: ITask;
@@ -42,18 +43,18 @@ const Task = ({
   onShuffleClick,
   ...restItemProps
 }: Props) => {
-  const { killIt, saveProgress, describe, shuffleIt, bucketIt } = useTasks();
+  const { killIt, saveProgress, describe } = useTasks();
 
   const [progress, setProgress] = useState(task.progress ?? 0);
 
-  const onProgress = (progress: number) => {
+  const onProgress = useDebouncedCallback((progress: number) => {
     setProgress(progress);
     saveProgress(task, progress);
 
     if (progress === 100) {
       killIt(task);
     }
-  };
+  }, 100);
 
   return (
     <AccordionItem
@@ -94,7 +95,7 @@ const Task = ({
             onChange={onProgress}
             height="24px"
             pointerEvents={isExpanded ? "initial" : "none"}
-            step={2}
+            step={0.01}
           >
             <SliderTrack
               // css={isExpanded ? wavyMask : ""}
@@ -187,3 +188,24 @@ const wavyMask = `
 -webkit-mask: var(--mask);
 mask: var(--mask);
 `;
+
+const useAnimationFrame = (callback: any) => {
+  const requestRef = useRef<number>();
+  const previousTimeRef = useRef<number>();
+
+  const animate = (time: number) => {
+    if (previousTimeRef.current != undefined) {
+      const deltaTime = time - previousTimeRef.current;
+      callback(deltaTime);
+    }
+    previousTimeRef.current = time;
+    requestRef.current = requestAnimationFrame(animate);
+  };
+
+  useEffect(() => {
+    requestRef.current = requestAnimationFrame(animate);
+    return () => {
+      requestRef.current && cancelAnimationFrame(requestRef.current);
+    };
+  }, []);
+};

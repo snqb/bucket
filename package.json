@@ -26,6 +26,7 @@
     "react-merge-refs": "^2.0.1",
     "react-textarea-autosize": "^8.3.4",
     "react-transition-group": "^4.4.2",
+    "use-debounce": "^9.0.2",
     "use-double-click": "^1.0.5",
     "use-long-press": "^2.0.2",
     "zustand": "^4.0.0-rc.1"
