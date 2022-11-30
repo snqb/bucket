@@ -38,7 +38,6 @@ const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
   );
 
   const onAdd = () => {
-    console.log(text);
     if (!text) return;
 
     const task: ITask = {

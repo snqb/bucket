@@ -22,11 +22,13 @@ export type ITask = {
 
 interface State {
   tasks: Record<ITask["id"], ITask>;
+
+  shuffle: ITask[];
+  shuffleIt: (slotIndex: number) => void;
+
   addTask: (task: ITask) => void;
   todayIt: (task: ITask) => void;
   bucketIt: (task: ITask) => void;
-  pinInShuffle: (task: ITask) => void;
-  unpinInShuffle: (task: ITask) => void;
   killIt: (task: ITask) => void;
   save: (task: ITask, progress: number) => void;
   describe: (task: ITask, description: string) => void;
@@ -48,6 +50,7 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
 
   return {
     tasks: {},
+    shuffle: [],
     addTask: R.pipe(
       (task: ITask) =>
         R.set<State, ITask>(R.lensPath(["tasks", task.id]), task, state()),
@@ -58,10 +61,20 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
         R.set<State, number>(lensTaskProp(task, "progress"), progress, state()),
       set
     ),
+    shuffleIt: (slot: number) => {
+      const possibleItems = R.reject(
+        R.propEq("wasSentTo", "graveyard"),
+        R.difference(R.values(state().tasks), state().shuffle)
+      );
+
+      const random =
+        possibleItems[Math.floor(possibleItems.length * Math.random())];
+
+      set(R.set(R.lensPath(["shuffle", slot]), random));
+    },
     todayIt: R.pipe(sendTaskTo("today"), set),
     bucketIt: R.pipe(sendTaskTo("bucket"), set),
     killIt: R.pipe(sendTaskTo("graveyard"), set),
-    pinInShuffle: R.pipe(sendTaskTo("shuffle"), set),
     describe: R.pipe(
       (task: ITask, description: string) =>
         R.set<State, string>(
@@ -91,6 +104,7 @@ export const useTasks = () => {
     save: saveProgress,
     bucketIt,
     killIt,
+    shuffle,
     ...rest
   } = useStore();
 
@@ -103,7 +117,6 @@ export const useTasks = () => {
   )(tasks);
 
   const today = R.filter(R.propEq("wasSentTo", "today"), tasks);
-  const shuffle = R.filter(R.propEq("wasSentTo", "shuffle"), tasks);
   const bucket = R.reject(R.propEq("wasSentTo", "graveyard"), tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
@@ -125,12 +138,12 @@ export const useTasks = () => {
   };
 };
 
-// <Flex justify="flex-end">
-//   <Button
-//     onClick={() => rejectTask(task)}
-//     variant="outline"
-//     colorScheme="pink"
-//   >
-//     🔪{"  "}f* it!
-//   </Button>
-// </Flex>
+function sampleSize<T>(size: number, list: T[], collected: T[] = []): T[] {
+  return size < 1 || list.length < 1
+    ? collected
+    : size >= list.length
+    ? [...collected, ...list] // or throw error?
+    : Math.random() < size / list.length
+    ? sampleSize(size - 1, list.slice(1), [...collected, list[0]])
+    : sampleSize(size, list.slice(1), collected);
+}

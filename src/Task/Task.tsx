@@ -19,7 +19,8 @@ import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
   task: ITask;
-  hasPin?: boolean; // yup this sucks
+  hasShuffler?: boolean; // yup this sucks
+  onShuffleClick?: () => void;
 }
 
 const gradient = `linear-gradient(to right, 
@@ -35,8 +36,13 @@ const gradient = `linear-gradient(to right,
   #ED525F,
   #DF5737)`;
 
-const Task = ({ task, hasPin = false, ...restItemProps }: Props) => {
-  const { killIt, saveProgress, describe, pinInShuffle, bucketIt } = useTasks();
+const Task = ({
+  task,
+  hasShuffler = false,
+  onShuffleClick,
+  ...restItemProps
+}: Props) => {
+  const { killIt, saveProgress, describe, shuffleIt, bucketIt } = useTasks();
 
   const [progress, setProgress] = useState(task.progress ?? 0);
 
@@ -67,22 +73,15 @@ const Task = ({ task, hasPin = false, ...restItemProps }: Props) => {
             <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
               {task.title.text}
             </Text>
-            {hasPin && (
+            {hasShuffler && (
               <IconButton
                 variant="ghost"
                 ml="auto"
-                aria-label={"📌"}
-                icon={<>📌</>}
-                filter={
-                  task.wasSentTo === "shuffle" ? "sepia(0.1)" : "grayscale(1)"
-                }
+                aria-label={"🎲"}
+                icon={<>🎲</>}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (task.wasSentTo === "bucket") {
-                    pinInShuffle(task);
-                  } else {
-                    bucketIt(task);
-                  }
+                  onShuffleClick?.();
                 }}
               />
             )}

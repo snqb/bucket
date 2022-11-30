@@ -1,4 +1,11 @@
-import { Accordion, Box, Button, VStack } from "@chakra-ui/react";
+import {
+  Accordion,
+  AccordionButton,
+  AccordionItem,
+  Box,
+  Button,
+  VStack,
+} from "@chakra-ui/react";
 import { useTasks } from "../data/useTasks";
 import Task from "../Task";
 import * as R from "ramda";
@@ -6,32 +13,41 @@ import * as R from "ramda";
 import { useState } from "react";
 
 const Shuffle = () => {
-  const { shuffle, bucket } = useTasks();
-  const howMuchToShuffleBesidesPinned = 3 - shuffle.length;
-
-  const fillTheGaps = () =>
-    sampleSize(howMuchToShuffleBesidesPinned, R.difference(bucket, shuffle));
-
-  const [newlyShuffled, setShuffled] = useState(fillTheGaps());
+  const { shuffle, shuffleIt } = useTasks();
 
   return (
     <Box position="relative">
       <VStack align="stretch" py={2}>
         <Accordion allowToggle>
-          {[...shuffle, ...newlyShuffled].map((task, index) => (
-            <Task hasPin tabIndex={index} mb={4} key={task.id} task={task} />
-          ))}
+          {R.pipe(
+            R.range(0),
+            R.map((num) => {
+              const shuffledItem = R.nth(num, shuffle);
+              const shuffleThis = () => shuffleIt(num);
+
+              if (shuffledItem) {
+                return (
+                  <Task
+                    hasShuffler
+                    onShuffleClick={shuffleThis}
+                    tabIndex={num}
+                    mb={4}
+                    key={shuffledItem.id}
+                    task={shuffledItem}
+                  />
+                );
+              } else {
+                return (
+                  <AccordionItem>
+                    <AccordionButton key={num} onClick={shuffleThis}>
+                      Shuffle bro
+                    </AccordionButton>
+                  </AccordionItem>
+                );
+              }
+            })
+          )(3)}
         </Accordion>
-        <Button
-          onClick={() => setShuffled(fillTheGaps())}
-          background={gradient}
-          size="lg"
-          fontSize="4xl"
-          rounded="sm"
-          py={8}
-        >
-          🎲
-        </Button>
       </VStack>
     </Box>
   );
