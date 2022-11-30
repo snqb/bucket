@@ -51,7 +51,7 @@ const Task = ({
     setProgress(progress);
     saveProgress(task, progress);
 
-    if (progress === 100) {
+    if (progress > 98) {
       killIt(task);
     }
   }, 100);
