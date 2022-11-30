@@ -38,9 +38,16 @@ const Shuffle = () => {
                 );
               } else {
                 return (
-                  <AccordionItem>
-                    <AccordionButton key={num} onClick={shuffleThis}>
-                      Shuffle bro
+                  <AccordionItem key={num}>
+                    <AccordionButton
+                      bg="darkmagenta"
+                      borderRadius="lg"
+                      fontWeight="medium"
+                      border="none"
+                      key={num}
+                      onClick={shuffleThis}
+                    >
+                      🎲 try shuffle
                     </AccordionButton>
                   </AccordionItem>
                 );
