@@ -9,51 +9,48 @@ import {
 import { useTasks } from "../data/useTasks";
 import Task from "../Task";
 import * as R from "ramda";
-
-import { useState } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Shuffle = () => {
   const { shuffle, shuffleIt } = useTasks();
+  const parent = useAutoAnimate({ duration: 100, easing: "ease-out" });
 
   return (
     <Box position="relative">
       <VStack align="stretch" py={2}>
-        <Accordion allowToggle>
-          {R.pipe(
-            R.range(0),
-            R.map((num) => {
-              const shuffledItem = R.nth(num, shuffle);
-              const shuffleThis = () => shuffleIt(num);
+        <Accordion allowToggle ref={parent as any}>
+          {R.times((num) => {
+            const shuffledItem = R.nth(num, shuffle);
+            const shuffleThis = () => shuffleIt(num);
 
-              if (shuffledItem) {
-                return (
-                  <Task
-                    hasShuffler
-                    onShuffleClick={shuffleThis}
-                    tabIndex={num}
-                    mb={4}
-                    key={shuffledItem.id}
-                    task={shuffledItem}
-                  />
-                );
-              } else {
-                return (
-                  <AccordionItem key={num}>
-                    <AccordionButton
-                      bg="darkmagenta"
-                      borderRadius="lg"
-                      fontWeight="medium"
-                      border="none"
-                      key={num}
-                      onClick={shuffleThis}
-                    >
-                      🎲 try shuffle
-                    </AccordionButton>
-                  </AccordionItem>
-                );
-              }
-            })
-          )(3)}
+            if (shuffledItem) {
+              return (
+                <Task
+                  hasShuffler
+                  onShuffleClick={shuffleThis}
+                  tabIndex={num}
+                  mb={4}
+                  key={shuffledItem.id}
+                  task={shuffledItem}
+                />
+              );
+            } else {
+              return (
+                <AccordionItem key={num}>
+                  <AccordionButton
+                    bg="darkmagenta"
+                    borderRadius="lg"
+                    fontWeight="medium"
+                    border="none"
+                    key={num}
+                    onClick={shuffleThis}
+                  >
+                    🎲 try shuffle
+                  </AccordionButton>
+                </AccordionItem>
+              );
+            }
+          })(3)}
         </Accordion>
       </VStack>
     </Box>

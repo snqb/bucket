@@ -120,8 +120,11 @@ export const useTasks = () => {
   const bucket = R.reject(R.propEq("wasSentTo", "graveyard"), tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
-  const killAndWrite = (task: ITask) =>
-    killIt(R.assoc("killedAt", new Date(), task));
+  const killAndWrite = (task: ITask) => {
+    const inShuffle = R.findIndex(R.propEq("id", task.id), shuffle);
+    rest.shuffleIt(inShuffle);
+    return killIt(R.assoc("killedAt", new Date(), task));
+  };
 
   return {
     tasks,

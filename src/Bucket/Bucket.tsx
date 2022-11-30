@@ -22,7 +22,7 @@ const Bucket = () => {
 
 const BucketView = () => {
   const { bucket } = useTasks();
-  const parent = useAutoAnimate({ duration: 200 });
+  const parent = useAutoAnimate({ duration: 100, easing: "ease-out" });
 
   return (
     <div id="bucket">
