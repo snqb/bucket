@@ -29,12 +29,12 @@ const BucketView = () => {
   const { bucket } = useTasks();
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
-  const sortOnce = useCallback(R.once(R.sortBy<ITask>(R.prop("progress"))), []);
+  const sortOnceIfJustMoving = useCallback(R.once(R.sortBy<ITask>(R.prop("progress"))), [bucket.length]);
 
   return (
     <div id="bucket">
       <Accordion allowToggle ref={parent as any}>
-        {sortOnce(bucket as ITask[]).map((task, index) => (
+        {sortOnceIfJustMoving(bucket as ITask[]).map((task, index) => (
           <Task tabIndex={index} mb={4} key={task.id} task={task} />
         ))}
       </Accordion>

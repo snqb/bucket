@@ -64,11 +64,12 @@ const Task = ({
 
   const onProgress = useDebouncedCallback((progress: number) => {
     saveProgress(task, progress);
+    setProgress(progress);
 
     if (progress > 98) {
       killIt(task);
     }
-  }, 1000);
+  }, 350);
 
   return (
     <AccordionItem
@@ -80,20 +81,20 @@ const Task = ({
       {...restItemProps}
     >
       {({ isExpanded }) => {
-        const whichColor = gradientColors[Math.ceil(task.progress / 10)];
+        const whichColor = gradientColors[Math.ceil(progress / 10)];
 
-        const aaa = isExpanded
+        const expandedProps = isExpanded
           ? {
               pb: 12,
               pt: 2,
               px: 4,
-              background: whichColor + "33",
+              background: whichColor + "40",
               mb: 6,
             }
           : {};
 
         return (
-          <Box {...aaa} sx={{ transition: "padding .1s linear" }}>
+          <Box {...expandedProps} sx={{ transition: "all .1s linear" }}>
             {/* <Box position="relative">{task.title.emoji}</Box> */}
             <AccordionButton p={0} fontWeight={500}>
               <EmojiThing mr={2} isTilted={isExpanded}>
@@ -120,10 +121,7 @@ const Task = ({
               mt={isExpanded ? 6 : 0}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
-              onChange={(value) => {
-                onProgress(value);
-                setProgress(progress);
-              }}
+              onChange={onProgress}
               height="24px"
               pointerEvents={isExpanded ? "initial" : "none"}
               step={0.01}
