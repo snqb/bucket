@@ -12,12 +12,12 @@ import Bucket from "./Bucket";
 
 import "@fontsource/lato";
 import Shuffle from "./Shuffle";
-import { useTasks } from "./data/useTasks";
+import { ITask, useTasks } from "./data/useTasks";
 
 function App() {
   const { bucket } = useTasks();
 
-  const hasEnoughTasksForShuffle = bucket.length > 4;
+  const hasEnoughTasksForShuffle = (bucket as ITask[]).length > 4;
 
   return (
     <Flex px={[1, 5, 10, 20, 300]} py={[1, 1, 1, 1, 1, 10]} direction="column">
