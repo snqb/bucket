@@ -1,6 +1,6 @@
 import { Accordion, Box, Flex, VStack } from "@chakra-ui/react";
 import Adder from "../Adder";
-import { useTasks } from "../data/useTasks";
+import { ITask, useTasks } from "../data/useTasks";
 import Graveyard from "../Graveyard";
 import Task from "../Task";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -29,7 +29,7 @@ const BucketView = () => {
   return (
     <div id="bucket">
       <Accordion allowToggle ref={parent as any}>
-        {bucket.map((task, index) => (
+        {(bucket as any).map((task: ITask, index: number) => (
           <Task tabIndex={index} mb={4} key={task.id} task={task} />
         ))}
       </Accordion>

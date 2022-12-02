@@ -16,7 +16,7 @@ const Graveyard = () => {
         {isClosed ? "🙈" : "🙉"} Graveyard
       </Heading>
       <Flex wrap="wrap" gap={3} justify="center">
-        {graveyard.map((task) => (
+        {graveyard.map((task: ITask) => (
           <Task key={task.id} task={task} />
         ))}
       </Flex>

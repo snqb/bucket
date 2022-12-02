@@ -1,4 +1,4 @@
-import localforage from "localforage";
+/* @ts-ignore-file */
 import * as R from "ramda";
 import create, { GetState, SetState } from "zustand";
 import { persist } from "zustand/middleware";
@@ -111,6 +111,7 @@ export const useTasks = () => {
   const tasks = R.values(tasksAsObject);
 
   const graveyard = R.compose(
+    // @ts-ignore
     R.reverse<ITask>,
     R.sortBy<ITask>(R.prop("createdAt")),
     R.filter(R.propEq("wasSentTo", "graveyard"))
@@ -118,7 +119,7 @@ export const useTasks = () => {
 
   const today = R.filter(R.propEq("wasSentTo", "today"), tasks);
   const bucket = R.pipe(
-    R.reject(R.propEq("wasSentTo", "graveyard")),
+    R.reject(R.propEq("wasSentTo", "graveyard")) as any,
     R.sortBy(R.prop("progress"))
   )(tasks);
 

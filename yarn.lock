@@ -5501,7 +5501,7 @@ __metadata:
     react-merge-refs: ^2.0.1
     react-textarea-autosize: ^8.3.4
     react-transition-group: ^4.4.2
-    typescript: ^4.6.3
+    typescript: beta
     use-debounce: ^9.0.2
     use-double-click: ^1.0.5
     use-long-press: ^2.0.2
@@ -5842,23 +5842,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.6.3":
-  version: 4.7.4
-  resolution: "typescript@npm:4.7.4"
+"typescript@npm:beta":
+  version: 4.9.1-beta
+  resolution: "typescript@npm:4.9.1-beta"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 5750181b1cd7e6482c4195825547e70f944114fb47e58e4aa7553e62f11b3f3173766aef9c281783edfd881f7b8299cf35e3ca8caebe73d8464528c907a164df
+  checksum: db7be9894e8809c3ddea07eb41730c6211929f4f9f388a148354b9ce5f872aea3a86bc20a1cf6277dae7afddc813520e268f5096f6e5befaac705bb8a97d61ea
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@^4.6.3#~builtin<compat/typescript>":
-  version: 4.7.4
-  resolution: "typescript@patch:typescript@npm%3A4.7.4#~builtin<compat/typescript>::version=4.7.4&hash=7ad353"
+"typescript@patch:typescript@beta#~builtin<compat/typescript>":
+  version: 4.9.1-beta
+  resolution: "typescript@patch:typescript@npm%3A4.9.1-beta#~builtin<compat/typescript>::version=4.9.1-beta&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 9096d8f6c16cb80ef3bf96fcbbd055bf1c4a43bd14f3b7be45a9fbe7ada46ec977f604d5feed3263b4f2aa7d4c7477ce5f9cd87de0d6feedec69a983f3a4f93e
+  checksum: 544ce5932a5b0cf05bd07411eba868160f3340a66752003540f80898b3354fe324c169d7b8ea98ed784d099926f590571e177fa45f9134622a4c9b489d468dd5
   languageName: node
   linkType: hard
 
