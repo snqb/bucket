@@ -120,7 +120,7 @@ export const useTasks = () => {
   const today = R.filter(R.propEq("wasSentTo", "today"), tasks);
   const bucket = R.pipe(
     R.reject(R.propEq("wasSentTo", "graveyard")) as any,
-    R.sortBy(R.prop("progress"))
+    // R.sortBy(R.prop("progress"))
   )(tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
