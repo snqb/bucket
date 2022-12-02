@@ -13,6 +13,7 @@ import Bucket from "./Bucket";
 import "@fontsource/lato";
 import Shuffle from "./Shuffle";
 import { ITask, useTasks } from "./data/useTasks";
+import ReloadPrompt from "./ReloadPrompt";
 
 function App() {
   const { bucket } = useTasks();
@@ -29,7 +30,7 @@ function App() {
       >
         <TabList minH={50} _hover={{ cursor: "pointer" }}>
           <HeadingTab>🪣 Bucket</HeadingTab>
-          {hasEnoughTasksForShuffle && <HeadingTab>🔀 Shuffle</HeadingTab>}
+          {/* {hasEnoughTasksForShuffle && <HeadingTab>🔀 Shuffle</HeadingTab>} */}
         </TabList>
         <TabPanels>
           <TabPanel>
@@ -40,6 +41,7 @@ function App() {
           </TabPanel>
         </TabPanels>
       </Tabs>
+      <ReloadPrompt />
     </Flex>
   );
 }
