@@ -8,7 +8,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 const Bucket = () => {
   return (
     <Box position="relative">
-      <VStack align="stretch" py={2}>
+      <VStack align="stretch" py={0}>
         <BucketView />
         <Adder />
 

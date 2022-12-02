@@ -35,7 +35,22 @@ const gradient = `linear-gradient(to right,
   #E965AD,
   #F15787,
   #ED525F,
-  #DF5737)`;
+  #DF5737
+  )`;
+
+const gradientColors = [
+  "#00C6FB",
+  "#3DBBFF",
+  "#6CADFF",
+  "#979DFC",
+  "#BA8BEA",
+  "#C783DE",
+  "#D778CF",
+  "#E965AD",
+  "#F15787",
+  "#ED525F",
+  "#DF5737",
+];
 
 const Task = ({
   task,
@@ -54,7 +69,7 @@ const Task = ({
     if (progress > 98) {
       killIt(task);
     }
-  }, 1000);
+  }, 500);
 
   return (
     <AccordionItem
@@ -66,18 +81,23 @@ const Task = ({
       {...restItemProps}
     >
       {({ isExpanded }) => {
+        const whichColor = gradientColors[Math.ceil(task.progress / 10)];
+
         const aaa = isExpanded
           ? {
               pb: 12,
               pt: 2,
               px: 4,
-              background: "#06071a",
-              mb: 6
+              background: whichColor + "33",
+              mb: 6,
             }
-          : {};
+          : {
+              background: whichColor + "12",
+            };
 
         return (
-          <Box {...aaa} sx={{transition: 'padding .1s linear'}}>
+          <Box {...aaa} sx={{ transition: "padding .1s linear" }}>
+            {/* <Box position="relative">{task.title.emoji}</Box> */}
             <AccordionButton p={0} fontWeight={500}>
               <EmojiThing mr={2} isTilted={isExpanded}>
                 {task.title.emoji}
@@ -198,24 +218,3 @@ const wavyMask = `
 -webkit-mask: var(--mask);
 mask: var(--mask);
 `;
-
-const useAnimationFrame = (callback: any) => {
-  const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
-
-  const animate = (time: number) => {
-    if (previousTimeRef.current != undefined) {
-      const deltaTime = time - previousTimeRef.current;
-      callback(deltaTime);
-    }
-    previousTimeRef.current = time;
-    requestRef.current = requestAnimationFrame(animate);
-  };
-
-  useEffect(() => {
-    requestRef.current = requestAnimationFrame(animate);
-    return () => {
-      requestRef.current && cancelAnimationFrame(requestRef.current);
-    };
-  }, []);
-};
