@@ -49,7 +49,7 @@ function ReloadPrompt() {
             <span>App ready to work offline</span>
           ) : (
             <span>
-              New content available, click on reload button to update.
+              New content available, click on reload button to update bucket.
             </span>
           )}
         </div>
