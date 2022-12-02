@@ -90,9 +90,7 @@ const Task = ({
               background: whichColor + "33",
               mb: 6,
             }
-          : {
-              background: whichColor + "12",
-            };
+          : {};
 
         return (
           <Box {...aaa} sx={{ transition: "padding .1s linear" }}>
