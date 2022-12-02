@@ -40,35 +40,33 @@ function ReloadPrompt() {
     setNeedRefresh(false);
   };
 
-  return (
-    (offlineReady  || needRefresh) && (
-      <Box position="fixed" bottom="0">
-        <Alert status="info">
-          <AlertIcon />
-          <div className="ReloadPrompt-message">
-            {offlineReady ? (
-              <span>App ready to work offline</span>
-            ) : (
-              <span>
-                New content available, click on reload button to update.
-              </span>
-            )}
-          </div>
-          {needRefresh && (
-            <button
-              className="ReloadPrompt-toast-button"
-              onClick={() => updateServiceWorker(true)}
-            >
-              Reload
-            </button>
+  return offlineReady || needRefresh ? (
+    <Box position="fixed" bottom="0">
+      <Alert status="info">
+        <AlertIcon />
+        <div className="ReloadPrompt-message">
+          {offlineReady ? (
+            <span>App ready to work offline</span>
+          ) : (
+            <span>
+              New content available, click on reload button to update.
+            </span>
           )}
-          <button className="ReloadPrompt-toast-button" onClick={() => close()}>
-            Close
+        </div>
+        {needRefresh && (
+          <button
+            className="ReloadPrompt-toast-button"
+            onClick={() => updateServiceWorker(true)}
+          >
+            Reload
           </button>
-        </Alert>
-      </Box>
-    )
-  );
+        )}
+        <button className="ReloadPrompt-toast-button" onClick={() => close()}>
+          Close
+        </button>
+      </Alert>
+    </Box>
+  ) : null;
 }
 
 export default ReloadPrompt;
