@@ -7,10 +7,12 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const Bucket = () => {
   return (
-    <Box position="relative">
-      <VStack align="stretch" py={0}>
+    <Box position="relative" pt="5vh">
+      <VStack align="stretch" gap={4}>
+        <Box>
+          <Adder />
+        </Box>
         <BucketView />
-        <Adder />
 
         <Flex mt="500px">
           <Graveyard />
@@ -22,7 +24,7 @@ const Bucket = () => {
 
 const BucketView = () => {
   const { bucket } = useTasks();
-  const parent = useAutoAnimate({ duration: 100, easing: "ease-out" });
+  const parent = useAutoAnimate({ duration: 160, easing: "linear" });
 
   return (
     <div id="bucket">

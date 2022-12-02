@@ -63,13 +63,12 @@ const Task = ({
   const [progress, setProgress] = useState(task.progress ?? 0);
 
   const onProgress = useDebouncedCallback((progress: number) => {
-    setProgress(progress);
     saveProgress(task, progress);
 
     if (progress > 98) {
       killIt(task);
     }
-  }, 500);
+  }, 1000);
 
   return (
     <AccordionItem
@@ -123,7 +122,10 @@ const Task = ({
               mt={isExpanded ? 6 : 0}
               aria-label={`progress of ${task.title.text}`}
               defaultValue={progress}
-              onChange={onProgress}
+              onChange={(value) => {
+                onProgress(value);
+                setProgress(progress);
+              }}
               height="24px"
               pointerEvents={isExpanded ? "initial" : "none"}
               step={0.01}

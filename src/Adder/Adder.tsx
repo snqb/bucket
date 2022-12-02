@@ -69,8 +69,8 @@ const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
         type="text"
         value={text}
         textTransform="lowercase"
-        placeholder="empty your head bro"
-        variant="flushed"
+        placeholder="write it down"
+        variant="outline"
         onChange={handleChange}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         onInput={handleInputChange}
