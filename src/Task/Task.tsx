@@ -54,7 +54,7 @@ const Task = ({
     if (progress > 98) {
       killIt(task);
     }
-  }, 100);
+  }, 1000);
 
   return (
     <AccordionItem
@@ -65,84 +65,94 @@ const Task = ({
       textTransform="lowercase"
       {...restItemProps}
     >
-      {({ isExpanded }) => (
-        <Box py={isExpanded ? 4 : 0}>
-          <AccordionButton p={0} fontWeight={500}>
-            <EmojiThing mr={2} isTilted={isExpanded}>
-              {task.title.emoji}
-            </EmojiThing>
-            <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
-              {task.title.text}
-            </Text>
-            {hasShuffler && (
-              <IconButton
-                variant="ghost"
-                ml="auto"
-                aria-label={"🎲"}
-                icon={<>🎲</>}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onShuffleClick?.();
-                }}
-              />
-            )}
-          </AccordionButton>
-          <Slider
-            focusThumbOnChange={false}
-            mt={isExpanded ? 6 : 0}
-            aria-label={`progress of ${task.title.text}`}
-            defaultValue={progress}
-            onChange={onProgress}
-            height="24px"
-            pointerEvents={isExpanded ? "initial" : "none"}
-            step={0.01}
-          >
-            <SliderTrack
-              // css={isExpanded ? wavyMask : ""}
-              bg={
-                isExpanded
-                  ? `url(/wave3.png), var(--chakra-colors-gray-300)`
-                  : "gray.200"
-              }
-              height={`${isExpanded ? 15 : 3}px`}
-              backgroundSize="contain"
-              backgroundBlendMode="multiply"
-              // borderRadius="4px"
+      {({ isExpanded }) => {
+        const aaa = isExpanded
+          ? {
+              pb: 12,
+              pt: 2,
+              px: 4,
+              background: "#06071a",
+              mb: 6
+            }
+          : {};
+
+        return (
+          <Box {...aaa} sx={{transition: 'padding .1s linear'}}>
+            <AccordionButton p={0} fontWeight={500}>
+              <EmojiThing mr={2} isTilted={isExpanded}>
+                {task.title.emoji}
+              </EmojiThing>
+              <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
+                {task.title.text}
+              </Text>
+              {hasShuffler && (
+                <IconButton
+                  variant="ghost"
+                  ml="auto"
+                  aria-label={"🎲"}
+                  icon={<>🎲</>}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onShuffleClick?.();
+                  }}
+                />
+              )}
+            </AccordionButton>
+            <Slider
+              focusThumbOnChange={false}
+              mt={isExpanded ? 6 : 0}
+              aria-label={`progress of ${task.title.text}`}
+              defaultValue={progress}
+              onChange={onProgress}
+              height="24px"
+              pointerEvents={isExpanded ? "initial" : "none"}
+              step={0.01}
             >
-              <SliderFilledTrack
-                bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
+              <SliderTrack
+                // css={isExpanded ? wavyMask : ""}
+                bg={
+                  isExpanded
+                    ? `url(/wave3.png), var(--chakra-colors-gray-300)`
+                    : "gray.200"
+                }
+                height={`${isExpanded ? 15 : 3}px`}
                 backgroundSize="contain"
                 backgroundBlendMode="multiply"
-              />
-            </SliderTrack>
-            {isExpanded && (
-              <SliderThumb
-                bg="rgba(240, 240, 240, 0.4)"
-                boxSize={8}
-                ml={-3}
-                mt={-2}
               >
-                <Box as="span" transform="scaleX(-1)">
-                  🏊‍♀️
-                </Box>
-              </SliderThumb>
-            )}
-          </Slider>
-          <AccordionPanel px={0} pt={1} py={3}>
-            <ResizableTextarea
-              p={0}
-              fontSize="smaller"
-              color="#bababa"
-              variant="outline"
-              defaultValue={task.description}
-              focusBorderColor="transparent"
-              placeholder="if you wanna put some more"
-              border="none"
-              onChange={(e) => describe(task, e.target.value)}
-            />
-          </AccordionPanel>
-        </Box>
-      )}
+                <SliderFilledTrack
+                  bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
+                  backgroundSize="contain"
+                  backgroundBlendMode="multiply"
+                />
+              </SliderTrack>
+              {isExpanded && (
+                <SliderThumb
+                  bg="rgba(240, 240, 240, 0.4)"
+                  boxSize={8}
+                  ml={-3}
+                  mt={-2}
+                >
+                  <Box as="span" transform="scaleX(-1)">
+                    🏊‍♀️
+                  </Box>
+                </SliderThumb>
+              )}
+            </Slider>
+            <AccordionPanel px={0} pt={1} py={3}>
+              <ResizableTextarea
+                p={0}
+                color="#bababa"
+                variant="outline"
+                defaultValue={task.description}
+                focusBorderColor="transparent"
+                placeholder="if you wanna put some more"
+                border="none"
+                onChange={(e) => describe(task, e.target.value)}
+              />
+            </AccordionPanel>
+          </Box>
+        );
+      }}
     </AccordionItem>
   );
 };
