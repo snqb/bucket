@@ -6,7 +6,7 @@ import {
 } from "@chakra-ui/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "./pages/index.page";
 import { registerSW } from "virtual:pwa-register";
 
 import { mode } from "@chakra-ui/theme-tools";

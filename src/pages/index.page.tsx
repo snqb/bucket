@@ -2,18 +2,20 @@ import {
   Box,
   Flex,
   Heading,
+  Portal,
+  PortalManager,
   Tab,
   TabList,
   TabPanel,
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-import Bucket from "./Bucket";
+import Bucket from "../Bucket";
 
 import "@fontsource/lato";
-import Shuffle from "./Shuffle";
-import { ITask, useTasks } from "./data/useTasks";
-import ReloadPrompt from "./ReloadPrompt";
+import Shuffle from "../Shuffle";
+import { ITask, useTasks } from "../data/useTasks";
+import ReloadPrompt from "../ReloadPrompt";
 
 function App() {
   const { bucket } = useTasks();
@@ -22,15 +24,17 @@ function App() {
 
   return (
     <Flex px={[4, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
-      <Heading>🪣Bucket</Heading>
+      <Heading>
+        🪣Bucket <PortalManager />
+      </Heading>
       <Bucket />
       <ReloadPrompt />
+      <Portal>Huy</Portal>
     </Flex>
   );
 }
 
 export default App;
-
 
 const initial = {
   state: {
