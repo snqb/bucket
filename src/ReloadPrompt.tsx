@@ -1,7 +1,7 @@
 import "./ReloadPrompt.css";
 
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { Alert, AlertIcon, Box } from "@chakra-ui/react";
+import { Alert, Text, Box, Flex, Button } from "@chakra-ui/react";
 
 function ReloadPrompt() {
   // replaced dynamically
@@ -41,32 +41,52 @@ function ReloadPrompt() {
   };
 
   return offlineReady || needRefresh ? (
-    <Box position="fixed" bottom="0">
-      <Alert status="info">
-        <AlertIcon />
-        <div className="ReloadPrompt-message">
-          {offlineReady ? (
-            <span>App ready to work offline</span>
-          ) : (
-            <span>
-              New content available, click on reload button to update bucket.
-            </span>
-          )}
-        </div>
+    <Flex
+      bg={
+        "linear-gradient(144deg, #c95fbb 25%, #2e2a12 25%, #2e2a12 50%, #c95fbb 50%, #c95fbb 75%, #2e2a12 75%, #2e2a12 100%)"
+      }
+      bgSize="68px"
+      justify="center"
+      position="fixed"
+      bottom="0"
+      left="0"
+      width="100vw"
+      direction="column"
+      align="center"
+      fontWeight="bold"
+      color="white.50"
+      p={2}
+    >
+      <Flex bg="#000000AA" py={3} px={6} direction="column" align="center" gap={1}>
+        <Text fontSize="2rem">🪣</Text>
+
+        <Text fontSize="1.1rem">
+          {offlineReady ? "Works offline" : "There's an "}
+        </Text>
         {needRefresh && (
-          <button
-            className="ReloadPrompt-toast-button"
-            onClick={() => updateServiceWorker(true)}
-          >
+          <Button bg={gradient} onClick={() => updateServiceWorker(true)}>
             Reload
-          </button>
+          </Button>
         )}
-        <button className="ReloadPrompt-toast-button" onClick={() => close()}>
-          Close
-        </button>
-      </Alert>
-    </Box>
+        <Button variant="outline" onClick={() => close()}>
+          Update
+        </Button>
+      </Flex>
+    </Flex>
   ) : null;
 }
 
 export default ReloadPrompt;
+
+const gradient = `linear-gradient(to right, 
+  #00C6FB, 
+  #3DBBFF, 
+  #6CADFF, 
+  #979DFC, 
+  #BA8BEA,
+  #C783DE,
+  #D778CF,
+  #E965AD,
+  #F15787,
+  #ED525F,
+  #DF5737)`;

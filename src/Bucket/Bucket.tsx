@@ -10,7 +10,7 @@ import { useCallback } from "react";
 
 const Bucket = () => {
   return (
-    <Box position="relative" pt="5vh">
+    <Box position="relative" pt="3vh">
       <VStack align="stretch" gap={4}>
         <Box>
           <Adder />

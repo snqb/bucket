@@ -68,16 +68,3 @@ function sampleSize<T>(size: number, list: T[], collected: T[] = []): T[] {
     ? sampleSize(size - 1, list.slice(1), [...collected, list[0]])
     : sampleSize(size, list.slice(1), collected);
 }
-
-const gradient = `linear-gradient(to right, 
-  #00C6FB, 
-  #3DBBFF, 
-  #6CADFF, 
-  #979DFC, 
-  #BA8BEA,
-  #C783DE,
-  #D778CF,
-  #E965AD,
-  #F15787,
-  #ED525F,
-  #DF5737)`;
