@@ -1,6 +1,8 @@
 {
   "name": "bucket",
   "short_name": "bucket",
+  "start_url": "/",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/manifest-icon-192.maskable.png",
