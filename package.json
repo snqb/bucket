@@ -29,7 +29,6 @@
     "use-debounce": "^9.0.2",
     "use-double-click": "^1.0.5",
     "use-long-press": "^2.0.2",
-    "vite-plugin-ssr": "^0.4.54",
     "zustand": "^4.0.0-rc.1"
   },
   "devDependencies": {

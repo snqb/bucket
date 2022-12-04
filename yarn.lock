@@ -1324,27 +1324,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@brillout/import@npm:^0.2.1":
-  version: 0.2.1
-  resolution: "@brillout/import@npm:0.2.1"
-  checksum: 976eadc570b5f135b2b27340047156246d6706ff9d833c0579339224fc25b9666c7eacd0f11bd75bd6e7961f6f1c87df3876515d1f5bfbcb7175a490ee21b44b
-  languageName: node
-  linkType: hard
-
-"@brillout/json-serializer@npm:^0.5.3":
-  version: 0.5.3
-  resolution: "@brillout/json-serializer@npm:0.5.3"
-  checksum: fecd31a517736dcbeefbc471f2a278d32b5e71a47f9f4f2675cc41374bcf43c282399d28950fe815d886efb7860d5d97a10ead8e416cd1cf2aeb74f336cd3ce2
-  languageName: node
-  linkType: hard
-
-"@brillout/vite-plugin-import-build@npm:^0.1.0":
-  version: 0.1.0
-  resolution: "@brillout/vite-plugin-import-build@npm:0.1.0"
-  checksum: 26094e724eef65aa1947fb2d3ab86bfb29f7f138a9093770d75176625a67244d54587c1f7950f123bfa9e0e9fb82353b2f8cae50c71115ec2fa3e270b1ffb19c
-  languageName: node
-  linkType: hard
-
 "@chakra-ui/accordion@npm:2.0.3":
   version: 2.0.3
   resolution: "@chakra-ui/accordion@npm:2.0.3"
@@ -2740,15 +2719,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@zkochan/rimraf@npm:^2.1.2":
-  version: 2.1.2
-  resolution: "@zkochan/rimraf@npm:2.1.2"
-  dependencies:
-    rimraf: ^3.0.2
-  checksum: 4f7fbfe837b7957bd33b12ce3d41639c737be115122fcad9ce3a96cf02c47da6f4b9be06f9efef2c7f5d94a401a96d593fe07be1d9f181b70437e844f2f211c3
-  languageName: node
-  linkType: hard
-
 "abbrev@npm:1":
   version: 1.1.1
   resolution: "abbrev@npm:1.1.1"
@@ -2935,15 +2905,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"better-path-resolve@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "better-path-resolve@npm:1.0.0"
-  dependencies:
-    is-windows: ^1.0.0
-  checksum: 5392dbe04e7fe68b944eb37961d9dfa147aaac3ee9ee3f6e13d42e2c9fbe949e68d16e896c14ee9016fa5f8e6e53ec7fd8b5f01b50a32067a7d94ac9cfb9a050
-  languageName: node
-  linkType: hard
-
 "brace-expansion@npm:^1.1.7":
   version: 1.1.11
   resolution: "brace-expansion@npm:1.1.11"
@@ -2997,13 +2958,6 @@ __metadata:
   version: 3.3.0
   resolution: "builtin-modules@npm:3.3.0"
   checksum: db021755d7ed8be048f25668fe2117620861ef6703ea2c65ed2779c9e3636d5c3b82325bd912244293959ff3ae303afa3471f6a15bf5060c103e4cc3a839749d
-  languageName: node
-  linkType: hard
-
-"cac@npm:^6.7.12":
-  version: 6.7.14
-  resolution: "cac@npm:6.7.14"
-  checksum: 45a2496a9443abbe7f52a49b22fbe51b1905eff46e03fd5e6c98e3f85077be3f8949685a1849b1a9cd2bc3e5567dfebcf64f01ce01847baf918f1b37c839791a
   languageName: node
   linkType: hard
 
@@ -3435,13 +3389,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-module-lexer@npm:^0.10.5":
-  version: 0.10.5
-  resolution: "es-module-lexer@npm:0.10.5"
-  checksum: d2f9debd9d913323322095934653e0558bb8220177645eb76d316b4afd911e8d83ffee0b748b0faa9f3ce1560db3eee4a0ac68d6c2f750c11f4250adce84cf02
-  languageName: node
-  linkType: hard
-
 "es-to-primitive@npm:^1.2.1":
   version: 1.2.1
   resolution: "es-to-primitive@npm:1.2.1"
@@ -3811,17 +3758,6 @@ __metadata:
   dependencies:
     tslib: ^2.1.0
   checksum: a23ebe8f7e20a32c0b99c2f8175b6f07af3ec6316aad52a2316316a6d011d717af8d2175dcc2827031c59fabb30232ed3e19a720a373caba7f070e1eae436325
-  languageName: node
-  linkType: hard
-
-"fs-extra@npm:10.1.0":
-  version: 10.1.0
-  resolution: "fs-extra@npm:10.1.0"
-  dependencies:
-    graceful-fs: ^4.2.0
-    jsonfile: ^6.0.1
-    universalify: ^2.0.0
-  checksum: dc94ab37096f813cc3ca12f0f1b5ad6744dfed9ed21e953d72530d103cea193c2f81584a39e9dee1bea36de5ee66805678c0dddc048e8af1427ac19c00fffc50
   languageName: node
   linkType: hard
 
@@ -4410,13 +4346,6 @@ __metadata:
   dependencies:
     call-bind: ^1.0.2
   checksum: 95bd9a57cdcb58c63b1c401c60a474b0f45b94719c30f548c891860f051bc2231575c290a6b420c6bc6e7ed99459d424c652bd5bf9a1d5259505dc35b4bf83de
-  languageName: node
-  linkType: hard
-
-"is-windows@npm:^1.0.0":
-  version: 1.0.2
-  resolution: "is-windows@npm:1.0.2"
-  checksum: 438b7e52656fe3b9b293b180defb4e448088e7023a523ec21a91a80b9ff8cdb3377ddb5b6e60f7c7de4fa8b63ab56e121b6705fe081b3cf1b828b0a380009ad7
   languageName: node
   linkType: hard
 
@@ -5338,16 +5267,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rename-overwrite@npm:^4.0.3":
-  version: 4.0.3
-  resolution: "rename-overwrite@npm:4.0.3"
-  dependencies:
-    "@zkochan/rimraf": ^2.1.2
-    fs-extra: 10.1.0
-  checksum: ac225a1b2e05ed3c2c15c235f3ed2bb93474d9fb037c401a6a68dc64f7e7439847110e907ed09096fe3db253212f4379e350c89c03d8bfbda22e97a0d5c12a22
-  languageName: node
-  linkType: hard
-
 "require-from-string@npm:^2.0.2":
   version: 2.0.2
   resolution: "require-from-string@npm:2.0.2"
@@ -5588,7 +5507,6 @@ __metadata:
     use-long-press: ^2.0.2
     vite: ^2.9.9
     vite-plugin-pwa: ^0.12.0
-    vite-plugin-ssr: ^0.4.54
     workbox-build: ^6.5.3
     workbox-core: ^6.5.3
     workbox-precaching: ^6.5.3
@@ -5807,18 +5725,6 @@ __metadata:
   version: 1.0.0
   resolution: "supports-preserve-symlinks-flag@npm:1.0.0"
   checksum: 53b1e247e68e05db7b3808b99b892bd36fb096e6fba213a06da7fab22045e97597db425c724f2bbd6c99a3c295e1e73f3e4de78592289f38431049e1277ca0ae
-  languageName: node
-  linkType: hard
-
-"symlink-dir@npm:^5.0.1":
-  version: 5.1.0
-  resolution: "symlink-dir@npm:5.1.0"
-  dependencies:
-    better-path-resolve: ^1.0.0
-    rename-overwrite: ^4.0.3
-  bin:
-    symlink-dir: dist/cli.js
-  checksum: 4518c0384bf495bed5a03595be2f3be0b90ae3fc7b39e43c06b0d42646fcd8f777f5b4695a2fd7d8661d434d0b1f691ffaf829908318fa66fc0c4476aff718cb
   languageName: node
   linkType: hard
 
@@ -6197,31 +6103,6 @@ __metadata:
     workbox-build: ^6.4.0
     workbox-window: ^6.4.0
   checksum: f66e405ca1c884566c37791c518a86880b63b57f51bd21c9498d0bca28f5385bdee1a29885284c9d70eb6d36d9e800de867c816ff190f79456a6f05e90618dde
-  languageName: node
-  linkType: hard
-
-"vite-plugin-ssr@npm:^0.4.54":
-  version: 0.4.54
-  resolution: "vite-plugin-ssr@npm:0.4.54"
-  dependencies:
-    "@brillout/import": ^0.2.1
-    "@brillout/json-serializer": ^0.5.3
-    "@brillout/vite-plugin-import-build": ^0.1.0
-    cac: ^6.7.12
-    es-module-lexer: ^0.10.5
-    fast-glob: ^3.2.11
-    picocolors: ^1.0.0
-    resolve: ^1.22.0
-    symlink-dir: ^5.0.1
-  peerDependencies:
-    react-streaming: ">=0.3.5"
-    vite: ">=3.0.0"
-  peerDependenciesMeta:
-    react-streaming:
-      optional: true
-  bin:
-    vite-plugin-ssr: node/bin/vite-plugin-ssr.js
-  checksum: 2a010e9743dd30752ccbdcb61a78575860333cd8a54200361e2c7c73cf37e36f0335ae62d10f88f94208b768fa85fffc3f3698d90b0547ed03f73eaf8bc6f163
   languageName: node
   linkType: hard
 
