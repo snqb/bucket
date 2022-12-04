@@ -1,5 +1,3 @@
-import "./ReloadPrompt.css";
-
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { Alert, Text, Box, Flex, Button } from "@chakra-ui/react";
 
@@ -57,20 +55,24 @@ function ReloadPrompt() {
       color="white.50"
       p={2}
     >
-      <Flex bg="#000000AA" py={3} px={6} direction="column" align="center" gap={1}>
+      <Flex
+        bg="#000000AA"
+        py={3}
+        px={6}
+        direction="column"
+        align="center"
+        gap={1}
+      >
         <Text fontSize="2rem">🪣</Text>
 
         <Text fontSize="1.1rem">
           {offlineReady ? "Works offline" : "There's an "}
         </Text>
         {needRefresh && (
-          <Button bg={gradient} onClick={() => updateServiceWorker(true)}>
-            Reload
+          <Button variant="outline" onClick={() => updateServiceWorker(true)}>
+            Update
           </Button>
         )}
-        <Button variant="outline" onClick={() => close()}>
-          Update
-        </Button>
       </Flex>
     </Flex>
   ) : null;
