@@ -7,6 +7,7 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 import * as R from "ramda";
 import { useCallback } from "react";
+import { useMemo } from "preact/hooks";
 
 const Bucket = () => {
   return (
@@ -29,12 +30,21 @@ const BucketView = () => {
   const { bucket } = useTasks();
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
-  const sortOnceIfJustMoving = useCallback(R.once(R.sortBy<ITask>(R.prop("progress"))), [bucket.length]);
+  const sortOnceIfJustMoving = useMemo(
+    () =>
+      R.once(
+        R.sortWith([
+          R.ascend(R.prop("progress") as any),
+          R.descend(R.prop("createdAt") as any),
+        ])
+      )(bucket),
+    [bucket]
+  );
 
   return (
     <div id="bucket">
       <Accordion allowToggle ref={parent as any}>
-        {sortOnceIfJustMoving(bucket as ITask[]).map((task, index) => (
+        {(sortOnceIfJustMoving as ITask[]).map((task, index) => (
           <Task tabIndex={index} mb={4} key={task.id} task={task} />
         ))}
       </Accordion>
