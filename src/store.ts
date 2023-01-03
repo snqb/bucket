@@ -18,14 +18,7 @@ export const store = syncedStore({
 });
 
 const doc = getYjsDoc(store);
-const provider = new IndexeddbPersistence("my-document-id", doc);
-const wsProvider = new WebsocketProvider(
-  "ws://localhost:1234",
-  "my-roomname",
-  doc
-);
-
-doc.on("update", console.log);
+const provider = new IndexeddbPersistence("bucket", doc);
 
 export type Thingy = {
   id: string;

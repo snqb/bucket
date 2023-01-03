@@ -12,11 +12,13 @@ import {
   SliderTrack,
   Text,
 } from "@chakra-ui/react";
+import { useSyncedStore } from "@syncedstore/react";
 
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Thingy } from "../store";
+import { store, Thingy } from "../store";
 import { ResizableTextarea } from "./ResizableTextarea";
+import { useMemo } from "preact/hooks";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
@@ -58,16 +60,29 @@ const Task = ({
   onShuffleClick,
   ...restItemProps
 }: Props) => {
-  const [progress, setProgress] = useState(task.progress ?? 0);
+  const state = useSyncedStore(store);
+
+  const thingy = useMemo(
+    () => state.bucket.find((it) => it.id === task.id),
+    [state.bucket]
+  );
 
   const onProgress = useDebouncedCallback((progress: number) => {
-    // saveProgress(task, progress);
+    if (!thingy) return;
+    if (progress > 98) {
+      thingy.residence = "graveyard";
+    }
+
+    thingy.progress = progress;
     // setProgress(progress);
     // if (progress > 98) {
     //   killIt(task);
     // }
   }, 350);
 
+  if (!thingy) {
+    return null;
+  }
   return (
     <AccordionItem
       p={0}
@@ -78,7 +93,7 @@ const Task = ({
       {...restItemProps}
     >
       {({ isExpanded }) => {
-        const whichColor = gradientColors[Math.ceil(progress / 10)];
+        const whichColor = gradientColors[Math.ceil(thingy.progress / 10)];
 
         const expandedProps = isExpanded
           ? {
@@ -117,7 +132,7 @@ const Task = ({
               focusThumbOnChange={false}
               mt={isExpanded ? 6 : 0}
               aria-label={`progress of ${task.title.text}`}
-              defaultValue={progress}
+              defaultValue={task.progress}
               onChange={onProgress}
               height="24px"
               pointerEvents={isExpanded ? "initial" : "none"}

@@ -30,6 +30,7 @@ const Graveyard = () => {
 export default Graveyard;
 
 const Task = ({ task }: { task: Thingy }) => {
+  console.log(task)
   return (
     <Flex m={2} direction="column" align="center" justify="center" gap={0.75}>
       <Heading as="h6" fontSize="2xl">

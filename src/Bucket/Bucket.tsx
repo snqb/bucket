@@ -33,6 +33,8 @@ const BucketView = () => {
 
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
+  console.log(state.bucket.forEach(console.log));
+
   // const sortOnceIfJustMoving = useMemo(
   //   () =>
   //     R.once(
