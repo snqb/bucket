@@ -7,14 +7,14 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
-import { nanoid } from "nanoid";
 import { ChangeEventHandler, useCallback, useState } from "react";
-import { ITask, useTasks } from "../data/useTasks";
 
+import { useSyncedStore } from "@syncedstore/react";
 import * as R from "ramda";
+import { store, Thingy } from "../store";
 
 const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
-  const { addTask } = useTasks();
+  const state = useSyncedStore(store);
   const [emoji, setEmoji, clearEmoji] = useInputEmoji();
   const [text, setText] = useState("");
 
@@ -40,19 +40,19 @@ const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
   const onAdd = () => {
     if (!text) return;
 
-    const task: ITask = {
-      id: nanoid(),
+    const task: Thingy = {
+      id: crypto.randomUUID(),
       title: {
         text,
         emoji,
       },
       createdAt: new Date(),
       progress: 1,
-      wasSentTo: "bucket",
+      residence: "default",
     };
 
     try {
-      addTask(task);
+      state.bucket.push(task);
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {

@@ -12,14 +12,14 @@ import {
   SliderTrack,
   Text,
 } from "@chakra-ui/react";
-import { ITask, useTasks } from "../data/useTasks";
 
-import { useEffect, useRef, useState } from "react";
-import { ResizableTextarea } from "./ResizableTextarea";
+import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { Thingy } from "../store";
+import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
-  task: ITask;
+  task: Thingy;
   hasShuffler?: boolean; // yup this sucks
   onShuffleClick?: () => void;
 }
@@ -58,17 +58,14 @@ const Task = ({
   onShuffleClick,
   ...restItemProps
 }: Props) => {
-  const { killIt, saveProgress, describe } = useTasks();
-
   const [progress, setProgress] = useState(task.progress ?? 0);
 
   const onProgress = useDebouncedCallback((progress: number) => {
-    saveProgress(task, progress);
-    setProgress(progress);
-
-    if (progress > 98) {
-      killIt(task);
-    }
+    // saveProgress(task, progress);
+    // setProgress(progress);
+    // if (progress > 98) {
+    //   killIt(task);
+    // }
   }, 350);
 
   return (
@@ -165,7 +162,9 @@ const Task = ({
                 focusBorderColor="transparent"
                 placeholder="if you wanna put some more"
                 border="none"
-                onChange={(e) => describe(task, e.target.value)}
+                onChange={(e) => {
+                  // return describe(task, e.target.value);
+                }}
               />
             </AccordionPanel>
           </Box>

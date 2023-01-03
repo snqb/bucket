@@ -1,8 +1,11 @@
 import { Box, Flex, Heading, Text, useDisclosure } from "@chakra-ui/react";
-import { ITask, useTasks } from "../data/useTasks";
+import { useSyncedStore } from "@syncedstore/react";
+import { store, Thingy } from "../store";
 
 const Graveyard = () => {
-  const { graveyard } = useTasks();
+  const state = useSyncedStore(store);
+  const graveyard = state.bucket.filter((it) => it.residence === "graveyard");
+
   const { isOpen, onToggle } = useDisclosure();
   const isClosed = !isOpen;
 
@@ -16,7 +19,7 @@ const Graveyard = () => {
         {isClosed ? "🙈" : "🙉"} Graveyard
       </Heading>
       <Flex wrap="wrap" gap={3} justify="center">
-        {graveyard.map((task: ITask) => (
+        {graveyard.map((task: Thingy) => (
           <Task key={task.id} task={task} />
         ))}
       </Flex>
@@ -26,7 +29,7 @@ const Graveyard = () => {
 
 export default Graveyard;
 
-const Task = ({ task }: { task: ITask }) => {
+const Task = ({ task }: { task: Thingy }) => {
   return (
     <Flex m={2} direction="column" align="center" justify="center" gap={0.75}>
       <Heading as="h6" fontSize="2xl">

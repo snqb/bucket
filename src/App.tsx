@@ -11,15 +11,9 @@ import {
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
-import Shuffle from "./Shuffle";
-import { ITask, useTasks } from "./data/useTasks";
 import ReloadPrompt from "./ReloadPrompt";
 
 function App() {
-  const { bucket } = useTasks();
-
-  const hasEnoughTasksForShuffle = (bucket as ITask[]).length > 4;
-
   return (
     <Flex px={[4, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
       <Heading>🪣Bucket</Heading>
@@ -30,7 +24,6 @@ function App() {
 }
 
 export default App;
-
 
 const initial = {
   state: {
