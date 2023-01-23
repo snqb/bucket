@@ -14,11 +14,9 @@ import {
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
 
-import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { store, Thingy } from "../store";
 import { ResizableTextarea } from "./ResizableTextarea";
-import { useMemo } from "preact/hooks";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
@@ -62,18 +60,19 @@ const Task = ({
 }: Props) => {
   const state = useSyncedStore(store);
 
-  const thingy = useMemo(
-    () => state.bucket.find((it) => it.id === task.id),
-    [state.bucket]
-  );
+  const thingy = state.bucket.find((it) => it.id === task.id);
 
   const onProgress = useDebouncedCallback((progress: number) => {
+    const thingy = state.bucket.find((it) => it.id === task.id);
     if (!thingy) return;
+    thingy.progress = progress;
     if (progress > 98) {
       thingy.residence = "graveyard";
     }
 
-    thingy.progress = progress;
+    console.log(thingy.progress);
+
+    // updateProgress(task.id, progress);
     // setProgress(progress);
     // if (progress > 98) {
     //   killIt(task);

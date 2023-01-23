@@ -34,7 +34,7 @@ interface State {
   describe: (task: ITask, description: string) => void;
 }
 
-const reducer = (set: SetState<State>, state: GetState<State>) => {
+const reducer = (updateState: SetState<State>, state: GetState<State>) => {
   const lensTaskProp = R.curry((task: ITask, prop: keyof ITask) =>
     R.lensPath(["tasks", task.id, prop])
   );
@@ -54,12 +54,12 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
     addTask: R.pipe(
       (task: ITask) =>
         R.set<State, ITask>(R.lensPath(["tasks", task.id]), task, state()),
-      set
+      updateState
     ),
     save: R.pipe(
       (task: ITask, progress: number) =>
         R.set<State, number>(lensTaskProp(task, "progress"), progress, state()),
-      set
+      updateState
     ),
     shuffleIt: (slot: number) => {
       const possibleItems = R.reject(
@@ -70,11 +70,11 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
       const random =
         possibleItems[Math.floor(possibleItems.length * Math.random())];
 
-      set(R.set(R.lensPath(["shuffle", slot]), random));
+      updateState(R.set(R.lensPath(["shuffle", slot]), random));
     },
-    todayIt: R.pipe(sendTaskTo("today"), set),
-    bucketIt: R.pipe(sendTaskTo("bucket"), set),
-    killIt: R.pipe(sendTaskTo("graveyard"), set),
+    todayIt: R.pipe(sendTaskTo("today"), updateState),
+    bucketIt: R.pipe(sendTaskTo("bucket"), updateState),
+    killIt: R.pipe(sendTaskTo("graveyard"), updateState),
     describe: R.pipe(
       (task: ITask, description: string) =>
         R.set<State, string>(
@@ -82,7 +82,7 @@ const reducer = (set: SetState<State>, state: GetState<State>) => {
           description,
           state()
         ),
-      set
+      updateState
     ),
   };
 };
@@ -121,11 +121,8 @@ export const useTasks = () => {
   const bucket = R.reject(R.propEq("wasSentTo", "graveyard"), tasks);
 
   const isToday = (task: ITask) => R.propEq("wasSentTo", "today", task);
-  const killAndWrite = (task: ITask) => {
-    const inShuffle = R.findIndex(R.propEq("id", task.id), shuffle);
-    rest.shuffleIt(inShuffle);
-    return killIt(R.assoc("killedAt", new Date(), task));
-  };
+  const killAndRememberDeathDate = (task: ITask) =>
+    killIt(R.assoc("killedAt", new Date(), task));
 
   return {
     tasks,
@@ -137,7 +134,7 @@ export const useTasks = () => {
     bucketIt,
     isToday,
     saveProgress,
-    killIt: killAndWrite,
+    killIt: killAndRememberDeathDate,
     ...rest,
   };
 };
