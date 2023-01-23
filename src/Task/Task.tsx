@@ -69,14 +69,6 @@ const Task = ({
     if (progress > 98) {
       thingy.residence = "graveyard";
     }
-
-    console.log(thingy.progress);
-
-    // updateProgress(task.id, progress);
-    // setProgress(progress);
-    // if (progress > 98) {
-    //   killIt(task);
-    // }
   }, 350);
 
   if (!thingy) {
@@ -177,7 +169,7 @@ const Task = ({
                 placeholder="if you wanna put some more"
                 border="none"
                 onChange={(e) => {
-                  // return describe(task, e.target.value);
+                  thingy.description = e.target.value;
                 }}
               />
             </AccordionPanel>

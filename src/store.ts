@@ -6,13 +6,6 @@ export const store = syncedStore({
   bucket: [] as Thingy[],
 });
 
-export const updateProgress = (id: any, progress: number) => {
-  const task = store.bucket.find((it) => it.id === id);
-  console.log(task?.residence);
-
-  if (task) task.progress = progress;
-};
-
 const doc = getYjsDoc(store);
 const provider = new IndexeddbPersistence("bucket", doc);
 
@@ -21,6 +14,8 @@ if (password) {
   const webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
     password,
   });
+
+  console.log(webrtcProvider.connected);
 }
 
 export type Thingy = {
