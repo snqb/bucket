@@ -1,4 +1,4 @@
-import { Accordion, Box, Flex, VStack } from "@chakra-ui/react";
+import { Accordion, Box, Button, Flex, Input, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Adder from "../Adder";
 import Graveyard from "../Graveyard";
@@ -7,8 +7,12 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import { store, Thingy } from "../store";
+import { useState } from "react";
 
 const Bucket = () => {
+  const [password, setPassword] = useState(
+    localStorage.getItem("password") ?? ""
+  );
   return (
     <Box position="relative" pt="3vh">
       <VStack align="stretch" gap={4}>
@@ -19,6 +23,22 @@ const Bucket = () => {
 
         <Flex mt="500px">
           <Graveyard />
+        </Flex>
+
+        <Flex>
+          <Input
+            value={password}
+            onChange={(e) => {
+              const value = e.target.value;
+
+              if (value) {
+                localStorage.setItem("password", e.target.value);
+                setPassword(e.target.value);
+              }
+            }}
+            placeholder="sync phrase"
+          />
+          <Button onClick={() => window.location.reload(true)}>Save</Button>
         </Flex>
       </VStack>
     </Box>
