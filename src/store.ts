@@ -14,8 +14,6 @@ if (password) {
   const webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
     password,
   });
-
-  console.log(webrtcProvider.connected);
 }
 
 export type Thingy = {
