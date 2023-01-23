@@ -38,6 +38,7 @@ const Bucket = () => {
             }}
             placeholder="sync phrase"
           />
+          {/* @ts-ignore */}
           <Button onClick={() => window.location.reload(true)}>Save</Button>
         </Flex>
       </VStack>
