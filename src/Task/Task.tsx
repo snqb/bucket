@@ -63,7 +63,6 @@ const Task = ({
   const thingy = state.bucket.find((it) => it.id === task.id);
 
   const onProgress = useDebouncedCallback((progress: number) => {
-    const thingy = state.bucket.find((it) => it.id === task.id);
     if (!thingy) return;
     thingy.progress = progress;
     if (progress > 98) {
@@ -144,6 +143,7 @@ const Task = ({
                   bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
                   backgroundSize="contain"
                   backgroundBlendMode="multiply"
+                  transition="all .5s ease-in"
                 />
               </SliderTrack>
               {isExpanded && (
