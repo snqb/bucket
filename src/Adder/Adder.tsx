@@ -4,7 +4,7 @@ import {
   InputGroup,
   InputGroupProps,
   InputLeftElement,
-  InputRightElement,
+  InputRightElement
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { ChangeEventHandler, useCallback, useState } from "react";
@@ -13,8 +13,13 @@ import { useSyncedStore } from "@syncedstore/react";
 import * as R from "ramda";
 import { store, Thingy } from "../store";
 
-const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
-  const state = useSyncedStore(store);
+export interface Props extends InputGroupProps {
+  where?: "today" | "bucket";
+}
+
+const Adder = forwardRef<Props, "div">((props, ref) => {
+  const { where = "bucket" } = props;
+  const tasks = useSyncedStore(store[where]);
   const [emoji, setEmoji, clearEmoji] = useInputEmoji();
   const [text, setText] = useState("");
 
@@ -52,7 +57,7 @@ const Adder = forwardRef<InputGroupProps, "div">((props, ref) => {
     };
 
     try {
-      state.bucket.push(task);
+      tasks.push(task);
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {

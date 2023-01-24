@@ -22,6 +22,7 @@ interface Props extends AccordionItemProps {
   task: Thingy;
   hasShuffler?: boolean; // yup this sucks
   onShuffleClick?: () => void;
+  where?: "today" | "bucket";
 }
 
 const gradient = `linear-gradient(to right, 
@@ -55,12 +56,12 @@ const gradientColors = [
 const Task = ({
   task,
   hasShuffler = false,
+  where = "bucket",
   onShuffleClick,
   ...restItemProps
 }: Props) => {
-  const state = useSyncedStore(store);
-
-  const thingy = state.bucket.find((it) => it.id === task.id);
+  const state = useSyncedStore(store[where]);
+  const thingy = state.find((it) => it.id === task.id);
 
   const onProgress = useDebouncedCallback((progress: number) => {
     if (!thingy) return;

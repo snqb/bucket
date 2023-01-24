@@ -4,6 +4,7 @@ import { WebrtcProvider } from "y-webrtc";
 
 export const store = syncedStore({
   bucket: [] as Thingy[],
+  today: [] as Thingy[],
 });
 
 const doc = getYjsDoc(store);
