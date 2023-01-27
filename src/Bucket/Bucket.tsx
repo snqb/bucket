@@ -46,7 +46,7 @@ const BucketView = () => {
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <Accordion allowToggle ref={parent as any}>
+    <Accordion allowToggle ref={parent as any} reduceMotion>
       {state.bucket
         .filter((it: Thingy) => it.residence !== "graveyard")
         .map((task, index) => {
