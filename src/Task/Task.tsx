@@ -118,7 +118,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
                 bg={
                   isExpanded
                     ? `url(/wave3.png), var(--chakra-colors-gray-300)`
-                    : "rgba(25, 25, 25, 0.4)"
+                    : "rgba(25, 25, 25, 0.5)"
                 }
                 height={`${isExpanded ? 15 : 4}px`}
                 backgroundSize="contain"
@@ -127,6 +127,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               >
                 <SliderFilledTrack
                   bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
+                  filter={isExpanded ? 'initial' : 'saturate(0.5)'}
                   backgroundSize="contain"
                   backgroundBlendMode="multiply"
                   transition="all .5s ease-in"
