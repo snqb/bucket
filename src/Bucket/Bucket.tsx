@@ -43,19 +43,16 @@ const Bucket = () => {
 
 const BucketView = () => {
   const state = useSyncedStore(store);
-
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <div id="bucket">
-      <Accordion allowToggle ref={parent as any}>
-        {state.bucket
-          .filter((it: Thingy) => it.residence !== "graveyard")
-          .map((task, index) => {
-            return <Task tabIndex={index} mb={2} key={task.id} task={task} />;
-          })}
-      </Accordion>
-    </div>
+    <Accordion allowToggle ref={parent as any}>
+      {state.bucket
+        .filter((it: Thingy) => it.residence !== "graveyard")
+        .map((task, index) => {
+          return <Task tabIndex={index} mb={2} key={task.id} task={task} />;
+        })}
+    </Accordion>
   );
 };
 

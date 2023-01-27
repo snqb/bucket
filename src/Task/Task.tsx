@@ -90,7 +90,6 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
 
         return (
           <Box {...expandedProps} sx={{ transition: "all .1s linear" }}>
-            {/* <Box position="relative">{task.title.emoji}</Box> */}
             <AccordionButton p={0} fontWeight={500} alignItems="baseline">
               <EmojiThing mr={2} isTilted={isExpanded}>
                 {task.title.emoji}
