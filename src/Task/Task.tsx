@@ -94,7 +94,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               <EmojiThing mr={2} isTilted={isExpanded}>
                 {task.title.emoji}
               </EmojiThing>
-              <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
+              <Text align="left" fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
                 {task.title.text}
               </Text>
             </AccordionButton>
