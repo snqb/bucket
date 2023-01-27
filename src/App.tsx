@@ -29,8 +29,8 @@ function App() {
   );
 
   return (
-    <Flex px={[4, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
-      <Tabs variant="soft-rounded" index={tab} onChange={setTab}>
+    <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
+      <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
         <TabList>
           <Tab>
             <Heading size="lg">🪣Bucket</Heading>
