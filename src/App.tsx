@@ -13,16 +13,29 @@ import Bucket from "./Bucket";
 import "@fontsource/lato";
 import ReloadPrompt from "./ReloadPrompt";
 import Today from "./Today";
+import { useState, useEffect } from "react";
 
 function App() {
+  console.log("hey", localStorage.getItem("current-tab"));
+  const [tab, setTab] = useState(
+    Number(localStorage.getItem("current-tab")) ?? 0
+  );
+
+  useEffect(
+    function persistCurrentTab() {
+      localStorage.setItem("current-tab", tab.toString());
+    },
+    [tab]
+  );
+
   return (
     <Flex px={[4, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
-      <Tabs variant="unstyled">
+      <Tabs variant="soft-rounded" index={tab} onChange={setTab}>
         <TabList>
-          <Tab _selected={{ bg: "rgba(220, 120, 50, 0.2)" }}>
+          <Tab>
             <Heading size="lg">🪣Bucket</Heading>
           </Tab>
-          <Tab _selected={{ bg: "rgba(220, 120, 50, 0.2)" }}>
+          <Tab>
             <Heading size="lg">☀️Today</Heading>
           </Tab>
           <IconButton
