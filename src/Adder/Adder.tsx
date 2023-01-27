@@ -4,7 +4,7 @@ import {
   InputGroup,
   InputGroupProps,
   InputLeftElement,
-  InputRightElement
+  InputRightElement,
 } from "@chakra-ui/react";
 import getEmojiFromText from "emoji-from-text";
 import { ChangeEventHandler, useCallback, useState } from "react";
@@ -20,26 +20,12 @@ export interface Props extends InputGroupProps {
 const Adder = forwardRef<Props, "div">((props, ref) => {
   const { where = "bucket" } = props;
   const tasks = useSyncedStore(store[where]);
-  const [emoji, setEmoji, clearEmoji] = useInputEmoji();
+  const [emoji, generateEmoji, clearEmoji] = useInputEmoji();
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.currentTarget.value,
     setText
-  );
-
-  const handleInputChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
-    (e) => e.currentTarget.value,
-    R.cond([
-      [R.either(R.isEmpty, R.isNil), clearEmoji],
-      [
-        R.T,
-        R.pipe(
-          (text) => getEmojiFromText(text, true)?.match?.emoji.char,
-          setEmoji
-        ),
-      ],
-    ])
   );
 
   const onAdd = () => {
@@ -77,21 +63,39 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         placeholder="write it down"
         variant="outline"
         onChange={handleChange}
+        onInput={generateEmoji}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
-        onInput={handleInputChange}
       />
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
     </InputGroup>
   );
 });
 
-const useInputEmoji = (): [string, (newEmoji: string) => void, () => void] => {
+const useInputEmoji = (): [
+  string,
+  ChangeEventHandler<HTMLInputElement>,
+  () => void
+] => {
   const DEFAULT = "🏄‍♂️";
   const [emoji, setEmoji] = useState(DEFAULT);
 
-  const clear = useCallback(() => setEmoji(DEFAULT), []);
+  const clearEmoji = useCallback(() => setEmoji(DEFAULT), []);
 
-  return [emoji, setEmoji, clear];
+  const generateEmojiFromText: ChangeEventHandler<HTMLInputElement> = R.pipe(
+    (e) => e.currentTarget.value,
+    R.cond([
+      [R.either(R.isEmpty, R.isNil), clearEmoji],
+      [
+        R.T,
+        R.pipe(
+          (text) => getEmojiFromText(text, true)?.match?.emoji.char,
+          setEmoji
+        ),
+      ],
+    ])
+  );
+
+  return [emoji, generateEmojiFromText, clearEmoji];
 };
 
 export default Adder;

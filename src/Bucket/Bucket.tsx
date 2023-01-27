@@ -24,11 +24,9 @@ import { store, Thingy } from "../store";
 
 const Bucket = () => {
   return (
-    <Box position="relative" pt="3vh">
+    <Box position="relative" pt="2vh">
       <VStack align="stretch" gap={4}>
-        <Box>
-          <Adder />
-        </Box>
+        <Adder />
         <BucketView />
 
         <Flex mt="500px">

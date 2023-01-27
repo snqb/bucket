@@ -5,7 +5,6 @@ import {
   AccordionPanel,
   Box,
   BoxProps,
-  IconButton,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -23,49 +22,21 @@ interface Props extends AccordionItemProps {
   where?: "today" | "bucket";
 }
 
-const gradient = `linear-gradient(to right, 
-  #00C6FB, 
-  #3DBBFF, 
-  #6CADFF, 
-  #979DFC, 
-  #BA8BEA,
-  #C783DE,
-  #D778CF,
-  #E965AD,
-  #F15787,
-  #ED525F,
-  #DF5737
-  )`;
-
-const gradientColors = [
-  "#00C6FB",
-  "#3DBBFF",
-  "#6CADFF",
-  "#979DFC",
-  "#BA8BEA",
-  "#C783DE",
-  "#D778CF",
-  "#E965AD",
-  "#F15787",
-  "#ED525F",
-  "#DF5737",
-];
-
 const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
   const state = useSyncedStore(store[where]);
   const thingy = state.find((it) => it.id === task.id);
 
   const onProgress = useDebouncedCallback((progress: number) => {
-    if (!thingy) return;
-    thingy.progress = progress;
+    thingy!.progress = progress;
     if (progress > 98) {
-      thingy.residence = "graveyard";
+      thingy!.residence = "graveyard";
     }
   }, 350);
 
   if (!thingy) {
     return null;
   }
+
   return (
     <AccordionItem
       p={0}
@@ -127,7 +98,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               >
                 <SliderFilledTrack
                   bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
-                  filter={isExpanded ? 'initial' : 'saturate(0.5)'}
+                  filter={isExpanded ? "initial" : "saturate(0.5)"}
                   backgroundSize="contain"
                   backgroundBlendMode="multiply"
                   transition="all .5s ease-in"
@@ -185,26 +156,30 @@ const EmojiThing = ({
   );
 };
 
-const x = `
-  --mask: radial-gradient()
-`;
+const gradient = `linear-gradient(to right, 
+  #00C6FB, 
+  #3DBBFF, 
+  #6CADFF, 
+  #979DFC, 
+  #BA8BEA,
+  #C783DE,
+  #D778CF,
+  #E965AD,
+  #F15787,
+  #ED525F,
+  #DF5737
+  )`;
 
-const wavyMask = `
---mask: radial-gradient(
-      21.09px at 50% calc(100% + 18px),
-      #0000 calc(99% - 1px),
-      #000 calc(101% - 1px) 99%,
-      #0000 101%
-    )
-      calc(50% - 20px) calc(50% - 5.5px + 0.5px) / 40px 11px
-    repeat-x,
-  radial-gradient(
-      21.09px at 50% -18px,
-      #0000 calc(99% - 1px),
-      #000 calc(101% - 1px) 99%,
-      #0000 101%
-    )
-    50% calc(50% + 5.5px) / 40px 11px repeat-x;
--webkit-mask: var(--mask);
-mask: var(--mask);
-`;
+const gradientColors = [
+  "#00C6FB",
+  "#3DBBFF",
+  "#6CADFF",
+  "#979DFC",
+  "#BA8BEA",
+  "#C783DE",
+  "#D778CF",
+  "#E965AD",
+  "#F15787",
+  "#ED525F",
+  "#DF5737",
+];

@@ -9,11 +9,9 @@ import { store } from "../store";
 
 const Today = () => {
   return (
-    <Box position="relative" pt="3vh">
+    <Box position="relative" pt="2vh">
       <VStack align="stretch" gap={4}>
-        <Box>
-          <Adder where="today" />
-        </Box>
+        <Adder where="today" />
         <TodayView />
       </VStack>
     </Box>
@@ -29,17 +27,15 @@ const TodayView = () => {
   return (
     <div id="Today">
       <Accordion allowToggle ref={parent as any} reduceMotion>
-        {today.map((task, index) => {
-          return (
-            <Task
-              where="today"
-              tabIndex={index}
-              mb={2}
-              key={task.id}
-              task={task}
-            />
-          );
-        })}
+        {today.map((task, index) => (
+          <Task
+            where="today"
+            tabIndex={index}
+            mb={2}
+            key={task.id}
+            task={task}
+          />
+        ))}
       </Accordion>
       {hasDone && (
         <Button
