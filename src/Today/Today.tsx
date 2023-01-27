@@ -34,7 +34,7 @@ const TodayView = () => {
             <Task
               where="today"
               tabIndex={index}
-              mb={4}
+              mb={2}
               key={task.id}
               task={task}
             />

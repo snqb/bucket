@@ -52,7 +52,7 @@ const BucketView = () => {
         {state.bucket
           .filter((it: Thingy) => it.residence !== "graveyard")
           .map((task, index) => {
-            return <Task tabIndex={index} mb={4} key={task.id} task={task} />;
+            return <Task tabIndex={index} mb={2} key={task.id} task={task} />;
           })}
       </Accordion>
     </div>

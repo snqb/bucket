@@ -20,8 +20,6 @@ import { ResizableTextarea } from "./ResizableTextarea";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
-  hasShuffler?: boolean; // yup this sucks
-  onShuffleClick?: () => void;
   where?: "today" | "bucket";
 }
 
@@ -53,13 +51,7 @@ const gradientColors = [
   "#DF5737",
 ];
 
-const Task = ({
-  task,
-  hasShuffler = false,
-  where = "bucket",
-  onShuffleClick,
-  ...restItemProps
-}: Props) => {
+const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
   const state = useSyncedStore(store[where]);
   const thingy = state.find((it) => it.id === task.id);
 
@@ -99,25 +91,13 @@ const Task = ({
         return (
           <Box {...expandedProps} sx={{ transition: "all .1s linear" }}>
             {/* <Box position="relative">{task.title.emoji}</Box> */}
-            <AccordionButton p={0} fontWeight={500}>
+            <AccordionButton p={0} fontWeight={500} alignItems="baseline">
               <EmojiThing mr={2} isTilted={isExpanded}>
                 {task.title.emoji}
               </EmojiThing>
               <Text fontWeight={500} fontSize={isExpanded ? "2xl" : "medium"}>
                 {task.title.text}
               </Text>
-              {hasShuffler && (
-                <IconButton
-                  variant="ghost"
-                  ml="auto"
-                  aria-label={"🎲"}
-                  icon={<>🎲</>}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onShuffleClick?.();
-                  }}
-                />
-              )}
             </AccordionButton>
             <Slider
               focusThumbOnChange={false}
@@ -134,11 +114,12 @@ const Task = ({
                 bg={
                   isExpanded
                     ? `url(/wave3.png), var(--chakra-colors-gray-300)`
-                    : "gray.200"
+                    : "rgba(25, 25, 25, 0.4)"
                 }
-                height={`${isExpanded ? 15 : 3}px`}
+                height={`${isExpanded ? 15 : 4}px`}
                 backgroundSize="contain"
                 backgroundBlendMode="multiply"
+                mt={-1}
               >
                 <SliderFilledTrack
                   bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
