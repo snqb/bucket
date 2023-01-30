@@ -16,7 +16,6 @@ import Today from "./Today";
 import { useState, useEffect } from "react";
 
 function App() {
-  console.log("hey", localStorage.getItem("current-tab"));
   const [tab, setTab] = useState(
     Number(localStorage.getItem("current-tab")) ?? 0
   );
