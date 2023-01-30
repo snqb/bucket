@@ -12,7 +12,9 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
+import { useState } from "preact/hooks";
 
+import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { store, Thingy } from "../store";
 import { ResizableTextarea } from "./ResizableTextarea";
@@ -25,13 +27,7 @@ interface Props extends AccordionItemProps {
 const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
   const state = useSyncedStore(store[where]);
   const thingy = state.find((it) => it.id === task.id);
-
-  const onProgress = useDebouncedCallback((progress: number) => {
-    thingy!.progress = progress;
-    if (progress > 98) {
-      thingy!.residence = "graveyard";
-    }
-  }, 350);
+  const [progress, onProgress] = useProgress(thingy!);
 
   if (!thingy) {
     return null;
@@ -80,6 +76,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               aria-label={`progress of ${task.title.text}`}
               defaultValue={task.progress}
               onChange={onProgress}
+              value={progress}
               height="24px"
               pointerEvents={isExpanded ? "initial" : "none"}
               step={0.01}
@@ -136,6 +133,34 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
       }}
     </AccordionItem>
   );
+};
+
+const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
+  const [progress, setProgress] = useState(thingy.progress ?? 0);
+
+  const updateStoreProgress = useDebouncedCallback((progress: number) => {
+    thingy.progress = progress;
+    // 98 because why not
+    if (progress > 98) {
+      thingy!.residence = "graveyard";
+    }
+  }, 1000);
+
+  useEffect(
+    function updateLocalVariableFromRemote() {
+      if (thingy.progress) {
+        setProgress(thingy.progress);
+      }
+    },
+    [thingy.progress]
+  );
+
+  const onProgress = (value: number) => {
+    setProgress(value);
+    updateStoreProgress(value);
+  };
+
+  return [progress, onProgress];
 };
 
 export default Task;
