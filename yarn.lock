@@ -5524,7 +5524,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prop-types@npm:^15.6.2":
+"prop-types@npm:^15.6.2, prop-types@npm:^15.7.2":
   version: 15.8.1
   resolution: "prop-types@npm:15.8.1"
   dependencies:
@@ -5607,6 +5607,17 @@ __metadata:
   version: 16.13.1
   resolution: "react-is@npm:16.13.1"
   checksum: f7a19ac3496de32ca9ae12aa030f00f14a3d45374f1ceca0af707c831b2a6098ef0d6bdae51bd437b0a306d7f01d4677fcc8de7c0d331eb47ad0f46130e53c5f
+  languageName: node
+  linkType: hard
+
+"react-page-visibility@npm:^7.0.0":
+  version: 7.0.0
+  resolution: "react-page-visibility@npm:7.0.0"
+  dependencies:
+    prop-types: ^15.7.2
+  peerDependencies:
+    react: ^16.13.1 || ^17.0.0 || ^18.0.0
+  checksum: fa1dbdc34d2e35f8817181989d17e188cdce64142fa064068aa0f5f75d7f25566a4f4f5207061f9acaeea2c522748c1cde5b0c22dd613ddf8ca17b4c56a29a8b
   languageName: node
   linkType: hard
 
@@ -6007,6 +6018,7 @@ __metadata:
     preact-compat: ^3.19.0
     prettier: 2.7.1
     ramda: ^0.28.0
+    react-page-visibility: ^7.0.0
     react-textarea-autosize: ^8.3.4
     typescript: beta
     use-debounce: ^9.0.2

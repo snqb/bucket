@@ -14,8 +14,12 @@ import "@fontsource/lato";
 import ReloadPrompt from "./ReloadPrompt";
 import Today from "./Today";
 import { useState, useEffect } from "react";
+import { usePageVisibility } from "react-page-visibility";
+import { webrtcProvider } from "./store";
 
 function App() {
+  const isVisible = usePageVisibility();
+
   const [tab, setTab] = useState(
     Number(localStorage.getItem("current-tab")) ?? 0
   );
@@ -26,6 +30,10 @@ function App() {
     },
     [tab]
   );
+
+  useEffect(() => {
+    webrtcProvider?.connect();
+  }, [isVisible]);
 
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">

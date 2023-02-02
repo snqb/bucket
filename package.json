@@ -21,6 +21,7 @@
     "preact": "^10.11.3",
     "preact-compat": "^3.19.0",
     "ramda": "^0.28.0",
+    "react-page-visibility": "^7.0.0",
     "react-textarea-autosize": "^8.3.4",
     "use-debounce": "^9.0.2",
     "use-double-click": "^1.0.5",

@@ -10,13 +10,14 @@ export const store = syncedStore({
 const doc = getYjsDoc(store);
 const provider = new IndexeddbPersistence("bucket", doc);
 
+export let webrtcProvider: WebrtcProvider;
 const password = localStorage.getItem("password");
 if (password) {
-  const webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
+  webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
     password,
   });
 
-  console.log(webrtcProvider);
+  webrtcProvider.connect();
 }
 
 export type Thingy = {
