@@ -33,6 +33,7 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.4.0",
     "@types/ramda": "^0",
+    "@types/react-page-visibility": "^6.4.1",
     "@types/react-textarea-autosize": "^8",
     "@types/use-double-click": "^1.0.1",
     "prettier": "2.7.1",
