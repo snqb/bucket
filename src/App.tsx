@@ -36,6 +36,10 @@ function App() {
 
   useEffect(() => {
     webrtcProvider?.connect();
+
+    return () => {
+      webrtcProvider.disconnect();
+    };
   }, [isVisible]);
 
   useEffect(() => {
@@ -46,6 +50,10 @@ function App() {
     if (!connected) {
       webrtcProvider.connect();
     }
+
+    return () => {
+      webrtcProvider.disconnect();
+    };
   }, [webrtcProvider?.connected]);
 
   return (
