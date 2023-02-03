@@ -19,6 +19,9 @@ import { webrtcProvider } from "./store";
 
 function App() {
   const isVisible = usePageVisibility();
+  const [connected, setIsConnected] = useState(
+    webrtcProvider?.connected ?? false
+  );
 
   const [tab, setTab] = useState(
     Number(localStorage.getItem("current-tab")) ?? 0
@@ -35,14 +38,18 @@ function App() {
     webrtcProvider?.connect();
   }, [isVisible]);
 
+  useEffect(() => {
+    setIsConnected(webrtcProvider?.connected);
+  }, [webrtcProvider?.connected]);
+
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
-      <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
+      <Tabs px={0} variant="unstyled" index={tab} onChange={setTab}>
         <TabList>
-          <Tab>
+          <Tab _selected={{ color: "blue.500" }}>
             <Heading size="lg">🪣Bucket</Heading>
           </Tab>
-          <Tab>
+          <Tab _selected={{ color: "blue.500" }}>
             <Heading size="lg">☀️Today</Heading>
           </Tab>
           <IconButton
@@ -53,6 +60,8 @@ function App() {
             }}
             aria-label="sync"
             icon={<>🔄️</>}
+            variant="ghost"
+            filter={connected ? "grayscale(1)" : "initial"}
           />
         </TabList>
         <TabPanels>
