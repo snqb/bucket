@@ -39,7 +39,13 @@ function App() {
   }, [isVisible]);
 
   useEffect(() => {
-    setIsConnected(webrtcProvider?.connected);
+    if (!webrtcProvider) return;
+    const { connected } = webrtcProvider;
+    setIsConnected(connected);
+
+    if (!connected) {
+      webrtcProvider.connect();
+    }
   }, [webrtcProvider?.connected]);
 
   return (
