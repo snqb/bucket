@@ -11,7 +11,6 @@ const Today = () => {
   return (
     <Box position="relative" pt="2vh">
       <VStack align="stretch" gap={4}>
-        <Adder where="today" />
         <TodayView />
       </VStack>
     </Box>

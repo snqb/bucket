@@ -16,6 +16,8 @@ import Today from "./Today";
 import { useState, useEffect } from "react";
 import { usePageVisibility } from "react-page-visibility";
 import { webrtcProvider } from "./store";
+import Adder from "./Adder";
+import { SyncInput } from "./SyncInput";
 
 function App() {
   const [tab, setTab] = usePersistedTab();
@@ -23,34 +25,48 @@ function App() {
 
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
-      <Tabs px={0} variant="unstyled" index={tab} onChange={setTab}>
-        <TabList>
-          <Tab _selected={{ color: "blue.500" }}>
-            <Heading size="lg">🪣Bucket</Heading>
-          </Tab>
-          <Tab _selected={{ color: "blue.500" }}>
-            <Heading size="lg">☀️Today</Heading>
-          </Tab>
-          <IconButton
-            ml="auto"
-            alignSelf="center"
-            onClick={() => {
-              window.location.reload();
-            }}
-            aria-label="sync"
-            icon={<>🔄️</>}
-            variant="ghost"
-            filter={connected ? "grayscale(1)" : "initial"}
-          />
-        </TabList>
-        <TabPanels>
+      <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
+        <TabPanels pb={10} height="80vh">
           <TabPanel>
             <Bucket />
+            <SyncInput />
           </TabPanel>
           <TabPanel>
             <Today />
           </TabPanel>
         </TabPanels>
+        <TabList
+          position="fixed"
+          bottom="0"
+          h="25vh"
+          w="full"
+          bg="black"
+          px={5}
+          py={10}
+        >
+          <Flex w="full" direction="column" justify="space-between">
+            <Adder where={tab === 0 ? "bucket" : "today"} />
+            <Flex>
+              <Tab>
+                <Heading size="lg">🪣Bucket</Heading>
+              </Tab>
+              <Tab>
+                <Heading size="lg">☀️Today</Heading>
+              </Tab>
+              <IconButton
+                ml="auto"
+                alignSelf="center"
+                onClick={() => {
+                  window.location.reload();
+                }}
+                aria-label="sync"
+                icon={<>🔄️</>}
+                variant="ghost"
+                filter={connected ? "grayscale(1)" : "initial"}
+              />
+            </Flex>
+          </Flex>
+        </TabList>
       </Tabs>
       <ReloadPrompt />
     </Flex>
