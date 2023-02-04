@@ -56,7 +56,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     <InputGroup variant="outline" size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
-        id="adder"
+        id={`adder-${where}`}
         type="text"
         value={text}
         textTransform="lowercase"
