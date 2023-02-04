@@ -38,13 +38,13 @@ function App() {
         <TabList
           position="fixed"
           bottom="0"
-          h="25vh"
+          h="27vh"
           w="full"
           bg="black"
           px={5}
           py={10}
         >
-          <Flex w="full" direction="column" justify="space-between">
+          <Flex w="full" direction="column" justify="space-around">
             <Adder where={tab === 0 ? "bucket" : "today"} />
             <Flex>
               <Tab>
