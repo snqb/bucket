@@ -2,6 +2,7 @@ import {
   Flex,
   Heading,
   IconButton,
+  StyleProps,
   Tab,
   TabList,
   TabPanel,
@@ -19,6 +20,11 @@ import { webrtcProvider } from "./store";
 import Adder from "./Adder";
 import { SyncInput } from "./SyncInput";
 
+const panelStyles: StyleProps = {
+  h: "100%", // so that it fills the whole screen
+  overflowY: "auto", // tasks inside should be scrollable
+};
+
 function App() {
   const [tab, setTab] = usePersistedTab();
   const connected = useRtcConnectionShit();
@@ -27,10 +33,10 @@ function App() {
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
       <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
         <TabPanels pb={10} height="80vh">
-          <TabPanel>
+          <TabPanel {...panelStyles}>
             <Bucket />
           </TabPanel>
-          <TabPanel>
+          <TabPanel {...panelStyles}>
             <Today />
           </TabPanel>
           <TabPanel>

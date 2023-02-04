@@ -9,11 +9,9 @@ import { store } from "../store";
 
 const Today = () => {
   return (
-    <Box position="relative" pt="2vh">
-      <VStack align="stretch" gap={4}>
-        <TodayView />
-      </VStack>
-    </Box>
+    <VStack justify="flex-end" h="100%" align="stretch" gap={4} pt="2vh">
+      <TodayView />
+    </VStack>
   );
 };
 
@@ -24,7 +22,7 @@ const TodayView = () => {
   const hasDone = today.some((task) => task.progress === 100);
 
   return (
-    <div id="Today">
+    <>
       <Accordion allowToggle ref={parent as any} reduceMotion>
         {today.map((task, index) => (
           <Task
@@ -36,6 +34,7 @@ const TodayView = () => {
           />
         ))}
       </Accordion>
+
       {hasDone && (
         <Button
           w="full"
@@ -58,7 +57,7 @@ const TodayView = () => {
           🔪 Clear
         </Button>
       )}
-    </div>
+    </>
   );
 };
 
