@@ -25,6 +25,8 @@ const panelStyles: StyleProps = {
   overflowY: "auto", // tasks inside should be scrollable
 };
 
+localStorage.setItem("log", "y-webrtc");
+
 function App() {
   const [tab, setTab] = usePersistedTab();
   const connected = useRtcConnectionShit();
@@ -104,7 +106,10 @@ const useRtcConnectionShit = () => {
     webrtcProvider?.connected ?? false
   );
 
+  console.log(connected);
+
   useEffect(() => {
+    console.log("visijdfsijd");
     webrtcProvider?.connect();
   }, [isVisible]);
 
@@ -114,6 +119,7 @@ const useRtcConnectionShit = () => {
     setIsConnected(connected);
 
     if (!connected) {
+      console.log("asdjasklj");
       webrtcProvider.connect();
     }
 
@@ -123,5 +129,5 @@ const useRtcConnectionShit = () => {
     };
   }, [webrtcProvider?.connected]);
 
-  return isVisible;
+  return connected;
 };
