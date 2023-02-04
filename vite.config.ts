@@ -37,7 +37,7 @@ export default defineConfig({
       manifest: {
         name: "Bucket",
         short_name: "Bucket",
-        description: "Bucket it!",
+        description: "words words",
         theme_color: "#000000",
         icons: [
           {

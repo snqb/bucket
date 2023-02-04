@@ -18,43 +18,8 @@ import { usePageVisibility } from "react-page-visibility";
 import { webrtcProvider } from "./store";
 
 function App() {
-  const isVisible = usePageVisibility();
-  const [connected, setIsConnected] = useState(
-    webrtcProvider?.connected ?? false
-  );
-
-  const [tab, setTab] = useState(
-    Number(localStorage.getItem("current-tab")) ?? 0
-  );
-
-  useEffect(
-    function persistCurrentTab() {
-      localStorage.setItem("current-tab", tab.toString());
-    },
-    [tab]
-  );
-
-  useEffect(() => {
-    webrtcProvider?.connect();
-
-    return () => {
-      webrtcProvider.disconnect();
-    };
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!webrtcProvider) return;
-    const { connected } = webrtcProvider;
-    setIsConnected(connected);
-
-    if (!connected) {
-      webrtcProvider.connect();
-    }
-
-    return () => {
-      webrtcProvider.disconnect();
-    };
-  }, [webrtcProvider?.connected]);
+  const [tab, setTab] = usePersistedTab();
+  const connected = useRtcConnectionShit();
 
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
@@ -93,3 +58,43 @@ function App() {
 }
 
 export default App;
+
+const usePersistedTab = () => {
+  const tabState = useState(Number(localStorage.getItem("current-tab")) ?? 0);
+
+  const [tab, setTab] = tabState;
+
+  useEffect(() => {
+    localStorage.setItem("current-tab", tab.toString());
+  }, [tab]);
+
+  return tabState;
+};
+
+const useRtcConnectionShit = () => {
+  const isVisible = usePageVisibility();
+  const [connected, setIsConnected] = useState(
+    webrtcProvider?.connected ?? false
+  );
+
+  useEffect(() => {
+    webrtcProvider?.connect();
+  }, [isVisible]);
+
+  useEffect(() => {
+    if (!webrtcProvider) return;
+    const { connected } = webrtcProvider;
+    setIsConnected(connected);
+
+    if (!connected) {
+      webrtcProvider.connect();
+    }
+
+    return () => {
+      console.log("huemoe");
+      webrtcProvider.disconnect();
+    };
+  }, [webrtcProvider?.connected]);
+
+  return isVisible;
+};
