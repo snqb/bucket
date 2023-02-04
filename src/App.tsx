@@ -29,10 +29,12 @@ function App() {
         <TabPanels pb={10} height="80vh">
           <TabPanel>
             <Bucket />
-            <SyncInput />
           </TabPanel>
           <TabPanel>
             <Today />
+          </TabPanel>
+          <TabPanel>
+            <SyncInput />
           </TabPanel>
         </TabPanels>
         <TabList
@@ -48,10 +50,13 @@ function App() {
             <Adder where={tab === 0 ? "bucket" : "today"} />
             <Flex>
               <Tab>
-                <Heading size="lg">🪣Bucket</Heading>
+                <Heading size="md">🪣Bucket</Heading>
               </Tab>
               <Tab>
-                <Heading size="lg">☀️Today</Heading>
+                <Heading size="md">☀️Today</Heading>
+              </Tab>
+              <Tab>
+                <Heading size="md">⚙️</Heading>
               </Tab>
               <IconButton
                 ml="auto"
