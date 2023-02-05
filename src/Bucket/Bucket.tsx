@@ -19,7 +19,13 @@ const BucketView = () => {
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <Accordion allowToggle ref={parent as any} reduceMotion overflowY="auto">
+    <Accordion
+      allowToggle
+      ref={parent as any}
+      reduceMotion
+      overflowY="auto"
+      overflowX="hidden"
+    >
       {state.bucket
         .filter((it: Thingy) => it.residence !== "graveyard")
         .map((task, index) => {

@@ -23,7 +23,13 @@ const TodayView = () => {
 
   return (
     <>
-      <Accordion allowToggle ref={parent as any} reduceMotion>
+      <Accordion
+        allowToggle
+        ref={parent as any}
+        overflowY="auto"
+        overflowX="hidden"
+        reduceMotion
+      >
         {today.map((task, index) => (
           <Task
             where="today"
