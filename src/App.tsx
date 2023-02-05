@@ -22,7 +22,7 @@ import { SyncInput } from "./SyncInput";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen
-  overflowY: "auto", // tasks inside should be scrollable
+  // overflowY: "auto", // tasks inside should be scrollable
 };
 
 localStorage.setItem("log", "y-webrtc");
@@ -106,10 +106,8 @@ const useRtcConnectionShit = () => {
     webrtcProvider?.connected ?? false
   );
 
-  console.log(connected);
 
   useEffect(() => {
-    console.log("visijdfsijd");
     webrtcProvider?.connect();
   }, [isVisible]);
 
@@ -119,12 +117,10 @@ const useRtcConnectionShit = () => {
     setIsConnected(connected);
 
     if (!connected) {
-      console.log("asdjasklj");
       webrtcProvider.connect();
     }
 
     return () => {
-      console.log("huemoe");
       webrtcProvider.disconnect();
     };
   }, [webrtcProvider?.connected]);

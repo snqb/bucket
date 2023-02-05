@@ -28,6 +28,7 @@ const BucketView = () => {
       allowToggle
       ref={parent as any}
       reduceMotion
+      overflowY="auto"
     >
       {state.bucket
         .filter((it: Thingy) => it.residence !== "graveyard")
