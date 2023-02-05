@@ -9,7 +9,7 @@ import { store } from "../store";
 
 const Today = () => {
   return (
-    <VStack justify="flex-end" h="100%" align="stretch" gap={4} pt="2vh">
+    <VStack justify="flex-end" h="100%" align="stretch" gap={4} py="3vh">
       <TodayView />
     </VStack>
   );
@@ -39,6 +39,8 @@ const TodayView = () => {
         <Button
           w="full"
           colorScheme="red"
+          variant="outline"
+          h="50px"
           onClick={() => {
             const cleanup = () => {
               const doneIndex = today.findIndex((it) => it.progress === 100);

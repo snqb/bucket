@@ -8,7 +8,7 @@ import { store, Thingy } from "../store";
 
 const Bucket = () => {
   return (
-    <VStack h="100%" justify="flex-end" align="stretch" gap={4} pt="2vh">
+    <VStack h="100%" justify="flex-end" align="stretch" gap={4} py="3vh">
       <BucketView />
 
       {/* <Flex mt="500px">
