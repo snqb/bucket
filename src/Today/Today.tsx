@@ -9,7 +9,7 @@ import { store } from "../store";
 
 const Today = () => {
   return (
-    <VStack justify="flex-end" h="100%" align="stretch" gap={4} py="3vh">
+    <VStack h="100%" align="stretch" gap={4} py="3vh">
       <TodayView />
     </VStack>
   );
@@ -23,7 +23,7 @@ const TodayView = () => {
 
   return (
     <>
-      <Accordion allowToggle ref={parent as any} reduceMotion overflowY="auto">
+      <Accordion allowToggle ref={parent as any} reduceMotion>
         {today.map((task, index) => (
           <Task
             where="today"
