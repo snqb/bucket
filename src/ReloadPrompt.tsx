@@ -38,7 +38,7 @@ function ReloadPrompt() {
     setNeedRefresh(false);
   };
 
-  return offlineReady || needRefresh ? (
+  return needRefresh ? (
     <Flex
       bg={
         "linear-gradient(144deg, #c95fbb 25%, #2e2a12 25%, #2e2a12 50%, #c95fbb 50%, #c95fbb 75%, #2e2a12 75%, #2e2a12 100%)"
@@ -65,9 +65,6 @@ function ReloadPrompt() {
       >
         <Text fontSize="2rem">🪣</Text>
 
-        <Text fontSize="1.1rem">
-          {offlineReady ? "Works offline" : "There's an "}
-        </Text>
         {needRefresh && (
           <Button variant="outline" onClick={() => updateServiceWorker(true)}>
             Update
