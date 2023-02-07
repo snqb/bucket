@@ -76,16 +76,3 @@ function ReloadPrompt() {
 }
 
 export default ReloadPrompt;
-
-const gradient = `linear-gradient(to right, 
-  #00C6FB, 
-  #3DBBFF, 
-  #6CADFF, 
-  #979DFC, 
-  #BA8BEA,
-  #C783DE,
-  #D778CF,
-  #E965AD,
-  #F15787,
-  #ED525F,
-  #DF5737)`;
