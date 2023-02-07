@@ -19,7 +19,7 @@ export interface Props extends InputGroupProps {
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
   const { where = "bucket" } = props;
-  const tasks = useSyncedStore(store[where]);
+  const tasks = useSyncedStore(store);
   const [emoji, generateEmoji, clearEmoji] = useInputEmoji();
   const [text, setText] = useState("");
 
@@ -43,7 +43,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     };
 
     try {
-      tasks.push(task);
+      tasks[where].push(task);
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {

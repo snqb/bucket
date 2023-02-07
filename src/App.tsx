@@ -30,6 +30,7 @@ localStorage.setItem("log", "y-webrtc");
 function App() {
   const [tab, setTab] = usePersistedTab();
   const connected = useRtcConnectionShit();
+  console.log(tab);
 
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
@@ -105,7 +106,6 @@ const useRtcConnectionShit = () => {
   const [connected, setIsConnected] = useState(
     webrtcProvider?.connected ?? false
   );
-
 
   useEffect(() => {
     webrtcProvider?.connect();
