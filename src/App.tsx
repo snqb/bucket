@@ -12,13 +12,13 @@ import {
 import Bucket from "./Bucket";
 
 import "@fontsource/lato";
-import ReloadPrompt from "./ReloadPrompt";
-import Today from "./Today";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { usePageVisibility } from "react-page-visibility";
-import { webrtcProvider } from "./store";
 import Adder from "./Adder";
+import ReloadPrompt from "./ReloadPrompt";
+import { webrtcProvider } from "./store";
 import { SyncInput } from "./SyncInput";
+import Today from "./Today";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen

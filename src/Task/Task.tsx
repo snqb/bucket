@@ -5,10 +5,6 @@ import {
   AccordionPanel,
   Box,
   BoxProps,
-  Slider,
-  SliderFilledTrack,
-  SliderThumb,
-  SliderTrack,
   Text,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
@@ -17,7 +13,8 @@ import { useState } from "preact/hooks";
 import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { store, Thingy } from "../store";
-import { ResizableTextarea } from "./ResizableTextarea";
+import { Progress } from "./+progress";
+import { ResizableTextarea } from "./+resizable-textarea";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
@@ -70,50 +67,15 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
                 {task.title.text}
               </Text>
             </AccordionButton>
-            <Slider
-              focusThumbOnChange={false}
-              mt={isExpanded ? 6 : 0}
-              aria-label={`progress of ${task.title.text}`}
+            <Progress
+              aria-label={`progress of ${thingy.title.text}`}
+              isExpanded={isExpanded}
               defaultValue={task.progress}
               onChange={onProgress}
               value={progress}
-              height="24px"
-              pointerEvents={isExpanded ? "initial" : "none"}
+              height={where === "bucket" ? "4px" : "16px"}
               step={0.01}
-            >
-              <SliderTrack
-                // css={isExpanded ? wavyMask : ""}
-                bg={
-                  isExpanded
-                    ? `url(/wave3.png), var(--chakra-colors-gray-300)`
-                    : "rgba(25, 25, 25, 0.5)"
-                }
-                height={`${isExpanded ? 15 : 4}px`}
-                backgroundSize="contain"
-                backgroundBlendMode="multiply"
-                mt={-1}
-              >
-                <SliderFilledTrack
-                  bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
-                  filter={isExpanded ? "initial" : "saturate(0.5)"}
-                  backgroundSize="contain"
-                  backgroundBlendMode="multiply"
-                  transition="all .5s ease-in"
-                />
-              </SliderTrack>
-              {isExpanded && (
-                <SliderThumb
-                  bg="rgba(240, 240, 240, 0.4)"
-                  boxSize={8}
-                  ml={-3}
-                  mt={-2}
-                >
-                  <Box as="span" transform="scaleX(-1)">
-                    🏊‍♀️
-                  </Box>
-                </SliderThumb>
-              )}
-            </Slider>
+            />
             <AccordionPanel px={0} pt={1} py={3}>
               <ResizableTextarea
                 p={0}
@@ -180,20 +142,6 @@ const EmojiThing = ({
     </Box>
   );
 };
-
-const gradient = `linear-gradient(to right, 
-  #00C6FB, 
-  #3DBBFF, 
-  #6CADFF, 
-  #979DFC, 
-  #BA8BEA,
-  #C783DE,
-  #D778CF,
-  #E965AD,
-  #F15787,
-  #ED525F,
-  #DF5737
-  )`;
 
 const gradientColors = [
   "#00C6FB",
