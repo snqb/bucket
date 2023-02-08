@@ -1,6 +1,5 @@
-import { Accordion, Box, Button, VStack } from "@chakra-ui/react";
+import { Accordion, Button, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import Adder from "../Adder";
 import Task from "../Task";
 
 import { useSyncedStore } from "@syncedstore/react";
@@ -9,7 +8,7 @@ import { store } from "../store";
 
 const Today = () => {
   return (
-    <VStack h="100%" align="stretch" gap={4} py="3vh">
+    <VStack h="100%" align="stretch" gap={4} pb="3vh">
       <TodayView />
     </VStack>
   );

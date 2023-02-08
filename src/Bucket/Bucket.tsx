@@ -5,10 +5,11 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import { store, Thingy } from "../store";
+import { BucketTask } from "../Task/BucketTask";
 
 const Bucket = () => {
   return (
-    <VStack h="100%" align="stretch" gap={4} py="3vh">
+    <VStack h="100%" align="stretch" gap={4} pb="3vh">
       <BucketView />
     </VStack>
   );
@@ -29,7 +30,9 @@ const BucketView = () => {
       {state.bucket
         .filter((it: Thingy) => it.residence !== "graveyard")
         .map((task, index) => {
-          return <Task tabIndex={index} mb={2} key={task.id} task={task} />;
+          return (
+            <BucketTask tabIndex={index} mb={4} key={task.id} task={task} />
+          );
         })}
     </Accordion>
   );

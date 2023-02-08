@@ -23,6 +23,7 @@ export const Progress = forwardRef<Props, "div">((props: Props, ref) => {
       {...props}
     >
       <SliderTrack
+        minHeight={isExpanded ? "16px" : "initial"}
         bg={
           isExpanded
             ? `url(/wave3.png), var(--chakra-colors-gray-300)`
@@ -30,9 +31,10 @@ export const Progress = forwardRef<Props, "div">((props: Props, ref) => {
         }
         backgroundSize="contain"
         backgroundBlendMode="multiply"
-        mt={-2}
+        mt={isExpanded ? 0 : -2}
       >
         <SliderFilledTrack
+          minHeight={isExpanded ? "16px" : "initial"}
           bg={isExpanded ? `url(/wave3.png), ${gradient}` : gradient}
           filter={isExpanded ? "initial" : "saturate(0.5)"}
           backgroundSize="contain"
@@ -41,7 +43,7 @@ export const Progress = forwardRef<Props, "div">((props: Props, ref) => {
         />
       </SliderTrack>
       {isExpanded && (
-        <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={8} ml={-3} mt={-2}>
+        <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={6} ml={-3} mt={-4}>
           <Box as="span" transform="scaleX(-1)">
             🏊‍♀️
           </Box>

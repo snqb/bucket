@@ -5,7 +5,9 @@ import { VitePWA } from "vite-plugin-pwa";
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    preact(),
+    preact({
+      include: "**/*.tsx",
+    }),
     VitePWA({
       strategies: "injectManifest",
       srcDir: "src",

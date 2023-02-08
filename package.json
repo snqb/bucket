@@ -8,7 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@chakra-ui/react": "^2.2.1",
+    "@chakra-ui/react": "^2.4.9",
     "@emotion/react": "^11",
     "@emotion/styled": "^11",
     "@fontsource/lato": "^4.5.8",
@@ -23,6 +23,7 @@
     "ramda": "^0.28.0",
     "react-page-visibility": "^7.0.0",
     "react-textarea-autosize": "^8.3.4",
+    "scroll-into-view-if-needed": "^3.0.4",
     "use-debounce": "^9.0.2",
     "use-double-click": "^1.0.5",
     "use-long-press": "^2.0.2",

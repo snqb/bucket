@@ -18,11 +18,10 @@ import { ResizableTextarea } from "./+resizable-textarea";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
-  where?: "today" | "bucket";
 }
 
-const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
-  const state = useSyncedStore(store[where]);
+export const BucketTask = ({ task, ...restItemProps }: Props) => {
+  const state = useSyncedStore(store.bucket);
   const thingy = state.find((it) => it.id === task.id);
   const [progress, onProgress] = useProgress(thingy!);
 
@@ -50,6 +49,7 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               px: 4,
               background: whichColor + "40",
               mb: 6,
+              h: "50vh",
             }
           : {};
 
@@ -73,14 +73,11 @@ const Task = ({ task, where = "bucket", ...restItemProps }: Props) => {
               defaultValue={task.progress}
               onChange={onProgress}
               value={progress}
-              height={where === "bucket" ? "4px" : "16px"}
               step={0.01}
             />
-
             <AccordionPanel px={0} pt={1} py={3}>
               <ResizableTextarea
                 isExpanded={isExpanded}
-                p={0}
                 color="#bababa"
                 variant="outline"
                 defaultValue={task.description}
@@ -126,8 +123,6 @@ const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
 
   return [progress, onProgress];
 };
-
-export default Task;
 
 const EmojiThing = ({
   children,
