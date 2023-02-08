@@ -47,7 +47,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       </Text>
       <Progress
         isExpanded
-        filter={`saturate(${(progress + 20) / 100})`}
+        filter={`saturate(${(progress + 30) / 100})`}
         mt={1}
         aria-label={`progress of ${thingy.title.text}`}
         defaultValue={task.progress}
@@ -55,7 +55,6 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
         value={progress}
         height="16px"
         step={0.01}
-        
       />
     </Flex>
   );
