@@ -4059,6 +4059,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"compute-scroll-into-view@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "compute-scroll-into-view@npm:2.0.4"
+  checksum: f3d1db9276c16af42155b572750514939cd0ab0a0f46498906f6811c5b654c5ff2b3f9bfd65958e57439e000a5e1ae092eb96b9e153d194a73e52ffd2380550c
+  languageName: node
+  linkType: hard
+
 "concat-map@npm:0.0.1":
   version: 0.0.1
   resolution: "concat-map@npm:0.0.1"
@@ -6277,6 +6284,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"scroll-into-view-if-needed@npm:^3.0.4":
+  version: 3.0.4
+  resolution: "scroll-into-view-if-needed@npm:3.0.4"
+  dependencies:
+    compute-scroll-into-view: ^2.0.4
+  checksum: 613fef3d404c1122f5505f3d2d4198ace569fa37a6e1a19d4a17a9baad09a541bb4753c479a2d205f91921a29e8c0fe27f2e8b217e318f28d018cd61aa8b5dfb
+  languageName: node
+  linkType: hard
+
 "semver@npm:7.0.0":
   version: 7.0.0
   resolution: "semver@npm:7.0.0"
@@ -6389,7 +6405,8 @@ __metadata:
     ramda: ^0.28.0
     react-page-visibility: ^7.0.0
     react-textarea-autosize: ^8.3.4
-    typescript: beta
+    scroll-into-view-if-needed: ^3.0.4
+    typescript: ^4.9.5
     use-debounce: ^9.0.2
     use-double-click: ^1.0.5
     use-long-press: ^2.0.2
@@ -6732,23 +6749,23 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:beta":
-  version: 4.9.1-beta
-  resolution: "typescript@npm:4.9.1-beta"
+"typescript@npm:^4.9.5":
+  version: 4.9.5
+  resolution: "typescript@npm:4.9.5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: db7be9894e8809c3ddea07eb41730c6211929f4f9f388a148354b9ce5f872aea3a86bc20a1cf6277dae7afddc813520e268f5096f6e5befaac705bb8a97d61ea
+  checksum: ee000bc26848147ad423b581bd250075662a354d84f0e06eb76d3b892328d8d4440b7487b5a83e851b12b255f55d71835b008a66cbf8f255a11e4400159237db
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@beta#~builtin<compat/typescript>":
-  version: 4.9.1-beta
-  resolution: "typescript@patch:typescript@npm%3A4.9.1-beta#~builtin<compat/typescript>::version=4.9.1-beta&hash=7ad353"
+"typescript@patch:typescript@^4.9.5#~builtin<compat/typescript>":
+  version: 4.9.5
+  resolution: "typescript@patch:typescript@npm%3A4.9.5#~builtin<compat/typescript>::version=4.9.5&hash=7ad353"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 544ce5932a5b0cf05bd07411eba868160f3340a66752003540f80898b3354fe324c169d7b8ea98ed784d099926f590571e177fa45f9134622a4c9b489d468dd5
+  checksum: 2eee5c37cad4390385db5db5a8e81470e42e8f1401b0358d7390095d6f681b410f2c4a0c496c6ff9ebd775423c7785cdace7bcdad76c7bee283df3d9718c0f20
   languageName: node
   linkType: hard
 

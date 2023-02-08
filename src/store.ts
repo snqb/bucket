@@ -15,10 +15,6 @@ const password = localStorage.getItem("password");
 if (password) {
   webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
     password,
-    signaling: [
-      "wss://y-webrtc-signaling-eu.herokuapp.com",
-      "wss://y-webrtc-signaling-us.herokuapp.com",
-    ],
   });
 
   webrtcProvider.connect();

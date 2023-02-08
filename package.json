@@ -38,7 +38,7 @@
     "@types/react-textarea-autosize": "^8",
     "@types/use-double-click": "^1.0.1",
     "prettier": "2.7.1",
-    "typescript": "beta",
+    "typescript": "^4.9.5",
     "vite": "^4.1.1",
     "vite-plugin-pwa": "^0.14.2",
     "workbox-build": "^6.5.3",
