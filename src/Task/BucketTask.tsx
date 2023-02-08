@@ -133,6 +133,7 @@ const EmojiThing = ({
     <Box
       as="span"
       transform={isTilted ? "rotate(45deg)" : "initial"}
+      fontSize="xs"
       {...props}
     >
       {children}
