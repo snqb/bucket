@@ -22,7 +22,7 @@ const TodayView = () => {
 
   return (
     <>
-      <List ref={parent as any} spacing={8} overflowY="auto" overflowX="hidden">
+      <List ref={parent as any} spacing={3} overflowY="auto" overflowX="hidden">
         {today.map((task, index) => (
           <Task tabIndex={index} mb={4} key={task.id} task={task} />
         ))}

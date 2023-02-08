@@ -35,7 +35,7 @@ function App() {
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
       <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
-        <TabPanels pt={10} height="80vh">
+        <TabPanels height="80vh">
           <TabPanel {...panelStyles}>
             <Bucket />
           </TabPanel>
@@ -52,7 +52,7 @@ function App() {
           h="27vh"
           w="full"
           bg="black"
-          px={5}
+          pb={5}
           py={10}
         >
           <Flex w="full" direction="column" justify="space-around">

@@ -44,7 +44,7 @@ export const Progress = (props: Props) => {
   return (
     <Slider focusThumbOnChange={false} {...partialProps} {...restProps}>
       <SliderTrack
-        minHeight="1rem"
+        minHeight=".75rem"
         bg={`url(/wave3.png), var(--chakra-colors-gray-300)`}
         backgroundSize="contain"
         backgroundBlendMode="multiply"
@@ -59,7 +59,7 @@ export const Progress = (props: Props) => {
           transition="all .5s ease-in"
         />
       </SliderTrack>
-      <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={6} ml={-3} mt={-2}>
+      <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={5} ml={-3} mt={-2}>
         <Box as="span" transform="scaleX(-1)">
           🏊‍♀️
         </Box>

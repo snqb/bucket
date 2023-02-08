@@ -39,7 +39,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       isFocusable={false}
       {...restItemProps}
     >
-      <Text p={0} mb={1} fontWeight={500} alignItems="baseline">
+      <Text p={0} mb={0} fontWeight={500} alignItems="baseline">
         <EmojiThing mr={2}>{task.title.emoji}</EmojiThing>
         <Text align="left" display="inline" fontWeight={500}>
           {task.title.text}
