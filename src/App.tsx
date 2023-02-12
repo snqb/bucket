@@ -56,7 +56,7 @@ function App() {
           py={10}
         >
           <Flex w="full" direction="column" justify="space-around">
-            {tab < 2 && <Adder where={tab === 0 ? "bucket" : "today"} />}
+            {tab === 0 && <Adder where="bucket" />}
 
             <Flex>
               <Tab>
