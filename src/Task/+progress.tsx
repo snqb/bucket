@@ -65,7 +65,7 @@ export const Progress = (props: Props) => {
           }}
           filter="initial"
           backgroundBlendMode="multiply"
-          transition="all .5s ease-in"
+          transition="all .3s ease-out"
         />
       </SliderTrack>
       <SliderThumb bg="rgba(240, 240, 240, 0.1)" boxSize={8} ml={-3} mt={-2}>
