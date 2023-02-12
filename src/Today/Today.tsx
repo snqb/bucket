@@ -25,6 +25,7 @@ const TodayView = () => {
         gap={5}
         direction="column"
         pb="20vmin"
+        justify="end"
       >
         {hasDone && (
           <Button
