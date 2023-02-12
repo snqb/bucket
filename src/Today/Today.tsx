@@ -28,6 +28,9 @@ const TodayView = () => {
       >
         {hasDone && (
           <Button
+            position="fixed"
+            top={5}
+            right={5}
             w="fit-content"
             colorScheme="red"
             variant="ghost"
