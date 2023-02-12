@@ -29,35 +29,36 @@ const TodayView = () => {
         overflowY="auto"
         overflowX="hidden"
       >
+        {hasDone && (
+          <Button
+            w="fit-content"
+            colorScheme="red"
+            variant="ghost"
+            ml="auto"
+            fontSize="x-large"
+            h="50px"
+            onClick={() => {
+              const cleanup = () => {
+                const doneIndex = today.findIndex((it) => it.progress === 100);
+                if (doneIndex < 0) {
+                  return;
+                }
+
+                // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
+                today.splice(doneIndex, 1);
+                cleanup();
+              };
+
+              cleanup();
+            }}
+          >
+            🗑️
+          </Button>
+        )}
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
       </Flex>
-
-      {hasDone && (
-        <Button
-          w="full"
-          colorScheme="red"
-          variant="outline"
-          h="50px"
-          onClick={() => {
-            const cleanup = () => {
-              const doneIndex = today.findIndex((it) => it.progress === 100);
-              if (doneIndex < 0) {
-                return;
-              }
-
-              // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
-              today.splice(doneIndex, 1);
-              cleanup();
-            };
-
-            cleanup();
-          }}
-        >
-          🔪 Clear
-        </Button>
-      )}
     </>
   );
 };
