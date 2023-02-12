@@ -22,7 +22,7 @@ import Today from "./Today";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen
-  // overflowY: "auto", // tasks inside should be scrollable
+  overflowY: "auto", // tasks inside should be scrollable
 };
 
 localStorage.setItem("log", "y-webrtc");

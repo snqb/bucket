@@ -7,11 +7,7 @@ import { useSyncedStore } from "@syncedstore/react";
 import { store } from "../store";
 
 const Today = () => {
-  return (
-    <VStack h="100%" align="stretch" pb="3vh">
-      <TodayView />
-    </VStack>
-  );
+  return <TodayView />;
 };
 
 const TodayView = () => {
@@ -23,11 +19,12 @@ const TodayView = () => {
   return (
     <>
       <Flex
+        h="100%"
+        mt="20vh"
         ref={parent as any}
         gap={5}
         direction="column"
-        overflowY="auto"
-        overflowX="hidden"
+        pb="20vmin"
       >
         {hasDone && (
           <Button

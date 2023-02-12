@@ -46,6 +46,7 @@ export const Progress = (props: Props) => {
     <Slider focusThumbOnChange={false} {...partialProps} {...restProps}>
       <SliderTrack
         minHeight=".75rem"
+        h="1vmin"
         sx={{
           maskImage: `url(/line2.svg)`,
           maskSize: "cover",
@@ -56,6 +57,7 @@ export const Progress = (props: Props) => {
       >
         <SliderFilledTrack
           minHeight="100%"
+          h="1vmin"
           sx={{
             maskImage: `url(/line2.svg)`,
             maskSize: "cover",
@@ -66,7 +68,7 @@ export const Progress = (props: Props) => {
           transition="all .5s ease-in"
         />
       </SliderTrack>
-      <SliderThumb bg="rgba(240, 240, 240, 0.2)" boxSize={8} ml={-3} mt={-2}>
+      <SliderThumb bg="rgba(240, 240, 240, 0.1)" boxSize={8} ml={-3} mt={-2}>
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>
