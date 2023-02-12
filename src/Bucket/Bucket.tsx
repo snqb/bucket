@@ -30,7 +30,7 @@ const BucketView = () => {
         .filter((it: Thingy) => it.residence !== "graveyard")
         .map((task, index) => {
           return (
-            <BucketTask tabIndex={index} mb={4} key={task.id} task={task} />
+            <BucketTask tabIndex={index} mb={1} key={task.id} task={task} />
           );
         })}
     </Accordion>
