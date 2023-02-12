@@ -110,7 +110,7 @@ const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
 
   useEffect(
     function updateLocalVariableFromRemote() {
-      if (thingy.progress) {
+      if (thingy.progress && thingy.progress !== progress) {
         setProgress(thingy.progress);
       }
     },

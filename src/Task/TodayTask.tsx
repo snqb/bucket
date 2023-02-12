@@ -18,8 +18,7 @@ interface Props extends AccordionItemProps {
 }
 
 const TodayTask = ({ task, ...restItemProps }: Props) => {
-  const state = useSyncedStore(store.today);
-  const thingy = state.find((it) => it.id === task.id);
+  const thingy = useSyncedStore(store.today.find((it) => it.id === task.id)!);
   const [progress, onProgress] = useProgress(thingy!);
 
   if (!thingy) {
