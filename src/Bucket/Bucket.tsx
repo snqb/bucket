@@ -22,7 +22,6 @@ const BucketView = () => {
   return (
     <Accordion
       allowToggle
-      ref={parent as any}
       reduceMotion
       overflowY="auto"
       overflowX="hidden"

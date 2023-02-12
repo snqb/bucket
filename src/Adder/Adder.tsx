@@ -38,7 +38,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         emoji,
       },
       createdAt: new Date(),
-      progress: 1,
+      progress: 5,
       residence: "default",
     };
 

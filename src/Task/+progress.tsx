@@ -9,10 +9,11 @@ import {
 
 interface Props extends SliderProps {
   isExpanded: boolean;
+  emoji?: string;
 }
 
 export const Progress = (props: Props) => {
-  const { isExpanded, ...restProps } = props;
+  const { isExpanded, emoji = "🏊‍♀️", ...restProps } = props;
 
   const partialProps: any = {
     mt: isExpanded ? 6 : 0,
@@ -45,23 +46,29 @@ export const Progress = (props: Props) => {
     <Slider focusThumbOnChange={false} {...partialProps} {...restProps}>
       <SliderTrack
         minHeight=".75rem"
-        bg={`url(/wave3.png), var(--chakra-colors-gray-300)`}
-        backgroundSize="contain"
+        sx={{
+          maskImage: `url(/line2.svg)`,
+          maskSize: "cover",
+          // bg: '#0074ba88 ',
+        }}
         backgroundBlendMode="multiply"
         mt={0}
       >
         <SliderFilledTrack
           minHeight="100%"
-          bg={`url(/wave3.png), ${gradient}`}
+          sx={{
+            maskImage: `url(/line2.svg)`,
+            maskSize: "cover",
+            bg: gradient,
+          }}
           filter="initial"
-          backgroundSize="contain"
           backgroundBlendMode="multiply"
           transition="all .5s ease-in"
         />
       </SliderTrack>
       <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={5} ml={-3} mt={-2}>
         <Box as="span" transform="scaleX(-1)">
-          🏊‍♀️
+          {emoji}
         </Box>
       </SliderThumb>
     </Slider>

@@ -37,6 +37,8 @@
     "@types/react-page-visibility": "^6.4.1",
     "@types/react-textarea-autosize": "^8",
     "@types/use-double-click": "^1.0.1",
+    "autoprefixer": "latest",
+    "postcss": "latest",
     "prettier": "2.7.1",
     "typescript": "^4.9.5",
     "vite": "^4.1.1",

@@ -49,7 +49,7 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
               px: 4,
               background: whichColor + "40",
               mb: 6,
-              h: "50vh",
+              h: "70vh",
             }
           : {};
 

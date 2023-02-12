@@ -1,4 +1,4 @@
-import { Accordion, Button, List, VStack } from "@chakra-ui/react";
+import { Accordion, Button, Flex, List, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Task from "../Task";
 
@@ -22,11 +22,17 @@ const TodayView = () => {
 
   return (
     <>
-      <List ref={parent as any} spacing={3} overflowY="auto" overflowX="hidden">
+      <Flex
+        ref={parent as any}
+        gap={5}
+        direction="column"
+        overflowY="auto"
+        overflowX="hidden"
+      >
         {today.map((task, index) => (
-          <Task tabIndex={index} mb={4} key={task.id} task={task} />
+          <Task tabIndex={index} key={task.id} task={task} />
         ))}
-      </List>
+      </Flex>
 
       {hasDone && (
         <Button
