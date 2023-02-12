@@ -53,7 +53,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup size="md" ref={ref} {...props}>
+    <InputGroup variant="outline" size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
         id={`adder-${where}`}
@@ -61,6 +61,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         value={text}
         textTransform="lowercase"
         placeholder="write it down"
+        variant="outline"
         onChange={handleChange}
         onInput={generateEmoji}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}

@@ -5,7 +5,6 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import { store } from "../store";
-import Adder from "../Adder";
 
 const Today = () => {
   return <TodayView />;
@@ -19,7 +18,14 @@ const TodayView = () => {
 
   return (
     <>
-      <Flex h="100%" ref={parent as any} gap={5} direction="column" pb="20vmin">
+      <Flex
+        h="100%"
+        mt="20vh"
+        ref={parent as any}
+        gap={5}
+        direction="column"
+        pb="20vmin"
+      >
         {hasDone && (
           <Button
             w="fit-content"
@@ -49,7 +55,6 @@ const TodayView = () => {
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
-        <Adder transform="scale(1.1)" where="today" variant="flushed" />
       </Flex>
     </>
   );
