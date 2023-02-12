@@ -66,7 +66,7 @@ export const Progress = (props: Props) => {
           transition="all .5s ease-in"
         />
       </SliderTrack>
-      <SliderThumb bg="rgba(240, 240, 240, 0.4)" boxSize={5} ml={-3} mt={-2}>
+      <SliderThumb bg="rgba(240, 240, 240, 0.2)" boxSize={8} ml={-3} mt={-2}>
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>
