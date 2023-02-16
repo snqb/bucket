@@ -35,3 +35,5 @@ It's a PWA, the link is in the description. Just add it to your desktop. It does
 it's not very ready yet, the code's meh and I am still breaking things, so use with caution
 
 even this readme was written just so this repo looks OK because I've sent it to potential employyes 🤐
+
+verba verba
