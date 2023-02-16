@@ -59,7 +59,6 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         id={`adder-${where}`}
         type="text"
         value={text}
-        textTransform="lowercase"
         placeholder="write it down"
         variant="outline"
         onChange={handleChange}

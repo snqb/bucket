@@ -34,7 +34,6 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       border="none"
       borderRadius="lg"
       userSelect="none"
-      textTransform="lowercase"
       isFocusable={false}
       {...restItemProps}
     >
