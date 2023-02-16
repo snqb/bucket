@@ -43,7 +43,12 @@ export const Progress = (props: Props) => {
   }
 
   return (
-    <Slider focusThumbOnChange={false} {...partialProps} {...restProps}>
+    <Slider
+      focusThumbOnChange={false}
+      {...partialProps}
+      {...restProps}
+      pointerEvents="none"
+    >
       <SliderTrack
         minHeight=".75rem"
         h="3vw"
@@ -69,7 +74,13 @@ export const Progress = (props: Props) => {
           willChange="width"
         />
       </SliderTrack>
-      <SliderThumb bg="rgba(240, 240, 240, 0.1)" boxSize={8} ml={-3} mt={-2}>
+      <SliderThumb
+        pointerEvents="auto"
+        bg="rgba(240, 240, 240, 0.1)"
+        boxSize={8}
+        ml={-3}
+        mt={-2}
+      >
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>
