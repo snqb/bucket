@@ -47,6 +47,7 @@ function App() {
           </TabPanel>
         </TabPanels>
         <TabList
+          zIndex={2}
           position="fixed"
           bottom="0"
           h="27vh"

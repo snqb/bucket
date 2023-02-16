@@ -19,46 +19,47 @@ const TodayView = () => {
   return (
     <>
       <Flex
-        h="100%"
         ref={parent as any}
+        h="max-content"
         gap={5}
         direction="column"
         pb="20vmin"
         justify="end"
+        overflowY="auto"
       >
-        {hasDone && (
-          <Button
-            position="fixed"
-            top={5}
-            right={5}
-            w="fit-content"
-            colorScheme="red"
-            variant="ghost"
-            ml="auto"
-            fontSize="x-large"
-            h="50px"
-            onClick={() => {
-              const cleanup = () => {
-                const doneIndex = today.findIndex((it) => it.progress === 100);
-                if (doneIndex < 0) {
-                  return;
-                }
-
-                // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
-                today.splice(doneIndex, 1);
-                cleanup();
-              };
-
-              cleanup();
-            }}
-          >
-            🗑️
-          </Button>
-        )}
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
       </Flex>
+      {hasDone && (
+        <Button
+          position="fixed"
+          top={5}
+          right={5}
+          w="fit-content"
+          colorScheme="red"
+          variant="ghost"
+          ml="auto"
+          fontSize="x-large"
+          h="50px"
+          onClick={() => {
+            const cleanup = () => {
+              const doneIndex = today.findIndex((it) => it.progress === 100);
+              if (doneIndex < 0) {
+                return;
+              }
+
+              // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
+              today.splice(doneIndex, 1);
+              cleanup();
+            };
+
+            cleanup();
+          }}
+        >
+          🗑️
+        </Button>
+      )}
     </>
   );
 };
