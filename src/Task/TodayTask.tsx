@@ -32,7 +32,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       p={0}
       userSelect="none"
       {...restItemProps}
-      spacing={1}
+      spacing={0}
     >
       <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
         {task.title.text}
