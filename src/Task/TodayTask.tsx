@@ -32,9 +32,9 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       p={0}
       userSelect="none"
       {...restItemProps}
-      spacing={0}
+      spacing={1}
     >
-      <Box w="min-content" as="span" fontSize="xl" fontWeight={500}>
+      <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
         {task.title.text}
       </Box>
       <Progress

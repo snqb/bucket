@@ -87,10 +87,10 @@ function App() {
           <Tab>
             <Heading size="lg">🪣</Heading>
           </Tab>
-          <Tab>
+          <Tab mb={4}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
-          <Tab>
+          <Tab mb={4}>
             <Heading size="sm">⚙️</Heading>
           </Tab>
           <IconButton
