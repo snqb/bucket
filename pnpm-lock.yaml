@@ -29,7 +29,7 @@ specifiers:
   use-debounce: ^9.0.3
   use-double-click: ^1.0.5
   use-long-press: ^2.0.3
-  vite: ^4.1.1
+  vite: ^4.1.3
   vite-plugin-pwa: ^0.14.2
   workbox-build: ^6.5.4
   workbox-core: ^6.5.4
@@ -75,8 +75,8 @@ devDependencies:
   postcss: 8.4.21
   prettier: 2.7.1
   typescript: 4.9.5
-  vite: 4.1.1
-  vite-plugin-pwa: 0.14.2_3vd7o33jrhd5kouhgwquhspjhi
+  vite: 4.1.3
+  vite-plugin-pwa: 0.14.2_a7neqmautsvqvxbixxqqjc4mq4
   workbox-build: 6.5.4
   workbox-core: 6.5.4
   workbox-precaching: 6.5.4
@@ -4926,7 +4926,7 @@ packages:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
     dev: false
 
-  /vite-plugin-pwa/0.14.2_3vd7o33jrhd5kouhgwquhspjhi:
+  /vite-plugin-pwa/0.14.2_a7neqmautsvqvxbixxqqjc4mq4:
     resolution: {integrity: sha512-3nTW1LX5i4l2qeuT0ypGyo52KtXagQoW4qdpMxHyUS/qvloa3BHLytQQfdNbU3cXTqV+cfuN99RXXKHiYDiLTA==}
     peerDependencies:
       vite: ^3.1.0 || ^4.0.0
@@ -4938,15 +4938,15 @@ packages:
       fast-glob: 3.2.12
       pretty-bytes: 6.1.0
       rollup: 3.14.0
-      vite: 4.1.1
+      vite: 4.1.3
       workbox-build: 6.5.4
       workbox-window: 6.5.4
     transitivePeerDependencies:
       - supports-color
     dev: true
 
-  /vite/4.1.1:
-    resolution: {integrity: sha512-LM9WWea8vsxhr782r9ntg+bhSFS06FJgCvvB0+8hf8UWtvaiDagKYWXndjfX6kGl74keHJUcpzrQliDXZlF5yg==}
+  /vite/4.1.3:
+    resolution: {integrity: sha512-0Zqo4/Fr/swSOBmbl+HAAhOjrqNwju+yTtoe4hQX9UsARdcuc9njyOdr6xU0DDnV7YP0RT6mgTTOiRtZgxfCxA==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
