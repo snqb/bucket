@@ -21,7 +21,6 @@ import Today from "./Today";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen
-  overflowY: "auto", // tasks inside should be scrollable
   p: 2,
   pb: "40vh",
 };
@@ -44,7 +43,17 @@ function App() {
       >
         <TabPanels>
           <TabPanel {...panelStyles}>
-            <Heading size="xl" mb={4} textAlign="left">
+            <Heading
+              w="full"
+              py={1}
+              zIndex={2}
+              bg="black"
+              position="sticky"
+              top={0}
+              size="xl"
+              mb={4}
+              textAlign="left"
+            >
               <Box fontSize="xl" as="span">
                 🪣&nbsp;
               </Box>
@@ -54,7 +63,17 @@ function App() {
           </TabPanel>
 
           <TabPanel {...panelStyles}>
-            <Heading size="xl" mb={4} textAlign="left">
+            <Heading
+              w="full"
+              py={1}
+              zIndex={2}
+              bg="black"
+              position="sticky"
+              top={0}
+              size="xl"
+              mb={4}
+              textAlign="left"
+            >
               <Box fontSize="xl" as="span">
                 🏄&nbsp;
               </Box>
