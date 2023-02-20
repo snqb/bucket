@@ -18,19 +18,19 @@ const TodayView = () => {
 
   return (
     <>
-      <Flex
+      <VStack
         ref={parent as any}
-        h="max-content"
+        minH="-webkit-fill-available"
         gap={5}
-        direction="column"
-        pb="20vmin"
-        justify="end"
+        pb="72px"
         overflowY="auto"
+        justify="end"
+        align="stretch"
       >
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
-      </Flex>
+      </VStack>
       {hasDone && (
         <Button
           position="fixed"

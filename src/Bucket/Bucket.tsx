@@ -9,7 +9,7 @@ import { BucketTask } from "../Task/BucketTask";
 
 const Bucket = () => {
   return (
-    <VStack h="100%" align="stretch" gap={4} pb="3vh">
+    <VStack h="100%" align="stretch" justify="end" pb="72px" gap={4}>
       <BucketView />
     </VStack>
   );
@@ -20,12 +20,7 @@ const BucketView = () => {
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <Accordion
-      allowToggle
-      reduceMotion
-      overflowY="auto"
-      overflowX="hidden"
-    >
+    <Accordion allowToggle reduceMotion overflowY="auto" overflowX="hidden">
       {state.bucket
         .filter((it: Thingy) => it.residence !== "graveyard")
         .map((task, index) => {
