@@ -28,13 +28,13 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
 
   return (
     <VStack
-      align="baseline"
+      align="start"
       p={0}
       userSelect="none"
       {...restItemProps}
       spacing={0}
     >
-      <Text fontSize="xl" align="left" display="inline" fontWeight={500}>
+      <Text fontSize="xl" fontWeight={500}>
         {task.title.text}
       </Text>
       <Progress
