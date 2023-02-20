@@ -4,6 +4,7 @@ import {
   BoxProps,
   Flex,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
 import { useState } from "preact/hooks";
@@ -24,18 +25,14 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
   if (!thingy) {
     return null;
   }
-  const whichColor = gradientColors[Math.ceil(thingy.progress / 10)];
 
   return (
-    <Flex
-      direction="column"
-      align="start"
+    <VStack
+      align="baseline"
       p={0}
-      border="none"
-      borderRadius="lg"
       userSelect="none"
-      isFocusable={false}
       {...restItemProps}
+      spacing={0}
     >
       <Text fontSize="xl" align="left" display="inline" fontWeight={500}>
         {task.title.text}
@@ -52,7 +49,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
         step={0.01}
         emoji={task.title.emoji}
       />
-    </Flex>
+    </VStack>
   );
 };
 
