@@ -72,7 +72,7 @@ export const Progress = (props: Props) => {
           willChange="width"
         />
       </SliderTrack>
-      <SliderThumb pointerEvents="auto" bg="blackAlpha.600" boxSize={9} mt={-4}>
+      <SliderThumb pointerEvents="auto" bg="blackAlpha.600" boxSize={8} mt={-3}>
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>
