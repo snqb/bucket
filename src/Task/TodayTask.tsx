@@ -37,10 +37,8 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       isFocusable={false}
       {...restItemProps}
     >
-      <Text p={0} mb={0} fontWeight={500} alignItems="baseline">
-        <Text fontSize="xl" align="left" display="inline" fontWeight={500}>
-          {task.title.text}
-        </Text>
+      <Text fontSize="xl" align="left" display="inline" fontWeight={500}>
+        {task.title.text}
       </Text>
       <Progress
         isExpanded
