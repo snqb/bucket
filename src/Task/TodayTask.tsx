@@ -34,9 +34,9 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       {...restItemProps}
       spacing={0}
     >
-      <Text fontSize="xl" fontWeight={500}>
+      <Box as="span" fontSize="xl" fontWeight={500}>
         {task.title.text}
-      </Text>
+      </Box>
       <Progress
         isExpanded
         // filter={`saturate(${(progress + 30) / 100})`}
