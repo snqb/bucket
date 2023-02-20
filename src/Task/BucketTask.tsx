@@ -67,7 +67,6 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
               </Text>
             </AccordionButton>
             <Progress
-              // filter={`saturate(${(progress + 30) / 100})`}
               aria-label={`progress of ${thingy.title.text}`}
               isExpanded={isExpanded}
               defaultValue={task.progress}

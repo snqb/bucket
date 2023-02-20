@@ -6,28 +6,22 @@ import { useSyncedStore } from "@syncedstore/react";
 
 import { store, Thingy } from "../store";
 import { BucketTask } from "../Task/BucketTask";
+import Adder from "../Adder";
 
 const Bucket = () => {
-  return (
-    <VStack h="100%" align="stretch" justify="end" pb="72px" gap={4}>
-      <BucketView />
-    </VStack>
-  );
-};
-
-const BucketView = () => {
   const state = useSyncedStore(store);
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <Accordion allowToggle reduceMotion overflowY="auto" overflowX="hidden">
-      {state.bucket
-        .filter((it: Thingy) => it.residence !== "graveyard")
-        .map((task, index) => {
-          return (
-            <BucketTask tabIndex={index} mb={1} key={task.id} task={task} />
-          );
-        })}
+    <Accordion allowToggle>
+      <VStack align="stretch">
+        {state.bucket
+          .filter((it: Thingy) => it.residence !== "graveyard")
+          .map((task, index) => {
+            return <BucketTask tabIndex={index} key={task.id} task={task} />;
+          })}
+        <Adder where="bucket" />
+      </VStack>
     </Accordion>
   );
 };

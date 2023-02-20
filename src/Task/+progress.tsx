@@ -32,7 +32,6 @@ export const Progress = (props: Props) => {
           <SliderFilledTrack
             minHeight="100%"
             bg={gradient}
-            filter="saturate(0.5)"
             backgroundSize="contain"
             backgroundBlendMode="multiply"
             transition="all .5s ease-in"
@@ -76,8 +75,8 @@ export const Progress = (props: Props) => {
       </SliderTrack>
       <SliderThumb
         pointerEvents="auto"
-        bg="rgba(240, 240, 240, 0.1)"
-        boxSize={8}
+        bg="blackAlpha.900"
+        boxSize={10}
         ml={-3}
         mt={-2}
       >

@@ -38,7 +38,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       {...restItemProps}
     >
       <Text p={0} mb={0} fontWeight={500} alignItems="baseline">
-        <Text fontSize="2xl" align="left" display="inline" fontWeight={500}>
+        <Text fontSize="xl" align="left" display="inline" fontWeight={500}>
           {task.title.text}
         </Text>
       </Text>

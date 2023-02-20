@@ -5,12 +5,9 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import { store } from "../store";
+import Adder from "../Adder";
 
 const Today = () => {
-  return <TodayView />;
-};
-
-const TodayView = () => {
   const today = useSyncedStore(store.today);
 
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
@@ -18,30 +15,23 @@ const TodayView = () => {
 
   return (
     <>
-      <VStack
-        ref={parent as any}
-        minH="-webkit-fill-available"
-        gap={5}
-        pb="72px"
-        overflowY="auto"
-        justify="end"
-        align="stretch"
-      >
+      <VStack ref={parent as any} gap={2} align="stretch">
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
+        <Adder where="today" />
       </VStack>
       {hasDone && (
         <Button
-          position="fixed"
+          position="absolute"
           top={5}
           right={5}
           w="fit-content"
-          colorScheme="red"
           variant="ghost"
           ml="auto"
           fontSize="x-large"
           h="50px"
+          bg="blackAlpha.900"
           onClick={() => {
             const cleanup = () => {
               const doneIndex = today.findIndex((it) => it.progress === 100);
