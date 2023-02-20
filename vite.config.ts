@@ -1,4 +1,3 @@
-import preact from "@preact/preset-vite";
 import autoprefixer from "autoprefixer";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -72,11 +71,5 @@ export default defineConfig({
       plugins: [autoprefixer()],
     },
   },
-  plugins: [
-    PWA,
-    preact({
-      include: "**/*.tsx",
-    }),
-    ,
-  ],
+  plugins: [PWA],
 });

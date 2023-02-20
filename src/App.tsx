@@ -12,10 +12,8 @@ import {
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
-import "@fontsource/lato";
 import { useEffect, useState } from "react";
 import { usePageVisibility } from "react-page-visibility";
-import Adder from "./Adder";
 import ReloadPrompt from "./ReloadPrompt";
 import { webrtcProvider } from "./store";
 import { SyncInput } from "./SyncInput";

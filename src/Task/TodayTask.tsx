@@ -7,7 +7,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
-import { useState } from "preact/hooks";
+import { useState } from "react";
 
 import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";

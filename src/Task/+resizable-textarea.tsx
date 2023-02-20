@@ -1,5 +1,5 @@
 import { Textarea, TextareaProps } from "@chakra-ui/react";
-import { useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef } from "react";
 import React from "react";
 import ResizeTextarea from "react-textarea-autosize";
 import scrollIntoView from "scroll-into-view-if-needed";

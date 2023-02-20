@@ -5,25 +5,24 @@ import {
   type ThemeConfig,
 } from "@chakra-ui/react";
 import React from "react";
-import ReactDOM from "preact/compat";
+import ReactDOM from "react-dom";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 
-import { mode } from "@chakra-ui/theme-tools";
 
 const theme: ThemeConfig = extendTheme({
   initialColorMode: "dark",
   styles: {
     global: (props: any) => ({
       body: {
-        bg: mode("#000000", "#000000")(props),
+        bg: "black",
         color: "white",
       },
     }),
   },
   fonts: {
-    heading: `system-ui, 'Lato', sans-serif`,
-    body: `system-ui, 'Lato', sans-serif`,
+    heading: `system-ui, sans-serif`,
+    body: `system-ui, sans-serif`,
   },
   gray: {
     "50": "#f9fafa",
