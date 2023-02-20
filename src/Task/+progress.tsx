@@ -54,7 +54,6 @@ export const Progress = (props: Props) => {
         sx={{
           maskImage: `url(/line2.svg)`,
           maskSize: "cover",
-          // bg: '#0074ba88 ',
         }}
         backgroundBlendMode="multiply"
         mt={0}
@@ -65,7 +64,7 @@ export const Progress = (props: Props) => {
           sx={{
             maskImage: `url(/line2.svg)`,
             maskSize: "cover",
-            bg: gradient,
+            bg: "linear-gradient(to right, #33ccee, #00b7f2, #00a0f4, #0086f0, #0069e3);",
           }}
           filter="initial"
           backgroundBlendMode="multiply"
@@ -73,13 +72,7 @@ export const Progress = (props: Props) => {
           willChange="width"
         />
       </SliderTrack>
-      <SliderThumb
-        pointerEvents="auto"
-        bg="blackAlpha.900"
-        boxSize={10}
-        ml={-3}
-        mt={-2}
-      >
+      <SliderThumb pointerEvents="auto" bg="blackAlpha.600" boxSize={9} mt={-4}>
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>
