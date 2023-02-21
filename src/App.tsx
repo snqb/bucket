@@ -85,7 +85,7 @@ function App() {
             </HeadingSection>
             <Today />
           </TabPanel>
-          <TabPanel>
+          {/* <TabPanel>
             <Heading size="xl" mb={4} textAlign="left">
               <Box fontSize="xl" as="span">
                 ⚙️&nbsp;
@@ -93,7 +93,7 @@ function App() {
               Settings
             </Heading>
             <SyncInput />
-          </TabPanel>
+          </TabPanel> */}
         </TabPanels>
         <TabList
           position="fixed"
@@ -113,10 +113,10 @@ function App() {
           <Tab mb={4}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
-          <Tab mb={4}>
+          {/* <Tab mb={4}>
             <Heading size="sm">⚙️</Heading>
-          </Tab>
-          <IconButton
+          </Tab> */}
+          {/* <IconButton
             onClick={() => {
               window.location.reload();
             }}
@@ -124,7 +124,7 @@ function App() {
             icon={<>🔄️</>}
             variant="ghost"
             filter={connected ? "grayscale(1)" : "initial"}
-          />
+          /> */}
         </TabList>
       </Tabs>
       <ReloadPrompt />
