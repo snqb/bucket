@@ -55,7 +55,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup variant="flushed" size="md" ref={ref} {...props}>
+    <InputGroup variant="outline" size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
         id={`adder-${where}`}

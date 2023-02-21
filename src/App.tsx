@@ -113,9 +113,7 @@ function App() {
           <Tab mb={4}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
-          {/* <Tab mb={4}>
-            <Heading size="sm">⚙️</Heading>
-          </Tab> */}
+
           {/* <IconButton
             onClick={() => {
               window.location.reload();
