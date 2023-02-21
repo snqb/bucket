@@ -1,5 +1,6 @@
 import {
   Box,
+  Button,
   Flex,
   Heading,
   IconButton,
@@ -12,12 +13,14 @@ import {
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
-import { useEffect, useState } from "react";
+import { PropsWithChildren, useEffect, useState } from "react";
 import { usePageVisibility } from "react-page-visibility";
 import ReloadPrompt from "./ReloadPrompt";
-import { webrtcProvider } from "./store";
+import { store, Thingy, webrtcProvider } from "./store";
 import { SyncInput } from "./SyncInput";
 import Today from "./Today";
+
+import { useSyncedStore } from "@syncedstore/react";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen
@@ -29,7 +32,9 @@ localStorage.setItem("log", "y-webrtc");
 
 function App() {
   const [tab, setTab] = usePersistedTab();
+  const today = useSyncedStore(store.today);
   const connected = useRtcConnectionShit();
+  const hasDone = today.some((task) => task.progress === 100);
 
   return (
     <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
@@ -43,42 +48,41 @@ function App() {
       >
         <TabPanels>
           <TabPanel {...panelStyles}>
-            <Heading
-              w="full"
-              py={1}
-              zIndex={2}
-              bg="black"
-              position="sticky"
-              top={0}
-              size="xl"
-              mb={4}
-              textAlign="left"
-            >
-              <Box fontSize="xl" as="span">
-                🪣&nbsp;
-              </Box>
-              Bucket
-            </Heading>
+            <HeadingSection title="Bucket" emoji="🪣" />
             <Bucket />
           </TabPanel>
 
           <TabPanel {...panelStyles}>
-            <Heading
-              w="full"
-              py={1}
-              zIndex={2}
-              bg="black"
-              position="sticky"
-              top={0}
-              size="xl"
-              mb={4}
-              textAlign="left"
-            >
-              <Box fontSize="xl" as="span">
-                🏄&nbsp;
-              </Box>
-              Today
-            </Heading>
+            <HeadingSection title="Today" emoji="🏄‍♂️">
+              {hasDone && (
+                <Button
+                  w="fit-content"
+                  variant="ghost"
+                  ml="auto"
+                  fontSize="x-large"
+                  // h="50px"
+                  bg="blackAlpha.900"
+                  onClick={() => {
+                    const cleanup = () => {
+                      const doneIndex = today.findIndex(
+                        (it: Thingy) => it.progress === 100
+                      );
+                      if (doneIndex < 0) {
+                        return;
+                      }
+
+                      // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
+                      today.splice(doneIndex, 1);
+                      cleanup();
+                    };
+
+                    cleanup();
+                  }}
+                >
+                  🗑️
+                </Button>
+              )}
+            </HeadingSection>
             <Today />
           </TabPanel>
           <TabPanel>
@@ -167,4 +171,37 @@ const useRtcConnectionShit = () => {
   }, [webrtcProvider?.connected]);
 
   return connected;
+};
+
+const HeadingSection = ({
+  title,
+  emoji,
+  children,
+}: PropsWithChildren<{ title: string; emoji: string }>) => {
+  return (
+    <Flex
+      w="full"
+      align="center"
+      justify="space-between"
+      position="sticky"
+      top={0}
+      py={1}
+      mb={4}
+      zIndex={2}
+    >
+      <Heading bg="black" size="xl" textAlign="left">
+        <EmojiThing>{emoji}</EmojiThing>
+        {title}
+      </Heading>
+      <Box>{children}</Box>
+    </Flex>
+  );
+};
+
+const EmojiThing = ({ children }: PropsWithChildren) => {
+  return (
+    <Box fontSize="xl" as="span">
+      {children}&nbsp;
+    </Box>
+  );
 };
