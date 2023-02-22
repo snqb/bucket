@@ -5,10 +5,9 @@ import {
   type ThemeConfig,
 } from "@chakra-ui/react";
 import React from "react";
-import ReactDOM from "react-dom";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
-
+import { createRoot } from "react-dom/client";
 
 const theme: ThemeConfig = extendTheme({
   initialColorMode: "dark",
@@ -146,15 +145,17 @@ const theme: ThemeConfig = extendTheme({
   },
 });
 
-ReactDOM.render(
+const container = document.getElementById("root");
+const root = createRoot(container!);
+
+root.render(
   <React.StrictMode>
     <ChakraProvider theme={theme}>
       <ColorModeScript initialColorMode="dark" />
 
       <App />
     </ChakraProvider>
-  </React.StrictMode>,
-  document.body
+  </React.StrictMode>
 );
 
 if ("serviceWorker" in navigator) {

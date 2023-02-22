@@ -3,7 +3,7 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
-    "allowJs": false,
+    "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": false,
     "allowSyntheticDefaultImports": true,
@@ -18,10 +18,7 @@
     "paths": {
       "~/*": ["./*"]
     },
-    "types": [
-      "vite-plugin-pwa",
-      "vite-plugin-pwa/client"
-    ],
+    "types": ["vite-plugin-pwa", "vite-plugin-pwa/client"]
   },
   "include": ["src", "@types/*.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]

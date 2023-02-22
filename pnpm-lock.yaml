@@ -7,6 +7,7 @@ specifiers:
   '@formkit/auto-animate': 1.0.0-beta.6
   '@syncedstore/core': ^0.4.3
   '@syncedstore/react': ^0.4.3
+  '@types/lodash.clonedeep': ^4.5.7
   '@types/ramda': ^0.28.22
   '@types/react': ^18.0.28
   '@types/react-dom': ^18.0.11
@@ -17,8 +18,10 @@ specifiers:
   autoprefixer: latest
   emoji-from-text: ^1.1.12
   framer-motion: ^6.5.1
+  lodash.clonedeep: ^4.5.0
   postcss: latest
   prettier: 2.7.1
+  proxy-clone: ^1.0.3
   ramda: ^0.28.0
   react: ^18.2.0
   react-dom: ^18.2.0
@@ -53,6 +56,8 @@ dependencies:
   '@use-gesture/react': 10.2.24_react@18.2.0
   emoji-from-text: 1.1.12
   framer-motion: 6.5.1_biqbaboplfbrettd7655fr4n2y
+  lodash.clonedeep: 4.5.0
+  proxy-clone: 1.0.3
   ramda: 0.28.0
   react: 18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -67,6 +72,7 @@ dependencies:
   yjs: 13.5.45
 
 devDependencies:
+  '@types/lodash.clonedeep': 4.5.7
   '@types/ramda': 0.28.22
   '@types/react-page-visibility': 6.4.1
   '@types/react-textarea-autosize': 8.0.0_pmekkgnqduwlme35zpnqhenc34
@@ -2920,6 +2926,12 @@ packages:
     resolution: {integrity: sha512-wOuvG1SN4Us4rez+tylwwwCV1psiNVOkJeM3AUWUNWg/jDQY2+HE/444y5gc+jBmRqASOm2Oeh5c1axHobwRKQ==}
     dev: false
 
+  /@types/lodash.clonedeep/4.5.7:
+    resolution: {integrity: sha512-ccNqkPptFIXrpVqUECi60/DFxjNKsfoQxSQsgcBJCX/fuX1wgyQieojkcWH/KpE3xzLoWN/2k+ZeGqIN3paSvw==}
+    dependencies:
+      '@types/lodash': 4.14.191
+    dev: true
+
   /@types/lodash.mergewith/4.6.7:
     resolution: {integrity: sha512-3m+lkO5CLRRYU0fhGRp7zbsGi6+BZj0uTVSwvcKU+nSlhjA9/QRNfuSGnD2mX6hQA7ZbmcCkzk5h4ZYGOtk14A==}
     dependencies:
@@ -2928,7 +2940,6 @@ packages:
 
   /@types/lodash/4.14.191:
     resolution: {integrity: sha512-BdZ5BCCvho3EIXw6wUCXHe7rS53AIDPLE+JzwgT+OsJk53oBfbSmZZ7CX4VaRoN78N+TJpFi9QPlfIVNmJYWxQ==}
-    dev: false
 
   /@types/node/18.13.0:
     resolution: {integrity: sha512-gC3TazRzGoOnoKAhUx+Q0t8S9Tzs74z7m0ipwGpSqQrleP14hKxP4/JUeEQcD3W1/aIpnWl8pHowI7WokuZpXg==}
@@ -4032,6 +4043,10 @@ packages:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
     dev: false
 
+  /lodash.clonedeep/4.5.0:
+    resolution: {integrity: sha512-H5ZhCF25riFd9uB5UCkVKo61m3S/xZk1x4wA6yp/L3RFP6Z/eHH1ymQcGLo7J3GMPfm0V/7m1tryHuGVxpqEBQ==}
+    dev: false
+
   /lodash.debounce/4.0.8:
     resolution: {integrity: sha512-FT1yDzDYEoYWhnSGnpE/4Kj1fLZkDFyqRb7fNt6FdYOSxlUWAtp42Eh6Wb0rGIv/m9Bgo7x4GhQbm5Ys4SG5ow==}
     dev: true
@@ -4238,6 +4253,14 @@ packages:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
+    dev: false
+
+  /proxy-clone/1.0.3:
+    resolution: {integrity: sha512-VZCTkXrj3Mc8/4PgHu6Lr3NmpTQeJEYGDuV5VI3K9BsF9JfZ1UjuAFE1uRueumpyuWqN52XdbbrVLJckXvy5BA==}
+    dependencies:
+      debug: 4.3.4
+    transitivePeerDependencies:
+      - supports-color
     dev: false
 
   /punycode/2.3.0:

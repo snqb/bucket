@@ -14,15 +14,19 @@ import * as R from "ramda";
 import { store, Thingy } from "../store";
 
 export interface Props extends InputGroupProps {
-  where?: "today" | "bucket";
+  where?: keyof typeof store;
 }
+
+const initialEmoji: Record<keyof typeof store, string> = {
+  today: "🏄‍♂️",
+  bucket: "🪣",
+  later: "🐼",
+};
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
   const { where = "bucket" } = props;
   const tasks = useSyncedStore(store);
-  const [emoji, generateEmoji, clearEmoji] = useInputEmoji(
-    where === "today" ? "🏄‍♂️" : "🪣"
-  );
+  const [emoji, generateEmoji, clearEmoji] = useInputEmoji(initialEmoji[where]);
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(

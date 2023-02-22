@@ -33,11 +33,15 @@ localStorage.setItem("log", "y-webrtc");
 function App() {
   const [tab, setTab] = usePersistedTab();
   const today = useSyncedStore(store.today);
-  const connected = useRtcConnectionShit();
   const hasDone = today.some((task) => task.progress === 100);
 
   return (
-    <Flex px={[2, 5, 10, 20, 300]} py={[4, 1, 1, 1, 1, 10]} direction="column">
+    <Flex
+      px={[2, 5, 10, 20, 300]}
+      py={[4, 1, 1, 1, 1, 10]}
+      direction="column"
+      scrollBehavior="smooth"
+    >
       <Tabs
         orientation="vertical"
         px={0}
@@ -54,54 +58,17 @@ function App() {
 
           <TabPanel {...panelStyles}>
             <HeadingSection title="Today" emoji="🏄‍♂️">
-              {hasDone && (
-                <Button
-                  w="fit-content"
-                  variant="ghost"
-                  ml="auto"
-                  fontSize="x-large"
-                  // h="50px"
-                  bg="blackAlpha.900"
-                  onClick={() => {
-                    const cleanup = () => {
-                      const doneIndex = today.findIndex(
-                        (it: Thingy) => it.progress === 100
-                      );
-                      if (doneIndex < 0) {
-                        return;
-                      }
-
-                      // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
-                      today.splice(doneIndex, 1);
-                      cleanup();
-                    };
-
-                    cleanup();
-                  }}
-                >
-                  🗑️
-                </Button>
-              )}
+              {hasDone && <CleanToday />}
             </HeadingSection>
             <Today />
           </TabPanel>
-          {/* <TabPanel>
-            <Heading size="xl" mb={4} textAlign="left">
-              <Box fontSize="xl" as="span">
-                ⚙️&nbsp;
-              </Box>
-              Settings
-            </Heading>
-            <SyncInput />
-          </TabPanel> */}
         </TabPanels>
         <TabList
           position="fixed"
           maxHeight="30vh"
-          top="70%"
+          top="69%"
           borderLeftRadius="30%"
           p={3}
-          // backdropFilter="blur(10px)"
           right={0}
           zIndex={2}
           bottom="0"
@@ -110,19 +77,9 @@ function App() {
           <Tab>
             <Heading size="lg">🪣</Heading>
           </Tab>
-          <Tab mb={4}>
+          <Tab mb={6}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
-
-          {/* <IconButton
-            onClick={() => {
-              window.location.reload();
-            }}
-            aria-label="sync"
-            icon={<>🔄️</>}
-            variant="ghost"
-            filter={connected ? "grayscale(1)" : "initial"}
-          /> */}
         </TabList>
       </Tabs>
       <ReloadPrompt />
@@ -178,14 +135,15 @@ const HeadingSection = ({
 }: PropsWithChildren<{ title: string; emoji: string }>) => {
   return (
     <Flex
+      bg="black"
       w="full"
       align="center"
       justify="space-between"
       position="sticky"
       top={0}
-      py={1}
+      p={1}
       mb={4}
-      zIndex={2}
+      zIndex={3}
     >
       <Heading bg="black" size="xl" textAlign="left">
         <EmojiThing>{emoji}</EmojiThing>
@@ -201,5 +159,37 @@ const EmojiThing = ({ children }: PropsWithChildren) => {
     <Box fontSize="xl" as="span">
       {children}&nbsp;
     </Box>
+  );
+};
+
+const CleanToday = () => {
+  const today = useSyncedStore(store.today);
+
+  return (
+    <Button
+      w="fit-content"
+      variant="ghost"
+      ml="auto"
+      fontSize="x-large"
+      bg="blackAlpha.900"
+      onClick={() => {
+        const cleanup = () => {
+          const doneIndex = today.findIndex(
+            (it: Thingy) => it.progress === 100
+          );
+          if (doneIndex < 0) {
+            return;
+          }
+
+          // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
+          today.splice(doneIndex, 1);
+          cleanup();
+        };
+
+        cleanup();
+      }}
+    >
+      🗑️
+    </Button>
   );
 };

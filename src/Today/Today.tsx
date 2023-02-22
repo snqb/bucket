@@ -1,4 +1,4 @@
-import { VStack } from "@chakra-ui/react";
+import { Heading, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Task from "../Task";
 
@@ -6,21 +6,32 @@ import { useSyncedStore } from "@syncedstore/react";
 
 import Adder from "../Adder";
 import { store } from "../store";
+import Later from "../Later/Later";
 
 const Today = () => {
   const today = useSyncedStore(store.today);
 
-  const parent = useAutoAnimate({ duration: 250, easing: "linear" });
-
   return (
-    <>
-      <VStack ref={parent as any} gap={2} align="stretch">
+    <VStack
+      spacing={12}
+      minH="120%"
+      pb="40vh"
+      justify="space-between"
+      align="stretch"
+    >
+      <VStack spacing={4} align="stretch">
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
         <Adder where="today" />
       </VStack>
-    </>
+      <VStack align="stretch" spacing={4}>
+        <Heading textAlign="left" size="lg">
+          🐼Later
+        </Heading>
+        <Later />
+      </VStack>
+    </VStack>
   );
 };
 
