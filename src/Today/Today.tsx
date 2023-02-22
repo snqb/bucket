@@ -23,7 +23,7 @@ const Today = () => {
         _focusWithin={{
           opacity: 1,
         }}
-        opacity={0.4}
+        opacity={0.5}
         align="stretch"
         spacing={4}
       >
