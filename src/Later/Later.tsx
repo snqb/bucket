@@ -13,11 +13,12 @@ const Later = () => {
   const parent = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <VStack  id="later" gap={2} align="stretch">
+    <VStack id="later" gap={2} align="stretch">
+      <Adder where="later" />
+
       {later.map((task, index) => (
         <LaterTask tabIndex={index} key={task.id} task={task} />
       ))}
-      <Adder where="later" />
     </VStack>
   );
 };

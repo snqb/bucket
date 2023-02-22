@@ -64,6 +64,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       <Input
         id={`adder-${where}`}
         type="text"
+        autoComplete="off"
         value={text}
         placeholder="write it down"
         onChange={handleChange}
