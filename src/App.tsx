@@ -3,7 +3,6 @@ import {
   Button,
   Flex,
   Heading,
-  IconButton,
   StyleProps,
   Tab,
   TabList,
@@ -13,13 +12,11 @@ import {
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
-import { PropsWithChildren, useEffect, useState } from "react";
-import { usePageVisibility } from "react-page-visibility";
-import ReloadPrompt from "./ReloadPrompt";
-import { store, Thingy, webrtcProvider } from "./store";
-import { SyncInput } from "./SyncInput";
-import Today from "./Today";
 import * as R from "ramda";
+import { PropsWithChildren, useEffect, useState } from "react";
+import ReloadPrompt from "./ReloadPrompt";
+import { store } from "./store";
+import Today from "./Today";
 
 import { useSyncedStore } from "@syncedstore/react";
 import Later from "./Later";
