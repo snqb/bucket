@@ -19,8 +19,10 @@ import ReloadPrompt from "./ReloadPrompt";
 import { store, Thingy, webrtcProvider } from "./store";
 import { SyncInput } from "./SyncInput";
 import Today from "./Today";
+import * as R from "ramda";
 
 import { useSyncedStore } from "@syncedstore/react";
+import Later from "./Later";
 
 const panelStyles: StyleProps = {
   h: "100%", // so that it fills the whole screen
@@ -50,19 +52,6 @@ function App() {
         onChange={setTab}
         align="center"
       >
-        <TabPanels>
-          <TabPanel {...panelStyles}>
-            <HeadingSection title="Bucket" emoji="🪣" />
-            <Bucket />
-          </TabPanel>
-
-          <TabPanel {...panelStyles}>
-            <HeadingSection title="Today" emoji="🏄‍♂️">
-              {hasDone && <CleanToday />}
-            </HeadingSection>
-            <Today />
-          </TabPanel>
-        </TabPanels>
         <TabList
           position="fixed"
           maxHeight="30vh"
@@ -77,10 +66,33 @@ function App() {
           <Tab>
             <Heading size="lg">🪣</Heading>
           </Tab>
+          <Tab>
+            <Heading size="lg">❓</Heading>
+          </Tab>
           <Tab mb={6}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
         </TabList>
+        <TabPanels>
+          <TabPanel {...panelStyles}>
+            <HeadingSection title="Bucket" emoji="🪣" />
+            <Bucket />
+          </TabPanel>
+
+          <TabPanel {...panelStyles}>
+            <HeadingSection title="Later" emoji="❓">
+              <Clean all what="later" />
+            </HeadingSection>
+            <Later />
+          </TabPanel>
+
+          <TabPanel {...panelStyles}>
+            <HeadingSection title="Today" emoji="🏄‍♂️">
+              {hasDone && <Clean what="today" />}
+            </HeadingSection>
+            <Today />
+          </TabPanel>
+        </TabPanels>
       </Tabs>
       <ReloadPrompt />
     </Flex>
@@ -99,33 +111,6 @@ const usePersistedTab = () => {
   }, [tab]);
 
   return tabState;
-};
-
-const useRtcConnectionShit = () => {
-  const isVisible = usePageVisibility();
-  const [connected, setIsConnected] = useState(
-    webrtcProvider?.connected ?? false
-  );
-
-  useEffect(() => {
-    webrtcProvider?.connect();
-  }, [isVisible]);
-
-  useEffect(() => {
-    if (!webrtcProvider) return;
-    const { connected } = webrtcProvider;
-    setIsConnected(connected);
-
-    if (!connected) {
-      webrtcProvider.connect();
-    }
-
-    return () => {
-      webrtcProvider.disconnect();
-    };
-  }, [webrtcProvider?.connected]);
-
-  return connected;
 };
 
 const HeadingSection = ({
@@ -162,8 +147,14 @@ const EmojiThing = ({ children }: PropsWithChildren) => {
   );
 };
 
-const CleanToday = () => {
-  const today = useSyncedStore(store.today);
+const Clean = ({
+  what,
+  all = false,
+}: {
+  what: keyof typeof store;
+  all?: boolean;
+}) => {
+  const where = useSyncedStore(store[what]);
 
   return (
     <Button
@@ -174,22 +165,24 @@ const CleanToday = () => {
       bg="blackAlpha.900"
       onClick={() => {
         const cleanup = () => {
-          const doneIndex = today.findIndex(
-            (it: Thingy) => it.progress === 100
-          );
-          if (doneIndex < 0) {
-            return;
-          }
+          if (all) {
+            where.splice(0, where.length);
+          } else {
+            const doneIndex = R.findIndex(R.propEq("progress", 100))(where);
+            if (doneIndex === -1) {
+              return;
+            }
 
-          // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
-          today.splice(doneIndex, 1);
-          cleanup();
+            // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
+            where.splice(doneIndex, 1);
+            cleanup();
+          }
         };
 
         cleanup();
       }}
     >
-      🗑️
+      🚮
     </Button>
   );
 };
