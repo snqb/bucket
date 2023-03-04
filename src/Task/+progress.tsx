@@ -16,7 +16,6 @@ export const Progress = (props: Props) => {
   const { isExpanded, emoji = "🏊‍♀️", ...restProps } = props;
 
   const partialProps: any = {
-    mt: isExpanded ? 6 : 0,
     pointerEvents: isExpanded ? "initial" : "none",
   };
 

@@ -10,10 +10,10 @@ import { store } from "../store";
 const Later = () => {
   const later = useSyncedStore(store.later);
 
-  const parent = useAutoAnimate({ duration: 250, easing: "linear" });
+  const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
-    <VStack id="later" gap={2} align="stretch">
+    <VStack id="later" gap={2} align="stretch" ref={autoAnimate as any}>
       <Adder where="later" />
 
       {later.map((task, index) => (

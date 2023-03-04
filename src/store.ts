@@ -2,7 +2,11 @@ import { getYjsDoc, syncedStore } from "@syncedstore/core";
 import { IndexeddbPersistence } from "y-indexeddb";
 import { WebrtcProvider } from "y-webrtc";
 
-export const store = syncedStore({
+export const store = syncedStore<{
+  bucket: Thingy[];
+  today: Thingy[];
+  later: Thingy[];
+}>({
   bucket: [] as Thingy[],
   today: [] as Thingy[],
   later: [] as Thingy[],
@@ -29,6 +33,7 @@ export type Thingy = {
   progress: number;
   residence: Residence;
   description?: string;
+  next?: string;
 };
 
 type Title = {

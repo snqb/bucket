@@ -5,6 +5,14 @@ import {
   AccordionPanel,
   Box,
   BoxProps,
+  Button,
+  Flex,
+  Input,
+  InputGroup,
+  InputLeftAddon,
+  InputLeftElement,
+  InputRightAddon,
+  InputRightElement,
   Text,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
@@ -12,6 +20,7 @@ import { useState } from "react";
 
 import { useEffect } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { getRandomEmoji } from "../Adder/Adder";
 import { store, Thingy } from "../store";
 import { Progress } from "./+progress";
 import { ResizableTextarea } from "./+resizable-textarea";
@@ -24,74 +33,90 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
   const state = useSyncedStore(store.bucket);
   const thingy = state.find((it) => it.id === task.id);
   const [progress, onProgress] = useProgress(thingy!);
+  const today = useSyncedStore(store.today);
 
   if (!thingy) {
     return null;
   }
 
+  const whichColor = gradientColors[Math.ceil(thingy.progress / 10)];
+
+  const expandedProps = {
+    pb: 12,
+    pt: 2,
+    px: 4,
+    background: whichColor + "15",
+    // h: "70vh",
+    w: "full",
+  };
+
   return (
-    <AccordionItem
+    <Flex
+      direction="column"
       p={0}
-      border="none"
       borderRadius="lg"
+      gap={2}
       userSelect="none"
-      isFocusable={false}
       {...restItemProps}
+      {...expandedProps}
     >
-      {({ isExpanded }) => {
-        const whichColor = gradientColors[Math.ceil(thingy.progress / 10)];
+      <Box textAlign="left" as="span" fontSize="xl" fontWeight={500}>
+        {task.title.emoji} {task.title.text}
+      </Box>
 
-        const expandedProps = isExpanded
-          ? {
-              pb: 12,
-              pt: 2,
-              px: 4,
-              background: whichColor + "40",
-              mb: 6,
-              h: "70vh",
-            }
-          : {};
+      <Progress
+        p={0}
+        aria-label={`progress of ${thingy.title.text}`}
+        isExpanded={true}
+        defaultValue={task.progress}
+        onChange={onProgress}
+        value={progress}
+        step={0.01}
+        emoji="●"
+      />
 
-        return (
-          <Box {...expandedProps} sx={{ transition: "all .1s linear" }}>
-            <AccordionButton p={0} fontWeight={500} alignItems="baseline">
-              <EmojiThing mr={2} isTilted={isExpanded}>
-                {task.title.emoji}
-              </EmojiThing>
-              <Text
-                align="left"
-                fontWeight={500}
-                fontSize={isExpanded ? "2xl" : "medium"}
-              >
-                {task.title.text}
-              </Text>
-            </AccordionButton>
-            <Progress
-              aria-label={`progress of ${thingy.title.text}`}
-              isExpanded={isExpanded}
-              defaultValue={task.progress}
-              onChange={onProgress}
-              value={progress}
-              step={0.01}
-            />
-            <AccordionPanel px={0} pt={1} py={3}>
-              <ResizableTextarea
-                isExpanded={isExpanded}
-                color="#bababa"
-                variant="outline"
-                defaultValue={task.description}
-                focusBorderColor="transparent"
-                placeholder="if you wanna put some more"
-                border="none"
-                onChange={(e) => {
-                  thingy.description = e.target.value;
-                }}
-              />
-            </AccordionPanel>
-          </Box>
-        );
-      }}
-    </AccordionItem>
+      <ResizableTextarea
+        isExpanded={false}
+        color="#bababa"
+        variant="outline"
+        defaultValue={task.description}
+        focusBorderColor="transparent"
+        placeholder="..."
+        border="none"
+        onChange={(e) => {
+          thingy.description = e.target.value;
+        }}
+      >
+        <InputGroup size="sm">
+          <Input
+            value={thingy.next ?? ""}
+            onInput={(e) => {
+              thingy.next = e.currentTarget.value;
+            }}
+            placeholder="I want to do"
+          />
+          <InputRightAddon
+            onClick={() => {
+              if (!thingy.next) return;
+              today.push({
+                id: crypto.randomUUID(),
+                title: {
+                  text: thingy.next,
+                  emoji: getRandomEmoji(),
+                },
+                createdAt: new Date(),
+                progress: 10,
+                residence: "default",
+              });
+              thingy.next = "";
+            }}
+          >
+            🏄‍♂️next
+          </InputRightAddon>
+          {/* <InputRightAddon>→</InputRightAddon> */}
+        </InputGroup>
+      </ResizableTextarea>
+    </Flex>
   );
 };
 
@@ -117,23 +142,6 @@ const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
   };
 
   return [progress, onProgress];
-};
-
-const EmojiThing = ({
-  children,
-  isTilted,
-  ...props
-}: BoxProps & { isTilted: boolean }) => {
-  return (
-    <Box
-      as="span"
-      transform={isTilted ? "rotate(45deg)" : "initial"}
-      fontSize="xs"
-      {...props}
-    >
-      {children}
-    </Box>
-  );
 };
 
 const gradientColors = [

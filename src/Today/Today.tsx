@@ -10,10 +10,11 @@ import Later from "../Later/Later";
 
 const Today = () => {
   const today = useSyncedStore(store.today);
+  const [parent] = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
     <VStack justify="space-between" minH="100%" pb="30vh" align="stretch">
-      <VStack minH="40vh" spacing={4} align="stretch">
+      <VStack minH="40vh" spacing={4} align="stretch" ref={parent as any}>
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}

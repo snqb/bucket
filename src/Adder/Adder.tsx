@@ -96,7 +96,7 @@ const useInputEmoji = (
 
 export default Adder;
 
-function getRandomEmoji() {
+export function getRandomEmoji() {
   return emojis[Math.floor(Math.random() * emojis.length)];
 }
 

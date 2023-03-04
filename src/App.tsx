@@ -51,7 +51,7 @@ function App() {
       >
         <TabList
           position="fixed"
-          maxHeight="30vh"
+          maxHeight="20vh"
           top="69%"
           borderLeftRadius="30%"
           p={3}
@@ -63,7 +63,7 @@ function App() {
           <Tab>
             <Heading size="lg">🪣</Heading>
           </Tab>
-          <Tab mb={6}>
+          <Tab>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
         </TabList>
