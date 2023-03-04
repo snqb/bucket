@@ -100,10 +100,6 @@ const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
 
   const updateStoreProgress = useDebouncedCallback((progress: number) => {
     thingy.progress = progress;
-    // 98 because why not
-    if (progress > 98) {
-      thingy!.residence = "graveyard";
-    }
   }, 1000);
 
   useEffect(

@@ -15,11 +15,9 @@ const Bucket = () => {
   return (
     <Accordion allowToggle>
       <VStack align="stretch">
-        {state.bucket
-          .filter((it: Thingy) => it.residence !== "graveyard")
-          .map((task, index) => {
-            return <BucketTask tabIndex={index} key={task.id} task={task} />;
-          })}
+        {state.bucket.map((task, index) => {
+          return <BucketTask tabIndex={index} key={task.id} task={task} />;
+        })}
         <Adder where="bucket" />
       </VStack>
     </Accordion>

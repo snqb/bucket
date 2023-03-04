@@ -59,7 +59,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           w="full"
           onClick={onLeftClick}
         >
-          🪣↑
+          🪣←
         </Button>
         <Button
           filter="saturate(0.5)"
@@ -77,7 +77,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           w="full"
           onClick={onUpClick}
         >
-          🏄‍♂️⬇
+          🏄‍♂️↑
         </Button>
       </ButtonGroup>
     </VStack>

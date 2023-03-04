@@ -63,29 +63,21 @@ function App() {
           <Tab>
             <Heading size="lg">🪣</Heading>
           </Tab>
-          <Tab>
-            <Heading size="lg">❓</Heading>
-          </Tab>
           <Tab mb={6}>
             <Heading size="lg">🏄‍♂️</Heading>
           </Tab>
         </TabList>
         <TabPanels>
           <TabPanel {...panelStyles}>
-            <HeadingSection title="Bucket" emoji="🪣" />
+            <HeadingSection title="Bucket" emoji="🪣">
+              <Clean what="bucket" />
+            </HeadingSection>
             <Bucket />
           </TabPanel>
 
           <TabPanel {...panelStyles}>
-            <HeadingSection title="Later" emoji="❓">
-              <Clean all what="later" />
-            </HeadingSection>
-            <Later />
-          </TabPanel>
-
-          <TabPanel {...panelStyles}>
             <HeadingSection title="Today" emoji="🏄‍♂️">
-              {hasDone && <Clean what="today" />}
+              <Clean what="today" />
             </HeadingSection>
             <Today />
           </TabPanel>
@@ -152,6 +144,10 @@ const Clean = ({
   all?: boolean;
 }) => {
   const where = useSyncedStore(store[what]);
+
+  const hasDones = where.some((it) => it.progress === 100);
+
+  if (!hasDones) return null;
 
   return (
     <Button

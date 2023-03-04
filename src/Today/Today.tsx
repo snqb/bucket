@@ -12,11 +12,26 @@ const Today = () => {
   const today = useSyncedStore(store.today);
 
   return (
-    <VStack minH="40vh" pb="30vh" spacing={4} align="stretch">
-      {today.map((task, index) => (
-        <Task tabIndex={index} key={task.id} task={task} />
-      ))}
-      <Adder where="today" />
+    <VStack justify="space-between" minH="100%" pb="30vh" align="stretch">
+      <VStack minH="40vh" spacing={4} align="stretch">
+        {today.map((task, index) => (
+          <Task tabIndex={index} key={task.id} task={task} />
+        ))}
+        <Adder where="today" />
+      </VStack>
+      <VStack
+        _focusWithin={{
+          opacity: 1,
+        }}
+        opacity={0.5}
+        align="stretch"
+        spacing={4}
+      >
+        <Heading textAlign="left" size="lg">
+          ❓Later
+        </Heading>
+        <Later />
+      </VStack>
     </VStack>
   );
 };
