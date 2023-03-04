@@ -42,10 +42,10 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
   const whichColor = gradientColors[Math.ceil(thingy.progress / 10)];
 
   const expandedProps = {
-    pb: 12,
+    pb: 6,
     pt: 2,
     px: 4,
-    background: whichColor + "15",
+    background: whichColor + "25",
     // h: "70vh",
     w: "full",
   };
@@ -93,9 +93,10 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
             onInput={(e) => {
               thingy.next = e.currentTarget.value;
             }}
-            placeholder="I want to do"
+            placeholder="next step is"
           />
           <InputRightAddon
+            ml={3}
             onClick={() => {
               if (!thingy.next) return;
               today.push({
@@ -111,7 +112,7 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
               thingy.next = "";
             }}
           >
-            🏄‍♂️next
+            today ➡️
           </InputRightAddon>
           {/* <InputRightAddon>→</InputRightAddon> */}
         </InputGroup>
