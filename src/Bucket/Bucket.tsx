@@ -13,9 +13,11 @@ const Bucket = () => {
 
   return (
     <VStack align="stretch" spacing={4} ref={autoAnimate as any}>
-      {state.bucket.map((task, index) => {
-        return <BucketTask tabIndex={index} key={task.id} task={task} />;
-      })}
+      {state.bucket
+        .filter((it) => it.residence !== "graveyard")
+        .map((task, index) => {
+          return <BucketTask tabIndex={index} key={task.id} task={task} />;
+        })}
       <Adder where="bucket" />
     </VStack>
   );
