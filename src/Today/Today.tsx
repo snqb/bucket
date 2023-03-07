@@ -24,7 +24,7 @@ const Today = () => {
         _focusWithin={{
           filter: "none",
         }}
-        filter="blur(2px)"
+        filter="opacity(0.4)"
         align="stretch"
         spacing={4}
       >

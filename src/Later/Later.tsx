@@ -1,4 +1,4 @@
-import { VStack } from "@chakra-ui/react";
+import { StackDivider, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { LaterTask } from "../Task";
 
@@ -9,16 +9,16 @@ import Adder from "../Adder";
 import { store } from "../store";
 
 const Later = () => {
-
   const later = useSyncedStore(store.later);
 
   const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
 
   return (
     <VStack
+      spacing={4}
       id="later"
-      gap={2}
       align="stretch"
+      divider={<StackDivider borderColor="gray.800" />}
       ref={autoAnimate as any}
     >
       <Adder placeholder="anything that is not now" where="later" />

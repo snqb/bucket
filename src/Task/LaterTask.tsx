@@ -45,7 +45,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
       p={0}
       userSelect="none"
       {...restItemProps}
-      spacing={2}
+      spacing={0}
     >
       <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
         {task.title.emoji}
@@ -53,8 +53,9 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
       </Box>
       <ButtonGroup variant="outline" size="lg" w="full">
         <Button
-          filter="saturate(0.5)"
-          fontSize="2xl"
+          variant="outline"
+          size="xs"
+          fontSize="md"
           fontWeight="bold"
           w="full"
           onClick={onLeftClick}
@@ -62,8 +63,9 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           🪣←
         </Button>
         <Button
-          filter="saturate(0.5)"
-          fontSize="2xl"
+          variant="outline"
+          size="xs"
+          fontSize="md"
           fontWeight="bold"
           w="full"
           onClick={onRemoveClick}
@@ -71,8 +73,9 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           ❌
         </Button>
         <Button
-          filter="saturate(0.5)"
-          fontSize="2xl"
+          variant="outline"
+          size="xs"
+          fontSize="md"
           fontWeight="bold"
           w="full"
           onClick={onUpClick}
