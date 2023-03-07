@@ -119,7 +119,7 @@ const HeadingSection = ({
       mb={5}
       zIndex={3}
     >
-      <Heading bg="black" size="xl" textAlign="left">
+      <Heading bg="black" size="2xl" textAlign="left">
         <EmojiThing>{emoji}</EmojiThing>
         {title}
       </Heading>

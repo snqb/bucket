@@ -78,10 +78,10 @@ export const Progress = (props: Props) => {
         />
       </SliderTrack>
       <SliderMark
-        filter={value < 100 ? "opacity(0.2)" : "initial"}
+        filter={value < 100 ? "opacity(0.4)" : "initial"}
         value={-(100 - value)}
         sx={S.markTitle}
-        top={-0.75}
+        top={-1}
       >
         <Box>
           <Box as="span" filter="grayscale(100%)">
