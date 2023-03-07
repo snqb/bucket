@@ -46,13 +46,12 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
     pt: 2,
     px: 4,
     background: whichColor + "25",
-    // h: "70vh",
     w: "full",
   };
 
   return (
     <Flex
-      minH="50vh"
+      minH="60vh"
       direction="column"
       p={0}
       borderRadius="lg"

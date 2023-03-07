@@ -52,7 +52,7 @@ function App() {
         <TabList
           position="fixed"
           maxHeight="20vh"
-          top="79%"
+          top="69%"
           borderLeftRadius="30%"
           p={3}
           right={0}

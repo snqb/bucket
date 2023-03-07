@@ -67,7 +67,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 
   return (
     <InputGroup
-      opacity={0.6}
+      opacity={0.8}
       _focusWithin={{
         opacity: 1,
       }}
