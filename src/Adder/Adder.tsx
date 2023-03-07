@@ -24,9 +24,9 @@ const initialEmoji: Record<keyof typeof store, string> = {
 };
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const { where = "bucket" } = props;
+  const { where = "bucket", placeholder } = props;
   const tasks = useSyncedStore(store);
-  const [emoji, generateEmoji, clearEmoji] = useInputEmoji(initialEmoji[where]);
+  const [emoji, generateEmoji, clearEmoji] = useInputEmoji(getRandomEmoji());
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
@@ -44,7 +44,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         emoji,
       },
       createdAt: new Date(),
-      progress: 10,
+      progress: 0,
       residence: "default",
     };
 
@@ -58,6 +58,8 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     }
   };
 
+  console.log(placeholder);
+
   return (
     <InputGroup variant="outline" size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
@@ -66,9 +68,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         type="text"
         autoComplete="off"
         value={text}
-        placeholder="write it down"
         onChange={handleChange}
         onInput={generateEmoji}
+        placeholder={placeholder}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
       />
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
@@ -77,11 +79,11 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 });
 
 const useInputEmoji = (
-  initial: string
+  initial: string = getRandomEmoji()
 ): [string, ChangeEventHandler<HTMLInputElement>, () => void] => {
   const [emoji, setEmoji] = useState(initial);
 
-  const clearEmoji = useCallback(() => setEmoji(initial), []);
+  const clearEmoji = useCallback(() => setEmoji(getRandomEmoji()), []);
 
   const generateEmojiFromText: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.currentTarget.value,

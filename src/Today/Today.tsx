@@ -5,8 +5,8 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import Adder from "../Adder";
-import { store } from "../store";
 import Later from "../Later/Later";
+import { store } from "../store";
 
 const Today = () => {
   const today = useSyncedStore(store.today);
@@ -14,17 +14,17 @@ const Today = () => {
 
   return (
     <VStack justify="space-between" minH="100%" pb="30vh" align="stretch">
-      <VStack minH="40vh" spacing={4} align="stretch" ref={parent as any}>
+      <VStack minH="60vh" spacing={6} align="stretch" ref={parent as any}>
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
-        <Adder where="today" />
+        <Adder mb={5} placeholder="now/today/any/even tomorrow" where="today" />
       </VStack>
       <VStack
         _focusWithin={{
-          opacity: 1,
+          filter: "none",
         }}
-        opacity={0.5}
+        filter="blur(2px)"
         align="stretch"
         spacing={4}
       >

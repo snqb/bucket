@@ -34,9 +34,9 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       {...restItemProps}
       spacing={0}
     >
-      <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
+      {/* <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
         {task.title.text}
-      </Box>
+      </Box> */}
       <Progress
         isExpanded
         // filter={`saturate(${(progress + 30) / 100})`}
@@ -48,6 +48,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
         height="16px"
         step={0.01}
         emoji={task.title.emoji}
+        huy={task.title.text}
       />
     </VStack>
   );
@@ -58,11 +59,7 @@ const useProgress = (thingy: Thingy): [number, (value: number) => void] => {
 
   const updateStoreProgress = useDebouncedCallback((progress: number) => {
     thingy.progress = progress;
-    // 98 because why not
-    if (progress > 98) {
-      thingy!.residence = "graveyard";
-    }
-  }, 1000);
+  }, 500);
 
   useEffect(
     function updateLocalVariableFromRemote() {

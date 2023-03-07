@@ -52,7 +52,7 @@ function App() {
         <TabList
           position="fixed"
           maxHeight="20vh"
-          top="69%"
+          top="79%"
           borderLeftRadius="30%"
           p={3}
           right={0}
@@ -116,7 +116,7 @@ const HeadingSection = ({
       position="sticky"
       top={0}
       p={1}
-      mb={4}
+      mb={5}
       zIndex={3}
     >
       <Heading bg="black" size="xl" textAlign="left">
