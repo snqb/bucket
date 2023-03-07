@@ -52,6 +52,7 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
 
   return (
     <Flex
+      minH="50vh"
       direction="column"
       p={0}
       borderRadius="lg"
@@ -88,12 +89,13 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
         }}
       >
         <InputGroup size="sm">
+          <InputLeftAddon opacity={0.5}>next: </InputLeftAddon>
           <Input
             value={thingy.next ?? ""}
             onInput={(e) => {
               thingy.next = e.currentTarget.value;
             }}
-            placeholder="next step is"
+            placeholder=".."
           />
           <InputRightAddon
             ml={3}
@@ -112,7 +114,7 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
               thingy.next = "";
             }}
           >
-            today ➡️
+            ➡️
           </InputRightAddon>
           {/* <InputRightAddon>→</InputRightAddon> */}
         </InputGroup>

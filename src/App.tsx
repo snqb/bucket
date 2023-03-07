@@ -102,7 +102,7 @@ const usePersistedTab = () => {
   return tabState;
 };
 
-const HeadingSection = ({
+export const HeadingSection = ({
   title,
   emoji,
   children,
@@ -136,7 +136,7 @@ const EmojiThing = ({ children }: PropsWithChildren) => {
   );
 };
 
-const Clean = ({
+export const Clean = ({
   what,
   all = false,
 }: {
