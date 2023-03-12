@@ -34,9 +34,9 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       {...restItemProps}
       spacing={0}
     >
-      {/* <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
+      <Box w="100%" textAlign="left" as="span" fontSize="3xl" fontWeight={500}>
         {task.title.text}
-      </Box> */}
+      </Box>
       <Progress
         isExpanded
         // filter={`saturate(${(progress + 30) / 100})`}
@@ -45,10 +45,10 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
         defaultValue={task.progress}
         onChange={onProgress}
         value={progress}
-        height="16px"
+        height="8px"
         step={0.01}
         emoji={task.title.emoji}
-        huy={task.title.text}
+        text={task.title.text}
       />
     </VStack>
   );

@@ -35,7 +35,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
-    (e) => e.currentTarget.value,
+    (e) => e.target.value,
     setText
   );
 
@@ -67,7 +67,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 
   return (
     <InputGroup
-      opacity={0.8}
+      opacity={0.9}
       _focusWithin={{
         opacity: 1,
       }}
@@ -83,7 +83,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         autoComplete="off"
         value={text}
         onChange={handleChange}
-        onBlur={handleChange}
+        onBlur={onAdd}
         onInput={generateEmoji}
         placeholder={placeholder}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}

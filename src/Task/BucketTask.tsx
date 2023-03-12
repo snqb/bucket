@@ -27,9 +27,14 @@ import { ResizableTextarea } from "./+resizable-textarea";
 
 interface Props extends AccordionItemProps {
   task: Thingy;
+  showFooter?: boolean;
 }
 
-export const BucketTask = ({ task, ...restItemProps }: Props) => {
+export const BucketTask = ({
+  task,
+  showFooter = false,
+  ...restItemProps
+}: Props) => {
   const state = useSyncedStore(store.bucket);
   const thingy = state.find((it) => it.id === task.id);
   const [progress, onProgress] = useProgress(thingy!);
@@ -51,7 +56,7 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
 
   return (
     <Flex
-      minH="60vh"
+      minH="20vh"
       direction="column"
       p={0}
       borderRadius="lg"
@@ -118,6 +123,18 @@ export const BucketTask = ({ task, ...restItemProps }: Props) => {
           {/* <InputRightAddon>→</InputRightAddon> */}
         </InputGroup>
       </ResizableTextarea>
+      {showFooter && (
+        <Box
+          mt="auto"
+          opacity={0.5}
+          textAlign="left"
+          as="span"
+          fontSize="xl"
+          fontWeight={500}
+        >
+          {task.title.emoji} {task.title.text}
+        </Box>
+      )}
     </Flex>
   );
 };

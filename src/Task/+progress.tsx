@@ -8,16 +8,18 @@ import {
   SliderThumb,
   SliderTrack,
   Text,
+  VStack,
 } from "@chakra-ui/react";
+import Task from ".";
 
 interface Props extends SliderProps {
   isExpanded: boolean;
   emoji?: string;
-  huy?: string;
+  text?: string;
 }
 
 export const Progress = (props: Props) => {
-  const { isExpanded, emoji = "🏊‍♀️", huy, value = 0, ...restProps } = props;
+  const { isExpanded, emoji = "🏊‍♀️", text, value = 0, ...restProps } = props;
 
   const partialProps: any = {
     pointerEvents: isExpanded ? "initial" : "none",
@@ -51,14 +53,16 @@ export const Progress = (props: Props) => {
       {...restProps}
       pointerEvents="none"
       overflow="hidden"
-      filter={value === 100 ? "opacity(0.2)" : "initial"}
+      // filter={value === 100 ? "opacity(0.5)" : "initial"}
+      // opacity={`-(${-((100 - value) * 2)}%`}
     >
       <SliderTrack
         minH="1rem"
-        h="3vmin"
         sx={{
           maskImage: `url(/line2.svg)`,
+          // bg: "linear-gradient(to right, #33ccee3A, #00b7f23A, #00a0f43A, #0086f03A, #0069e33A);",
           maskSize: "cover",
+          bg: "blackAlpha.900",
         }}
         mt={0}
       >
@@ -69,7 +73,9 @@ export const Progress = (props: Props) => {
           sx={{
             maskImage: `url(/line2.svg)`,
             maskSize: "cover",
-            bg: "linear-gradient(to right, #33ccee, #00b7f2, #00a0f4, #0086f0, #0069e3);",
+            bg: "white",
+
+            // bg: "linear-gradient(to right, #33ccee, #00b7f2, #00a0f4, #0086f0, #0069e3);",
           }}
           backgroundBlendMode="multiply"
           transition="width .3s ease-out"
@@ -77,41 +83,10 @@ export const Progress = (props: Props) => {
           filter="initial"
         />
       </SliderTrack>
-      <SliderMark
-        filter={value < 100 ? "opacity(0.4)" : "initial"}
-        value={-(100 - value)}
-        sx={S.markTitle}
-        top={-1}
-      >
-        <Box>
-          <Box as="span" filter="grayscale(100%)">
-            {emoji}
-          </Box>
-          <Box as="span" textDecoration="line-through">
-            {huy}
-          </Box>
+      <SliderThumb pointerEvents="auto" bg="blackAlpha.600" ml={2} boxSize={8} mt={-3}>
+        <Box as="span" transform="scaleX(-1)">
+          {emoji}
         </Box>
-      </SliderMark>
-      <SliderThumb
-        pointerEvents="auto"
-        h="fit-content"
-        top={3}
-        bg="blackAlpha.900"
-        w="fit-content"
-        overflowX="hidden"
-        left={
-          value > 80
-            ? `calc(${value}% - 24px) !important`
-            : `${value}% !important`
-        }
-      >
-        <Flex fontSize="xl" color="white" gap={1}>
-          <Box>{emoji}</Box>
-
-          <Box w="max-content" sx={S.markTitle}>
-            {huy}
-          </Box>
-        </Flex>
       </SliderThumb>
     </Slider>
   );

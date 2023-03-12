@@ -4,7 +4,6 @@ import { LaterTask } from "../Task";
 
 import { useSyncedStore } from "@syncedstore/react";
 
-import { useInView } from "react-intersection-observer";
 import Adder from "../Adder";
 import { store } from "../store";
 

@@ -1,4 +1,4 @@
-import { Flex, VStack } from "@chakra-ui/react";
+import { Flex, VStack, Box } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Swiper, SwiperSlide } from "swiper/react";
 
@@ -20,8 +20,7 @@ const Bucket = () => {
     <Flex direction="column" align="stretch" gap={6} overflowY="hidden">
       <Swiper
         style={{
-          // border: "1px solid red",
-          height: "70vh",
+          height: "77vh",
           width: "100%",
         }}
         direction="vertical"
@@ -39,7 +38,13 @@ const Bucket = () => {
           .map((task, index) => {
             return (
               <SwiperSlide key={task.id}>
-                <BucketTask tabIndex={index} key={task.id} task={task} />
+                <BucketTask
+                  tabIndex={index}
+                  key={task.id}
+                  task={task}
+                  filter={index !== slide ? "opacity(0.5)" : "initial"}
+                  transition="filter 0.2s"
+                />
               </SwiperSlide>
             );
           })}
