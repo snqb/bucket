@@ -1,4 +1,10 @@
-import { StackDivider, VStack } from "@chakra-ui/react";
+import {
+  Heading,
+  Skeleton,
+  SkeletonText,
+  StackDivider,
+  VStack,
+} from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { LaterTask } from "../Task";
 
@@ -20,11 +26,15 @@ const Later = () => {
       divider={<StackDivider borderColor="gray.800" />}
       ref={autoAnimate as any}
     >
-      <Adder placeholder="anything that is not now" where="later" />
-
+      {later.length === 0 && (
+        <VStack align="stretch">
+          <Skeleton h="48px" />
+        </VStack>
+      )}
       {later.map((task, index) => (
         <LaterTask tabIndex={index} key={task.id} task={task} />
       ))}
+      <Adder placeholder="anything that is not now" where="later" />
     </VStack>
   );
 };

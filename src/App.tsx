@@ -1,38 +1,24 @@
 import {
-  Box,
-  Button,
   Flex,
-  Heading,
-  StyleProps,
-  Tab,
+  Heading, Tab,
   TabList,
   TabPanel,
   TabPanels,
-  Tabs,
+  Tabs
 } from "@chakra-ui/react";
 import Bucket from "./Bucket";
 
-import * as R from "ramda";
-import { PropsWithChildren, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
-import { store } from "./store";
 import Today from "./Today";
 
-import { useSyncedStore } from "@syncedstore/react";
+import { Clean } from "./@components/Clean";
 import Later from "./Later";
 
-const panelStyles: StyleProps = {
-  h: "100%", // so that it fills the whole screen
-  p: 2,
-  pb: "40vh",
-};
-
-localStorage.setItem("log", "y-webrtc");
+// localStorage.setItem("log", "y-webrtc");
 
 function App() {
   const [tab, setTab] = usePersistedTab();
-  const today = useSyncedStore(store.today);
-  const hasDone = today.some((task) => task.progress === 100);
 
   return (
     <Flex
@@ -41,45 +27,33 @@ function App() {
       direction="column"
       scrollBehavior="smooth"
     >
-      <Tabs
-        orientation="vertical"
-        px={0}
-        variant="soft-rounded"
-        index={tab}
-        onChange={setTab}
-        align="center"
-      >
-        <TabList
-          position="fixed"
-          maxHeight="20vh"
-          top="69%"
-          borderLeftRadius="30%"
-          p={3}
-          right={0}
-          zIndex={2}
-          bottom="0"
-          bg="blackAlpha.800"
-        >
+      <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
+        <TabList bg="blackAlpha.800">
           <Tab>
-            <Heading size="lg">🪣</Heading>
+            <Heading size="lg">🪣Bucket</Heading>
           </Tab>
           <Tab>
-            <Heading size="lg">🏄‍♂️</Heading>
+            <Heading size="lg">🏄‍♂️Today</Heading>
+          </Tab>
+          <Tab>
+            <Heading size="lg">❓</Heading>
           </Tab>
         </TabList>
         <TabPanels>
-          <TabPanel {...panelStyles}>
-            <HeadingSection title="Bucket" emoji="🪣">
-              <Clean what="bucket" />
-            </HeadingSection>
+          <TabPanel>
+            <Clean what="bucket" />
+
             <Bucket />
           </TabPanel>
 
-          <TabPanel {...panelStyles}>
-            <HeadingSection title="Today" emoji="🏄‍♂️">
-              <Clean what="today" />
-            </HeadingSection>
+          <TabPanel>
+            <Clean what="today" />
+
             <Today />
+          </TabPanel>
+
+          <TabPanel>
+            <Later />
           </TabPanel>
         </TabPanels>
       </Tabs>
@@ -100,82 +74,4 @@ const usePersistedTab = () => {
   }, [tab]);
 
   return tabState;
-};
-
-export const HeadingSection = ({
-  title,
-  emoji,
-  children,
-}: PropsWithChildren<{ title: string; emoji: string }>) => {
-  return (
-    <Flex
-      bg="black"
-      w="full"
-      align="center"
-      justify="space-between"
-      position="sticky"
-      bottom={0}
-      p={1}
-      mb={5}
-      zIndex={3}
-    >
-      <Heading bg="black" size="2xl" textAlign="left">
-        <EmojiThing>{emoji}</EmojiThing>
-        {title}
-      </Heading>
-      <Box>{children}</Box>
-    </Flex>
-  );
-};
-
-const EmojiThing = ({ children }: PropsWithChildren) => {
-  return (
-    <Box fontSize="xl" as="span">
-      {children}&nbsp;
-    </Box>
-  );
-};
-
-export const Clean = ({
-  what,
-  all = false,
-}: {
-  what: keyof typeof store;
-  all?: boolean;
-}) => {
-  const where = useSyncedStore(store[what]);
-
-  const hasDones = where.some((it) => it.progress === 100);
-
-  if (!hasDones) return null;
-
-  return (
-    <Button
-      w="fit-content"
-      variant="ghost"
-      ml="auto"
-      fontSize="x-large"
-      bg="blackAlpha.900"
-      onClick={() => {
-        const cleanup = () => {
-          if (all) {
-            where.splice(0, where.length);
-          } else {
-            const doneIndex = R.findIndex(R.propEq("progress", 100))(where);
-            if (doneIndex === -1) {
-              return;
-            }
-
-            // we recursively delete them because syncedstore doesn't support `filter`, as we have to mutate
-            where.splice(doneIndex, 1);
-            cleanup();
-          }
-        };
-
-        cleanup();
-      }}
-    >
-      🚮
-    </Button>
-  );
 };

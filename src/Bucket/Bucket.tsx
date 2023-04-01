@@ -39,6 +39,7 @@ const Bucket = () => {
             return (
               <SwiperSlide key={task.id}>
                 <BucketTask
+                  minHeight="60vh"
                   tabIndex={index}
                   key={task.id}
                   task={task}

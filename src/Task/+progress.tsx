@@ -59,7 +59,7 @@ export const Progress = (props: Props) => {
       <SliderTrack
         minH="1rem"
         sx={{
-          maskImage: `url(/line2.svg)`,
+          // maskImage: `url(/line2.svg)`,
           // bg: "linear-gradient(to right, #33ccee3A, #00b7f23A, #00a0f43A, #0086f03A, #0069e33A);",
           maskSize: "cover",
           bg: "blackAlpha.900",
@@ -71,7 +71,7 @@ export const Progress = (props: Props) => {
           minH="1rem"
           h="3vw"
           sx={{
-            maskImage: `url(/line2.svg)`,
+            // maskImage: `url(/line2.svg)`,
             maskSize: "cover",
             bg: "white",
 

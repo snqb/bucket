@@ -56,7 +56,6 @@ export const BucketTask = ({
 
   return (
     <Flex
-      minH="20vh"
       direction="column"
       p={0}
       borderRadius="lg"
