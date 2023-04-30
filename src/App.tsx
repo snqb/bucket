@@ -35,9 +35,9 @@ function App() {
           <Tab>
             <Heading size="lg">🏄‍♂️Today</Heading>
           </Tab>
-          <Tab>
+          {/* <Tab>
             <Heading size="lg">❓</Heading>
-          </Tab>
+          </Tab> */}
         </TabList>
         <TabPanels>
           <TabPanel>
@@ -52,9 +52,9 @@ function App() {
             <Today />
           </TabPanel>
 
-          <TabPanel>
+          {/* <TabPanel>
             <Later />
-          </TabPanel>
+          </TabPanel> */}
         </TabPanels>
       </Tabs>
       <ReloadPrompt />

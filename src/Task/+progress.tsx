@@ -57,9 +57,9 @@ export const Progress = (props: Props) => {
       // opacity={`-(${-((100 - value) * 2)}%`}
     >
       <SliderTrack
-        minH="1rem"
+        minH=".6rem"
         sx={{
-          // maskImage: `url(/line2.svg)`,
+          maskImage: `url(/line2.svg)`,
           // bg: "linear-gradient(to right, #33ccee3A, #00b7f23A, #00a0f43A, #0086f03A, #0069e33A);",
           maskSize: "cover",
           bg: "blackAlpha.900",
@@ -68,7 +68,7 @@ export const Progress = (props: Props) => {
       >
         <SliderFilledTrack
           minHeight="100%"
-          minH="1rem"
+          minH=".6rem"
           h="3vw"
           sx={{
             // maskImage: `url(/line2.svg)`,
@@ -83,7 +83,13 @@ export const Progress = (props: Props) => {
           filter="initial"
         />
       </SliderTrack>
-      <SliderThumb pointerEvents="auto" bg="blackAlpha.600" ml={2} boxSize={8} mt={-3}>
+      <SliderThumb
+        pointerEvents="auto"
+        bg="blackAlpha.600"
+        ml={2}
+        boxSize={8}
+        mt={-3}
+      >
         <Box as="span" transform="scaleX(-1)">
           {emoji}
         </Box>

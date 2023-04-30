@@ -72,4 +72,7 @@ export default defineConfig({
     },
   },
   plugins: [PWA],
+  build: {
+    target: "safari11",
+  },
 });
