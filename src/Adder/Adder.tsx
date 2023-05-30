@@ -33,7 +33,8 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     setText
   );
 
-  const onAdd = () => {
+  const onAdd = (e: any) => {
+    e.preventDefault();
     if (!text) return;
 
     const task: Thingy = {
@@ -79,7 +80,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         onBlur={onAdd}
         onInput={generateEmoji}
         placeholder={placeholder}
-        onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
+        onKeyDown={R.when((e) => {
+          return e.key === "Enter";
+        }, onAdd)}
         bg="whiteAlpha.100"
       />
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
