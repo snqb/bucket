@@ -65,10 +65,12 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       opacity={0.9}
       size="md"
       ref={ref}
+      tabIndex={-1}
       {...props}
     >
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
+        tabIndex={-1}
         id={`adder-${where}`}
         type="text"
         autoComplete="off"
