@@ -32,7 +32,7 @@ const Bucket = () => {
         effect="cube"
         direction="horizontal"
         slidesPerView={1}
-        autoHeight
+        cssMode
         initialSlide={slide}
         onSlideChange={(it) => {
           setSlide(it.activeIndex);

@@ -29,10 +29,9 @@ function App() {
         }}
         cssMode
         direction="vertical"
-        slidesPerView="auto"
+        slidesPerView={2}
         spaceBetween={4}
         centeredSlides
-        autoHeight
         initialSlide={slide}
         onSlideChange={(it) => {
           setSlide(it.activeIndex);
@@ -42,7 +41,7 @@ function App() {
           <VStack
             filter={0 !== slide ? "opacity(0.5)" : "initial"}
             align="stretch"
-            minH="50vh"
+            h="50vh"
             spacing={8}
           >
             <Heading size="2xl">Short</Heading>
