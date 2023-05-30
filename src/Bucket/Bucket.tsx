@@ -51,7 +51,6 @@ const Bucket = () => {
                 <BucketTask
                   minH="55vh"
                   bg="whiteAlpha.100"
-                  tabIndex={index}
                   key={task.id}
                   task={task}
                   filter={index !== slide ? "opacity(0.5)" : "initial"}

@@ -16,7 +16,7 @@ const Today = () => {
       <Adder w="full" placeholder="slower things..." where="today" />
       <VStack spacing={3} align="stretch" ref={parent as any}>
         {today.map((task, index) => (
-          <Task tabIndex={index} key={task.id} task={task} />
+          <Task key={task.id} task={task} />
         ))}
       </VStack>
     </VStack>

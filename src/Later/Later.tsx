@@ -29,7 +29,7 @@ const Later = () => {
       <Adder placeholder="faster things..." where="later" />
 
       {later.map((task, index) => (
-        <LaterTask tabIndex={index} key={task.id} task={task} />
+        <LaterTask key={task.id} task={task} />
       ))}
     </VStack>
   );
