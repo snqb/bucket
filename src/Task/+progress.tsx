@@ -1,5 +1,6 @@
 import {
   Box,
+  css,
   Flex,
   Slider,
   SliderFilledTrack,
@@ -10,77 +11,47 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
+import { useState } from "react";
 import Task from ".";
 
 interface Props extends SliderProps {
-  isExpanded: boolean;
   emoji?: string;
   text?: string;
 }
 
 export const Progress = (props: Props) => {
-  const { isExpanded, emoji = "🏊‍♀️", text, value = 0, ...restProps } = props;
-
-  const partialProps: any = {
-    pointerEvents: isExpanded ? "initial" : "none",
-  };
-
-  if (!isExpanded) {
-    return (
-      <Slider focusThumbOnChange={false} {...partialProps} {...restProps}>
-        <SliderTrack
-          bg="rgba(25, 25, 25, 0.5)"
-          backgroundSize="contain"
-          backgroundBlendMode="multiply"
-          mt={-2}
-        >
-          <SliderFilledTrack
-            minHeight="100%"
-            bg={gradient}
-            backgroundSize="contain"
-            backgroundBlendMode="multiply"
-            transition="all .5s ease-in"
-          />
-        </SliderTrack>
-      </Slider>
-    );
-  }
+  const { emoji = "🏊‍♀️", text, ...restProps } = props;
+  const [sliderValue, setSliderValue] = useState(50);
 
   return (
     <Slider
       focusThumbOnChange={false}
-      {...partialProps}
       {...restProps}
       pointerEvents="none"
       overflow="hidden"
-      // filter={value === 100 ? "opacity(0.5)" : "initial"}
-      // opacity={`-(${-((100 - value) * 2)}%`}
+      variant="wavy"
+      value={sliderValue}
+      onChange={(val) => setSliderValue(val)}
     >
       <SliderTrack
         minH=".6rem"
         sx={{
           maskImage: `url(/line2.svg)`,
-          // bg: "linear-gradient(to right, #33ccee3A, #00b7f23A, #00a0f43A, #0086f03A, #0069e33A);",
-          maskSize: "cover",
-          bg: "blackAlpha.900",
+          bg: "gray",
         }}
         mt={0}
       >
         <SliderFilledTrack
           minHeight="100%"
-          minH=".6rem"
+          minH="1rem"
           h="3vw"
+          w="100%"
           sx={{
-            // maskImage: `url(/line2.svg)`,
-            maskSize: "cover",
-            bg: "white",
-
-            // bg: "linear-gradient(to right, #33ccee, #00b7f2, #00a0f4, #0086f0, #0069e3);",
+            bg: `blue.${toHundreds(sliderValue * 9)}`,
           }}
-          backgroundBlendMode="multiply"
+          // backgroundBlendMode="multiply"
           transition="width .3s ease-out"
           willChange="width"
-          filter="initial"
         />
       </SliderTrack>
       <SliderThumb
@@ -90,7 +61,7 @@ export const Progress = (props: Props) => {
         boxSize={8}
         mt={-3}
       >
-        <Box as="span" transform="scaleX(-1)">
+        <Box as="span" transform={`translate(-50%, ${getWaveOffset(10)})`}>
           {emoji}
         </Box>
       </SliderThumb>
@@ -98,6 +69,15 @@ export const Progress = (props: Props) => {
   );
 };
 
+const toHundreds = (x: number) => Math.round(x / 100) * 100;
+
+function getWaveOffset(x: number) {
+  const frequency = 0.03;
+  const amplitude = 10;
+  const phase = -0.5 * Math.PI;
+
+  return amplitude * Math.sin(frequency * x + phase);
+}
 const S = {
   markTitle: {
     fontWeight: 500,

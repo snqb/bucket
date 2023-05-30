@@ -32,14 +32,12 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       p={0}
       userSelect="none"
       {...restItemProps}
-      spacing={0}
+      spacing={-3}
     >
-      <Box w="100%" textAlign="left" as="span" fontSize="3xl" fontWeight={500}>
+      <Text w="100%" fontSize="3xl" color="#efefef">
         {task.title.text}
-      </Box>
+      </Text>
       <Progress
-        isExpanded
-        // filter={`saturate(${(progress + 30) / 100})`}
         mt={0}
         aria-label={`progress of ${thingy.title.text}`}
         defaultValue={task.progress}

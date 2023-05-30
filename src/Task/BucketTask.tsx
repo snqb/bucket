@@ -49,8 +49,7 @@ export const BucketTask = ({
   const expandedProps = {
     pb: 6,
     pt: 2,
-    px: 4,
-    background: whichColor + "25",
+    px: 2,
     w: "full",
   };
 
@@ -71,7 +70,6 @@ export const BucketTask = ({
       <Progress
         p={0}
         aria-label={`progress of ${thingy.title.text}`}
-        isExpanded={true}
         defaultValue={task.progress}
         onChange={onProgress}
         value={progress}

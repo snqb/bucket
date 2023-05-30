@@ -1,62 +1,37 @@
-import {
-  Flex,
-  Heading, Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs
-} from "@chakra-ui/react";
-import Bucket from "./Bucket";
+import { Flex, Heading, Spacer, StackDivider, VStack } from "@chakra-ui/react";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 import Today from "./Today";
 
-import { Clean } from "./@components/Clean";
 import Later from "./Later";
-
-// localStorage.setItem("log", "y-webrtc");
+import Bucket from "./Bucket";
 
 function App() {
-  const [tab, setTab] = usePersistedTab();
-
   return (
-    <Flex
-      px={[2, 5, 10, 20, 300]}
-      py={[4, 1, 1, 1, 1, 10]}
-      direction="column"
-      scrollBehavior="smooth"
-    >
-      <Tabs px={0} variant="soft-rounded" index={tab} onChange={setTab}>
-        <TabList bg="blackAlpha.800">
-          <Tab>
-            <Heading size="lg">🪣Bucket</Heading>
-          </Tab>
-          <Tab>
-            <Heading size="lg">🏄‍♂️Today</Heading>
-          </Tab>
-          {/* <Tab>
-            <Heading size="lg">❓</Heading>
-          </Tab> */}
-        </TabList>
-        <TabPanels>
-          <TabPanel>
-            <Clean what="bucket" />
+    <Flex px={[5, 5, 10, 20, 300]} pt={12} pb={128} maxW="500px">
+      <VStack
+        mt="36vh"
+        spacing={16}
+        divider={<StackDivider />}
+        align="stretch"
+        w="full"
+        minH="100vh"
+      >
+        <VStack align="stretch" minH="30vh">
+          <Heading size="2xl">Short</Heading>
+          <Later />
+        </VStack>
+        <VStack align="stretch" minH="30vh">
+          <Heading size="2xl">Long</Heading>
+          <Today />
+        </VStack>
 
-            <Bucket />
-          </TabPanel>
-
-          <TabPanel>
-            <Clean what="today" />
-
-            <Today />
-          </TabPanel>
-
-          {/* <TabPanel>
-            <Later />
-          </TabPanel> */}
-        </TabPanels>
-      </Tabs>
+        <VStack align="stretch" minH="30vh">
+          <Heading size="2xl">Bucket</Heading>
+          <Bucket />
+        </VStack>
+      </VStack>
       <ReloadPrompt />
     </Flex>
   );

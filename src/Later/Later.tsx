@@ -26,6 +26,8 @@ const Later = () => {
       divider={<StackDivider borderColor="gray.800" />}
       ref={autoAnimate as any}
     >
+      <Adder placeholder="faster things..." where="later" />
+
       {later.length === 0 && (
         <VStack align="stretch">
           <Skeleton h="48px" />
@@ -34,7 +36,6 @@ const Later = () => {
       {later.map((task, index) => (
         <LaterTask tabIndex={index} key={task.id} task={task} />
       ))}
-      <Adder placeholder="anything that is not now" where="later" />
     </VStack>
   );
 };

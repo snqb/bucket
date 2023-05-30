@@ -1,6 +1,7 @@
 import {
   ChakraProvider,
   ColorModeScript,
+  defineStyle,
   extendTheme,
   type ThemeConfig,
 } from "@chakra-ui/react";
@@ -8,6 +9,22 @@ import React from "react";
 import App from "./App";
 import { registerSW } from "virtual:pwa-register";
 import { createRoot } from "react-dom/client";
+
+// @ts-ignore
+import { sliderAnatomy as parts } from "@chakra-ui/anatomy";
+import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
+const { definePartsStyle, defineMultiStyleConfig } =
+  createMultiStyleConfigHelpers(parts.keys);
+
+const wavy = definePartsStyle({
+  thumb: {
+    animation: "swim 2s infinite",
+  },
+});
+
+export const sliderTheme = defineMultiStyleConfig({
+  variants: { wavy },
+});
 
 const theme: ThemeConfig = extendTheme({
   initialColorMode: "dark",
@@ -17,6 +34,17 @@ const theme: ThemeConfig = extendTheme({
         bg: "black",
         color: "white",
       },
+      "@keyframes swim": {
+        "0%": {
+          transform: "translateY(0)",
+        },
+        "50%": {
+          transform: "translateY(-10px)",
+        },
+        "100%": {
+          transform: "translateY(0)",
+        },
+      },
     }),
   },
   fonts: {
@@ -24,8 +52,8 @@ const theme: ThemeConfig = extendTheme({
     body: `system-ui, sans-serif`,
   },
   colors: {
-    black: '#000007',
-    white: '#f0f0f0'
+    black: "#000007",
+    white: "#efefef",
   },
   gray: {
     "50": "#f9fafa",
@@ -38,6 +66,9 @@ const theme: ThemeConfig = extendTheme({
     "700": "#33373d",
     "800": "#1d2025",
     "900": "#171a1d",
+  },
+  components: {
+    Slider: sliderTheme,
   },
 });
 

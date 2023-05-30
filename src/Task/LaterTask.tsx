@@ -3,6 +3,8 @@ import {
   Box,
   Button,
   ButtonGroup,
+  Flex,
+  HStack,
   VStack,
 } from "@chakra-ui/react";
 import { useSyncedStore } from "@syncedstore/react";
@@ -47,32 +49,23 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
       {...restItemProps}
       spacing={0}
     >
-      <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
-        {task.title.emoji}
-        {task.title.text}
-      </Box>
-      <ButtonGroup variant="outline" size="lg" w="full">
+      <HStack w="full" align="baseline" justify="space-between">
+        <Box w="100%" textAlign="left" as="span" fontSize="xl" fontWeight={500}>
+          {task.title.emoji}
+          {task.title.text}
+        </Box>
         <Button
           variant="outline"
           size="xs"
           fontSize="md"
           fontWeight="bold"
-          w="full"
-          onClick={onLeftClick}
-        >
-          🪣←
-        </Button>
-        <Button
-          variant="outline"
-          size="xs"
-          fontSize="md"
-          fontWeight="bold"
-          w="full"
           onClick={onRemoveClick}
         >
           ❌
         </Button>
-        <Button
+      </HStack>
+      <ButtonGroup variant="outline" size="lg" w="full">
+        {/* <Button
           variant="outline"
           size="xs"
           fontSize="md"
@@ -81,7 +74,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           onClick={onUpClick}
         >
           🏄‍♂️↑
-        </Button>
+        </Button> */}
       </ButtonGroup>
     </VStack>
   );
