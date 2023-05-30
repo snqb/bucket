@@ -48,7 +48,7 @@ function ReloadPrompt() {
       align="center"
       fontWeight="bold"
       color="white.50"
-      zIndex={10000}
+      zIndex={190}
       p={2}
     >
       <Flex
