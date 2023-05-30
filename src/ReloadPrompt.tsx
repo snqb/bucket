@@ -33,11 +33,6 @@ function ReloadPrompt() {
     },
   });
 
-  const close = () => {
-    setOfflineReady(false);
-    setNeedRefresh(false);
-  };
-
   return needRefresh ? (
     <Flex
       bg={
@@ -53,6 +48,7 @@ function ReloadPrompt() {
       align="center"
       fontWeight="bold"
       color="white.50"
+      zIndex={10000}
       p={2}
     >
       <Flex
@@ -65,11 +61,9 @@ function ReloadPrompt() {
       >
         <Text fontSize="2rem">🪣</Text>
 
-        {needRefresh && (
-          <Button variant="outline" onClick={() => updateServiceWorker(true)}>
-            Update
-          </Button>
-        )}
+        <Button variant="outline" onClick={() => updateServiceWorker(true)}>
+          Update
+        </Button>
       </Flex>
     </Flex>
   ) : null;
