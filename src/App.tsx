@@ -23,13 +23,13 @@ function App() {
   return (
     <Flex px={[5, 5, 10, 20, 300]} pt={12} maxW="500px" overflowY="hidden">
       <Swiper
+        cssMode
         style={{
           height: "100vh",
           width: "100%",
         }}
-        cssMode
         direction="vertical"
-        slidesPerView={2}
+        slidesPerView="auto"
         spaceBetween={4}
         centeredSlides
         initialSlide={slide}
@@ -41,7 +41,6 @@ function App() {
           <VStack
             filter={0 !== slide ? "opacity(0.5)" : "initial"}
             align="stretch"
-            h="50vh"
             spacing={8}
           >
             <Heading size="2xl">Short</Heading>
@@ -53,7 +52,6 @@ function App() {
           <VStack
             overflowY="auto"
             align="stretch"
-            minH="50vh"
             h="max-content"
             filter={1 !== slide ? "opacity(0.5)" : "initial"}
             spacing={8}
@@ -70,7 +68,6 @@ function App() {
         <SwiperSlide>
           <VStack
             align="stretch"
-            minH="50vh"
             spacing={8}
             filter={2 !== slide ? "opacity(0.5)" : "initial"}
           >
