@@ -34,6 +34,7 @@ export const Progress = (props: Props) => {
         minH=".6rem"
         sx={{
           maskImage: `url(/line2.svg)`,
+          bg: "gray.700",
         }}
         mt={0}
       >
@@ -44,7 +45,7 @@ export const Progress = (props: Props) => {
           w="100%"
           transition="width .3s ease-out"
           willChange="width"
-          bg="gray.300"
+          bg="gray.400"
         />
       </SliderTrack>
       <SliderThumb

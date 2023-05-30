@@ -6,13 +6,7 @@ import {
   InputLeftElement,
   InputRightElement,
 } from "@chakra-ui/react";
-import getEmojiFromText from "emoji-from-text";
-import {
-  ChangeEventHandler,
-  FocusEventHandler,
-  useCallback,
-  useState,
-} from "react";
+import { ChangeEventHandler, useCallback, useState } from "react";
 
 import { useSyncedStore } from "@syncedstore/react";
 import * as R from "ramda";
@@ -63,17 +57,12 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     }
   };
 
-  console.log(placeholder);
-
   return (
     <InputGroup
       variant="filled"
       ml={-2}
       width="calc(100% + 8px)"
       opacity={0.9}
-      _focusWithin={{
-        opacity: 1,
-      }}
       size="md"
       ref={ref}
       {...props}
@@ -89,6 +78,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         onInput={generateEmoji}
         placeholder={placeholder}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
+        bg="whiteAlpha.100"
       />
       <InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
     </InputGroup>

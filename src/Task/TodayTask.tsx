@@ -26,7 +26,6 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
     return null;
   }
 
-  console.log(thingy.progress);
   return (
     <VStack
       align="start"

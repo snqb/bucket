@@ -23,7 +23,6 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
     const _task = cloneDeep(state.later.find((it) => it.id === task.id));
     const position = state.later.findIndex((it) => it.id === task.id);
     state.later.splice(position, 1);
-    console.log(cloneDeep(task));
 
     state.today.push(_task!);
   };
@@ -55,7 +54,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           {task.title.text}
         </Box>
         <Button
-          variant="outline"
+          variant="ghost"
           size="xs"
           fontSize="md"
           fontWeight="bold"
