@@ -60,6 +60,7 @@ export const LaterTask = ({ task, ...restItemProps }: Props) => {
           fontSize="md"
           fontWeight="bold"
           onClick={onRemoveClick}
+          filter="saturate(0)"
         >
           ❌
         </Button>

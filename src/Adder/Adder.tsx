@@ -68,6 +68,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   return (
     <InputGroup
       ml={-2}
+      width="calc(100% + 8px)"
       opacity={0.9}
       _focusWithin={{
         opacity: 1,

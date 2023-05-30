@@ -21,7 +21,6 @@ interface Props extends SliderProps {
 
 export const Progress = (props: Props) => {
   const { emoji = "🏊‍♀️", text, ...restProps } = props;
-  const [sliderValue, setSliderValue] = useState(50);
 
   return (
     <Slider
@@ -30,14 +29,11 @@ export const Progress = (props: Props) => {
       pointerEvents="none"
       overflow="hidden"
       variant="wavy"
-      value={sliderValue}
-      onChange={(val) => setSliderValue(val)}
     >
       <SliderTrack
         minH=".6rem"
         sx={{
           maskImage: `url(/line2.svg)`,
-          bg: "gray",
         }}
         mt={0}
       >
@@ -46,12 +42,9 @@ export const Progress = (props: Props) => {
           minH="1rem"
           h="3vw"
           w="100%"
-          sx={{
-            bg: `blue.${toHundreds(sliderValue * 9)}`,
-          }}
-          // backgroundBlendMode="multiply"
           transition="width .3s ease-out"
           willChange="width"
+          bg="gray.300"
         />
       </SliderTrack>
       <SliderThumb
@@ -61,15 +54,13 @@ export const Progress = (props: Props) => {
         boxSize={8}
         mt={-3}
       >
-        <Box as="span" transform={`translate(-50%, ${getWaveOffset(10)})`}>
+        <Box as="span" transform={`translateX(${getWaveOffset(10)})`}>
           {emoji}
         </Box>
       </SliderThumb>
     </Slider>
   );
 };
-
-const toHundreds = (x: number) => Math.round(x / 100) * 100;
 
 function getWaveOffset(x: number) {
   const frequency = 0.03;

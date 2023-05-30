@@ -18,14 +18,8 @@ export const Clean = ({
 
   return (
     <Button
-      mb={2}
-      py={3}
-      // variant="outline"
-      ml="auto"
-      bg="red.900"
-      // filter="blur(1px)"
+      display="inline"
       opacity={0.5}
-      w="full"
       size="sm"
       onClick={() => {
         const cleanup = () => {
@@ -46,7 +40,7 @@ export const Clean = ({
         cleanup();
       }}
     >
-      ❌ Clean
+      🗑️
     </Button>
   );
 };

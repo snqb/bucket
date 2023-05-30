@@ -28,11 +28,6 @@ const Later = () => {
     >
       <Adder placeholder="faster things..." where="later" />
 
-      {later.length === 0 && (
-        <VStack align="stretch">
-          <Skeleton h="48px" />
-        </VStack>
-      )}
       {later.map((task, index) => (
         <LaterTask tabIndex={index} key={task.id} task={task} />
       ))}

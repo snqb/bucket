@@ -5,9 +5,7 @@ import Task from "../Task";
 import { useSyncedStore } from "@syncedstore/react";
 
 import Adder from "../Adder";
-import Later from "../Later/Later";
 import { store } from "../store";
-import { Empty } from "../@components/Empty";
 
 const Today = () => {
   const today = useSyncedStore(store.today);
@@ -20,13 +18,11 @@ const Today = () => {
         w="full"
         placeholder="slower things..."
         where="today"
-        // display="contents"
       />
       <VStack spacing={3} align="stretch" ref={parent as any}>
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
         ))}
-        <Empty what="today" />
       </VStack>
     </VStack>
   );

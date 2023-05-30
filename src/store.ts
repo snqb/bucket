@@ -1,6 +1,5 @@
 import { getYjsDoc, syncedStore } from "@syncedstore/core";
 import { IndexeddbPersistence } from "y-indexeddb";
-import { WebrtcProvider } from "y-webrtc";
 
 export const store = syncedStore<{
   bucket: Thingy[];
@@ -15,12 +14,11 @@ export const store = syncedStore<{
 const doc = getYjsDoc(store);
 
 const provider = new IndexeddbPersistence("bucket", doc);
-export let webrtcProvider: WebrtcProvider;
 // const password = localStorage.getItem("password");
 // if (password) {
-//   webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
-//     password,
-//   });
+// webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
+//   password,
+// });
 
 //   webrtcProvider.connect();
 // }

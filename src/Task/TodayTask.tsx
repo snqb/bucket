@@ -26,6 +26,7 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
     return null;
   }
 
+  console.log(thingy.progress);
   return (
     <VStack
       align="start"
@@ -35,18 +36,18 @@ const TodayTask = ({ task, ...restItemProps }: Props) => {
       spacing={-3}
     >
       <Text w="100%" fontSize="3xl" color="#efefef">
-        {task.title.text}
+        {thingy.title.text}
       </Text>
       <Progress
         mt={0}
         aria-label={`progress of ${thingy.title.text}`}
-        defaultValue={task.progress}
+        defaultValue={thingy.progress}
         onChange={onProgress}
         value={progress}
         height="8px"
         step={0.01}
-        emoji={task.title.emoji}
-        text={task.title.text}
+        emoji={thingy.title.emoji}
+        text={thingy.title.text}
       />
     </VStack>
   );
