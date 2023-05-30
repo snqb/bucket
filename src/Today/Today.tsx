@@ -13,12 +13,7 @@ const Today = () => {
 
   return (
     <VStack justify="space-between" align="stretch">
-      <Adder
-        variant="filled"
-        w="full"
-        placeholder="slower things..."
-        where="today"
-      />
+      <Adder w="full" placeholder="slower things..." where="today" />
       <VStack spacing={3} align="stretch" ref={parent as any}>
         {today.map((task, index) => (
           <Task tabIndex={index} key={task.id} task={task} />
