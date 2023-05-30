@@ -16,14 +16,14 @@ const doc = getYjsDoc(store);
 
 const provider = new IndexeddbPersistence("bucket", doc);
 export let webrtcProvider: WebrtcProvider;
-const password = localStorage.getItem("password");
-if (password) {
-  webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
-    password,
-  });
+// const password = localStorage.getItem("password");
+// if (password) {
+//   webrtcProvider = new WebrtcProvider("bucket-sucket", doc, {
+//     password,
+//   });
 
-  webrtcProvider.connect();
-}
+//   webrtcProvider.connect();
+// }
 
 export type Thingy = {
   id: string;
