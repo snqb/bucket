@@ -33,6 +33,7 @@ const theme: ThemeConfig = extendTheme({
       body: {
         bg: "black",
         color: "white",
+        "overscroll-behavior-y": "contain",
       },
       "@keyframes swim": {
         "0%": {

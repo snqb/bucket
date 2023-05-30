@@ -1,7 +1,6 @@
-import { Flex, VStack, Box } from "@chakra-ui/react";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Flex } from "@chakra-ui/react";
 import { Pagination } from "swiper";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 // Import Swiper styles
 import "swiper/css";
@@ -18,7 +17,6 @@ import { useLocalStorageValue } from "../utils";
 
 const Bucket = () => {
   const state = useSyncedStore(store);
-  const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
   const [slide, setSlide] = useLocalStorageValue("bucket-slide", 0);
 
   return (
@@ -31,6 +29,7 @@ const Bucket = () => {
           height: "50vh",
           width: "100%",
         }}
+        effect="cube"
         direction="horizontal"
         slidesPerView={1}
         autoHeight

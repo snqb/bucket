@@ -21,15 +21,16 @@ function App() {
   const [slide, setSlide] = useLocalStorageValue("current-slide", 0);
 
   return (
-    <Flex px={[5, 5, 10, 20, 300]} pt={12} pb={128} maxW="500px">
+    <Flex px={[5, 5, 10, 20, 300]} pt={12} maxW="500px" overflowY="hidden">
       <Swiper
         style={{
-          height: "90vh",
+          height: "100vh",
           width: "100%",
         }}
+        cssMode
         direction="vertical"
         slidesPerView="auto"
-        spaceBetween={12}
+        spaceBetween={4}
         centeredSlides
         autoHeight
         initialSlide={slide}
