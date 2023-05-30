@@ -51,6 +51,7 @@ export const BucketTask = ({
     pt: 2,
     px: 2,
     w: "full",
+    h: "full",
   };
 
   return (

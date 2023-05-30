@@ -1,9 +1,14 @@
-import { Flex, VStack, Box, StackDivider } from "@chakra-ui/react";
+import { Flex, VStack, Box } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { Pagination } from "swiper";
 
 // Import Swiper styles
 import "swiper/css";
+import "swiper/css/pagination";
+
+import "./bullets.css";
+
 import { useSyncedStore } from "@syncedstore/react";
 
 import Adder from "../Adder";
@@ -17,24 +22,47 @@ const Bucket = () => {
   const [slide, setSlide] = useLocalStorageValue("bucket-slide", 0);
 
   return (
-    <VStack align="stretch" spacing={4} divider={<StackDivider />}>
+    <Flex direction="column" align="stretch" gap={2} overflowY="hidden">
       <Adder placeholder="slow things go here" where="bucket" />
 
-      {state.bucket
-        .filter((it) => it.residence !== "graveyard")
-        .map((task, index) => {
-          return (
-            <BucketTask
-              // minHeight="60vh"
-              tabIndex={index}
-              key={task.id}
-              task={task}
-              // filter={index !== slide ? "opacity(0.5)" : "initial"}
-              transition="filter 0.2s"
-            />
-          );
-        })}
-    </VStack>
+      <Swiper
+        modules={[Pagination]}
+        style={{
+          height: "50vh",
+          width: "100%",
+        }}
+        direction="horizontal"
+        slidesPerView={1}
+        autoHeight
+        initialSlide={slide}
+        onSlideChange={(it) => {
+          setSlide(it.activeIndex);
+        }}
+        pagination={{
+          enabled: true,
+          type: "bullets",
+          dynamicBullets: true,
+        }}
+      >
+        {state.bucket
+          .filter((it) => it.residence !== "graveyard")
+          .map((task, index) => {
+            return (
+              <SwiperSlide key={task.id}>
+                <BucketTask
+                  minH="55vh"
+                  bg="whiteAlpha.100"
+                  tabIndex={index}
+                  key={task.id}
+                  task={task}
+                  filter={index !== slide ? "opacity(0.5)" : "initial"}
+                  transition="filter 0.2s"
+                />
+              </SwiperSlide>
+            );
+          })}
+      </Swiper>
+    </Flex>
   );
 };
 
