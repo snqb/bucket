@@ -14,40 +14,57 @@ import Today from "./Today";
 import Later from "./Later";
 import Bucket from "./Bucket";
 import { Clean } from "./@components/Clean";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 function App() {
   return (
     <Flex px={[5, 5, 10, 20, 300]} pt={12} pb={128} maxW="500px">
-      <VStack
-        mt="24vh"
-        spacing={16}
-        divider={<StackDivider />}
-        align="stretch"
-        w="full"
-        minH="100vh"
+      <Swiper
+        style={{
+          height: "90vh",
+          width: "100%",
+        }}
+        direction="vertical"
+        slidesPerView="auto"
+        spaceBetween={16}
+        centeredSlides
+        autoHeight
       >
-        <VStack align="stretch" minH="30vh" spacing={8}>
-          <Heading size="2xl">Short</Heading>
-          <Later />
-        </VStack>
+        <SwiperSlide>
+          <VStack align="stretch" minH="50vh" spacing={8}>
+            <Heading size="2xl">Short</Heading>
+            <Later />
+          </VStack>
+        </SwiperSlide>
 
-        <VStack align="stretch" minH="30vh" spacing={8}>
-          <HStack justify="space-between">
-            <Heading size="2xl">Long</Heading>
-            <Clean what="today" />
-          </HStack>
+        <SwiperSlide>
+          <VStack
+            overflowY="auto"
+            align="stretch"
+            minH="50vh"
+            h="max-content"
+            spacing={8}
+          >
+            <HStack justify="space-between">
+              <Heading size="2xl">Long</Heading>
+              <Clean what="today" />
+            </HStack>
 
-          <Today />
-        </VStack>
+            <Today />
+          </VStack>
+        </SwiperSlide>
 
-        <VStack align="stretch" minH="30vh" spacing={8}>
-          <HStack justify="space-between">
-            <Heading size="2xl">Bucket</Heading>
-            <Clean what="bucket" />
-          </HStack>
-          <Bucket />
-        </VStack>
-      </VStack>
+        <SwiperSlide>
+          <VStack align="stretch" minH="50vh" spacing={8}>
+            <HStack justify="space-between">
+              <Heading size="2xl">Bucket</Heading>
+              <Clean what="bucket" />
+            </HStack>
+            <Bucket />
+          </VStack>
+        </SwiperSlide>
+      </Swiper>
+
       <ReloadPrompt />
     </Flex>
   );
