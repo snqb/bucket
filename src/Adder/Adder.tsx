@@ -40,7 +40,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     const task: Thingy = {
       id: crypto.randomUUID(),
       title: {
-        text,
+        text: text.toLowerCase(),
         emoji,
       },
       createdAt: new Date(),
@@ -70,6 +70,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     >
       <InputLeftElement pointerEvents="none" children={<span>{emoji}</span>} />
       <Input
+        textTransform="lowercase"
         enterKeyHint="done"
         id={`adder-${where}`}
         type="text"
