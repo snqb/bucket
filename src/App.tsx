@@ -15,8 +15,11 @@ import Later from "./Later";
 import Bucket from "./Bucket";
 import { Clean } from "./@components/Clean";
 import { Swiper, SwiperSlide } from "swiper/react";
+import { useLocalStorageValue } from "./utils";
 
 function App() {
+  const [slide, setSlide] = useLocalStorageValue("current-slide", 0);
+
   return (
     <Flex px={[5, 5, 10, 20, 300]} pt={12} pb={128} maxW="500px">
       <Swiper
@@ -26,12 +29,21 @@ function App() {
         }}
         direction="vertical"
         slidesPerView="auto"
-        spaceBetween={16}
+        spaceBetween={12}
         centeredSlides
         autoHeight
+        initialSlide={slide}
+        onSlideChange={(it) => {
+          setSlide(it.activeIndex);
+        }}
       >
         <SwiperSlide>
-          <VStack align="stretch" minH="50vh" spacing={8}>
+          <VStack
+            filter={0 !== slide ? "opacity(0.5)" : "initial"}
+            align="stretch"
+            minH="50vh"
+            spacing={8}
+          >
             <Heading size="2xl">Short</Heading>
             <Later />
           </VStack>
@@ -43,6 +55,7 @@ function App() {
             align="stretch"
             minH="50vh"
             h="max-content"
+            filter={1 !== slide ? "opacity(0.5)" : "initial"}
             spacing={8}
           >
             <HStack justify="space-between">
@@ -55,7 +68,12 @@ function App() {
         </SwiperSlide>
 
         <SwiperSlide>
-          <VStack align="stretch" minH="50vh" spacing={8}>
+          <VStack
+            align="stretch"
+            minH="50vh"
+            spacing={8}
+            filter={2 !== slide ? "opacity(0.5)" : "initial"}
+          >
             <HStack justify="space-between">
               <Heading size="2xl">Bucket</Heading>
               <Clean what="bucket" />

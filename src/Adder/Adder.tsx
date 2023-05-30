@@ -60,8 +60,8 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   return (
     <InputGroup
       variant="filled"
-      ml={-2}
-      width="calc(100% + 8px)"
+      // ml={-2}
+      // width="calc(100% + 8px)"
       opacity={0.9}
       size="md"
       ref={ref}
