@@ -10,34 +10,35 @@ import { ChangeEventHandler, useCallback, useState } from "react";
 
 import { useSyncedStore } from "@syncedstore/react";
 import * as R from "ramda";
-import { store, Thingy } from "../store";
+import {
+  addTask,
+  useAppDispatch,
+  store,
+  type Todo,
+  type TodoState,
+} from "./newStore";
 
 export interface Props extends InputGroupProps {
-  where?: keyof typeof store;
+  where: keyof TodoState;
 }
 
-const initialEmoji: Record<keyof typeof store, string> = {
-  today: "🏄‍♂️",
-  bucket: "🪣",
-  later: "🐼",
-};
-
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const { where = "bucket", placeholder } = props;
-  const tasks = useSyncedStore(store);
+  const { where, placeholder } = props;
+  const dispatch = useAppDispatch();
+
   const [emoji, generateEmoji, clearEmoji] = useInputEmoji(getRandomEmoji());
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
-    setText
+    setText,
   );
 
   const onAdd = (e: any) => {
     e.preventDefault();
     if (!text) return;
 
-    const task: Thingy = {
+    const task: Todo = {
       id: crypto.randomUUID(),
       title: {
         text: text.toLowerCase(),
@@ -45,11 +46,15 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       },
       createdAt: new Date(),
       progress: 0,
-      residence: "default",
     };
 
     try {
-      tasks[where].push(task);
+      dispatch(
+        addTask({
+          key: where,
+          task,
+        }),
+      );
     } catch (e) {
       alert("dev is stupid, text him t.me/snqba");
     } finally {
@@ -91,7 +96,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 });
 
 const useInputEmoji = (
-  initial: string = getRandomEmoji()
+  initial: string = getRandomEmoji(),
 ): [string, ChangeEventHandler<HTMLInputElement>, () => void] => {
   const [emoji, setEmoji] = useState(initial);
 
@@ -102,7 +107,7 @@ const useInputEmoji = (
     R.cond([
       [R.either(R.isEmpty, R.isNil), clearEmoji],
       [R.T, R.pipe(getRandomEmoji, setEmoji)],
-    ])
+    ]),
   );
 
   return [emoji, generateEmojiFromText, clearEmoji];

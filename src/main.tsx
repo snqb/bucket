@@ -16,6 +16,8 @@ import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
 const { definePartsStyle, defineMultiStyleConfig } =
   createMultiStyleConfigHelpers(parts.keys);
 
+import "swiper/css";
+
 const wavy = definePartsStyle({
   thumb: {
     animation: "swim 2s infinite",
@@ -71,7 +73,7 @@ root.render(
 
       <App />
     </ChakraProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
 
 if ("serviceWorker" in navigator) {
