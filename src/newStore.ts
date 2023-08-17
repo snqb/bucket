@@ -44,7 +44,7 @@ const todoSlice = createSlice({
       state,
       action: PayloadAction<{ key: keyof TodoState; task: Todo }>,
     ) => {
-      state[action.payload.key].push(action.payload.task);
+      state[action.payload.key].unshift(action.payload.task);
     },
     removeTask: (
       state,

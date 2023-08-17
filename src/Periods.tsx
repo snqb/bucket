@@ -6,12 +6,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import Adder from "./Adder";
 import { TodoState, useAppSelector } from "./newStore";
 
-const Days = ({
-  periods,
-}: {
-  where: string;
-  periods: readonly (keyof TodoState)[];
-}) => {
+const Days = ({ periods }: { periods: readonly (keyof TodoState)[] }) => {
   const tasks = useAppSelector((state) => state.todo);
 
   const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });

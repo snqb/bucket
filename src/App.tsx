@@ -13,7 +13,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Flex px={[5, 5, 10, 20, 300]} pt={12} maxW="500px" overflowY="hidden">
+        <Flex px={[5, 5, 10, 20, 300]} py={6} maxW="500px" overflowY="hidden">
           <Swiper
             style={{
               height: "100vh",
@@ -23,14 +23,10 @@ function App() {
             slidesPerView={1}
           >
             <SwiperSlide>
-              <Periods
-                where="day"
-                periods={["today", "tomorrow", "someday"] as const}
-              />
+              <Periods periods={["today", "tomorrow", "someday"] as const} />
             </SwiperSlide>
             <SwiperSlide>
               <Periods
-                where="week"
                 periods={["thisWeek", "nextWeek", "someWeek"] as const}
               />
             </SwiperSlide>
