@@ -3,6 +3,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import thunk from "redux-thunk";
+import { PERIODS } from "./constants";
 
 export type Todo = {
   id: string;
@@ -18,24 +19,11 @@ type Title = {
   emoji: string;
 };
 
-export type TodoState = {
-  today: Todo[];
-  tomorrow: Todo[];
-  someday: Todo[];
-  thisWeek: Todo[];
-  nextWeek: Todo[];
-  someWeek: Todo[];
-};
-
-const initialState: TodoState = {
-  today: [],
-  tomorrow: [],
-  someday: [],
-  thisWeek: [],
-  nextWeek: [],
-  someWeek: [],
-};
-
+export type TodoState = Record<(typeof PERIODS)[number], Todo[]>;
+export const initialState: TodoState = PERIODS.reduce(
+  (acc, it) => ({ ...acc, [it]: [] }),
+  {} as TodoState,
+);
 const todoSlice = createSlice({
   name: "todo",
   initialState,

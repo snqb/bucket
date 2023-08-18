@@ -13,7 +13,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Flex px={[5, 5, 10, 20, 300]} py={6} maxW="500px" overflowY="hidden">
+        <Flex px={[5, 5, 10, 20, 300]} pt={10} maxW="500px" overflowY="hidden">
           <Swiper
             style={{
               height: "100vh",
