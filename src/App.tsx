@@ -1,13 +1,14 @@
 import { Flex } from "@chakra-ui/react";
 
-import ReloadPrompt from "./ReloadPrompt";
 import { useEffect, useState } from "react";
+import ReloadPrompt from "./ReloadPrompt";
 
-import Period from "./Period";
-import { persistor, store } from "./newStore";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Controller, EffectCube } from "swiper/modules";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import Period from "./Period";
+import { persistor, store } from "./store";
 
 function App() {
 	return (
@@ -23,10 +24,24 @@ function App() {
 						slidesPerView={1}
 					>
 						<SwiperSlide>
-							<Period periods={["today", "tomorrow", "someday"] as const} />
+							<Period
+								row={0}
+								periods={["today", "tomorrow", "someday"] as const}
+							/>
 						</SwiperSlide>
 						<SwiperSlide>
-							<Period periods={["thisWeek", "nextWeek", "someWeek"] as const} />
+							<Period
+								row={1}
+								periods={["thisWeek", "nextWeek", "someWeek"] as const}
+							/>
+						</SwiperSlide>
+						<SwiperSlide>
+							<Period
+								row={2}
+								periods={
+									["otherThing", "anotherThing", "differentThing"] as const
+								}
+							/>
 						</SwiperSlide>
 					</Swiper>
 

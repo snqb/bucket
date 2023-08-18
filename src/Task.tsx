@@ -22,13 +22,7 @@ import {
 import * as R from "ramda";
 
 import { PERIODS, PERIOD_TEXTS, Period } from "./constants";
-import {
-	Todo,
-	TodoState,
-	moveTask,
-	removeTask,
-	useAppDispatch,
-} from "./newStore";
+import { Todo, TodoState, moveTask, removeTask, useAppDispatch } from "./store";
 
 interface Props extends AccordionItemProps {
 	task: Todo;
@@ -107,7 +101,6 @@ const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
 				<ModalHeader>
 					<Title task={task} />
 				</ModalHeader>
-				<ModalCloseButton />
 				<ModalBody>
 					<Grid templateColumns="repeat(3, 1fr)" gap={2}>
 						{PERIODS.map((period) => (
@@ -119,6 +112,11 @@ const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
 								bg="blackAlpha.800"
 								fontSize="sm"
 								isDisabled={period === where}
+								sx={{
+									_disabled: {
+										bg: "blackAlpha.100",
+									},
+								}}
 								onClick={() => handleMove(period)}
 							>
 								{period === where ? "" : PERIOD_TEXTS[period]}
@@ -128,8 +126,8 @@ const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
 				</ModalBody>
 
 				<ModalFooter>
-					<Button colorScheme="blue" mr={3} onClick={onClose}>
-						X
+					<Button colorScheme="gray" mr={3} onClick={onClose}>
+						❌
 					</Button>
 				</ModalFooter>
 			</ModalContent>

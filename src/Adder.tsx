@@ -8,7 +8,7 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEventHandler, useCallback, useState } from "react";
 
-import { type Todo, type TodoState, addTask, useAppDispatch } from "./newStore";
+import { type Todo, type TodoState, addTask, useAppDispatch } from "./store";
 import * as R from "ramda";
 
 export interface Props extends InputGroupProps {
@@ -57,15 +57,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 	};
 
 	return (
-		<InputGroup
-			variant="filled"
-			// ml={-2}
-			// width="calc(100% + 8px)"
-			opacity={0.9}
-			size="md"
-			ref={ref}
-			{...props}
-		>
+		<InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
 			<InputLeftElement pointerEvents="none">
 				<span>{emoji}</span>
 			</InputLeftElement>
