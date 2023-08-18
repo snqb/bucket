@@ -1,9 +1,9 @@
-import { createSlice, PayloadAction, configureStore } from "@reduxjs/toolkit";
+import { PERIODS } from "./constants";
+import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import thunk from "redux-thunk";
-import { PERIODS } from "./constants";
 
 export type Todo = {
 	id: string;

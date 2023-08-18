@@ -21,6 +21,7 @@ import {
 
 import * as R from "ramda";
 
+import { PERIODS, PERIOD_TEXTS, Period } from "./constants";
 import {
 	Todo,
 	TodoState,
@@ -28,7 +29,6 @@ import {
 	removeTask,
 	useAppDispatch,
 } from "./newStore";
-import { PERIODS, PERIOD_TEXTS, Period } from "./constants";
 
 interface Props extends AccordionItemProps {
 	task: Todo;

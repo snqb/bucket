@@ -1,11 +1,11 @@
+import { ShortTask } from "./Task";
 import { Heading, StackDivider, VStack } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { ShortTask } from "./Task";
 
-import { Swiper, SwiperSlide } from "swiper/react";
 import Adder from "./Adder";
-import { TodoState, useAppSelector } from "./newStore";
 import { PERIOD_TEXTS } from "./constants";
+import { TodoState, useAppSelector } from "./newStore";
+import { Swiper, SwiperSlide } from "swiper/react";
 
 const Period = ({ periods }: { periods: readonly (keyof TodoState)[] }) => {
 	const tasks = useAppSelector((state) => state.todo);

@@ -1,13 +1,13 @@
 import { Flex } from "@chakra-ui/react";
 
-import { useEffect, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
+import { useEffect, useState } from "react";
 
+import Period from "./Period";
+import { persistor, store } from "./newStore";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import Period from "./Period";
-import { persistor, store } from "./newStore";
 
 function App() {
 	return (

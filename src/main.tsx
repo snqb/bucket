@@ -1,14 +1,14 @@
+import App from "./App";
 import {
 	ChakraProvider,
 	ColorModeScript,
+	type ThemeConfig,
 	defineStyle,
 	extendTheme,
-	type ThemeConfig,
 } from "@chakra-ui/react";
 import React from "react";
-import App from "./App";
-import { registerSW } from "virtual:pwa-register";
 import { createRoot } from "react-dom/client";
+import { registerSW } from "virtual:pwa-register";
 
 // @ts-ignore
 import { sliderAnatomy as parts } from "@chakra-ui/anatomy";

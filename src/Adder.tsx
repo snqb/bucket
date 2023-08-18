@@ -1,15 +1,15 @@
 import {
-	forwardRef,
 	Input,
 	InputGroup,
 	InputGroupProps,
 	InputLeftElement,
 	InputRightElement,
+	forwardRef,
 } from "@chakra-ui/react";
 import { ChangeEventHandler, useCallback, useState } from "react";
 
+import { type Todo, type TodoState, addTask, useAppDispatch } from "./newStore";
 import * as R from "ramda";
-import { addTask, useAppDispatch, type Todo, type TodoState } from "./newStore";
 
 export interface Props extends InputGroupProps {
 	where: keyof TodoState;
@@ -85,7 +85,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 				}, onAdd)}
 				bg="whiteAlpha.100"
 			/>
-			<InputRightElement onClick={onAdd} fontSize="2xl" children="↵" />
+			<InputRightElement onClick={onAdd} fontSize="2xl">
+				↵
+			</InputRightElement>
 		</InputGroup>
 	);
 });

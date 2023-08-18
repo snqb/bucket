@@ -1,5 +1,5 @@
+import { Alert, Box, Button, Flex, Text } from "@chakra-ui/react";
 import { useRegisterSW } from "virtual:pwa-register/react";
-import { Alert, Text, Box, Flex, Button } from "@chakra-ui/react";
 
 function ReloadPrompt() {
 	// replaced dynamically
@@ -24,7 +24,7 @@ function ReloadPrompt() {
 					}, 20000 /* 20s for testing purposes */);
 			} else {
 				// rome-disable-next-line prefer-template,no-console
-				console.log("SW Registered: " + r);
+				console.log(`SW Registered: ${r}`);
 			}
 		},
 		onRegisterError(error) {
