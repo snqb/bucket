@@ -17,7 +17,7 @@ const Periods = ({ periods }: { periods: readonly (keyof TodoState)[] }) => {
       {periods.map((period) => (
         <SwiperSlide key={period} style={{ width: "100vw", height: "100vh" }}>
           <VStack
-            spacing={4}
+            spacing={2}
             id="later"
             align="stretch"
             divider={<StackDivider borderColor="gray.800" />}

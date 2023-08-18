@@ -53,7 +53,7 @@ export const ShortTask = (props: Props) => {
     <>
       <VStack
         align="start"
-        p={0}
+        py={2}
         userSelect="none"
         {...restItemProps}
         spacing={0}
@@ -95,8 +95,14 @@ const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
   };
 
   return (
-    <Modal isCentered size="xl" isOpen={isOpen} onClose={onClose}>
-      <ModalOverlay backdropFilter="auto" backdropBlur="2px" />
+    <Modal
+      isCentered
+      motionPreset="none"
+      size="xl"
+      isOpen={isOpen}
+      onClose={onClose}
+    >
+      <ModalOverlay backdropFilter="blur(10px)" backdropBlur="1px" />
       <ModalContent bg="gray.900">
         <ModalHeader>
           <Title task={task} />
@@ -139,7 +145,6 @@ const Title = ({ task, onOpen }: Props & OverlayProps) => (
     fontWeight={500}
     onClick={onOpen}
   >
-    {task.title.emoji}
-    {task.title.text}
+    {task.title.emoji} {task.title.text}
   </Box>
 );
