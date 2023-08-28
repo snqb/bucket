@@ -1,100 +1,67 @@
-import {
-  Flex,
-  Heading,
-  HStack,
-  Spacer,
-  StackDivider,
-  VStack,
-} from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
-import Today from "./Today";
 
-import Later from "./Later";
-import Bucket from "./Bucket";
-import { Clean } from "./@components/Clean";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { useLocalStorageValue } from "./utils";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { Controller, EffectCube } from "swiper/modules";
+import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
+import Period from "./Period";
+import { persistor, store } from "./store";
 
 function App() {
-  const [slide, setSlide] = useLocalStorageValue("current-slide", 0);
+	return (
+		<Provider store={store}>
+			<PersistGate persistor={persistor}>
+				<Flex px={[5, 5, 10, 20, 300]} pt={10} maxW="500px" overflowY="hidden">
+					<Swiper
+						style={{
+							height: "100vh",
+							width: "100%",
+						}}
+						direction="vertical"
+						slidesPerView={1}
+					>
+						<SwiperSlide>
+							<Period
+								row={0}
+								periods={["today", "tomorrow", "someday"] as const}
+							/>
+						</SwiperSlide>
+						<SwiperSlide>
+							<Period
+								row={1}
+								periods={["thisWeek", "nextWeek", "someWeek"] as const}
+							/>
+						</SwiperSlide>
+						<SwiperSlide>
+							<Period
+								row={2}
+								periods={
+									["otherThing", "anotherThing", "differentThing"] as const
+								}
+							/>
+						</SwiperSlide>
+					</Swiper>
 
-  return (
-    <Flex px={[5, 5, 10, 20, 300]} pt={12} maxW="500px" overflowY="hidden">
-      <Swiper
-        cssMode
-        style={{
-          height: "100vh",
-          width: "100%",
-        }}
-        direction="vertical"
-        slidesPerView="auto"
-        spaceBetween={4}
-        centeredSlides
-        initialSlide={slide}
-        onSlideChange={(it) => {
-          setSlide(it.activeIndex);
-        }}
-      >
-        <SwiperSlide>
-          <VStack
-            filter={0 !== slide ? "opacity(0.5)" : "initial"}
-            align="stretch"
-            spacing={8}
-          >
-            <Heading size="2xl">Short</Heading>
-            <Later />
-          </VStack>
-        </SwiperSlide>
-
-        <SwiperSlide>
-          <VStack
-            overflowY="auto"
-            align="stretch"
-            h="max-content"
-            filter={1 !== slide ? "opacity(0.5)" : "initial"}
-            spacing={8}
-          >
-            <HStack justify="space-between">
-              <Heading size="2xl">Long</Heading>
-              <Clean what="today" />
-            </HStack>
-
-            <Today />
-          </VStack>
-        </SwiperSlide>
-
-        <SwiperSlide>
-          <VStack
-            align="stretch"
-            spacing={8}
-            filter={2 !== slide ? "opacity(0.5)" : "initial"}
-          >
-            <HStack justify="space-between">
-              <Heading size="2xl">Bucket</Heading>
-              <Clean what="bucket" />
-            </HStack>
-            <Bucket />
-          </VStack>
-        </SwiperSlide>
-      </Swiper>
-
-      <ReloadPrompt />
-    </Flex>
-  );
+					<ReloadPrompt />
+				</Flex>
+			</PersistGate>
+		</Provider>
+	);
 }
 
 export default App;
 
 const usePersistedTab = () => {
-  const tabState = useState(Number(localStorage.getItem("current-tab")) ?? 0);
+	const tabState = useState(Number(localStorage.getItem("current-tab")) ?? 0);
 
-  const [tab, setTab] = tabState;
+	const [tab, setTab] = tabState;
 
-  useEffect(() => {
-    localStorage.setItem("current-tab", tab.toString());
-  }, [tab]);
+	useEffect(() => {
+		localStorage.setItem("current-tab", tab.toString());
+	}, [tab]);
 
-  return tabState;
+	return tabState;
 };
