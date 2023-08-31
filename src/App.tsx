@@ -22,6 +22,7 @@ function App() {
 						}}
 						direction="vertical"
 						slidesPerView={1}
+						loop
 					>
 						<SwiperSlide>
 							<Period

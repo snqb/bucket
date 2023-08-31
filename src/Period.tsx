@@ -14,7 +14,6 @@ import { PERIODS, PERIOD_TEXTS } from "./constants";
 import { TodoState, horizontalIndex, useAppSelector } from "./store";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
 import { useEffect, useState } from "react";
-import { EffectCube } from "swiper/modules";
 
 interface Props {
 	periods: readonly (keyof TodoState)[];
@@ -29,7 +28,7 @@ const Period = ({ periods, row }: Props) => {
 
 	useEffect(() => {
 		const timerId = requestAnimationFrame(() =>
-			controller?.slideTo(horizontalIndex.value, 0),
+			controller?.slideToLoop(horizontalIndex.value, 0, false),
 		);
 
 		return () => cancelAnimationFrame(timerId);
@@ -40,10 +39,11 @@ const Period = ({ periods, row }: Props) => {
 			slidesPerView={1}
 			loop
 			onSlideChange={(it) => {
-				horizontalIndex.value = it.activeIndex;
+				horizontalIndex.value = it.realIndex;
 			}}
 			onSwiper={setController}
 			direction="horizontal"
+			initialSlide={horizontalIndex.value}
 		>
 			{periods.map((period, index) => (
 				<SwiperSlide key={period} style={{ width: "100vw", height: "100vh" }}>
