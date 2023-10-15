@@ -84,19 +84,20 @@ const Period = ({ periods, row }: Props) => {
               <ShortTask key={task.id} task={task} where={period} />
             ))}
           </VStack>
-          <HStack
+          <Grid
             position="fixed"
             bottom="15%"
-            wrap="wrap"
-            justify="space-evenly"
-            align="space-evenly"
+            width="full"
+            templateColumns="repeat(auto-fill, minmax(18vw, 1fr))"
             gap={2}
+            cursor="pointer"
+            userSelect="none"
           >
             <CircleText text="milk a cow" />
             <CircleText text="work out" />
             <CircleText text="work an hour with" />
             <CircleText text="pages" />
-          </HStack>
+          </Grid>
         </SwiperSlide>
       ))}
     </Swiper>
@@ -114,14 +115,10 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
   const [number, setNumber] = useState(0);
 
   return (
-    <Button
-      variant="ghost"
+    <Box
       borderRadius="50%"
-      width="84px"
-      height="84px"
       position="relative"
       bg="black"
-      // outlineColor="whiteAlpha.50"
       onClick={() => setNumber((it) => it + 1)}
     >
       <Box
@@ -142,7 +139,10 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
         position="absolute"
         left="40%"
         fontSize="12px"
-        minW="24px"
+        minW="4ch"
+        textAlign="center"
+        fontWeight="bold"
+        h="auto"
         key={number}
         initial={{ y: -20 }}
         animate={{ y: 0 }}
@@ -151,12 +151,11 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
         {number}
       </MotionBox>
       <VStack width="64px" height="64px" align="center" justify="end">
-        {/* <Text fontSize="32px">{emoji}</Text> */}
-        <Box width="90%">
-          <AutoTextSize>{text}</AutoTextSize>
-        </Box>
+        <AutoTextSize minFontSizePx={11} maxFontSizePx={14}>
+          {text}
+        </AutoTextSize>
       </VStack>
-    </Button>
+    </Box>
   );
 };
 
