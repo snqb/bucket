@@ -127,7 +127,7 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
       onClick={() => setNumber((it) => it + 1)}
       filter="saturate(.8)"
       opacity="0.5"
-      _active={{
+      _focus={{
         bg: "gray.900",
         transition: "all 1.5s",
         filter: "saturate(1)",
