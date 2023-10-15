@@ -90,8 +90,12 @@ const Period = ({ periods, row }: Props) => {
             width="full"
             templateColumns="repeat(auto-fill, minmax(18vw, 1fr))"
             gap={2}
-            cursor="pointer"
-            userSelect="none"
+            _hover={{
+              bg: "inherit",
+            }}
+            sx={{
+              WebkitTapHighlightColor: "transparent",
+            }}
           >
             <CircleText text="milk a cow" />
             <CircleText text="work out" />
@@ -116,24 +120,21 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
 
   return (
     <Button
-      variant="ghost"
+      variant="unstyled"
       borderRadius={4}
       position="relative"
       bg="black"
       onClick={() => setNumber((it) => it + 1)}
       filter="saturate(.8)"
       opacity="0.5"
-      _focus={{
-        bg: "gray.900",
-        filter: "saturate(1)",
-        opacity: 1,
-      }}
       _active={{
-        bg: "inherit",
-        boxShadow: "none",
+        bg: "gray.900",
+        transition: "all 1.5s",
         filter: "saturate(1)",
         opacity: 1,
+        outline: "none",
       }}
+      userSelect="none"
     >
       <Box
         sx={{
