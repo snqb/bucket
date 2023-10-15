@@ -32,6 +32,9 @@ dependencies:
   '@types/react-dom':
     specifier: ^18.2.4
     version: 18.2.4
+  auto-text-size:
+    specifier: ^0.2.2
+    version: 0.2.2(react@18.2.0)
   emoji-from-text:
     specifier: ^1.1.12
     version: 1.1.12
@@ -3081,6 +3084,14 @@ packages:
     resolution: {integrity: sha512-+q/t7Ekv1EDY2l6Gda6LLiX14rU9TV20Wa3ofeQmwPFZbOMo9DXrLbOjFaaclkXKWidIaopwAObQDqwWtGUjqg==}
     engines: {node: '>= 4.0.0'}
     dev: true
+
+  /auto-text-size@0.2.2(react@18.2.0):
+    resolution: {integrity: sha512-V8dUUB9HKW2AY6rjLsk5xZdmZsNLjMAs15Wu849OnH9MfZ/BMn4Ruk3TpY1aMz0mlYuOD0AdljRBtpKR5OzxkQ==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 18.2.0
+    dev: false
 
   /autoprefixer@10.4.14(postcss@8.4.24):
     resolution: {integrity: sha512-FQzyfOsTlwVzjHxKEqRIAdJx9niO6VCBCoEwax/VLSoQF29ggECcPuBqUMZ+u8jCZOPSy8b8/8KnuFbp0SaFZQ==}
