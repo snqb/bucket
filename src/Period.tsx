@@ -128,6 +128,12 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
         filter: "saturate(1)",
         opacity: 1,
       }}
+      _active={{
+        bg: "inherit",
+        boxShadow: "none",
+        filter: "saturate(1)",
+        opacity: 1,
+      }}
     >
       <Box
         sx={{
