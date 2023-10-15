@@ -116,12 +116,17 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
 
   return (
     <Button
+      variant="ghost"
       borderRadius={4}
       position="relative"
       bg="black"
       onClick={() => setNumber((it) => it + 1)}
+      filter="saturate(.8)"
+      opacity="0.5"
       _focus={{
         bg: "gray.900",
+        filter: "saturate(1)",
+        opacity: 1,
       }}
     >
       <Box
@@ -130,7 +135,6 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
           position: "absolute",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          opacity: "0.5",
         }}
       >
         {emoji}
