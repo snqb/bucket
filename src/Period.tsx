@@ -86,7 +86,7 @@ const Period = ({ periods, row }: Props) => {
           </VStack>
           <Grid
             position="fixed"
-            bottom="15%"
+            bottom="10%"
             width="full"
             templateColumns="repeat(auto-fill, minmax(18vw, 1fr))"
             gap={2}
