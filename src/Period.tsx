@@ -115,11 +115,14 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
   const [number, setNumber] = useState(0);
 
   return (
-    <Box
-      borderRadius="50%"
+    <Button
+      borderRadius={4}
       position="relative"
       bg="black"
       onClick={() => setNumber((it) => it + 1)}
+      _focus={{
+        bg: "gray.900",
+      }}
     >
       <Box
         sx={{
@@ -155,7 +158,7 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
           {text}
         </AutoTextSize>
       </VStack>
-    </Box>
+    </Button>
   );
 };
 
