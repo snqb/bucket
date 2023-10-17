@@ -9,6 +9,7 @@ import {
   Text,
   Center,
   Flex,
+  Divider,
 } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ShortTask } from "./Task";
@@ -100,10 +101,13 @@ const Period = ({ periods, row }: Props) => {
             }}
             flex="0 1 fit-content"
           >
+            <Divider mb={2} />
+
             <CircleText text="milk a cow" />
             <CircleText text="work out" />
-            <CircleText text="work an hour with" />
+            {/* <CircleText text="work an hour with" /> */}
             <CircleText text="pages" />
+            <CircleText text="yoga" />
           </Flex>
         </SwiperSlide>
       ))}
@@ -126,7 +130,7 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
       <Button
         variant="solid"
         w="fit-content"
-        bg="gray.800"
+        bg="blackAlpha.900"
         onClick={() => setNumber((it) => it + 1)}
         filter="saturate(.8)"
         _active={huemoe}
@@ -135,10 +139,16 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
         display="flex"
         alignItems="center"
         p={1}
+        gap={1}
       >
         <Box fontSize="1.5rem">{emoji}</Box>
-        <Box width="50%">
-          <AutoTextSize mode="multiline" minFontSizePx={11} maxFontSizePx={14}>
+        <Box text-textAlign="left">
+          <AutoTextSize
+            style={{ textAlign: "left" }}
+            mode="box"
+            minFontSizePx={11}
+            maxFontSizePx={14}
+          >
             {text}
           </AutoTextSize>
         </Box>
