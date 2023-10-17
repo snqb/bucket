@@ -8,6 +8,7 @@ import {
   VStack,
   Text,
   Center,
+  Flex,
 } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ShortTask } from "./Task";
@@ -19,6 +20,7 @@ import { PERIODS, PERIOD_TEXTS } from "./constants";
 import { TodoState, horizontalIndex, useAppSelector } from "./store";
 import { AutoTextSize } from "auto-text-size";
 import { motion } from "framer-motion";
+import EmojiSpawner from "./Confetti";
 interface Props {
   periods: readonly (keyof TodoState)[];
   row: number;
@@ -84,24 +86,25 @@ const Period = ({ periods, row }: Props) => {
               <ShortTask key={task.id} task={task} where={period} />
             ))}
           </VStack>
-          <Grid
+          <Flex
+            flexWrap="wrap"
             position="fixed"
             bottom="10%"
             width="full"
-            templateColumns="repeat(auto-fill, minmax(18vw, 1fr))"
-            gap={2}
+            gap={1}
             _hover={{
               bg: "inherit",
             }}
             sx={{
               WebkitTapHighlightColor: "transparent",
             }}
+            flex="0 1 fit-content"
           >
             <CircleText text="milk a cow" />
             <CircleText text="work out" />
             <CircleText text="work an hour with" />
             <CircleText text="pages" />
-          </Grid>
+          </Flex>
         </SwiperSlide>
       ))}
     </Swiper>
@@ -119,65 +122,54 @@ const CircleText: React.FC<CircleTextProps> = ({ text }) => {
   const [number, setNumber] = useState(0);
 
   return (
-    <Button
-      variant="unstyled"
-      borderRadius={4}
-      position="relative"
-      bg="black"
-      onClick={() => setNumber((it) => it + 1)}
-      filter="saturate(.8)"
-      opacity="0.5"
-      _active={{
-        bg: "gray.900",
-        transition: "all 1.5s",
-        filter: "saturate(1)",
-        opacity: 1,
-        outline: "none",
-      }}
-      _hover={{
-        bg: "gray.900",
-        transition: "all 1.5s",
-        filter: "saturate(1)",
-        opacity: 1,
-        outline: "none",
-      }}
-      userSelect="none"
-    >
-      <Box
-        sx={{
-          fontSize: "2.5rem",
-          position: "absolute",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-        }}
-      >
-        {emoji}
-      </Box>
-      <MotionBox
-        background="gray.800"
-        borderRadius="50%"
+    <EmojiSpawner>
+      <Button
+        variant="solid"
+        w="fit-content"
+        bg="gray.800"
+        onClick={() => setNumber((it) => it + 1)}
+        filter="saturate(.8)"
+        _active={huemoe}
+        _hover={huemoe}
+        userSelect="none"
+        display="flex"
+        alignItems="center"
         p={1}
-        position="absolute"
-        left="40%"
-        fontSize="12px"
-        minW="4ch"
-        textAlign="center"
-        fontWeight="bold"
-        h="auto"
-        key={number}
-        initial={{ y: -20 }}
-        animate={{ y: 0 }}
-        exit={{ y: 20 }}
       >
-        {number}
-      </MotionBox>
-      <VStack width="64px" height="64px" align="center" justify="end">
-        <AutoTextSize minFontSizePx={11} maxFontSizePx={14}>
-          {text}
-        </AutoTextSize>
-      </VStack>
-    </Button>
+        <Box fontSize="1.5rem">{emoji}</Box>
+        <Box width="50%">
+          <AutoTextSize mode="multiline" minFontSizePx={11} maxFontSizePx={14}>
+            {text}
+          </AutoTextSize>
+        </Box>
+        <MotionBox
+          background="gray.700"
+          borderRadius="50%"
+          p={1}
+          fontSize="12px"
+          minW="4ch"
+          textAlign="center"
+          fontWeight="bold"
+          h="auto"
+          key={number}
+          initial={{ y: -20 }}
+          animate={{ y: 0 }}
+          exit={{ y: 20 }}
+          border="1px solid gray.200"
+        >
+          {number}
+        </MotionBox>
+      </Button>
+    </EmojiSpawner>
   );
 };
 
 const MotionBox = motion(Box);
+
+const huemoe = {
+  bg: "gray.900",
+  transition: "all 1.5s",
+  filter: "saturate(1)",
+  opacity: 1,
+  outline: "none",
+};
