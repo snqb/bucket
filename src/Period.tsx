@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Grid,
   HStack,
   Heading,
@@ -16,12 +15,11 @@ import { ShortTask } from "./Task";
 
 import { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperClass, SwiperSlide } from "swiper/react";
-import Adder, { getRandomEmoji } from "./Adder";
+import Adder from "./Adder";
 import { PERIODS, PERIOD_TEXTS } from "./constants";
 import { TodoState, horizontalIndex, useAppSelector } from "./store";
-import { AutoTextSize } from "auto-text-size";
 import { motion } from "framer-motion";
-import EmojiSpawner from "./Confetti";
+import { CircleText } from "./CircleText";
 interface Props {
   periods: readonly (keyof TodoState)[];
   row: number;
@@ -92,7 +90,7 @@ const Period = ({ periods, row }: Props) => {
             position="fixed"
             bottom="10%"
             width="full"
-            gap={1}
+            gap={2}
             _hover={{
               bg: "inherit",
             }}
@@ -117,66 +115,11 @@ const Period = ({ periods, row }: Props) => {
 
 export default Period;
 
-interface CircleTextProps {
+export interface CircleTextProps {
   text: string;
 }
 
-const CircleText: React.FC<CircleTextProps> = ({ text }) => {
-  const [emoji] = useState(getRandomEmoji());
-  const [number, setNumber] = useState(0);
-
-  return (
-    <EmojiSpawner>
-      <Button
-        variant="solid"
-        w="fit-content"
-        bg="blackAlpha.900"
-        onClick={() => setNumber((it) => it + 1)}
-        filter="saturate(.8)"
-        _active={huemoe}
-        _hover={huemoe}
-        userSelect="none"
-        display="flex"
-        alignItems="center"
-        p={1}
-        gap={1}
-      >
-        <Box fontSize="1.5rem">{emoji}</Box>
-        <Box text-textAlign="left">
-          <AutoTextSize
-            style={{ textAlign: "left" }}
-            mode="box"
-            minFontSizePx={11}
-            maxFontSizePx={14}
-          >
-            {text}
-          </AutoTextSize>
-        </Box>
-        <MotionBox
-          background="gray.700"
-          borderRadius="50%"
-          p={1}
-          fontSize="12px"
-          minW="4ch"
-          textAlign="center"
-          fontWeight="bold"
-          h="auto"
-          key={number}
-          initial={{ y: -20 }}
-          animate={{ y: 0 }}
-          exit={{ y: 20 }}
-          border="1px solid gray.200"
-        >
-          {number}
-        </MotionBox>
-      </Button>
-    </EmojiSpawner>
-  );
-};
-
-const MotionBox = motion(Box);
-
-const huemoe = {
+export const huemoe = {
   bg: "gray.900",
   transition: "all 1.5s",
   filter: "saturate(1)",

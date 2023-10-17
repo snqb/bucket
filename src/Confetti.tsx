@@ -3,41 +3,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import ReactDOM from "react-dom";
 
-const MotionBox = motion(Box);
-
-const emojiArray = ["👍", "🎉", "❤️", "🌟", "🎈"];
-
-const ConfettiEmoji = ({ onComplete }) => {
-  const randomEmoji = emojiArray[Math.floor(Math.random() * emojiArray.length)];
-  const fontSize = Math.random() * 24 + 16; // Random font size between 16 and 40
-  const leftPosition = Math.random() * 100; // Random starting position
-
-  const animationProps = {
-    initial: { y: "100vh", scale: 0.5 },
-    animate: { y: "50vh", scale: [0.5, 1.5], rotate: [0, 360] },
-    exit: { opacity: 0 },
-    transition: { duration: 2 },
-    onAnimationComplete: onComplete,
-  };
-
-  return (
-    <MotionBox
-      position="absolute"
-      left={`${leftPosition}vw`}
-      bottom="0"
-      fontSize={`${fontSize}px`}
-      {...animationProps}
-    >
-      {randomEmoji}
-    </MotionBox>
-  );
-};
-
 const FadingEmoji = ({ x, y, onComplete }) => {
   const animationProps = {
     initial: { scale: 3, opacity: 1 },
     animate: { scale: 1, opacity: 0 },
-    transition: { duration: 2 },
+    transition: { duration: 1 },
     onAnimationComplete: onComplete,
   };
 
@@ -74,7 +44,7 @@ const EmojiSpawner = ({ children }) => {
 
   return (
     <>
-      <Button p={1} variant="ghost" onClick={handleButtonClick}>
+      <Button p={0} onClick={handleButtonClick}>
         {children}
       </Button>
       {coords && (
