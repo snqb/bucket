@@ -14,7 +14,7 @@ export const PERIODS = [
 
 export type Period = (typeof PERIODS)[number];
 
-export const PERIOD_TEXTS: Record<keyof TodoState, string> = {
+export const PERIOD_TEXTS: Record<string, string> = {
   today: "Today",
   tomorrow: "Tomorrow",
   someday: "Someday",

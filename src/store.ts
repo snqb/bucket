@@ -20,61 +20,85 @@ type Title = {
   emoji: string;
 };
 
-export type TodoState = Record<(typeof PERIODS)[number], Todo[]>;
+export type TodoState = Record<string, Todo[]>;
 export const initialState: TodoState = PERIODS.reduce(
   (acc, it) => ({ ...acc, [it]: [] }),
   {} as TodoState,
 );
+
+const isT: {
+  structure: string[][];
+  values: { [key: string]: Todo[] };
+} = {
+  structure: [["welcome"]],
+  values: {},
+};
+
 const todoSlice = createSlice({
   name: "todo",
-  initialState,
+  initialState: isT,
   reducers: {
     addTask: (
       state,
-      action: PayloadAction<{ key: keyof TodoState; task: Todo }>,
+      action: PayloadAction<{
+        key: string;
+        task: Todo;
+        coords: [number, number];
+      }>,
     ) => {
-      state[action.payload.key].unshift(action.payload.task);
+      const { key, coords } = action.payload;
+      const [row, column] = coords;
+
+      if (!state.structure[row] || !state.structure[row][column]) {
+        state.structure[row] = [];
+        state.structure[row][column] = key;
+      }
+      if (!state.values[key]) {
+        state.values[key] = [];
+      }
+
+      state.values[key].unshift(action.payload.task);
     },
-    removeTask: (
-      state,
-      action: PayloadAction<{ key: keyof TodoState; id: string }>,
-    ) => {
-      state[action.payload.key] = state[action.payload.key].filter(
-        (task) => task.id !== action.payload.id,
-      );
+    removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
+      state.values[action.payload.key] = state.values[
+        action.payload.key
+      ].filter((task) => task.id !== action.payload.id);
     },
     moveTask: (
       state,
       action: PayloadAction<{
-        from: keyof TodoState;
-        to: keyof TodoState;
+        from: string;
+        to: string;
         id: string;
       }>,
     ) => {
-      const taskIndex = state[action.payload.from].findIndex(
+      const taskIndex = state.values[action.payload.from].findIndex(
         (task) => task.id === action.payload.id,
       );
       if (taskIndex > -1) {
-        const [task] = state[action.payload.from].splice(taskIndex, 1);
-        state[action.payload.to].push(task);
+        const [task] = state.values[action.payload.from].splice(taskIndex, 1);
+        state.values[action.payload.to].push(task);
       }
     },
-    toToday: (
+    changeTitle: (
       state,
-      action: PayloadAction<{ from: keyof TodoState; id: string }>,
+      action: PayloadAction<{ title: string; coords: [number, number] }>,
     ) => {
-      const taskIndex = state[action.payload.from].findIndex(
-        (task) => task.id === action.payload.id,
-      );
-      if (taskIndex > -1) {
-        const [task] = state[action.payload.from].splice(taskIndex, 1);
-        state.today.push(task);
+      const { title, coords } = action.payload;
+      const [row, column] = coords;
+
+      const oldName = state.structure[row][column];
+      if (oldName) {
+        state.values[title] = state.values[oldName];
+        delete state.values[oldName];
       }
+
+      state.structure[row][column] = title;
     },
   },
 });
 
-export const { addTask, removeTask, moveTask, toToday } = todoSlice.actions;
+export const { addTask, removeTask, moveTask, changeTitle } = todoSlice.actions;
 
 const persistConfig = {
   key: "bucket",
