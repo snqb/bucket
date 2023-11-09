@@ -1,11 +1,16 @@
 import {
+  Button,
+  ButtonGroup,
   Editable,
   EditableInput,
   EditablePreview,
+  Flex,
   HStack,
+  IconButton,
   StackDivider,
   StackProps,
   VStack,
+  useEditableControls,
 } from "@chakra-ui/react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ShortTask } from "./Task";
@@ -28,6 +33,7 @@ const getBg = (name: string) => {
     seed: name,
     format: "rgba",
     alpha: 0.07,
+    hue: "blue",
   });
 };
 
@@ -36,6 +42,8 @@ const Screen = ({ name, ...stackProps }: Props) => {
   const x = useAppSelector((state) => state.todo.structure);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
+
+  const todos = tasks[name] ?? [];
 
   const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
   return (
@@ -64,18 +72,41 @@ const Screen = ({ name, ...stackProps }: Props) => {
         >
           <EditablePreview />
           <EditableInput />
+          <EditableControls />
         </Editable>
       </HStack>
 
       <Adder placeholder="faster things..." where={name} />
 
-      {has(name, tasks)
-        ? tasks[name].map((task, index) => (
-            <ShortTask key={task.id} task={task} where={name} />
-          ))
-        : null}
+      {todos.map((task, index) => (
+        <ShortTask key={task.id} task={task} where={name} />
+      ))}
     </VStack>
   );
 };
+
+function EditableControls() {
+  const {
+    isEditing,
+    getSubmitButtonProps,
+    getCancelButtonProps,
+    getEditButtonProps,
+  } = useEditableControls();
+
+  return isEditing ? (
+    <ButtonGroup justifyContent="center" size="sm">
+      <Button variant="ghost" {...getSubmitButtonProps()}>
+        ✅
+      </Button>
+      <Button variant="ghost" {...getCancelButtonProps()}>
+        ❌
+      </Button>
+    </ButtonGroup>
+  ) : (
+    <Button variant="ghost" {...getEditButtonProps()}>
+      🖊️
+    </Button>
+  );
+}
 
 export default Screen;
