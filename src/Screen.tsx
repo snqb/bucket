@@ -19,31 +19,33 @@ import { has } from "ramda";
 import { useContext, useState } from "react";
 import Adder from "./Adder";
 import { CoordinatesContext } from "./App";
-import { changeTitle, useAppDispatch, useAppSelector } from "./store";
+import { renameScreen, useAppDispatch, useAppSelector } from "./store";
 import randomColor from "randomcolor";
 import { Map } from "./Map";
 
 interface Props extends StackProps {
   name: string;
+  fake?: boolean;
 }
 
 const getBg = (name: string) => {
   return randomColor({
-    luminosity: "dark",
+    luminosity: "light",
     seed: name,
     format: "rgba",
     alpha: 0.07,
-    hue: "blue",
+    // hue: "",
   });
 };
 
-const Screen = ({ name, ...stackProps }: Props) => {
+const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const x = useAppSelector((state) => state.todo.structure);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
 
   const todos = tasks[name] ?? [];
+  if (todos === undefined) return null;
 
   const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
   return (
@@ -55,28 +57,31 @@ const Screen = ({ name, ...stackProps }: Props) => {
       id="later"
       align="stretch"
       divider={<StackDivider borderStyle="dotted" borderColor="gray.800" />}
-      ref={autoAnimate as any}
+      // ref={autoAnimate as any}
       bg={getBg(name)}
       {...stackProps}
     >
       <HStack>
-        <Map position={[row, column]} slides={x} />
+        <Map fake={fake} position={[row, column]} slides={x} />
         <Editable
           key={name}
-          defaultValue={name}
+          defaultValue={fake ? undefined : name}
           onSubmit={(name) => {
-            dispatch(changeTitle({ title: name, coords: [row, column] }));
+            dispatch(renameScreen({ title: name, coords: [row, column] }));
           }}
           fontSize="3xl"
           fontWeight="bold"
+          placeholder="untitled"
+          textTransform="uppercase"
         >
           <EditablePreview />
+
           <EditableInput />
           <EditableControls />
         </Editable>
       </HStack>
 
-      <Adder placeholder="faster things..." where={name} />
+      {!fake && <Adder placeholder="faster things..." where={name} />}
 
       {todos.map((task, index) => (
         <ShortTask key={task.id} task={task} where={name} />

@@ -57,13 +57,13 @@ const TwoDeeThing = () => {
                 </Slide>
               ))}
               <Slide virtualIndex={0}>
-                <Screen name={"new " + crypto.randomUUID().slice(0, 3)} />
+                <Screen fake name={"new " + crypto.randomUUID().slice(0, 3)} />
               </Slide>
             </Swiper>
           </Slide>
         ))}
         <Slide virtualIndex={0}>
-          <Screen name={"new  " + crypto.randomUUID().slice(0, 3)} />
+          <Screen fake name={"new  " + crypto.randomUUID().slice(0, 3)} />
         </Slide>
       </Swiper>
     </CoordinatesContext.Provider>

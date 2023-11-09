@@ -80,25 +80,32 @@ const todoSlice = createSlice({
         state.values[action.payload.to].push(task);
       }
     },
-    changeTitle: (
+    renameScreen: (
       state,
       action: PayloadAction<{ title: string; coords: [number, number] }>,
     ) => {
       const { title, coords } = action.payload;
       const [row, column] = coords;
+      console.log(action);
 
-      const oldName = state.structure[row][column];
+      const oldName = state.structure?.[row]?.[column];
       if (oldName) {
-        state.values[title] = state.values[oldName];
+        state.values[title] = [...state.values[oldName]];
         delete state.values[oldName];
+      } else {
+        state.values[title] = [];
       }
 
+      if (!state.structure[row]) {
+        state.structure[row] = [];
+      }
       state.structure[row][column] = title;
     },
   },
 });
 
-export const { addTask, removeTask, moveTask, changeTitle } = todoSlice.actions;
+export const { addTask, removeTask, moveTask, renameScreen } =
+  todoSlice.actions;
 
 const persistConfig = {
   key: "bucket",

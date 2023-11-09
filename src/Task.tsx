@@ -151,7 +151,7 @@ const Title = ({ task, onOpen }: Props & OverlayProps) => (
     textAlign="left"
     as="span"
     fontSize="xl"
-    fontWeight={500}
+    fontWeight={600}
     onClick={onOpen}
   >
     {task.title.emoji} {task.title.text}
