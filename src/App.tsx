@@ -29,6 +29,9 @@ export const CoordinatesContext = createContext([0, 0]);
 const TwoDeeThing = () => {
   // const [slides, setSlides] = useState(SLIDES.concat([["fake vertical"]]));
   const slides = useAppSelector((state) => state.todo.structure);
+  const [controlledSwiper, setControlledSwiper] = useState<SwiperClass | null>(
+    null,
+  );
 
   const [row, setRow] = useState(0);
   const [column, setColumn] = useState(0);
@@ -46,6 +49,8 @@ const TwoDeeThing = () => {
           <Slide key={columnIndex} virtualIndex={columnIndex}>
             <Swiper
               direction="horizontal"
+              modules={[Controller]}
+              controller={{ control: controlledSwiper }}
               {...swiperProps}
               onSlideChange={(swiper) => {
                 setColumn(swiper.realIndex);

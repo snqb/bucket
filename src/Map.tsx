@@ -1,4 +1,5 @@
 import { Text, VStack } from "@chakra-ui/react";
+import { useAppSelector } from "./store";
 
 export const Map = ({
   position,
@@ -10,7 +11,7 @@ export const Map = ({
   fake?: boolean;
 }) => {
   const [activeRow, activeColumn] = position;
-  const grid = slides.concat(true ? [["➕"]] : []);
+  const structure = useAppSelector((state) => state.todo.structure);
 
   return (
     <VStack
@@ -21,13 +22,14 @@ export const Map = ({
       gap={0}
       align="baseline"
     >
-      {slides.map((row, index) => {
+      {structure.map((row, index) => {
         let legend = Array(row.length).fill("⏺️");
         if (activeRow === index) {
           const marker = "⭕";
           legend[activeColumn] = marker;
         }
-        legend[row.length] = activeColumn === row.length ? "⚔️" : "➕";
+        legend[row.length] =
+          activeRow === index && (activeColumn === row.length ? "⚔️" : "➕");
         return <Text key={legend.concat(index).join("")}>{legend}</Text>;
       })}
       <Text key="fake-vertical">
