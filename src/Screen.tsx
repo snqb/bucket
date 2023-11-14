@@ -40,14 +40,12 @@ const getBg = (name: string) => {
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
-  const x = useAppSelector((state) => state.todo.structure);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
 
-  const [autoAnimate] = useAutoAnimate({ duration: 250, easing: "linear" });
   return (
     <VStack
       px={[5, 5, 10, 20, 300]}
@@ -62,7 +60,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       {...stackProps}
     >
       <HStack>
-        <Map fake={fake} position={[row, column]} slides={x} />
+        <Map fake={fake} />
         <Editable
           key={name}
           defaultValue={fake ? undefined : name}
@@ -71,13 +69,17 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           }}
           fontSize="3xl"
           fontWeight="bold"
-          placeholder="untitled"
-          textTransform="uppercase"
+          fontStyle="italic"
+          placeholder="new"
+          sx={{
+            color: "gray.200",
+            fontVariant: "all-small-caps",
+          }}
         >
           <EditablePreview />
 
           <EditableInput />
-          <EditableControls />
+          <EditableControls fake={fake} />
         </Editable>
       </HStack>
 
@@ -90,7 +92,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   );
 };
 
-function EditableControls() {
+function EditableControls({ fake }: { fake: boolean }) {
   const {
     isEditing,
     getSubmitButtonProps,
@@ -99,7 +101,7 @@ function EditableControls() {
   } = useEditableControls();
 
   return isEditing ? (
-    <ButtonGroup justifyContent="center" size="sm">
+    <ButtonGroup justifyContent="center" size="xs" alignItems="center">
       <Button variant="ghost" {...getSubmitButtonProps()}>
         ✅
       </Button>
@@ -108,8 +110,8 @@ function EditableControls() {
       </Button>
     </ButtonGroup>
   ) : (
-    <Button variant="ghost" {...getEditButtonProps()}>
-      🖊️
+    <Button size="sm" variant="ghost" {...getEditButtonProps()}>
+      {fake ? "➕" : "🖊️"}
     </Button>
   );
 }

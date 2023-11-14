@@ -1,0 +1,24 @@
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #6e5f79; /* default background */
+  transition: background 1s;
+}
+
+.row {
+  background: #090b42;
+}
+
+.fake {
+  background: aquamarine;
+}
+
+/* .fake[data-bigger="true"] {
+  transform: scale(1.44);
+} */
+
+.dot[data-onit="true"] {
+  background: #f88f09;
+  transform: scale(1.21);
+}

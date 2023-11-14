@@ -5,6 +5,7 @@ import {
   createContext,
   forwardRef,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import ReloadPrompt from "./ReloadPrompt";
@@ -29,17 +30,18 @@ export const CoordinatesContext = createContext([0, 0]);
 const TwoDeeThing = () => {
   // const [slides, setSlides] = useState(SLIDES.concat([["fake vertical"]]));
   const slides = useAppSelector((state) => state.todo.structure);
-  const [controlledSwiper, setControlledSwiper] = useState<SwiperClass | null>(
-    null,
-  );
 
+  const swiperOne = useRef<SwiperClass>();
   const [row, setRow] = useState(0);
   const [column, setColumn] = useState(0);
 
   return (
     <CoordinatesContext.Provider value={[row, column]}>
       <Swiper
-        onSlideChange={(swiper) => {
+        onRealIndexChange={(swiper) => {
+          if (column === 2) console.log("setting column", column);
+          // swiperOne.current?.slideToLoop(column);
+
           setRow(swiper.realIndex);
         }}
         direction="vertical"
@@ -49,25 +51,26 @@ const TwoDeeThing = () => {
           <Slide key={columnIndex} virtualIndex={columnIndex}>
             <Swiper
               direction="horizontal"
-              modules={[Controller]}
-              controller={{ control: controlledSwiper }}
               {...swiperProps}
-              onSlideChange={(swiper) => {
-                setColumn(swiper.realIndex);
+              onRealIndexChange={(swiper) => {
+                const column = swiper.realIndex;
+                console.log(column);
+                if (!Number.isNaN(column)) setColumn(column);
               }}
+              // initialSlide={column}
             >
               {slides[columnIndex].map((name, index) => (
                 <Slide key={name + index} virtualIndex={index}>
                   <Screen name={name} />
                 </Slide>
               ))}
-              <Slide virtualIndex={0}>
+              <Slide virtualIndex={-1}>
                 <Screen fake name={"new " + crypto.randomUUID().slice(0, 3)} />
               </Slide>
             </Swiper>
           </Slide>
         ))}
-        <Slide virtualIndex={0}>
+        <Slide virtualIndex={-1}>
           <Screen fake name={"new  " + crypto.randomUUID().slice(0, 3)} />
         </Slide>
       </Swiper>
