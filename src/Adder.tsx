@@ -20,8 +20,6 @@ export interface Props extends InputGroupProps {
 const Adder = forwardRef<Props, "div">((props, ref) => {
   const { where, placeholder } = props;
   const dispatch = useAppDispatch();
-  const swiper = useSwiper();
-  const slide = useSwiperSlide();
   const [row, column] = useContext(CoordinatesContext);
 
   const [emoji, generateEmoji, clearEmoji] = useInputEmoji(getRandomEmoji());
@@ -64,7 +62,13 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
+    <InputGroup
+      variant="ghost"
+      // opacity={0.9}
+      size="md"
+      ref={ref}
+      {...props}
+    >
       <InputLeftElement pointerEvents="none">
         <span>{emoji}</span>
       </InputLeftElement>

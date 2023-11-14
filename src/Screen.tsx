@@ -53,7 +53,7 @@ const pastels = compFilter(
   // chroma(0, 0.25),
   // require at least 3 theme colors to have min 50% luma
   chroma(0, 0.3, 1),
-  luma(0, 0.3, 1),
+  luma(0, 0.3, 3),
   hue(0.7, 1, 1),
 );
 
@@ -102,10 +102,11 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
             fontVariant: "all-small-caps",
           }}
         >
-          <EditablePreview />
-
-          <EditableInput />
-          <EditableControls fake={fake} />
+          <HStack>
+            <EditablePreview />
+            <EditableInput fontSize="lg" />
+            <EditableControls fake={fake} />
+          </HStack>
         </Editable>
       </HStack>
 
@@ -136,7 +137,12 @@ function EditableControls({ fake }: { fake: boolean }) {
       </Button>
     </ButtonGroup>
   ) : (
-    <Button size="sm" variant="ghost" {...getEditButtonProps()}>
+    <Button
+      display="inline"
+      size="sm"
+      variant="ghost"
+      {...getEditButtonProps()}
+    >
       {fake ? "➕" : "🖊️"}
     </Button>
   );

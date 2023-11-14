@@ -8,7 +8,7 @@
   height: 9px;
   border-radius: 50%;
   background: #6d135b; /* default background */
-  transition: background 1s;
+  transition: background .7s;
 }
 
 .fake {
