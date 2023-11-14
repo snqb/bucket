@@ -1,27 +1,19 @@
-import { Box, Flex } from "@chakra-ui/react";
+import { Flex, Heading } from "@chakra-ui/react";
 
-import {
-  RefAttributes,
-  createContext,
-  forwardRef,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, useRef, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { Controller, EffectCube, Virtual } from "swiper/modules";
+import { Controller, Virtual } from "swiper/modules";
 import {
+  SwiperSlide as Slide,
   Swiper,
   SwiperClass,
-  SwiperSlide as Slide,
   SwiperProps,
-  SwiperRef,
 } from "swiper/react";
 import Screen from "./Screen";
-import { horizontalIndex, persistor, store, useAppSelector } from "./store";
+import { persistor, store, useAppSelector } from "./store";
 
 const SLIDES = [["first"], ["second", "third"]];
 
@@ -29,48 +21,44 @@ export const CoordinatesContext = createContext([0, 0]);
 
 const TwoDeeThing = () => {
   // const [slides, setSlides] = useState(SLIDES.concat([["fake vertical"]]));
-  const slides = useAppSelector((state) => state.todo.structure);
+  const structure = useAppSelector((state) => state.todo.structure);
 
   const swiperOne = useRef<SwiperClass>();
-  const [row, setRow] = useState(0);
-  const [column, setColumn] = useState(0);
+  const [activeRow, setRow] = useState(0);
+  const [activeColumn, setColumn] = useState(0);
 
   return (
-    <CoordinatesContext.Provider value={[row, column]}>
+    <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
       <Swiper
+        {...swiperProps}
         onRealIndexChange={(swiper) => {
-          if (column === 2) console.log("setting column", column);
-          // swiperOne.current?.slideToLoop(column);
-
           setRow(swiper.realIndex);
         }}
         direction="vertical"
-        {...swiperProps}
       >
-        {slides.map((row, columnIndex) => (
-          <Slide key={columnIndex} virtualIndex={columnIndex}>
+        {structure.map((row, rowIndex) => (
+          <Slide key={rowIndex} virtualIndex={rowIndex}>
             <Swiper
-              direction="horizontal"
               {...swiperProps}
+              key={rowIndex}
+              direction="horizontal"
               onRealIndexChange={(swiper) => {
-                const column = swiper.realIndex;
-                console.log(column);
-                if (!Number.isNaN(column)) setColumn(column);
+                if (!Number.isNaN(swiper.realIndex))
+                  setColumn(swiper.realIndex);
               }}
-              // initialSlide={column}
             >
-              {slides[columnIndex].map((name, index) => (
-                <Slide key={name + index} virtualIndex={index}>
+              {structure[rowIndex].map((name, columnIndex) => (
+                <Slide key={name + columnIndex} virtualIndex={columnIndex}>
                   <Screen name={name} />
                 </Slide>
               ))}
-              <Slide virtualIndex={-1}>
+              <Slide virtualIndex={row.length}>
                 <Screen fake name={"new " + crypto.randomUUID().slice(0, 3)} />
               </Slide>
             </Swiper>
           </Slide>
         ))}
-        <Slide virtualIndex={-1}>
+        <Slide virtualIndex={structure.length}>
           <Screen fake name={"new  " + crypto.randomUUID().slice(0, 3)} />
         </Slide>
       </Swiper>
@@ -85,7 +73,8 @@ const swiperProps: SwiperProps = {
     height: "100vh",
     width: "100%",
   },
-  virtual: true,
+  observer: true, // cause I add slides
+  virtual: true, // Slides are virtual, I add/remove all the time
   modules: [Virtual],
 };
 

@@ -1,4 +1,14 @@
-import { Box, HStack, Text, VStack, Grid, GridItem } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Text,
+  VStack,
+  Grid,
+  GridItem,
+  BoxProps,
+  forwardRef,
+  Center,
+} from "@chakra-ui/react";
 import { useAppSelector } from "./store";
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
@@ -56,8 +66,7 @@ export const Map = ({
 }) => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
 
-  const { structure, values } = useAppSelector((state) => state.todo);
-  const value = values[structure?.[activeRow]?.[activeColumn]];
+  const { structure } = useAppSelector((state) => state.todo);
   const isOutOnY = activeRow === structure.length;
   const isOutOnX = activeColumn === structure?.[activeRow]?.length;
 
@@ -80,13 +89,13 @@ export const Map = ({
       gap={1}
       align="baseline"
     >
-      <Text>
+      {/* <Text>
         {activeRow}:{activeColumn}:{fake && "fake"}
-      </Text>
+      </Text> */}
       {structure.map((row, rowIndex) => {
         return (
           <HStack
-            key={row[rowIndex]}
+            key={rowIndex}
             border="1px solid gray.400"
             gap={1}
             height="0.5rem"
@@ -106,22 +115,22 @@ export const Map = ({
               );
             })}
             {fake && rowIndex === activeRow && (
-              <Box
-                className="fake dot"
-                data-onit={isOutOnX}
-                key={`${rowIndex}-${fake}`}
-              ></Box>
+              <Fake data-onit={isOutOnX} key={`${rowIndex}-${fake}`} />
             )}
           </HStack>
         );
       })}
       {fake && isOutOnY && (
-        <Box
-          className="fake dot"
-          data-onit={isOutOnX}
-          key={`${"qew"}-${fake}`}
-        ></Box>
+        <Fake data-onit={isOutOnX} key={`${"qew"}-${fake}`} />
       )}
     </VStack>
   );
 };
+
+const Fake = forwardRef<BoxProps, "div">((props, ref) => {
+  return (
+    <Center {...props} className="fake dot" fontSize="0.3rem" ref={ref}>
+      ➕
+    </Center>
+  );
+});

@@ -31,7 +31,8 @@
     "react-swipeable": "^7.0.1",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.2",
-    "swiper": "^10.1.0"
+    "swiper": "^11.0.4",
+    "tinycolor2": "^1.6.0"
   },
   "devDependencies": {
     "@types/ramda": "^0.29.2",

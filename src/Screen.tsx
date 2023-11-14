@@ -4,35 +4,29 @@ import {
   Editable,
   EditableInput,
   EditablePreview,
-  Flex,
   HStack,
-  IconButton,
   StackDivider,
   StackProps,
   VStack,
   useEditableControls,
 } from "@chakra-ui/react";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ShortTask } from "./Task";
 
-import {
-  asCSS,
-  chroma,
-  compFilter,
-  cssThemes,
-  hue,
-  luma,
-  proximityRGB,
-} from "@thi.ng/color-palettes";
+import { chroma, compFilter, cssThemes, luma } from "@thi.ng/color-palettes";
 
-import { has } from "ramda";
-import { useContext, useState } from "react";
+import { prng_alea } from "esm-seedrandom";
+import randomColor from "randomcolor";
+import { useContext } from "react";
+import tinycolor from "tinycolor2";
 import Adder from "./Adder";
 import { CoordinatesContext } from "./App";
-import { renameScreen, useAppDispatch, useAppSelector } from "./store";
-import randomColor from "randomcolor";
 import { Map } from "./Map";
-import { prng_alea } from "esm-seedrandom";
+import {
+  removeScreen,
+  renameScreen,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -52,14 +46,17 @@ const pastels = compFilter(
   // require all theme colors to have max 25% chroma
   // chroma(0, 0.25),
   // require at least 3 theme colors to have min 50% luma
-  chroma(0, 0.3, 1),
-  luma(0, 0.3, 3),
-  hue(0.7, 1, 1),
+  chroma(0, 0.5, 3),
+  luma(0, 0.5, 3),
+  // hue(0.7, 1, 1),
 );
 
 const colors = [...cssThemes(pastels)];
+const bgs = colors.filter((it) =>
+  tinycolor.isReadable(it[0], "#fff", { level: "AAA", size: "large" }),
+);
+console.log(colors, bgs);
 
-console.log(colors);
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
@@ -85,7 +82,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       bg={bg}
       {...stackProps}
     >
-      <HStack>
+      <HStack align="center">
         <Map cellColor={cell} currentColor={current} fake={fake} />
         <Editable
           key={name}
@@ -101,11 +98,21 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
             color: "gray.200",
             fontVariant: "all-small-caps",
           }}
+          _placeholder={{
+            fontVariant: "all-small-caps",
+          }}
+          w="full"
         >
-          <HStack>
+          <HStack w="full" align="baseline">
             <EditablePreview />
             <EditableInput fontSize="lg" />
-            <EditableControls fake={fake} />
+            <EditableControls
+              onRemove={() => {
+                console.log("huemoe");
+                dispatch(removeScreen({ title: name, coords: [row, column] }));
+              }}
+              fake={fake}
+            />
           </HStack>
         </Editable>
       </HStack>
@@ -119,7 +126,13 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   );
 };
 
-function EditableControls({ fake }: { fake: boolean }) {
+function EditableControls({
+  fake,
+  onRemove,
+}: {
+  fake: boolean;
+  onRemove: () => void;
+}) {
   const {
     isEditing,
     getSubmitButtonProps,
@@ -131,20 +144,22 @@ function EditableControls({ fake }: { fake: boolean }) {
     <ButtonGroup justifyContent="center" size="xs" alignItems="center">
       <Button variant="ghost" {...getSubmitButtonProps()}>
         ✅
-      </Button>
+      </Button>{" "}
       <Button variant="ghost" {...getCancelButtonProps()}>
         ❌
       </Button>
     </ButtonGroup>
   ) : (
-    <Button
-      display="inline"
-      size="sm"
-      variant="ghost"
-      {...getEditButtonProps()}
-    >
-      {fake ? "➕" : "🖊️"}
-    </Button>
+    <ButtonGroup flex="1" w="max-content" justifyContent="space-between">
+      <Button size="sm" variant="ghost" {...getEditButtonProps()}>
+        {fake ? "➕" : "🖊️"}
+      </Button>
+      {!fake && (
+        <Button type="button" variant="ghost" onClick={onRemove}>
+          🚮
+        </Button>
+      )}
+    </ButtonGroup>
   );
 }
 

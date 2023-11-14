@@ -86,7 +86,6 @@ const todoSlice = createSlice({
     ) => {
       const { title, coords } = action.payload;
       const [row, column] = coords;
-      console.log(action);
 
       const oldName = state.structure?.[row]?.[column];
       if (oldName) {
@@ -101,10 +100,24 @@ const todoSlice = createSlice({
       }
       state.structure[row][column] = title;
     },
+    removeScreen: (
+      state,
+      action: PayloadAction<{ title: string; coords: [number, number] }>,
+    ) => {
+      const { title, coords } = action.payload;
+      const [row, column] = coords;
+      console.log(row, column);
+
+      delete state.values[title];
+      state.structure[row].splice(column, 1);
+      if (state.structure[row].length === 0) {
+        state.structure.splice(row, 1);
+      }
+    },
   },
 });
 
-export const { addTask, removeTask, moveTask, renameScreen } =
+export const { addTask, removeTask, moveTask, renameScreen, removeScreen } =
   todoSlice.actions;
 
 const persistConfig = {
