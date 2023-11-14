@@ -15,6 +15,16 @@ import {
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { ShortTask } from "./Task";
 
+import {
+  asCSS,
+  chroma,
+  compFilter,
+  cssThemes,
+  hue,
+  luma,
+  proximityRGB,
+} from "@thi.ng/color-palettes";
+
 import { has } from "ramda";
 import { useContext, useState } from "react";
 import Adder from "./Adder";
@@ -22,7 +32,7 @@ import { CoordinatesContext } from "./App";
 import { renameScreen, useAppDispatch, useAppSelector } from "./store";
 import randomColor from "randomcolor";
 import { Map } from "./Map";
-
+import { prng_alea } from "esm-seedrandom";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -38,10 +48,26 @@ const getBg = (name: string) => {
   });
 };
 
+const pastels = compFilter(
+  // require all theme colors to have max 25% chroma
+  // chroma(0, 0.25),
+  // require at least 3 theme colors to have min 50% luma
+  chroma(0, 0.3, 1),
+  luma(0, 0.3, 1),
+  hue(0.7, 1, 1),
+);
+
+const colors = [...cssThemes(pastels)];
+
+console.log(colors);
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
+  const random = prng_alea(name);
+
+  const [bg, current, cell, adding, ...rest] =
+    colors?.[(colors.length * random()) | 0];
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
@@ -49,18 +75,18 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   return (
     <VStack
       px={[5, 5, 10, 20, 300]}
-      pt={10}
+      pt={4}
       height="100vh"
       spacing={2}
       id="later"
       align="stretch"
       divider={<StackDivider borderStyle="dotted" borderColor="gray.800" />}
       // ref={autoAnimate as any}
-      bg={getBg(name)}
+      bg={bg}
       {...stackProps}
     >
       <HStack>
-        <Map fake={fake} />
+        <Map cellColor={cell} currentColor={current} fake={fake} />
         <Editable
           key={name}
           defaultValue={fake ? undefined : name}

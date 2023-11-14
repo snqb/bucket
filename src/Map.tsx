@@ -1,16 +1,75 @@
-import { Box, HStack, Text, VStack, styled } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack, Grid, GridItem } from "@chakra-ui/react";
 import { useAppSelector } from "./store";
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
 import "./Map.css";
 
-export const Map = ({ fake = false }: { fake?: boolean }) => {
+const useGrid = () => {
+  const [y, x] = useContext(CoordinatesContext);
+  const { structure, values } = useAppSelector((state) => state.todo);
+  const isOutOnY = y === structure.length;
+  const isOutOnX = x === structure?.[y]?.length;
+
+  // Function to get the value at the current coordinates
+  const getCurrentValue = () => {
+    if (!isOutOnY && !isOutOnX) {
+      return values[structure[y][x]];
+    }
+    return null;
+  };
+
+  // Navigation functions (to be implemented)
+  const moveToNext = () => {
+    /* ... */
+  };
+  const moveToPrevious = () => {
+    /* ... */
+  };
+  const moveUp = () => {
+    /* ... */
+  };
+  const moveDown = () => {
+    /* ... */
+  };
+
+  return {
+    y,
+    x,
+    isOutOnY,
+    isOutOnX,
+    getCurrentValue,
+    moveToNext,
+    moveToPrevious,
+    moveUp,
+    moveDown,
+  };
+};
+
+export const Map = ({
+  fake = false,
+  cellColor,
+  currentColor,
+}: {
+  fake?: boolean;
+  cellColor: string;
+  currentColor: string;
+}) => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
 
   const { structure, values } = useAppSelector((state) => state.todo);
-  const value = values[structure[activeRow][activeColumn]];
-  const row = values[activeRow];
-  const isOutOnX = activeColumn === structure[activeRow].length;
+  const value = values[structure?.[activeRow]?.[activeColumn]];
+  const isOutOnY = activeRow === structure.length;
+  const isOutOnX = activeColumn === structure?.[activeRow]?.length;
+
+  const css = `
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: ${cellColor}; /* default background */
+  transition: background 1s;
+
+  
+  `;
 
   return (
     <VStack
@@ -25,7 +84,6 @@ export const Map = ({ fake = false }: { fake?: boolean }) => {
         {activeRow}:{activeColumn}:{fake && "fake"}
       </Text>
       {structure.map((row, rowIndex) => {
-        console.log(row);
         return (
           <HStack
             key={row[rowIndex]}
@@ -35,19 +93,16 @@ export const Map = ({ fake = false }: { fake?: boolean }) => {
             className="row"
           >
             {row.map((_, colIndex) => {
+              const onIt = rowIndex === activeRow && colIndex === activeColumn;
               return (
-                <>
-                  <Box
-                    className="dot"
-                    data-fake={value === undefined}
-                    data-onit={
-                      rowIndex === activeRow && colIndex === activeColumn
-                        ? "true"
-                        : undefined
-                    }
-                    key={`${rowIndex}-${colIndex}`}
-                  />
-                </>
+                <Box
+                  className="dot"
+                  sx={{
+                    bg: onIt ? currentColor : cellColor,
+                    transform: onIt ? "scale(1.2)" : undefined,
+                  }}
+                  key={`${rowIndex}-${colIndex}`}
+                />
               );
             })}
             {fake && rowIndex === activeRow && (
@@ -60,11 +115,13 @@ export const Map = ({ fake = false }: { fake?: boolean }) => {
           </HStack>
         );
       })}
-      {/* <Text key="fake-vertical">
-        {activeRow === slides.length ? "⚔️" : "➕"}
-      </Text> */}
+      {fake && isOutOnY && (
+        <Box
+          className="fake dot"
+          data-onit={isOutOnX}
+          key={`${"qew"}-${fake}`}
+        ></Box>
+      )}
     </VStack>
   );
 };
-
-const Dot = styled(Box);
