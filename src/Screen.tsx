@@ -51,11 +51,18 @@ const pastels = compFilter(
   // hue(0.7, 1, 1),
 );
 
-const colors = [...cssThemes(pastels)];
-const bgs = colors.filter((it) =>
-  tinycolor.isReadable(it[0], "#fff", { level: "AAA", size: "large" }),
-);
-console.log(colors, bgs);
+const colors = [...cssThemes(pastels)].map(([bg, ...rest]) => [
+  tinycolor(bg).darken(20).toString(),
+  ...rest,
+]);
+const bgs = colors.filter(([bg, ...rest]) => {
+  const color = tinycolor(bg);
+  return (
+    tinycolor.readability("#fff", color) > 11 &&
+    color.isDark() &&
+    color.getBrightness() < 33
+  );
+});
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
