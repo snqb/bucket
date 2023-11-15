@@ -55,30 +55,27 @@ const useGrid = () => {
   };
 };
 
+interface ColorScheme {
+  cell: string;
+  active: string;
+  one: string;
+  two: string;
+  three: string;
+  four: string;
+}
+
 export const Map = ({
   fake = false,
-  cellColor,
-  currentColor,
+  colors,
 }: {
   fake?: boolean;
-  cellColor: string;
-  currentColor: string;
+  colors: ColorScheme;
 }) => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
 
   const { structure } = useAppSelector((state) => state.todo);
   const isOutOnY = activeRow === structure.length;
   const isOutOnX = activeColumn === structure?.[activeRow]?.length;
-
-  const css = `
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: ${cellColor}; /* default background */
-  transition: background 1s;
-
-  
-  `;
 
   return (
     <VStack
@@ -107,7 +104,7 @@ export const Map = ({
                 <Box
                   className="dot"
                   sx={{
-                    bg: onIt ? currentColor : cellColor,
+                    bg: onIt ? colors.active : colors.cell,
                     transform: onIt ? "scale(1.2)" : undefined,
                   }}
                   key={`${rowIndex}-${colIndex}`}

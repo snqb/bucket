@@ -68,10 +68,10 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
-  const random = prng_alea(name);
 
-  const [bg, current, cell, adding, ...rest] =
-    colors?.[(colors.length * random()) | 0];
+  const seedRandom = prng_alea(name);
+  const [bg, current, cell, adding, two, three] =
+    colors?.[(colors.length * seedRandom()) | 0];
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
@@ -84,13 +84,22 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={2}
       id="later"
       align="stretch"
-      divider={<StackDivider borderStyle="dotted" borderColor="gray.800" />}
-      // ref={autoAnimate as any}
+      divider={<StackDivider borderStyle="dotted" borderColor={current} />}
       bg={bg}
       {...stackProps}
     >
       <HStack align="center">
-        <Map cellColor={cell} currentColor={current} fake={fake} />
+        <Map
+          colors={{
+            active: current,
+            cell,
+            one: adding,
+            two,
+            three,
+            four: "",
+          }}
+          fake={fake}
+        />
         <Editable
           key={name}
           defaultValue={fake ? undefined : name}
@@ -115,7 +124,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
             <EditableInput fontSize="lg" />
             <EditableControls
               onRemove={() => {
-                console.log("huemoe");
                 dispatch(removeScreen({ title: name, coords: [row, column] }));
               }}
               fake={fake}
@@ -124,7 +132,13 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
         </Editable>
       </HStack>
 
-      {!fake && <Adder placeholder="faster things..." where={name} />}
+      {!fake && (
+        <Adder
+          bg={tinycolor(current).darken(15).toString()}
+          placeholder="faster things..."
+          where={name}
+        />
+      )}
 
       {todos.map((task, index) => (
         <ShortTask key={task.id} task={task} where={name} />
