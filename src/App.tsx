@@ -1,11 +1,11 @@
-import { Flex, Heading } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 
 import { createContext, useRef, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { Controller, Virtual } from "swiper/modules";
+import { Virtual } from "swiper/modules";
 import {
   SwiperSlide as Slide,
   Swiper,
@@ -20,7 +20,6 @@ const SLIDES = [["first"], ["second", "third"]];
 export const CoordinatesContext = createContext([0, 0]);
 
 const TwoDeeThing = () => {
-  // const [slides, setSlides] = useState(SLIDES.concat([["fake vertical"]]));
   const structure = useAppSelector((state) => state.todo.structure);
 
   const swiperOne = useRef<SwiperClass>();

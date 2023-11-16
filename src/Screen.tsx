@@ -12,12 +12,8 @@ import {
 } from "@chakra-ui/react";
 import { ShortTask } from "./Task";
 
-import { chroma, compFilter, cssThemes, luma } from "@thi.ng/color-palettes";
-
-import { prng_alea } from "esm-seedrandom";
 import randomColor from "randomcolor";
 import { useContext } from "react";
-import tinycolor from "tinycolor2";
 import Adder from "./Adder";
 import { CoordinatesContext } from "./App";
 import { Map } from "./Map";
@@ -38,40 +34,13 @@ const getBg = (name: string) => {
     seed: name,
     format: "rgba",
     alpha: 0.07,
-    // hue: "",
   });
 };
-
-const pastels = compFilter(
-  // require all theme colors to have max 25% chroma
-  // chroma(0, 0.25),
-  // require at least 3 theme colors to have min 50% luma
-  chroma(0, 0.5, 3),
-  luma(0, 0.5, 3),
-  // hue(0.7, 1, 1),
-);
-
-const colors = [...cssThemes(pastels)].map(([bg, ...rest]) => [
-  tinycolor(bg).darken(20).toString(),
-  ...rest,
-]);
-const bgs = colors.filter(([bg, ...rest]) => {
-  const color = tinycolor(bg);
-  return (
-    tinycolor.readability("#fff", color) > 11 &&
-    color.isDark() &&
-    color.getBrightness() < 33
-  );
-});
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
-
-  const seedRandom = prng_alea(name);
-  const [bg, current, cell, adding, two, three] =
-    colors?.[(colors.length * seedRandom()) | 0];
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
@@ -84,22 +53,12 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={2}
       id="later"
       align="stretch"
-      divider={<StackDivider borderStyle="dotted" borderColor={current} />}
-      bg={bg}
+      divider={<StackDivider borderStyle="dotted" />}
+      bg={getBg(name)}
       {...stackProps}
     >
       <HStack align="center">
-        <Map
-          colors={{
-            active: current,
-            cell,
-            one: adding,
-            two,
-            three,
-            four: "",
-          }}
-          fake={fake}
-        />
+        <Map fake={fake} />
         <Editable
           key={name}
           defaultValue={fake ? undefined : name}
@@ -132,13 +91,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
         </Editable>
       </HStack>
 
-      {!fake && (
-        <Adder
-          bg={tinycolor(current).darken(15).toString()}
-          placeholder="faster things..."
-          where={name}
-        />
-      )}
+      {!fake && <Adder placeholder="faster things..." where={name} />}
 
       {todos.map((task, index) => (
         <ShortTask key={task.id} task={task} where={name} />

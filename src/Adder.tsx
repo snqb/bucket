@@ -8,19 +8,16 @@ import {
 } from "@chakra-ui/react";
 import { ChangeEventHandler, useCallback, useContext, useState } from "react";
 
-import { type Todo, type TodoState, addTask, useAppDispatch } from "./store";
 import * as R from "ramda";
-import { useSwiper, useSwiperSlide } from "swiper/react";
 import { CoordinatesContext } from "./App";
-import tinycolor from "tinycolor2";
+import { addTask, useAppDispatch, type Todo } from "./store";
 
 export interface Props extends InputGroupProps {
   where: string;
-  bg?: string;
 }
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const { where, placeholder, bg } = props;
+  const { where, placeholder } = props;
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
 
@@ -86,14 +83,12 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         onInput={generateEmoji}
         placeholder={placeholder}
         _placeholder={{
-          color: tinycolor
-            .mostReadable(bg, ["#fff", "#eee", "#ddd", "#ccc"])
-            .toString(),
+          color: "white",
         }}
         onKeyDown={R.when((e) => {
           return e.key === "Enter";
         }, onAdd)}
-        bg={bg}
+        bg="gray.600"
       />
       <InputRightElement onClick={onAdd} fontSize="2xl">
         ↵

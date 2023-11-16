@@ -1,81 +1,20 @@
 import {
   Box,
-  HStack,
-  Text,
-  VStack,
-  Grid,
-  GridItem,
   BoxProps,
-  forwardRef,
   Center,
+  HStack,
+  VStack,
+  forwardRef,
 } from "@chakra-ui/react";
-import { useAppSelector } from "./store";
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
 import "./Map.css";
+import { useAppSelector } from "./store";
 
-const useGrid = () => {
-  const [y, x] = useContext(CoordinatesContext);
-  const { structure, values } = useAppSelector((state) => state.todo);
-  const isOutOnY = y === structure.length;
-  const isOutOnX = x === structure?.[y]?.length;
-
-  // Function to get the value at the current coordinates
-  const getCurrentValue = () => {
-    if (!isOutOnY && !isOutOnX) {
-      return values[structure[y][x]];
-    }
-    return null;
-  };
-
-  // Navigation functions (to be implemented)
-  const moveToNext = () => {
-    /* ... */
-  };
-  const moveToPrevious = () => {
-    /* ... */
-  };
-  const moveUp = () => {
-    /* ... */
-  };
-  const moveDown = () => {
-    /* ... */
-  };
-
-  return {
-    y,
-    x,
-    isOutOnY,
-    isOutOnX,
-    getCurrentValue,
-    moveToNext,
-    moveToPrevious,
-    moveUp,
-    moveDown,
-  };
-};
-
-interface ColorScheme {
-  cell: string;
-  active: string;
-  one: string;
-  two: string;
-  three: string;
-  four: string;
-}
-
-export const Map = ({
-  fake = false,
-  colors,
-}: {
-  fake?: boolean;
-  colors: ColorScheme;
-}) => {
+export const Map = ({ fake = false }: { fake?: boolean }) => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
 
-  const { structure } = useAppSelector((state) => state.todo);
-  const isOutOnY = activeRow === structure.length;
-  const isOutOnX = activeColumn === structure?.[activeRow]?.length;
+  const { structure, isOutOnX, isOutOnY } = useGrid();
 
   return (
     <VStack
@@ -104,7 +43,7 @@ export const Map = ({
                 <Box
                   className="dot"
                   sx={{
-                    bg: onIt ? colors.active : colors.cell,
+                    bg: onIt ? "gray.400" : "white",
                     transform: onIt ? "scale(1.2)" : undefined,
                   }}
                   key={`${rowIndex}-${colIndex}`}
@@ -131,3 +70,18 @@ const Fake = forwardRef<BoxProps, "div">((props, ref) => {
     </Center>
   );
 });
+
+const useGrid = () => {
+  const [y, x] = useContext(CoordinatesContext);
+  const { structure, values } = useAppSelector((state) => state.todo);
+  const isOutOnY = y === structure.length;
+  const isOutOnX = x === structure?.[y]?.length;
+
+  return {
+    y,
+    x,
+    isOutOnY,
+    isOutOnX,
+    structure,
+  };
+};
