@@ -4,8 +4,8 @@
   padding: 5px 0;
 }
 .dot {
-  width: 9px;
-  height: 9px;
+  width: 0.44rem;
+  height: 0.44rem;
   border-radius: 50%;
   background: #6d135b; /* default background */
   transition: background .7s;

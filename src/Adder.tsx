@@ -61,13 +61,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup
-      variant="ghost"
-      // opacity={0.9}
-      size="md"
-      ref={ref}
-      {...props}
-    >
+    <InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none">
         <span>{emoji}</span>
       </InputLeftElement>

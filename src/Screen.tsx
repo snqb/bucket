@@ -53,7 +53,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={2}
       id="later"
       align="stretch"
-      divider={<StackDivider borderStyle="dotted" />}
+      divider={<StackDivider bg="gray.900" borderStyle="dotted" />}
       bg={getBg(name)}
       {...stackProps}
     >
@@ -71,10 +71,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           placeholder="new"
           sx={{
             color: "gray.200",
-            fontVariant: "all-small-caps",
-          }}
-          _placeholder={{
-            fontVariant: "all-small-caps",
           }}
           w="full"
         >
