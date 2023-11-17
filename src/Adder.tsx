@@ -79,10 +79,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         _placeholder={{
           color: "white",
         }}
-        onKeyDown={R.when((e) => {
-          return e.key === "Enter";
-        }, onAdd)}
-        bg="gray.600"
+        onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
+        bg="gray.900"
+        borderColor="blackAlpha.900"
       />
       <InputRightElement onClick={onAdd} fontSize="2xl">
         ↵

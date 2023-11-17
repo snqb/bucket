@@ -1,16 +1,4 @@
 
-.row {
-  background: #16274b;
-  padding: 5px 0;
-}
-.dot {
-  width: 0.44rem;
-  height: 0.44rem;
-  border-radius: 50%;
-  background: #6d135b; /* default background */
-  transition: background .7s;
-}
-
 .fake {
   background: #d5bba0 !important;
 }

@@ -1,6 +1,8 @@
 import {
+  AbsoluteCenter,
   Button,
   ButtonGroup,
+  Center,
   Editable,
   EditableInput,
   EditablePreview,
@@ -53,7 +55,9 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={2}
       id="later"
       align="stretch"
-      divider={<StackDivider bg="gray.900" borderStyle="dotted" />}
+      divider={
+        <StackDivider borderBottomColor="gray.900" borderBottomWidth="5px" />
+      }
       bg={getBg(name)}
       {...stackProps}
     >
@@ -68,22 +72,27 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           fontSize="3xl"
           fontWeight="bold"
           fontStyle="italic"
-          placeholder="new"
+          placeholder="untitled"
           sx={{
-            color: "gray.200",
+            color: fake ? "gray.700" : "gray.200",
           }}
           w="full"
         >
-          <HStack w="full" align="baseline">
+          <HStack w="full" align="center">
             <EditablePreview />
             <EditableInput fontSize="lg" />
-            <EditableControls
-              onRemove={() => {
-                dispatch(removeScreen({ title: name, coords: [row, column] }));
-              }}
-              fake={fake}
-            />
+            {!fake && (
+              <EditableControls
+                onRemove={() => {
+                  dispatch(
+                    removeScreen({ title: name, coords: [row, column] }),
+                  );
+                }}
+                fake={fake}
+              />
+            )}
           </HStack>
+          {fake && <CreateButton />}
         </Editable>
       </HStack>
 
@@ -93,6 +102,37 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
         <ShortTask key={task.id} task={task} where={name} />
       ))}
     </VStack>
+  );
+};
+
+const CreateButton = () => {
+  const {
+    isEditing,
+    getSubmitButtonProps,
+    getCancelButtonProps,
+    getEditButtonProps,
+  } = useEditableControls();
+
+  if (isEditing)
+    return (
+      <AbsoluteCenter>
+        <Button {...getSubmitButtonProps()}>Save</Button>
+      </AbsoluteCenter>
+    );
+
+  return (
+    <AbsoluteCenter>
+      <Button
+        {...getEditButtonProps()}
+        fontSize="xl"
+        fontWeight="bold"
+        colorScheme="pink"
+        aspectRatio="21/9"
+        size="lg"
+      >
+        +
+      </Button>
+    </AbsoluteCenter>
   );
 };
 
@@ -121,8 +161,8 @@ function EditableControls({
     </ButtonGroup>
   ) : (
     <ButtonGroup flex="1" w="max-content" justifyContent="space-between">
-      <Button size="sm" variant="ghost" {...getEditButtonProps()}>
-        {fake ? "➕" : "🖊️"}
+      <Button size="lg" variant="ghost" {...getEditButtonProps()}>
+        {fake ? "🆕" : "🖊️"}
       </Button>
       {!fake && (
         <Button type="button" variant="ghost" onClick={onRemove}>
