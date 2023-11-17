@@ -83,7 +83,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         bg="gray.900"
         borderColor="blackAlpha.900"
       />
-      <InputRightElement onClick={onAdd} fontSize="2xl">
+      <InputRightElement onClick={onAdd} fontSize="2xl" alignItems="baseline">
         ↵
       </InputRightElement>
     </InputGroup>

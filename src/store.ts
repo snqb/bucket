@@ -1,4 +1,3 @@
-import { PERIODS } from "./constants";
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
@@ -20,22 +19,18 @@ type Title = {
 };
 
 export type TodoState = Record<string, Todo[]>;
-export const initialState: TodoState = PERIODS.reduce(
-  (acc, it) => ({ ...acc, [it]: [] }),
-  {} as TodoState,
-);
 
-const isT: {
+const initialState: {
   structure: string[][];
   values: { [key: string]: Todo[] };
 } = {
-  structure: [["welcome"]],
+  structure: [["Today"]],
   values: {},
 };
 
 const todoSlice = createSlice({
   name: "todo",
-  initialState: isT,
+  initialState,
   reducers: {
     addTask: (
       state,

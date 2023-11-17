@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Center,
-  Grid,
   HStack,
   Heading,
   Modal,
@@ -16,8 +15,14 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import { PERIODS, PERIOD_TEXTS, Period } from "./constants";
-import { Todo, TodoState, moveTask, removeTask, useAppDispatch } from "./store";
+import {
+  Todo,
+  TodoState,
+  moveTask,
+  removeTask,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
 
 interface Props extends AccordionItemProps {
   task: Todo;
@@ -70,12 +75,13 @@ type OverlayProps = any;
 
 const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
   const dispatch = useAppDispatch();
+  const { structure } = useAppSelector((state) => state.todo);
 
-  const handleMove = (period: Period) => {
+  const handleMove = (screen: string) => {
     dispatch(
       moveTask({
         from: where,
-        to: period,
+        to: screen,
         id: task.id,
       }),
     );
@@ -99,45 +105,42 @@ const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
           </Heading>
         </ModalHeader>
         <ModalBody>
-          <Grid templateColumns="repeat(3, 1fr)" gap={2}>
-            {PERIODS.map((period) => (
-              <Button
-                tabIndex={-1}
-                key={period}
-                minW="25vmin"
-                minH="25vmin"
-                aspectRatio="1/1"
-                bg="blackAlpha.800"
-                fontSize="sm"
-                isDisabled={period === where}
-                sx={{
-                  _disabled: {
-                    bg: "blackAlpha.100",
-                  },
-                }}
-                onClick={() => handleMove(period)}
-              >
-                {period === where ? (
-                  <Center
-                    fontSize="large"
-                    w="50px"
-                    h="50px"
-                    borderRadius="50%"
-                    bg="gray.400"
-                  >
-                    {task.title.emoji}
-                  </Center>
-                ) : (
-                  PERIOD_TEXTS[period]
-                )}
-              </Button>
-            ))}
-          </Grid>
+          <VStack align="start">
+            {structure.map((row) => {
+              return (
+                <HStack flex={1} align="start">
+                  {row.map((screen) => (
+                    <Button
+                      variant="outline"
+                      tabIndex={-1}
+                      key={screen}
+                      bg="blackAlpha.800"
+                      color="white"
+                      fontSize="sm"
+                      isDisabled={screen === where}
+                      sx={{
+                        _disabled: {
+                          bg: "blackAlpha.100",
+                        },
+                      }}
+                      onClick={() => handleMove(screen)}
+                    >
+                      {screen === where ? (
+                        <Center fontSize="large">⋒</Center>
+                      ) : (
+                        screen
+                      )}
+                    </Button>
+                  ))}
+                </HStack>
+              );
+            })}
+          </VStack>
         </ModalBody>
 
         <ModalFooter>
-          <Button colorScheme="gray" mr={3} onClick={onClose}>
-            ❌
+          <Button colorScheme="gray" variant="outline" mr={3} onClick={onClose}>
+            ✖️
           </Button>
         </ModalFooter>
       </ModalContent>

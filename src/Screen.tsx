@@ -74,7 +74,10 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           fontStyle="italic"
           placeholder="untitled"
           sx={{
-            color: fake ? "gray.700" : "gray.200",
+            color: fake && "gray.700",
+          }}
+          _focusWithin={{
+            color: "gray.200",
           }}
           w="full"
         >
@@ -96,7 +99,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
         </Editable>
       </HStack>
 
-      {!fake && <Adder placeholder="faster things..." where={name} />}
+      {!fake && <Adder placeholder={`№` + (todos.length + 1)} where={name} />}
 
       {todos.map((task, index) => (
         <ShortTask key={task.id} task={task} where={name} />
@@ -160,8 +163,13 @@ function EditableControls({
       </Button>
     </ButtonGroup>
   ) : (
-    <ButtonGroup flex="1" w="max-content" justifyContent="space-between">
-      <Button size="lg" variant="ghost" {...getEditButtonProps()}>
+    <ButtonGroup
+      flex="1"
+      w="max-content"
+      justifyContent="space-between"
+      alignItems="baseline"
+    >
+      <Button size="sm" variant="ghost" {...getEditButtonProps()}>
         {fake ? "🆕" : "🖊️"}
       </Button>
       {!fake && (
