@@ -51,7 +51,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
     <VStack
       px={[5, 5, 10, 20, 300]}
       pt={4}
-      height="100vh"
+      height="100dvh"
       spacing={2}
       id="later"
       align="stretch"

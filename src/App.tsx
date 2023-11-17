@@ -69,7 +69,7 @@ const swiperProps: SwiperProps = {
   slidesPerView: 1,
   loop: true,
   style: {
-    height: "100vh",
+    height: "100dvh",
     width: "100%",
   },
   observer: true, // cause I add slides
