@@ -2,7 +2,6 @@ import {
   AbsoluteCenter,
   Button,
   ButtonGroup,
-  Center,
   Editable,
   EditableInput,
   EditablePreview,
@@ -169,12 +168,12 @@ function EditableControls({
       justifyContent="space-between"
       alignItems="baseline"
     >
-      <Button size="sm" variant="ghost" {...getEditButtonProps()}>
+      <Button size="xs" variant="ghost" {...getEditButtonProps()}>
         {fake ? "🆕" : "🖊️"}
       </Button>
       {!fake && (
         <Button type="button" variant="ghost" onClick={onRemove}>
-          🚮
+          🗑️
         </Button>
       )}
     </ButtonGroup>

@@ -1,7 +1,6 @@
 import {
   Box,
   BoxProps,
-  Center,
   HStack,
   VStack,
   forwardRef,
@@ -9,7 +8,6 @@ import {
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
-import "./Map.css";
 import { useAppSelector } from "./store";
 
 export const Map = ({ fake = false }: { fake?: boolean }) => {

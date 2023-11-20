@@ -66,7 +66,6 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         <span>{emoji}</span>
       </InputLeftElement>
       <Input
-        textTransform="lowercase"
         enterKeyHint="done"
         id={`adder-${where}`}
         type="text"
