@@ -1,5 +1,3 @@
-import { signal } from "@preact/signals-react";
-import { PERIODS } from "./constants";
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
@@ -20,61 +18,101 @@ type Title = {
   emoji: string;
 };
 
-export type TodoState = Record<(typeof PERIODS)[number], Todo[]>;
-export const initialState: TodoState = PERIODS.reduce(
-  (acc, it) => ({ ...acc, [it]: [] }),
-  {} as TodoState,
-);
+export type TodoState = Record<string, Todo[]>;
+
+const initialState: {
+  structure: string[][];
+  values: { [key: string]: Todo[] };
+} = {
+  structure: [["Today"]],
+  values: {},
+};
+
 const todoSlice = createSlice({
   name: "todo",
   initialState,
   reducers: {
     addTask: (
       state,
-      action: PayloadAction<{ key: keyof TodoState; task: Todo }>,
+      action: PayloadAction<{
+        key: string;
+        task: Todo;
+        coords: [number, number];
+      }>,
     ) => {
-      state[action.payload.key].unshift(action.payload.task);
+      const { key, coords } = action.payload;
+      const [row, column] = coords;
+
+      if (!state.structure[row] || !state.structure[row][column]) {
+        state.structure[row] = [];
+        state.structure[row][column] = key;
+      }
+      if (!state.values[key]) {
+        state.values[key] = [];
+      }
+
+      state.values[key].unshift(action.payload.task);
     },
-    removeTask: (
-      state,
-      action: PayloadAction<{ key: keyof TodoState; id: string }>,
-    ) => {
-      state[action.payload.key] = state[action.payload.key].filter(
-        (task) => task.id !== action.payload.id,
-      );
+    removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
+      state.values[action.payload.key] = state.values[
+        action.payload.key
+      ].filter((task) => task.id !== action.payload.id);
     },
     moveTask: (
       state,
       action: PayloadAction<{
-        from: keyof TodoState;
-        to: keyof TodoState;
+        from: string;
+        to: string;
         id: string;
       }>,
     ) => {
-      const taskIndex = state[action.payload.from].findIndex(
+      const taskIndex = state.values[action.payload.from].findIndex(
         (task) => task.id === action.payload.id,
       );
       if (taskIndex > -1) {
-        const [task] = state[action.payload.from].splice(taskIndex, 1);
-        state[action.payload.to].push(task);
+        const [task] = state.values[action.payload.from].splice(taskIndex, 1);
+        state.values[action.payload.to].push(task);
       }
     },
-    toToday: (
+    renameScreen: (
       state,
-      action: PayloadAction<{ from: keyof TodoState; id: string }>,
+      action: PayloadAction<{ title: string; coords: [number, number] }>,
     ) => {
-      const taskIndex = state[action.payload.from].findIndex(
-        (task) => task.id === action.payload.id,
-      );
-      if (taskIndex > -1) {
-        const [task] = state[action.payload.from].splice(taskIndex, 1);
-        state.today.push(task);
+      const { title, coords } = action.payload;
+      const [row, column] = coords;
+
+      const oldName = state.structure?.[row]?.[column];
+      if (oldName) {
+        state.values[title] = [...state.values[oldName]];
+        delete state.values[oldName];
+      } else {
+        state.values[title] = [];
+      }
+
+      if (!state.structure[row]) {
+        state.structure[row] = [];
+      }
+      state.structure[row][column] = title;
+    },
+    removeScreen: (
+      state,
+      action: PayloadAction<{ title: string; coords: [number, number] }>,
+    ) => {
+      const { title, coords } = action.payload;
+      const [row, column] = coords;
+      console.log(row, column);
+
+      delete state.values[title];
+      state.structure[row].splice(column, 1);
+      if (state.structure[row].length === 0) {
+        state.structure.splice(row, 1);
       }
     },
   },
 });
 
-export const { addTask, removeTask, moveTask, toToday } = todoSlice.actions;
+export const { addTask, removeTask, moveTask, renameScreen, removeScreen } =
+  todoSlice.actions;
 
 const persistConfig = {
   key: "bucket",
@@ -96,5 +134,3 @@ export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;
-
-export const horizontalIndex = signal(0);

@@ -34,39 +34,43 @@ function ReloadPrompt() {
 	});
 
 	return needRefresh ? (
-		<Flex
-			bg={
-				"linear-gradient(144deg, #c95fbb 25%, #2e2a12 25%, #2e2a12 50%, #c95fbb 50%, #c95fbb 75%, #2e2a12 75%, #2e2a12 100%)"
-			}
-			bgSize="68px"
-			justify="center"
-			position="fixed"
-			bottom="0"
-			left="0"
-			width="100vw"
-			direction="column"
-			align="center"
-			fontWeight="bold"
-			color="white.50"
-			zIndex={190}
-			p={2}
-		>
-			<Flex
-				bg="#000000AA"
-				py={3}
-				px={6}
-				direction="column"
-				align="center"
-				gap={1}
-			>
-				<Text fontSize="2rem">🪣</Text>
+    <Flex
+      bg={
+        "linear-gradient(144deg, #c95fbb 25%, #2e2a12 25%, #2e2a12 50%, #c95fbb 50%, #c95fbb 75%, #2e2a12 75%, #2e2a12 100%)"
+      }
+      bgSize="68px"
+      justify="center"
+      position="fixed"
+      bottom="0"
+      left="0"
+      width="100vw"
+      direction="column"
+      align="center"
+      fontWeight="bold"
+      color="white.50"
+      zIndex={190}
+      p={2}
+    >
+      <Flex
+        bg="#000000AA"
+        py={3}
+        px={6}
+        direction="column"
+        align="center"
+        gap={1}
+      >
+        <Text fontSize="2rem">🪣</Text>
 
-				<Button variant="outline" onClick={() => updateServiceWorker(true)}>
-					Update
-				</Button>
-			</Flex>
-		</Flex>
-	) : null;
+        <Button
+          color="white"
+          variant="outline"
+          onClick={() => updateServiceWorker(true)}
+        >
+          Update
+        </Button>
+      </Flex>
+    </Flex>
+  ) : null;
 }
 
 export default ReloadPrompt;
