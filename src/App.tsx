@@ -1,28 +1,20 @@
 import { Flex } from "@chakra-ui/react";
 
-import { createContext, useRef, useState } from "react";
+import { createContext, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Virtual } from "swiper/modules";
-import {
-  SwiperSlide as Slide,
-  Swiper,
-  SwiperClass,
-  SwiperProps,
-} from "swiper/react";
+import { SwiperSlide as Slide, Swiper, SwiperProps } from "swiper/react";
 import Screen from "./Screen";
 import { persistor, store, useAppSelector } from "./store";
-
-const SLIDES = [["first"], ["second", "third"]];
 
 export const CoordinatesContext = createContext([0, 0]);
 
 const TwoDeeThing = () => {
   const structure = useAppSelector((state) => state.todo.structure);
 
-  const swiperOne = useRef<SwiperClass>();
   const [activeRow, setRow] = useState(0);
   const [activeColumn, setColumn] = useState(0);
 

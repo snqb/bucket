@@ -10,7 +10,7 @@ import { useContext } from "react";
 import { CoordinatesContext } from "./App";
 import { useAppSelector } from "./store";
 
-export const Map = ({ fake = false }: { fake?: boolean }) => {
+export const Map = () => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
 
   const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();
