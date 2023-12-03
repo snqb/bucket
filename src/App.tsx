@@ -17,15 +17,17 @@ const TwoDeeThing = () => {
 
   const [activeRow, setRow] = useState(0);
   const [activeColumn, setColumn] = useState(0);
+  console.log(activeColumn);
 
   return (
     <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
       <Swiper
         {...swiperProps}
-        onRealIndexChange={(swiper) => {
+        onActiveIndexChange={(swiper) => {
           setRow(swiper.realIndex);
         }}
         direction="vertical"
+        loopAddBlankSlides
       >
         {structure.map((row, rowIndex) => (
           <Slide key={rowIndex} virtualIndex={rowIndex}>
@@ -33,10 +35,11 @@ const TwoDeeThing = () => {
               {...swiperProps}
               key={rowIndex}
               direction="horizontal"
-              onRealIndexChange={(swiper) => {
-                if (!Number.isNaN(swiper.realIndex))
-                  setColumn(swiper.realIndex);
+              loopAddBlankSlides
+              onActiveIndexChange={(swiper) => {
+                setColumn(swiper.realIndex);
               }}
+              initialSlide={activeColumn}
             >
               {structure[rowIndex].map((name, columnIndex) => (
                 <Slide key={name + columnIndex} virtualIndex={columnIndex}>
@@ -67,6 +70,8 @@ const swiperProps: SwiperProps = {
   observer: true, // cause I add slides
   virtual: true, // Slides are virtual, I add/remove all the time
   modules: [Virtual],
+  // loopAddBlankSlides: true,
+  loopAdditionalSlides: 5,
 };
 
 function App() {

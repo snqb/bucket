@@ -44,7 +44,7 @@ export const Map = () => {
                     h: "0.24rem",
                     borderRadius: "50%",
                     transition: "background .7s",
-                    bg: isActiveCell ? "gray.400" : "white",
+                    bg: isActiveCell ? "pink.600" : "white",
                     transform: isActiveCell ? "scale(2)" : undefined,
                   }}
                   key={`${rowIndex}-${colIndex}`}
@@ -78,12 +78,12 @@ const Fake = forwardRef<BoxProps & { blink: boolean }, "div">(
         {...boxProps}
         ref={ref}
         sx={{
-          w: "0.24rem",
-          h: "0.24rem",
+          w: "0.48rem",
+          h: "0.48rem",
           borderRadius: "50%",
           transition: "background .7s",
           fontSize: "8px",
-          bg: "pink.600",
+          bg: "gray.400",
           animation: blink ? `${blinking} 10s infinite` : undefined,
         }}
       ></Box>
