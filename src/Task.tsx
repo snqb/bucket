@@ -73,7 +73,12 @@ export const ShortTask = (props: Props) => {
 
 type OverlayProps = any;
 
-const Overlay = ({ isOpen, onClose, task, where }: Props & OverlayProps) => {
+export const Overlay = ({
+  isOpen,
+  onClose,
+  task,
+  where,
+}: Props & OverlayProps) => {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
 

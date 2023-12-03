@@ -1,17 +1,31 @@
 import {
   Box,
   BoxProps,
+  Button,
+  Center,
   HStack,
+  Heading,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  ModalProps,
   VStack,
   forwardRef,
   keyframes,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
 import { useAppSelector } from "./store";
+import { Overlay } from "./Task";
+import { where } from "ramda";
 
 export const Map = () => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();
 
@@ -33,6 +47,7 @@ export const Map = () => {
             gap={1}
             height="0.5rem"
             py="5px"
+            onClick={onOpen}
           >
             {row.map((_, colIndex) => {
               const isActiveCol = colIndex === activeColumn;
@@ -58,6 +73,7 @@ export const Map = () => {
         );
       })}
       {(isOutOnY || isOnLastY) && <Fake blink={isOnLastY} />}
+      <BigMap isOpen={isOpen} onClose={onClose} />
     </VStack>
   );
 };
@@ -108,4 +124,60 @@ const useGrid = () => {
     isOnLastX,
     isOnLastY,
   };
+};
+
+const BigMap = ({ isOpen, onClose }: ModalProps) => {
+  const { structure, values } = useAppSelector((state) => state.todo);
+
+  return (
+    <Modal
+      isCentered
+      motionPreset="none"
+      size="lg"
+      isOpen={isOpen}
+      onClose={onClose}
+    >
+      <ModalOverlay backdropFilter="blur(10px)" backdropBlur="1px" />
+      <ModalContent bg="gray.900">
+        <ModalHeader>
+          <Heading as="h3" size="lg">
+            Map
+          </Heading>
+        </ModalHeader>
+        <ModalBody>
+          <VStack h="100%" justify="end" align="stretch">
+            {structure.map((row) => {
+              return (
+                <HStack flex={1} align="start" justify="stretch">
+                  {row.map((screen) => (
+                    <Button
+                      variant="outline"
+                      tabIndex={-1}
+                      key={screen}
+                      bg="blackAlpha.800"
+                      color="white"
+                      fontSize="sm"
+                      sx={{
+                        _disabled: {
+                          bg: "blackAlpha.100",
+                        },
+                      }}
+                    >
+                      {screen}
+                    </Button>
+                  ))}
+                </HStack>
+              );
+            })}
+          </VStack>
+        </ModalBody>
+
+        <ModalFooter>
+          <Button colorScheme="gray" variant="outline" mr={3} onClick={onClose}>
+            ✖️
+          </Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
 };
