@@ -41,6 +41,9 @@ dependencies:
   ramda:
     specifier: ^0.29.0
     version: 0.29.0
+  rand-seed:
+    specifier: ^1.0.2
+    version: 1.0.2
   randomcolor:
     specifier: ^0.6.2
     version: 0.6.2
@@ -4221,6 +4224,10 @@ packages:
 
   /ramda@0.29.0:
     resolution: {integrity: sha512-BBea6L67bYLtdbOqfp8f58fPMqEwx0doL+pAi8TZyp2YWz8R9G8z9x75CZI8W+ftqhFHCpEX2cRnUUXK130iKA==}
+    dev: false
+
+  /rand-seed@1.0.2:
+    resolution: {integrity: sha512-Nu4jxelXx2hKyZJQvkRcUyc1n1ZDQk/VUYmY3hxYfXYGrMfCFqsJ9O6r5jtpt8KjqbllCB8qnIB86Oqy4s5gdw==}
     dev: false
 
   /randombytes@2.1.0:

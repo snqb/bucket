@@ -1,12 +1,6 @@
 import {
   AbsoluteCenter,
-  Box,
   Button,
-  ButtonGroup,
-  Editable,
-  EditableInput,
-  EditablePreview,
-  HStack,
   StackDivider,
   StackProps,
   VStack,
@@ -14,18 +8,11 @@ import {
 } from "@chakra-ui/react";
 import { ShortTask } from "./Task";
 
-import randomColor from "randomcolor";
-import { useContext } from "react";
-import Adder from "./Adder";
-import { CoordinatesContext } from "./App";
-import { Map } from "./Map";
-import {
-  removeScreen,
-  renameScreen,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import randomColor from "randomcolor";
+import Adder from "./Adder";
+import { Map } from "./Map";
+import { useAppSelector } from "./store";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -42,8 +29,6 @@ const getBg = (name: string) => {
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
-  const dispatch = useAppDispatch();
-  const [row, column] = useContext(CoordinatesContext);
   const [animationParent] = useAutoAnimate();
 
   const todos = tasks[name] ?? [];
@@ -63,45 +48,9 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       bg={getBg(name)}
       {...stackProps}
     >
-      <HStack align="center">
-        <Map fake={fake} />
-        <Editable
-          key={name}
-          defaultValue={fake ? undefined : name}
-          onSubmit={(name) => {
-            dispatch(renameScreen({ title: name, coords: [row, column] }));
-          }}
-          fontSize="3xl"
-          fontWeight="bold"
-          fontStyle="italic"
-          placeholder="untitled"
-          sx={{
-            color: fake && "gray.700",
-          }}
-          _focusWithin={{
-            color: "gray.200",
-          }}
-          w="full"
-        >
-          <HStack w="full" align="center">
-            <EditablePreview />
-            <EditableInput fontSize="lg" />
-            {!fake && (
-              <EditableControls
-                onRemove={() => {
-                  dispatch(
-                    removeScreen({ title: name, coords: [row, column] }),
-                  );
-                }}
-                fake={fake}
-              />
-            )}
-          </HStack>
-          {fake && <CreateButton />}
-        </Editable>
-      </HStack>
+      <Map />
 
-      {!fake && <Adder placeholder={`№` + (todos.length + 1)} where={name} />}
+      {!fake && <Adder placeholder={`№` + (todos.length + 1)} what="task" />}
 
       <VStack align="stretch" ref={animationParent as any}>
         {todos.map((task) => (
@@ -142,47 +91,5 @@ const CreateButton = () => {
     </AbsoluteCenter>
   );
 };
-
-function EditableControls({
-  fake,
-  onRemove,
-}: {
-  fake: boolean;
-  onRemove: () => void;
-}) {
-  const {
-    isEditing,
-    getSubmitButtonProps,
-    getCancelButtonProps,
-    getEditButtonProps,
-  } = useEditableControls();
-
-  return isEditing ? (
-    <ButtonGroup justifyContent="center" size="xs" alignItems="center">
-      <Button variant="ghost" {...getSubmitButtonProps()}>
-        ✅
-      </Button>{" "}
-      <Button variant="ghost" {...getCancelButtonProps()}>
-        ❌
-      </Button>
-    </ButtonGroup>
-  ) : (
-    <ButtonGroup
-      flex="1"
-      w="max-content"
-      justifyContent="space-between"
-      alignItems="baseline"
-    >
-      <Button size="xs" variant="ghost" {...getEditButtonProps()}>
-        {fake ? "🆕" : "🖊️"}
-      </Button>
-      {!fake && (
-        <Button type="button" variant="ghost" onClick={onRemove}>
-          🗑️
-        </Button>
-      )}
-    </ButtonGroup>
-  );
-}
 
 export default Screen;
