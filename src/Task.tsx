@@ -31,7 +31,7 @@ interface Props extends AccordionItemProps {
   where: keyof TodoState;
 }
 
-export const ShortTask = (props: Props) => {
+export const Task = (props: Props) => {
   const { task, where, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -41,16 +41,21 @@ export const ShortTask = (props: Props) => {
   const addSome = useCallback(() => {
     setProgress((progress) => progress + 3);
 
+    if (hueref.current) cancelAnimationFrame(hueref.current);
     hueref.current = requestAnimationFrame(addSome);
   }, [task.progress, where, task.id]);
 
   const bind = useLongPress(() => {}, {
     onStart: () => {
       hueref.current = requestAnimationFrame(addSome);
-      // hueref.current = setInterval(addSome, 10);
+    },
+    onCancel: () => {
+      if (hueref.current) {
+        cancelAnimationFrame(hueref.current);
+      }
     },
     onFinish: () => {
-      console.log("finish");
+      console.log("finihsh");
       if (hueref.current) {
         cancelAnimationFrame(hueref.current);
       }

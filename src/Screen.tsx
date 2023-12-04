@@ -6,7 +6,7 @@ import {
   VStack,
   useEditableControls,
 } from "@chakra-ui/react";
-import { ShortTask } from "./Task";
+import { Task } from "./Task";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import randomColor from "randomcolor";
@@ -54,7 +54,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       <VStack key={name} align="stretch" ref={animationParent as any}>
         {todos.map((task) => (
-          <ShortTask key={task.id} task={task} where={name} />
+          <Task key={task.id} task={task} where={name} />
         ))}
       </VStack>
     </VStack>
