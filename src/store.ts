@@ -58,6 +58,15 @@ const todoSlice = createSlice({
         action.payload.key
       ].filter((task) => task.id !== action.payload.id);
     },
+    updateProgress: function (
+      state,
+      {
+        payload: { key, id, progress },
+      }: PayloadAction<{ key: string; id: string; progress: number }>,
+    ) {
+      const value = state.values[key].find((task) => task.id === id);
+      if (value) value.progress = progress;
+    },
     moveTask: (
       state,
       action: PayloadAction<{
@@ -111,8 +120,14 @@ const todoSlice = createSlice({
   },
 });
 
-export const { addTask, removeTask, moveTask, renameScreen, removeScreen } =
-  todoSlice.actions;
+export const {
+  addTask,
+  removeTask,
+  moveTask,
+  renameScreen,
+  removeScreen,
+  updateProgress,
+} = todoSlice.actions;
 
 const persistConfig = {
   key: "bucket",

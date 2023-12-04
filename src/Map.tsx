@@ -20,8 +20,6 @@ import {
 import { useContext } from "react";
 import { CoordinatesContext } from "./App";
 import { useAppSelector } from "./store";
-import { Overlay } from "./Task";
-import { where } from "ramda";
 
 export const Map = () => {
   const [activeRow, activeColumn] = useContext(CoordinatesContext);
@@ -146,9 +144,14 @@ const BigMap = ({ isOpen, onClose }: ModalProps) => {
         </ModalHeader>
         <ModalBody>
           <VStack h="100%" justify="end" align="stretch">
-            {structure.map((row) => {
+            {structure.map((row, index) => {
               return (
-                <HStack flex={1} align="start" justify="stretch">
+                <HStack
+                  key={row[index]}
+                  flex={1}
+                  align="start"
+                  justify="stretch"
+                >
                   {row.map((screen) => (
                     <Button
                       variant="outline"

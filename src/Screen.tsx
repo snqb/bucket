@@ -1,5 +1,6 @@
 import {
   AbsoluteCenter,
+  Box,
   Button,
   ButtonGroup,
   Editable,
@@ -24,6 +25,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -42,6 +44,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
+  const [animationParent] = useAutoAnimate();
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
@@ -100,9 +103,11 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       {!fake && <Adder placeholder={`№` + (todos.length + 1)} where={name} />}
 
-      {todos.map((task, index) => (
-        <ShortTask key={task.id} task={task} where={name} />
-      ))}
+      <VStack align="stretch" ref={animationParent as any}>
+        {todos.map((task) => (
+          <ShortTask key={task.id} task={task} where={name} />
+        ))}
+      </VStack>
     </VStack>
   );
 };

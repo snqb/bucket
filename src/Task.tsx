@@ -20,10 +20,12 @@ import {
   TodoState,
   moveTask,
   removeTask,
+  updateProgress,
   useAppDispatch,
   useAppSelector,
 } from "./store";
-
+import { useLongPress } from "use-long-press";
+import { useCallback, useEffect, useRef, useState } from "react";
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
@@ -33,6 +35,39 @@ export const ShortTask = (props: Props) => {
   const { task, where, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const hueref = useRef<number>();
+  const [progress, setProgress] = useState(task.progress);
+
+  const addSome = useCallback(() => {
+    setProgress((progress) => progress + 3);
+
+    hueref.current = requestAnimationFrame(addSome);
+  }, [task.progress, where, task.id]);
+
+  const bind = useLongPress(() => {}, {
+    onStart: () => {
+      hueref.current = requestAnimationFrame(addSome);
+      // hueref.current = setInterval(addSome, 10);
+    },
+    onFinish: () => {
+      console.log("finish");
+      if (hueref.current) {
+        cancelAnimationFrame(hueref.current);
+      }
+      dispatch(
+        updateProgress({
+          key: where,
+          id: task.id,
+          progress,
+        }),
+      );
+    },
+    onMove: () => {
+      console.log("move");
+    },
+    captureEvent: true,
+    threshold: 222, // In milliseconds
+  });
 
   const onRemoveClick = () => {
     dispatch(
@@ -43,6 +78,12 @@ export const ShortTask = (props: Props) => {
     );
   };
 
+  useEffect(() => {
+    if (progress > 300) {
+      onRemoveClick();
+    }
+  }, [progress]);
+
   return (
     <>
       <VStack
@@ -51,19 +92,18 @@ export const ShortTask = (props: Props) => {
         userSelect="none"
         {...restItemProps}
         spacing={0}
+        filter={`blur(${progress / 100}px)`}
       >
-        <HStack w="full" align="baseline" justify="space-between">
+        <HStack w="full" align="start" justify="space-between">
           <Title task={task} onOpen={onOpen} />
           <Button
+            {...bind()}
             variant="ghost"
             size="xs"
-            fontSize="md"
-            fontWeight="bold"
-            onClick={onRemoveClick}
-            filter="saturate(0)"
-          >
-            ❌
-          </Button>
+            borderRadius="50%"
+            borderColor="gray.600"
+            borderWidth={`${1 + progress / 24}px`}
+          ></Button>
         </HStack>
         <Overlay isOpen={isOpen} onClose={onClose} {...props} />
       </VStack>
@@ -111,32 +151,34 @@ export const Overlay = ({
         </ModalHeader>
         <ModalBody>
           <VStack align="start">
-            {structure.map((row) => {
+            {structure.map((row, index) => {
               return (
-                <HStack flex={1} align="start">
-                  {row.map((screen) => (
-                    <Button
-                      variant="outline"
-                      tabIndex={-1}
-                      key={screen}
-                      bg="blackAlpha.800"
-                      color="white"
-                      fontSize="sm"
-                      isDisabled={screen === where}
-                      sx={{
-                        _disabled: {
-                          bg: "blackAlpha.100",
-                        },
-                      }}
-                      onClick={() => handleMove(screen)}
-                    >
-                      {screen === where ? (
-                        <Center fontSize="large">⋒</Center>
-                      ) : (
-                        screen
-                      )}
-                    </Button>
-                  ))}
+                <HStack key={row[index]} flex={1} align="start">
+                  {row.map((screen) => {
+                    return (
+                      <Button
+                        variant="outline"
+                        tabIndex={-1}
+                        key={"ss" + row[index]}
+                        bg="blackAlpha.800"
+                        color="white"
+                        fontSize="sm"
+                        isDisabled={screen === where}
+                        sx={{
+                          _disabled: {
+                            bg: "blackAlpha.100",
+                          },
+                        }}
+                        onClick={() => handleMove(screen)}
+                      >
+                        {screen === where ? (
+                          <Center fontSize="large">⋒</Center>
+                        ) : (
+                          screen
+                        )}
+                      </Button>
+                    );
+                  })}
                 </HStack>
               );
             })}

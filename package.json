@@ -28,7 +28,8 @@
     "react-swipeable": "^7.0.1",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.4.2",
-    "swiper": "^11.0.4"
+    "swiper": "^11.0.4",
+    "use-long-press": "^3.2.0"
   },
   "devDependencies": {
     "@types/ramda": "^0.29.2",

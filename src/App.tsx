@@ -17,7 +17,6 @@ const TwoDeeThing = () => {
 
   const [activeRow, setRow] = useState(0);
   const [activeColumn, setColumn] = useState(0);
-  console.log(activeColumn);
 
   return (
     <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
