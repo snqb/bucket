@@ -39,7 +39,7 @@ export const Map = () => {
                   <HStack>
                     <Center
                       sx={{
-                        fontSize: "7px",
+                        fontSize: "8px",
                         borderRadius: "50%",
                         transition: "background .7s",
                         bg: isActiveCell ? "pink.600" : "transparent",

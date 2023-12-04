@@ -52,7 +52,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       {!fake && <Adder placeholder={`№` + (todos.length + 1)} what="task" />}
 
-      <VStack align="stretch" ref={animationParent as any}>
+      <VStack key={name} align="stretch" ref={animationParent as any}>
         {todos.map((task) => (
           <ShortTask key={task.id} task={task} where={name} />
         ))}
