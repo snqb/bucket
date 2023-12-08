@@ -18,6 +18,7 @@ import {
   type Todo,
 } from "./store";
 import { emojis } from "./emojis";
+import { Plusik } from "./Plusik";
 export interface Props extends InputGroupProps {
   what: "task" | "screen";
 }
@@ -74,7 +75,11 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   return (
     <InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
       <InputLeftElement pointerEvents="none">
-        <span>{getRandomEmoji(text)}</span>
+        {text.length === 0 ? (
+          <Plusik isActive />
+        ) : (
+          <span>{getRandomEmoji(text)}</span>
+        )}
       </InputLeftElement>
       <Input
         enterKeyHint="done"
