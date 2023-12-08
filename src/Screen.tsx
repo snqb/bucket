@@ -29,7 +29,10 @@ const getBg = (name: string) => {
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
-  const [animationParent] = useAutoAnimate();
+  const [animationParent] = useAutoAnimate({
+    duration: 420,
+    easing: "ease-out",
+  });
 
   const todos = tasks[name] ?? [];
   if (todos === undefined) return null;
