@@ -99,9 +99,10 @@ const todoSlice = createSlice({
       }
 
       if (!state.structure[row]) {
-        state.structure[row] = [];
+        state.structure[row] = [title];
+      } else {
+        state.structure[row][column] = title;
       }
-      state.structure[row][column] = title;
     },
     removeScreen: (
       state,

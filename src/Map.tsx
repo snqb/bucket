@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  Grid,
   HStack,
   Heading,
   Table,
@@ -24,65 +25,63 @@ export const Map = () => {
   return (
     <HStack align="stretch" justify="space-between">
       <VStack align="baseline" gap="0">
-        <Table
+        <VStack
           w="min-content"
-          borderRadius="4px"
           borderColor="gray.600"
           fontSize="md"
+          align="left"
+          gap={0}
         >
-          {structure.map((row, rowIndex) => {
+          {structure.map((row, rowIndex, rows) => {
             const isActiveRow = rowIndex === activeRow;
             return (
-              <Tr>
-                {row.map((name, colIndex) => {
+              <HStack gap={0}>
+                {row.map((name, colIndex, columns) => {
                   const isActiveCol = colIndex === activeColumn;
                   const isActiveCell = isActiveRow && isActiveCol;
 
+                  const isXNeighbour =
+                    isActiveRow && Math.abs(activeColumn - colIndex) <= 1;
+
+                  const isYNeighbour =
+                    isActiveCol && Math.abs(activeRow - rowIndex) <= 1;
+
                   return (
-                    <Td
+                    <Box
                       border="1px solid"
-                      p="2px"
-                      colSpan={isActiveCell ? 3 : 1}
+                      borderRadius="4px"
+                      p={isActiveCell ? 2 : 1}
                       color={isActiveCell ? "white" : "gray.400"}
+                      opacity={isActiveCell ? 1 : 0.5}
                     >
                       <Heading
-                        fontSize="md"
+                        fontSize={isActiveCell ? "md" : "sm"}
                         whiteSpace="nowrap"
                         color={isActiveCell ? "white" : "gray.400"}
                         textTransform="capitalize"
                       >
                         {getRandomEmoji(name)}
-                        {name?.[0]}
-                        {isActiveCell && (
+                        {(isXNeighbour || isYNeighbour || row.length === 1) && (
                           <Box as="span" fontSize="md" fontStyle="italic">
-                            {name?.substring(1)}
+                            {name}
                           </Box>
                         )}
                       </Heading>
-                    </Td>
+                    </Box>
                   );
                 })}
                 {isActiveRow && (isOnLastX || isOutOnX) && (
-                  <td colSpan={0}>{isOnLastX ? <Plusik /> : <FakeAdder />}</td>
+                  <Box>{isOnLastX ? <Plusik /> : <FakeAdder />}</Box>
                 )}
-                {/* <Tr>
-                  <Td colSpan={100}> */}
-                {/* {isOnLastX && isActiveRow && <Plusik />} */}
-                {/* </Td>
-                </Tr> */}
-                {/* {isOutOnX && isActiveRow && <FakeAdder />} */}
-              </Tr>
+              </HStack>
             );
           })}
           {(isOnLastY || isOutOnY) && (
             <span>
-              {/* <Td p="2px" colSpan={100} border="none"> */}
               {isOnLastY ? <Plusik /> : isOutOnY ? <FakeAdder /> : null}
-              {/* </Td> */}
             </span>
           )}
-        </Table>
-        {/* {isOutOnY && <FakeAdder />} */}
+        </VStack>
       </VStack>
 
       <HStack align="baseline">

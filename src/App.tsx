@@ -33,7 +33,8 @@ const TwoDeeThing = () => {
   const [activeRow, setRow] = useState(0);
   const [activeColumn, setColumn] = useState(0);
 
-  const isCorrectIndex = (index: number | undefined) => index !== undefined;
+  const isCorrectIndex = (index: number | undefined) =>
+    index !== undefined && Number.isSafeInteger(index);
 
   return (
     <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
@@ -58,20 +59,24 @@ const TwoDeeThing = () => {
                     setColumn(swiper.realIndex);
                   }
                 }}
-                initialSlide={clamp(0, row.length, activeColumn)}
-                runCallbacksOnInit={false}
+                initialSlide={Math.min(
+                  activeColumn,
+                  structure[activeRow]?.length - 1,
+                )}
               >
                 {structure[rowIndex].map((name, columnIndex) => (
                   <Slide key={name + columnIndex} virtualIndex={columnIndex}>
                     <Screen name={name} />
                   </Slide>
                 ))}
-                <Slide virtualIndex={row.length}>
-                  <Screen
-                    fake
-                    name={"new " + crypto.randomUUID().slice(0, 3)}
-                  />
-                </Slide>
+                {row.length > activeColumn - 1 && (
+                  <Slide virtualIndex={row.length}>
+                    <Screen
+                      fake
+                      name={"new " + crypto.randomUUID().slice(0, 3)}
+                    />
+                  </Slide>
+                )}
               </Swiper>
             </Slide>
           );
