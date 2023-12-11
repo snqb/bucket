@@ -15,6 +15,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLongPress } from "use-long-press";
 import {
   Todo,
   TodoState,
@@ -24,8 +26,6 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { useLongPress } from "use-long-press";
-import { useCallback, useEffect, useRef, useState } from "react";
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
@@ -39,7 +39,7 @@ export const Task = (props: Props) => {
   const [progress, setProgress] = useState(task.progress);
 
   const addSome = useCallback(() => {
-    setProgress((progress) => progress + 3);
+    setProgress((progress) => progress + 2.66);
 
     if (hueref.current) cancelAnimationFrame(hueref.current);
     hueref.current = requestAnimationFrame(addSome);
@@ -70,7 +70,6 @@ export const Task = (props: Props) => {
     onMove: () => {
       console.log("move");
     },
-    captureEvent: true,
     threshold: 222, // In milliseconds
   });
 
@@ -103,11 +102,11 @@ export const Task = (props: Props) => {
           <Title task={task} onOpen={onOpen} />
           <Button
             {...bind()}
-            variant="ghost"
+            variant="unstyled"
             size="xs"
             borderRadius="50%"
             borderColor="gray.600"
-            borderWidth={`${1 + progress / 24}px`}
+            borderWidth={`${5 + progress / 32}px`}
           ></Button>
         </HStack>
         <Overlay isOpen={isOpen} onClose={onClose} {...props} />
@@ -158,13 +157,13 @@ export const Overlay = ({
           <VStack align="start">
             {structure.map((row, index) => {
               return (
-                <HStack key={row[index]} flex={1} align="start">
-                  {row.map((screen) => {
+                <HStack key={"qwe" + row[index]} flex={1} align="start">
+                  {row.map((screen, index) => {
                     return (
                       <Button
                         variant="outline"
                         tabIndex={-1}
-                        key={"ss" + row[index]}
+                        key={"ss" + index}
                         bg="blackAlpha.800"
                         color="white"
                         fontSize="sm"

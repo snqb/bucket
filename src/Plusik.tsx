@@ -1,7 +1,7 @@
 import { Text, TextProps } from "@chakra-ui/react";
 
 export const Plusik = (props: TextProps & { isActive?: boolean }) => {
-  const { isActive = false } = props;
+  const { isActive = false, ...restProps } = props;
   return (
     <Text
       w="20px"
@@ -12,7 +12,7 @@ export const Plusik = (props: TextProps & { isActive?: boolean }) => {
       borderColor={isActive ? "white" : "gray.500"}
       color={isActive ? "white" : "gray.500"}
       fontWeight="bold"
-      {...props}
+      {...restProps}
     >
       +
     </Text>

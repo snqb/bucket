@@ -1,15 +1,5 @@
-import {
-  Box,
-  Button,
-  Grid,
-  HStack,
-  Heading,
-  Table,
-  Td,
-  Tr,
-  VStack,
-} from "@chakra-ui/react";
-import { useContext } from "react";
+import { Box, Button, HStack, Heading, VStack } from "@chakra-ui/react";
+import { PropsWithChildren, useContext, useMemo } from "react";
 import Adder, { getRandomEmoji } from "./Adder";
 import { CoordinatesContext } from "./App";
 import { Plusik } from "./Plusik";
@@ -32,11 +22,11 @@ export const Map = () => {
           align="left"
           gap={0}
         >
-          {structure.map((row, rowIndex, rows) => {
+          {structure.map((row, rowIndex) => {
             const isActiveRow = rowIndex === activeRow;
             return (
-              <HStack gap={0}>
-                {row.map((name, colIndex, columns) => {
+              <HStack gap={0} key={rowIndex}>
+                {row.map((name, colIndex) => {
                   const isActiveCol = colIndex === activeColumn;
                   const isActiveCell = isActiveRow && isActiveCol;
 
@@ -47,27 +37,17 @@ export const Map = () => {
                     isActiveCol && Math.abs(activeRow - rowIndex) <= 1;
 
                   return (
-                    <Box
-                      border="1px solid"
-                      borderRadius="4px"
-                      p={isActiveCell ? 2 : 1}
-                      color={isActiveCell ? "white" : "gray.400"}
-                      opacity={isActiveCell ? 1 : 0.5}
+                    <GridTitle
+                      isActive={isActiveCell}
+                      key={`${rowIndex}-${colIndex}`}
                     >
-                      <Heading
-                        fontSize={isActiveCell ? "md" : "sm"}
-                        whiteSpace="nowrap"
-                        color={isActiveCell ? "white" : "gray.400"}
-                        textTransform="capitalize"
-                      >
-                        {getRandomEmoji(name)}
-                        {(isXNeighbour || isYNeighbour || row.length === 1) && (
-                          <Box as="span" fontSize="md" fontStyle="italic">
-                            {name}
-                          </Box>
-                        )}
-                      </Heading>
-                    </Box>
+                      {getRandomEmoji(name)}
+                      {(isXNeighbour || isYNeighbour || row.length === 1) && (
+                        <Box as="span" fontSize="md" fontStyle="italic">
+                          {name}
+                        </Box>
+                      )}
+                    </GridTitle>
                   );
                 })}
                 {isActiveRow && (isOnLastX || isOutOnX) && (
@@ -100,6 +80,39 @@ export const Map = () => {
   );
 };
 
+const GridTitle = ({
+  isActive,
+  children,
+}: PropsWithChildren<{ isActive: boolean }>) => {
+  if (isActive) {
+    return (
+      <Box border="1px solid" borderRadius="4px" p={2}>
+        <Heading
+          fontSize="md"
+          whiteSpace="nowrap"
+          color="white"
+          textTransform="capitalize"
+        >
+          {children}
+        </Heading>
+      </Box>
+    );
+  }
+  return (
+    <Box
+      border="1px solid"
+      borderRadius="4px"
+      p={1}
+      color="gray.400"
+      opacity={0.5}
+    >
+      <Heading fontSize="sm" whiteSpace="nowrap" textTransform="capitalize">
+        {children}
+      </Heading>
+    </Box>
+  );
+};
+
 const FakeAdder = () => {
   return (
     <HStack w="max-content">
@@ -118,19 +131,23 @@ const FakeAdder = () => {
 
 const useGrid = () => {
   const [y, x] = useContext(CoordinatesContext);
-  const { structure, values } = useAppSelector((state) => state.todo);
+  const { structure } = useAppSelector((state) => state.todo);
   const isOutOnY = y === structure.length;
   const isOnLastY = y === structure.length - 1;
   const isOutOnX = x === structure?.[y]?.length;
   const isOnLastX = x === structure?.[y]?.length - 1;
 
-  return {
-    y,
-    x,
-    isOutOnY,
-    isOutOnX,
-    structure,
-    isOnLastX,
-    isOnLastY,
-  };
+  const values = useMemo(() => {
+    return {
+      y,
+      x,
+      isOutOnY,
+      isOutOnX,
+      structure,
+      isOnLastX,
+      isOnLastY,
+    };
+  }, [y, x, isOutOnY, isOutOnX, structure, isOnLastX, isOnLastY]);
+
+  return values;
 };
