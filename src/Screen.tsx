@@ -80,8 +80,9 @@ const TaskAdder = ({ mode = "slow" }: { mode?: "slow" | "fast" }) => {
       autoFocus
       placeholder={`something ${mode}~`}
       what="task"
-      variant="filled"
-      size="sm"
+      variant="outline"
+      borderColor="gray.700"
+      size="md"
       taskMode={mode}
       sx={{
         borderRadius: "4px",

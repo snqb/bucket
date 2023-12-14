@@ -12,6 +12,7 @@ import {
   ModalHeader,
   ModalOverlay,
   VStack,
+  useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
 
@@ -38,6 +39,8 @@ export const Task = (props: Props) => {
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const hueref = useRef<number>();
+  const [isPressing, { on, off }] = useBoolean(false);
+
   const [progress, setProgress] = useState(task.progress);
 
   const addSome = useCallback(() => {
@@ -50,16 +53,19 @@ export const Task = (props: Props) => {
   const bind = useLongPress(() => {}, {
     onStart: () => {
       hueref.current = requestAnimationFrame(addSome);
+      on();
     },
     onCancel: () => {
       if (hueref.current) {
         cancelAnimationFrame(hueref.current);
+        off();
       }
     },
     onFinish: () => {
       console.log("finihsh");
       if (hueref.current) {
         cancelAnimationFrame(hueref.current);
+        off();
       }
       dispatch(
         updateProgress({
@@ -100,18 +106,19 @@ export const Task = (props: Props) => {
         spacing={0}
         filter={mode === "slow" ? `blur(${progress / 60}px)` : "none"}
       >
-        <HStack w="full" align="start" justify="space-between">
+        <HStack w="full" align="center" justify="space-between">
           <Title task={task} onOpen={onOpen} />
           {mode === "slow" ? (
             <Button
               {...bind()}
               variant="unstyled"
+              aspectRatio="1/1"
               size="xs"
               borderRadius="50%"
               background={`linear-gradient(to right, #374ed7, ${
                 progress / 0.8
               }%, #54c3fa88);`}
-              // borderWidth={`${5 + progress / 32}px`}
+              transform={isPressing ? "scale(2)" : "scale(1)"}
             />
           ) : (
             <FistButton
@@ -220,7 +227,7 @@ const Title = ({ task, onOpen }: Props & OverlayProps) => (
     w="100%"
     textAlign="left"
     as="span"
-    fontSize="lg"
+    fontSize="xl"
     fontWeight={600}
     onClick={onOpen}
   >
