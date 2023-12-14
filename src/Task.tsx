@@ -17,6 +17,7 @@ import {
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLongPress } from "use-long-press";
+import FistButton from "./FistButton";
 import {
   Todo,
   TodoState,
@@ -26,7 +27,6 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import FistButton from "./FistButton";
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;

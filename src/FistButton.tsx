@@ -1,6 +1,6 @@
-import { Box, Button, ButtonProps } from "@chakra-ui/react";
-import { motion, AnimatePresence } from "framer-motion";
-import { PropsWithChildren, useState } from "react";
+import { Button, ButtonProps } from "@chakra-ui/react";
+import { motion } from "framer-motion";
+import { useState } from "react";
 import ReactDOM from "react-dom";
 
 const FadingEmoji = ({
@@ -39,7 +39,7 @@ const FadingEmoji = ({
 
 const FistButton = ({ children, ...restProps }: ButtonProps) => {
   const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
-  const handleButtonClick = (e) => {
+  const handleButtonClick = (e: any) => {
     const rect = e.target.getBoundingClientRect();
     const x = rect.left + window.scrollX;
     const y = rect.top + window.scrollY;
@@ -48,18 +48,13 @@ const FistButton = ({ children, ...restProps }: ButtonProps) => {
 
   const handleAnimationComplete = () => {
     setCoords(null);
+    // @ts-ignore
     restProps.onClick?.();
   };
 
   return (
     <>
-      <Button
-        {...restProps}
-        p={0}
-        onClick={(e) => {
-          handleButtonClick(e);
-        }}
-      >
+      <Button {...restProps} p={0} onClick={handleButtonClick}>
         {children}
       </Button>
       {coords && (

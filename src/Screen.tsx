@@ -1,19 +1,12 @@
-import {
-  Box,
-  StackDivider,
-  StackProps,
-  VStack,
-  useBoolean,
-} from "@chakra-ui/react";
+import { Box, StackDivider, StackProps, VStack } from "@chakra-ui/react";
 import { Task } from "./Task";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { lt, partition, pipe, prop } from "ramda";
 import randomColor from "randomcolor";
-import { useRef } from "react";
 import Adder from "./Adder";
 import { Map } from "./Map";
-import { TodoState, useAppSelector } from "./store";
+import { useAppSelector } from "./store";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -35,11 +28,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
     easing: "ease-out",
   });
 
-  const [animationParent2] = useAutoAnimate({
-    duration: 420,
-    easing: "ease-out",
-  });
-
   const todos = tasks[name] ?? [];
 
   if (todos === undefined) return null;
@@ -55,9 +43,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={1}
       id="later"
       align="stretch"
-      // divider={
-      //   <StackDivider borderBottomColor="gray.900" borderBottomWidth="5px" />
-      // }
       bg={getBg(name)}
       {...stackProps}
     >

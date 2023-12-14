@@ -9,7 +9,6 @@ import { Virtual } from "swiper/modules";
 import { SwiperSlide as Slide, Swiper, SwiperProps } from "swiper/react";
 import Screen from "./Screen";
 import { persistor, store, useAppSelector } from "./store";
-import { clamp } from "ramda";
 
 export const CoordinatesContext = createContext<[number, number]>([0, 0]);
 

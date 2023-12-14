@@ -5,11 +5,13 @@ import {
   InputLeftElement,
   forwardRef,
 } from "@chakra-ui/react";
-import { ChangeEventHandler, useCallback, useContext, useState } from "react";
+import { ChangeEventHandler, useContext, useState } from "react";
 
 import * as R from "ramda";
 import Rand from "rand-seed";
 import { CoordinatesContext } from "./App";
+import { Plusik } from "./Plusik";
+import { emojis } from "./emojis";
 import {
   addTask,
   renameScreen,
@@ -17,8 +19,6 @@ import {
   useAppSelector,
   type Todo,
 } from "./store";
-import { emojis } from "./emojis";
-import { Plusik } from "./Plusik";
 export interface Props extends InputGroupProps {
   what: "task" | "screen";
   taskMode?: "fast" | "slow";
@@ -108,13 +108,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         }}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         bg="gray.900"
-        // borderColor={`${
-        //   taskMode === "slow" ? "blue" : taskMode === "fast" ? "yellow" : "gray"
-        // }.900`}
       />
-      {/* <InputRightElement onClick={onAdd} fontSize="2xl" alignItems="center">
-        ↵
-      </InputRightElement> */}
     </InputGroup>
   );
 });

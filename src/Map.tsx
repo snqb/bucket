@@ -1,4 +1,4 @@
-import { Box, Button, Center, HStack, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Heading, VStack } from "@chakra-ui/react";
 import { PropsWithChildren, useContext, useMemo } from "react";
 import Adder, { getRandomEmoji } from "./Adder";
 import { CoordinatesContext } from "./App";
