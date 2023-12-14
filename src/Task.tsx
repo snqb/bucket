@@ -44,7 +44,7 @@ export const Task = (props: Props) => {
   const [progress, setProgress] = useState(task.progress);
 
   const addSome = useCallback(() => {
-    setProgress((progress) => progress + 0.88);
+    setProgress((progress) => progress + 0.5);
 
     if (hueref.current) cancelAnimationFrame(hueref.current);
     hueref.current = requestAnimationFrame(addSome);
@@ -118,7 +118,7 @@ export const Task = (props: Props) => {
               background={`linear-gradient(to right, #374ed7, ${
                 progress / 0.8
               }%, #54c3fa88);`}
-              transform={isPressing ? "scale(2)" : "scale(1)"}
+              transform={isPressing ? "scale(3)" : "scale(1)"}
             />
           ) : (
             <FistButton
@@ -227,7 +227,7 @@ const Title = ({ task, onOpen }: Props & OverlayProps) => (
     w="100%"
     textAlign="left"
     as="span"
-    fontSize="xl"
+    fontSize="lg"
     fontWeight={600}
     onClick={onOpen}
   >

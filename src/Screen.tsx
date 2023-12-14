@@ -52,18 +52,22 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
-      <VStack key={name} align="stretch">
+      <VStack
+        key={name}
+        align="stretch"
+        divider={
+          <StackDivider borderBottomColor="red.600" borderBottomWidth="1px" />
+        }
+      >
         <VStack align="stretch" spacing={1} ref={animationParent as any}>
-          <TaskAdder mode="slow" />
+          <TaskAdder key="slow-adder" mode="slow" />
           {slows.map((task) => (
             <Task mode="slow" key={task.id} task={task} where={name} />
           ))}
         </VStack>
 
-        <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
-
         <VStack align="stretch" spacing={1} ref={animationParent as any}>
-          <TaskAdder mode="fast" />
+          <TaskAdder key="fast-adder" mode="fast" />
           {fasts.map((task) => (
             <Task mode="fast" key={task.id} task={task} where={name} />
           ))}
@@ -78,10 +82,9 @@ const TaskAdder = ({ mode = "slow" }: { mode?: "slow" | "fast" }) => {
     <Adder
       initialEmoji={mode === "fast" ? "👊" : "🌊"}
       autoFocus
-      placeholder={`something ${mode}~`}
+      placeholder={`+ ${mode} +`}
       what="task"
-      variant="outline"
-      borderColor="gray.700"
+      variant="filled"
       size="md"
       taskMode={mode}
       sx={{
