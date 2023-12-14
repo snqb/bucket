@@ -30,7 +30,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     placeholder,
     what = "task",
     initialEmoji = "+",
-    taskMode = "fast",
+    taskMode,
     ...inputGroupProps
   } = props;
   const dispatch = useAppDispatch();
@@ -108,7 +108,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         }}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         bg="gray.900"
-        borderColor={`${taskMode === "slow" ? "blue" : "yellow"}.400`}
+        // borderColor={`${
+        //   taskMode === "slow" ? "blue" : taskMode === "fast" ? "yellow" : "gray"
+        // }.900`}
       />
       {/* <InputRightElement onClick={onAdd} fontSize="2xl" alignItems="center">
         ↵

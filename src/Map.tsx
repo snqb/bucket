@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, Center, HStack, Heading, VStack } from "@chakra-ui/react";
 import { PropsWithChildren, useContext, useMemo } from "react";
 import Adder, { getRandomEmoji } from "./Adder";
 import { CoordinatesContext } from "./App";
@@ -17,7 +17,7 @@ export const Map = () => {
       <VStack align="baseline" gap="0">
         <VStack
           w="min-content"
-          borderColor="gray.600"
+          borderColor="red.400"
           fontSize="md"
           align="left"
           gap={0}
@@ -27,7 +27,8 @@ export const Map = () => {
             return (
               <HStack gap={0} key={rowIndex}>
                 {row.map((name, colIndex) => {
-                  const isActiveCol = colIndex === activeColumn;
+                  const isActiveCol =
+                    colIndex === activeColumn || row.length - 1 < activeColumn;
                   const isActiveCell = isActiveRow && isActiveCol;
 
                   const isXNeighbour =
@@ -36,18 +37,23 @@ export const Map = () => {
                   const isYNeighbour =
                     isActiveCol && Math.abs(activeRow - rowIndex) <= 1;
 
+                  const rowDistance = Math.abs(activeRow - rowIndex);
+                  const scale = 2 * (rowDistance - 1);
+
                   return (
-                    <GridTitle
-                      isActive={isActiveCell}
-                      key={`${rowIndex}-${colIndex}`}
-                    >
-                      {getRandomEmoji(name)}
-                      {(isXNeighbour || isYNeighbour || row.length === 1) && (
-                        <Box as="span" fontSize="md" fontStyle="italic">
-                          {name}
-                        </Box>
-                      )}
-                    </GridTitle>
+                    <Box transform={`rotateZ(${scale}deg)`}>
+                      <GridTitle
+                        isActive={isActiveCell}
+                        key={`${rowIndex}-${colIndex}`}
+                      >
+                        {getRandomEmoji(name)}
+                        {(isXNeighbour || isYNeighbour) && (
+                          <Box as="span" fontSize="md" fontStyle="italic">
+                            {name}
+                          </Box>
+                        )}
+                      </GridTitle>
+                    </Box>
                   );
                 })}
                 {isActiveRow && (isOnLastX || isOutOnX) && (
@@ -86,7 +92,7 @@ const GridTitle = ({
 }: PropsWithChildren<{ isActive: boolean }>) => {
   if (isActive) {
     return (
-      <Box border="1px solid" borderRadius="4px" p={2}>
+      <Box px={2} border="1px solid" borderColor="gray.400" borderRadius="4px">
         <Heading
           fontSize="md"
           whiteSpace="nowrap"
@@ -101,8 +107,9 @@ const GridTitle = ({
   return (
     <Box
       border="1px solid"
+      borderColor="gray.500"
       borderRadius="4px"
-      p={1}
+      px={1}
       color="gray.400"
       opacity={0.5}
     >

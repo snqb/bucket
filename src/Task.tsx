@@ -26,6 +26,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import FistButton from "./FistButton";
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
@@ -40,7 +41,7 @@ export const Task = (props: Props) => {
   const [progress, setProgress] = useState(task.progress);
 
   const addSome = useCallback(() => {
-    setProgress((progress) => progress + 2.66);
+    setProgress((progress) => progress + 0.88);
 
     if (hueref.current) cancelAnimationFrame(hueref.current);
     hueref.current = requestAnimationFrame(addSome);
@@ -84,7 +85,7 @@ export const Task = (props: Props) => {
   };
 
   useEffect(() => {
-    if (progress > 300) {
+    if (progress > 100) {
       onRemoveClick();
     }
   }, [progress]);
@@ -97,7 +98,7 @@ export const Task = (props: Props) => {
         userSelect="none"
         {...restItemProps}
         spacing={0}
-        filter={`blur(${progress / 100}px)`}
+        filter={mode === "slow" ? `blur(${progress / 60}px)` : "none"}
       >
         <HStack w="full" align="start" justify="space-between">
           <Title task={task} onOpen={onOpen} />
@@ -107,18 +108,21 @@ export const Task = (props: Props) => {
               variant="unstyled"
               size="xs"
               borderRadius="50%"
-              borderColor="gray.600"
-              borderWidth={`${5 + progress / 32}px`}
-            ></Button>
+              background={`linear-gradient(to right, #374ed7, ${
+                progress / 0.8
+              }%, #54c3fa88);`}
+              // borderWidth={`${5 + progress / 32}px`}
+            />
           ) : (
-            <Button
-              variant="unstyled"
-              size="xs"
+            <FistButton
+              variant="outline"
+              size="sm"
               borderRadius="50%"
-              borderColor="gray.600"
+              borderColor="gray.800"
+              onClick={onRemoveClick}
             >
               👊
-            </Button>
+            </FistButton>
           )}
         </HStack>
         <Overlay isOpen={isOpen} onClose={onClose} {...props} />
@@ -216,7 +220,7 @@ const Title = ({ task, onOpen }: Props & OverlayProps) => (
     w="100%"
     textAlign="left"
     as="span"
-    fontSize="xl"
+    fontSize="lg"
     fontWeight={600}
     onClick={onOpen}
   >

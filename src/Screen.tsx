@@ -1,22 +1,19 @@
 import {
-  AbsoluteCenter,
-  Button,
+  Box,
   StackDivider,
   StackProps,
   VStack,
   useBoolean,
-  useEditableControls,
-  useTimeout,
 } from "@chakra-ui/react";
 import { Task } from "./Task";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
+import { lt, partition, pipe, prop } from "ramda";
 import randomColor from "randomcolor";
+import { useRef } from "react";
 import Adder from "./Adder";
 import { Map } from "./Map";
 import { TodoState, useAppSelector } from "./store";
-import { useRef, useState } from "react";
-import { lt, partition, pipe, prop } from "ramda";
 interface Props extends StackProps {
   name: string;
   fake?: boolean;
@@ -38,6 +35,11 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
     easing: "ease-out",
   });
 
+  const [animationParent2] = useAutoAnimate({
+    duration: 420,
+    easing: "ease-out",
+  });
+
   const todos = tasks[name] ?? [];
 
   if (todos === undefined) return null;
@@ -50,7 +52,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       px={[5, 5, 10, 20, 300]}
       pt={4}
       height="100dvh"
-      spacing={2}
+      spacing={1}
       id="later"
       align="stretch"
       // divider={
@@ -59,61 +61,42 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       bg={getBg(name)}
       {...stackProps}
     >
-      <Map />
+      <Box mb={2}>
+        <Map />
+      </Box>
 
-      <TextualAdder mode="slow" todos={todos} />
+      <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
-      <VStack key={name} align="stretch" ref={animationParent as any}>
-        {slows.map((task) => (
-          <Task mode="slow" key={task.id} task={task} where={name} />
-        ))}
+      <VStack key={name} align="stretch">
+        <VStack align="stretch" spacing={1} ref={animationParent as any}>
+          <TaskAdder mode="slow" />
+          {slows.map((task) => (
+            <Task mode="slow" key={task.id} task={task} where={name} />
+          ))}
+        </VStack>
+
         <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
-        {fasts.map((task) => (
-          <Task mode="fast" key={task.id} task={task} where={name} />
-        ))}
-      </VStack>
 
-      <TextualAdder mode="fast" todos={todos} />
+        <VStack align="stretch" spacing={1} ref={animationParent as any}>
+          <TaskAdder mode="fast" />
+          {fasts.map((task) => (
+            <Task mode="fast" key={task.id} task={task} where={name} />
+          ))}
+        </VStack>
+      </VStack>
     </VStack>
   );
 };
 
-const TextualAdder = ({
-  todos,
-  mode = "slow",
-}: {
-  todos: TodoState["values"]; // this doesn't make sense, todo: refactor reducer to include coordinates in it -> derive
-  mode?: "slow" | "fast";
-}) => {
-  const tasks = useAppSelector((it) => it.todo.values);
-  const [showAdder, { on: turnOnAdder, off: turnOffAdder }] = useBoolean(false);
-  const [showTextual, { on: turnOnText, off: turnOffText }] = useBoolean(true);
-
-  const hueref = useRef<any>();
-
-  // if (showTextual) {
-  //   return (
-  //     <Button
-  //       onClick={pipe(turnOnAdder, turnOffText)}
-  //       variant="unstyled"
-  //       color="gray.600"
-  //       opacity="0.8"
-  //       p={0}
-  //     >
-  //       Add {mode}...
-  //     </Button>
-  //   );
-  // }
-
+const TaskAdder = ({ mode = "slow" }: { mode?: "slow" | "fast" }) => {
   return (
     <Adder
       initialEmoji={mode === "fast" ? "👊" : "🌊"}
       autoFocus
       placeholder={`something ${mode}~`}
       what="task"
-      onBlur={pipe(turnOffAdder, turnOnText)}
-      variant=""
-      ref={hueref}
+      variant="filled"
+      size="sm"
       taskMode={mode}
       sx={{
         borderRadius: "4px",
