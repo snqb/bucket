@@ -21,10 +21,18 @@ import { emojis } from "./emojis";
 import { Plusik } from "./Plusik";
 export interface Props extends InputGroupProps {
   what: "task" | "screen";
+  taskMode?: "fast" | "slow";
+  initialEmoji?: string;
 }
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const { placeholder, what = "task" } = props;
+  const {
+    placeholder,
+    what = "task",
+    initialEmoji = "+",
+    taskMode = "fast",
+    ...inputGroupProps
+  } = props;
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
   const structure = useAppSelector((state) => state.todo.structure);
@@ -47,7 +55,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         emoji: getRandomEmoji(text),
       },
       createdAt: new Date(),
-      progress: 0,
+      progress: taskMode === "slow" ? 1 : 0,
     };
 
     try {
@@ -73,10 +81,16 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
+    <InputGroup
+      variant="outline"
+      opacity={0.9}
+      size="md"
+      ref={ref}
+      {...inputGroupProps}
+    >
       <InputLeftElement pointerEvents="none">
         {text.length === 0 ? (
-          <Plusik isActive />
+          <Plusik isActive>{initialEmoji}</Plusik>
         ) : (
           <span>{getRandomEmoji(text)}</span>
         )}
@@ -88,13 +102,13 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         value={text}
         onChange={handleChange}
         onBlur={onAdd}
-        placeholder={placeholder}
+        placeholder={placeholder} // it doesn't work if you pass it to input group for some reason
         _placeholder={{
           color: "white",
         }}
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         bg="gray.900"
-        borderColor="blackAlpha.900"
+        borderColor={`${taskMode === "slow" ? "blue" : "yellow"}.400`}
       />
       {/* <InputRightElement onClick={onAdd} fontSize="2xl" alignItems="center">
         ↵

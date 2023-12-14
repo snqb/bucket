@@ -29,10 +29,11 @@ import {
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
+  mode: "slow" | "fast";
 }
 
 export const Task = (props: Props) => {
-  const { task, where, ...restItemProps } = props;
+  const { task, where, mode, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const hueref = useRef<number>();
@@ -100,14 +101,25 @@ export const Task = (props: Props) => {
       >
         <HStack w="full" align="start" justify="space-between">
           <Title task={task} onOpen={onOpen} />
-          <Button
-            {...bind()}
-            variant="unstyled"
-            size="xs"
-            borderRadius="50%"
-            borderColor="gray.600"
-            borderWidth={`${5 + progress / 32}px`}
-          ></Button>
+          {mode === "slow" ? (
+            <Button
+              {...bind()}
+              variant="unstyled"
+              size="xs"
+              borderRadius="50%"
+              borderColor="gray.600"
+              borderWidth={`${5 + progress / 32}px`}
+            ></Button>
+          ) : (
+            <Button
+              variant="unstyled"
+              size="xs"
+              borderRadius="50%"
+              borderColor="gray.600"
+            >
+              👊
+            </Button>
+          )}
         </HStack>
         <Overlay isOpen={isOpen} onClose={onClose} {...props} />
       </VStack>
