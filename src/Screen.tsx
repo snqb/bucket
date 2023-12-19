@@ -61,12 +61,12 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       >
         <VStack align="stretch" spacing={1} ref={animationParent as any}>
           <TaskAdder key="slow-adder" mode="slow" />
-          {fasts.map((task) => (
-            <Task mode="fast" key={task.id} task={task} where={name} />
-          ))}
-          {slows.map((task) => (
+          {todos.map((task) => (
             <Task mode="slow" key={task.id} task={task} where={name} />
           ))}
+          {/* {slows.map((task) => (
+            <Task mode="slow" key={task.id} task={task} where={name} />
+          ))} */}
         </VStack>
 
         {/* <VStack align="stretch" spacing={1} ref={animationParent as any}>

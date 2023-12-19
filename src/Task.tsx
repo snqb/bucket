@@ -13,6 +13,7 @@ import {
   ModalOverlay,
   VStack,
   useDisclosure,
+  Text,
 } from "@chakra-ui/react";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -40,18 +41,15 @@ export const Task = (props: Props) => {
   const hueref = useRef<number>();
 
   const [progress, setProgress] = useState(task.progress);
-
-  const addSome = useCallback(() => {
+  const [startProgress, stop] = useAnimationFrame((timing) => {
+    console.log(timing);
     setProgress((progress) => progress + 1);
-
-    if (hueref.current) cancelAnimationFrame(hueref.current);
-    hueref.current = requestAnimationFrame(addSome);
-  }, [task.progress, where, task.id]);
+  });
 
   const stopProgress = useCallback(() => {
-    if (hueref.current) {
-      cancelAnimationFrame(hueref.current);
-    }
+    stop();
+    console.log("end", progress);
+
     dispatch(
       updateProgress({
         key: where,
@@ -59,18 +57,13 @@ export const Task = (props: Props) => {
         progress,
       }),
     );
-  }, [dispatch, updateProgress, hueref.current]);
+  }, [dispatch, updateProgress, hueref.current, progress]);
 
-  const bind = useLongPress(console.log, {
-    onStart: () => {
-      hueref.current = requestAnimationFrame(addSome);
-    },
+  const bind = useLongPress(() => {}, {
+    onStart: startProgress,
     onCancel: stopProgress,
     onFinish: stopProgress,
-    onMove: () => {
-      console.log("move");
-    },
-    threshold: 500, // In milliseconds
+    threshold: 100, // In milliseconds
   });
 
   const onRemoveClick = () => {
@@ -104,7 +97,9 @@ export const Task = (props: Props) => {
         >
           {task.title.emoji}
           {task.title.text}
-          {mode === "slow" && `(${progress}%)`}
+          <Text display="inline" fontSize="xs" ml="auto">
+            {mode === "slow" && progress > 0 && `(${progress}%)`}
+          </Text>
         </Title>
         {mode === "slow" ? (
           <FistButton
@@ -112,7 +107,7 @@ export const Task = (props: Props) => {
             filter={`saturate(${progress / 50})`}
             {...bind()}
           >
-            🌊
+            👊
           </FistButton>
         ) : (
           <FistButton onClick={onRemoveClick}>👊</FistButton>
@@ -220,3 +215,28 @@ const Title = ({ children, onOpen, ...rest }: Props & OverlayProps) => (
     {children}
   </Box>
 );
+
+const useAnimationFrame = (callback: (time: number) => void) => {
+  // Use useRef for mutable variables that we want to persist
+  // without triggering a re-render on their change
+  const requestRef = useRef<number>();
+  const previousTimeRef = useRef<number>();
+
+  const animate = (time: number) => {
+    if (previousTimeRef.current != undefined) {
+      const deltaTime = time - previousTimeRef.current;
+      callback(deltaTime);
+    }
+    previousTimeRef.current = time;
+    requestRef.current = requestAnimationFrame(animate);
+  };
+
+  const start = useCallback(() => {
+    requestRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(requestRef.current!);
+  }, []); // Make sure the effect runs only once
+
+  const stop = useCallback(() => cancelAnimationFrame(requestRef.current!), []);
+
+  return [start, stop];
+};

@@ -58,7 +58,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         emoji: getRandomEmoji(text),
       },
       createdAt: new Date(),
-      progress: mode === "slow" ? 1 : 0,
+      progress: 0,
     };
 
     try {
@@ -91,13 +91,9 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       ref={ref}
       {...inputGroupProps}
     >
-      <InputLeftElement
-        onClick={() => {
-          setMode((prev) => (prev === "fast" ? "slow" : "fast"));
-        }}
-      >
+      <InputLeftElement>
         {text.length === 0 ? (
-          <Plusik isActive>{mode === "fast" ? "👊" : "🌊"}</Plusik>
+          <Plusik isActive>{"👊"}</Plusik>
         ) : (
           <span>{getRandomEmoji(text)}</span>
         )}

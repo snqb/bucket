@@ -16,7 +16,7 @@ const FadingEmoji = ({
   const animationProps = {
     initial: { scale: 3, opacity: 1 },
     animate: { scale: 1, opacity: 0 },
-    transition: { duration: 0.3 },
+    transition: { duration: 1 },
     onAnimationComplete: onComplete,
   };
 
