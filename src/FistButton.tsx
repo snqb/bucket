@@ -1,17 +1,18 @@
 import { Button, ButtonProps } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import ReactDOM from "react-dom";
 
 const FadingEmoji = ({
   x,
   y,
   onComplete,
-}: {
+  children,
+}: PropsWithChildren<{
   x: number;
   y: number;
   onComplete: () => void;
-}) => {
+}>) => {
   const animationProps = {
     initial: { scale: 3, opacity: 1 },
     animate: { scale: 1, opacity: 0 },
@@ -31,7 +32,7 @@ const FadingEmoji = ({
       }}
       {...animationProps}
     >
-      👊
+      {children}
     </motion.div>,
     document.body,
   );
@@ -54,7 +55,15 @@ const FistButton = ({ children, ...restProps }: ButtonProps) => {
 
   return (
     <>
-      <Button {...restProps} p={0} onClick={handleButtonClick}>
+      <Button
+        variant="unstyled"
+        size="sm"
+        borderRadius="50%"
+        borderColor="gray.800"
+        p={0}
+        onClick={handleButtonClick}
+        {...restProps}
+      >
         {children}
       </Button>
       {coords && (
@@ -62,7 +71,9 @@ const FistButton = ({ children, ...restProps }: ButtonProps) => {
           x={coords.x - 30}
           y={coords.y}
           onComplete={handleAnimationComplete}
-        />
+        >
+          {children}
+        </FadingEmoji>
       )}
     </>
   );

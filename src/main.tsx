@@ -29,8 +29,8 @@ const theme: ThemeConfig = extendTheme({
     }),
   },
   fonts: {
-    heading: "system-ui, sans-serif",
-    body: "system-ui, sans-serif",
+    heading: "monospace, sans-serif",
+    body: "monospace, sans-serif",
   },
   colors: {
     black: "#000007",

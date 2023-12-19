@@ -92,7 +92,13 @@ const GridTitle = ({
 }: PropsWithChildren<{ isActive: boolean }>) => {
   if (isActive) {
     return (
-      <Box px={2} border="1px solid" borderColor="gray.400" borderRadius="4px">
+      <Box
+        px={2}
+        border="1px solid"
+        borderColor="gray.400"
+        borderRadius="4px"
+        shadow="outline"
+      >
         <Heading
           fontSize="md"
           whiteSpace="nowrap"

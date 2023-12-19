@@ -12,7 +12,6 @@ import {
   ModalHeader,
   ModalOverlay,
   VStack,
-  useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
 
@@ -39,46 +38,39 @@ export const Task = (props: Props) => {
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const hueref = useRef<number>();
-  const [isPressing, { on, off }] = useBoolean(false);
 
   const [progress, setProgress] = useState(task.progress);
 
   const addSome = useCallback(() => {
-    setProgress((progress) => progress + 0.5);
+    setProgress((progress) => progress + 1);
 
     if (hueref.current) cancelAnimationFrame(hueref.current);
     hueref.current = requestAnimationFrame(addSome);
   }, [task.progress, where, task.id]);
 
-  const bind = useLongPress(() => {}, {
+  const stopProgress = useCallback(() => {
+    if (hueref.current) {
+      cancelAnimationFrame(hueref.current);
+    }
+    dispatch(
+      updateProgress({
+        key: where,
+        id: task.id,
+        progress,
+      }),
+    );
+  }, [dispatch, updateProgress, hueref.current]);
+
+  const bind = useLongPress(console.log, {
     onStart: () => {
       hueref.current = requestAnimationFrame(addSome);
-      on();
     },
-    onCancel: () => {
-      if (hueref.current) {
-        cancelAnimationFrame(hueref.current);
-        off();
-      }
-    },
-    onFinish: () => {
-      console.log("finihsh");
-      if (hueref.current) {
-        cancelAnimationFrame(hueref.current);
-        off();
-      }
-      dispatch(
-        updateProgress({
-          key: where,
-          id: task.id,
-          progress,
-        }),
-      );
-    },
+    onCancel: stopProgress,
+    onFinish: stopProgress,
     onMove: () => {
       console.log("move");
     },
-    threshold: 222, // In milliseconds
+    threshold: 500, // In milliseconds
   });
 
   const onRemoveClick = () => {
@@ -97,44 +89,37 @@ export const Task = (props: Props) => {
   }, [progress]);
 
   return (
-    <>
-      <VStack
-        align="start"
-        py={2}
-        userSelect="none"
-        {...restItemProps}
-        spacing={0}
-        filter={mode === "slow" ? `blur(${progress / 60}px)` : "none"}
-      >
-        <HStack w="full" align="center" justify="space-between">
-          <Title task={task} onOpen={onOpen} />
-          {mode === "slow" ? (
-            <Button
-              {...bind()}
-              variant="unstyled"
-              aspectRatio="1/1"
-              size="xs"
-              borderRadius="50%"
-              background={`linear-gradient(to right, #374ed7, ${
-                progress / 0.8
-              }%, #54c3fa88);`}
-              transform={isPressing ? "scale(3)" : "scale(1)"}
-            />
-          ) : (
-            <FistButton
-              variant="outline"
-              size="sm"
-              borderRadius="50%"
-              borderColor="gray.800"
-              onClick={onRemoveClick}
-            >
-              👊
-            </FistButton>
-          )}
-        </HStack>
-        <Overlay isOpen={isOpen} onClose={onClose} {...props} />
-      </VStack>
-    </>
+    <VStack
+      align="start"
+      py={2}
+      userSelect="none"
+      {...restItemProps}
+      spacing={0}
+      filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
+    >
+      <HStack w="full" align="center" justify="space-between">
+        <Title
+          opacity={mode == "slow" ? 1 - progress / 110 : 1}
+          onOpen={onOpen}
+        >
+          {task.title.emoji}
+          {task.title.text}
+          {mode === "slow" && `(${progress}%)`}
+        </Title>
+        {mode === "slow" ? (
+          <FistButton
+            // border="4px solid gray"
+            filter={`saturate(${progress / 50})`}
+            {...bind()}
+          >
+            🌊
+          </FistButton>
+        ) : (
+          <FistButton onClick={onRemoveClick}>👊</FistButton>
+        )}
+      </HStack>
+      <Overlay isOpen={isOpen} onClose={onClose} {...props} />
+    </VStack>
   );
 };
 
@@ -222,15 +207,16 @@ export const Overlay = ({
   );
 };
 
-const Title = ({ task, onOpen }: Props & OverlayProps) => (
+const Title = ({ children, onOpen, ...rest }: Props & OverlayProps) => (
   <Box
     w="100%"
     textAlign="left"
     as="span"
     fontSize="lg"
-    fontWeight={600}
+    fontWeight={500}
     onClick={onOpen}
+    {...rest}
   >
-    {task.title.emoji} {task.title.text}
+    {children}
   </Box>
 );

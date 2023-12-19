@@ -5,7 +5,7 @@ import {
   InputLeftElement,
   forwardRef,
 } from "@chakra-ui/react";
-import { ChangeEventHandler, useContext, useState } from "react";
+import { ChangeEventHandler, useContext, useEffect, useState } from "react";
 
 import * as R from "ramda";
 import Rand from "rand-seed";
@@ -37,7 +37,10 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   const [row, column] = useContext(CoordinatesContext);
   const structure = useAppSelector((state) => state.todo.structure);
 
+  const [mode, setMode] = useState(taskMode);
   const [text, setText] = useState("");
+
+  useEffect(() => console.log(text), [text]);
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
@@ -51,11 +54,11 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     const task: Todo = {
       id: crypto.randomUUID(),
       title: {
-        text: text.toLowerCase(),
+        text: text,
         emoji: getRandomEmoji(text),
       },
       createdAt: new Date(),
-      progress: taskMode === "slow" ? 1 : 0,
+      progress: mode === "slow" ? 1 : 0,
     };
 
     try {
@@ -88,9 +91,13 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       ref={ref}
       {...inputGroupProps}
     >
-      <InputLeftElement pointerEvents="none">
+      <InputLeftElement
+        onClick={() => {
+          setMode((prev) => (prev === "fast" ? "slow" : "fast"));
+        }}
+      >
         {text.length === 0 ? (
-          <Plusik isActive>{initialEmoji}</Plusik>
+          <Plusik isActive>{mode === "fast" ? "👊" : "🌊"}</Plusik>
         ) : (
           <span>{getRandomEmoji(text)}</span>
         )}
@@ -102,10 +109,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         value={text}
         onChange={handleChange}
         onBlur={onAdd}
-        placeholder={placeholder} // it doesn't work if you pass it to input group for some reason
-        _placeholder={{
-          color: "white",
-        }}
+        placeholder={mode} // it doesn't work if you pass it to input group for some reason
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         bg="gray.900"
       />
