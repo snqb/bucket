@@ -41,14 +41,12 @@ export const Task = (props: Props) => {
   const hueref = useRef<number>();
 
   const [progress, setProgress] = useState(task.progress);
-  const [startProgress, stop] = useAnimationFrame((timing) => {
-    console.log(timing);
+  const [startProgress, stop] = useAnimationFrame(() => {
     setProgress((progress) => progress + 1);
   });
 
   const stopProgress = useCallback(() => {
     stop();
-    console.log("end", progress);
 
     dispatch(
       updateProgress({

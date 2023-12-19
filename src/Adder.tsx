@@ -40,8 +40,6 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   const [mode, setMode] = useState(taskMode);
   const [text, setText] = useState("");
 
-  useEffect(() => console.log(text), [text]);
-
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
     setText,
