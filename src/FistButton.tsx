@@ -25,7 +25,7 @@ const FadingEmoji = ({
     <motion.div
       style={{
         zIndex: 10,
-        position: "absolute",
+        position: "fixed",
         left: `${x}px`,
         top: `${y}px`,
         fontSize: "40px",

@@ -41,11 +41,11 @@ export const Map = () => {
                   const scale = 2 * (rowDistance - 1);
 
                   return (
-                    <Box transform={`rotateZ(${scale}deg)`}>
-                      <GridTitle
-                        isActive={isActiveCell}
-                        key={`${rowIndex}-${colIndex}`}
-                      >
+                    <Box
+                      transform={`rotateZ(${scale}deg)`}
+                      key={`${rowIndex}-${colIndex}`}
+                    >
+                      <GridTitle isActive={isActiveCell}>
                         {getRandomEmoji(name)}
                         {(isXNeighbour || isYNeighbour) && (
                           <Box as="span" fontSize="md" fontStyle="italic">
