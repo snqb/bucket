@@ -8,7 +8,8 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
-
+// Supports weights 100-900
+import '@fontsource-variable/noto-sans-mono';
 // @ts-ignore
 import { sliderAnatomy as parts } from "@chakra-ui/anatomy";
 import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
@@ -25,12 +26,16 @@ const theme: ThemeConfig = extendTheme({
         bg: "black",
         color: "white",
         "overscroll-behavior-y": "contain",
+        fontVariationSettings: `"wdth" 65, "wght" 500`,
+      },
+      h2: {
+        fontVariationSettings: `"wdth" 65, "wght" 700`,
       },
     }),
   },
   fonts: {
-    heading: "monospace, sans-serif",
-    body: "monospace, sans-serif",
+    heading: "'Noto Sans Mono Variable', sans-serif",
+    body: "'Noto Sans Mono Variable', sans-serif",
   },
   colors: {
     black: "#000007",
