@@ -1,7 +1,7 @@
 import { Text, TextProps } from "@chakra-ui/react";
 
 export const Plusik = (props: TextProps & { isActive?: boolean }) => {
-  const { isActive = false, ...restProps } = props;
+  const { isActive = false, children = "+", ...restProps } = props;
   return (
     <Text
       w="20px"
@@ -14,7 +14,7 @@ export const Plusik = (props: TextProps & { isActive?: boolean }) => {
       fontWeight="bold"
       {...restProps}
     >
-      +
+      {children}
     </Text>
   );
 };

@@ -5,11 +5,13 @@ import {
   InputLeftElement,
   forwardRef,
 } from "@chakra-ui/react";
-import { ChangeEventHandler, useCallback, useContext, useState } from "react";
+import { ChangeEventHandler, useContext, useEffect, useState } from "react";
 
 import * as R from "ramda";
 import Rand from "rand-seed";
 import { CoordinatesContext } from "./App";
+import { Plusik } from "./Plusik";
+import { emojis } from "./emojis";
 import {
   addTask,
   renameScreen,
@@ -17,18 +19,25 @@ import {
   useAppSelector,
   type Todo,
 } from "./store";
-import { emojis } from "./emojis";
-import { Plusik } from "./Plusik";
 export interface Props extends InputGroupProps {
   what: "task" | "screen";
+  taskMode?: "fast" | "slow";
+  initialEmoji?: string;
 }
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const { placeholder, what = "task" } = props;
+  const {
+    placeholder,
+    what = "task",
+    initialEmoji = "+",
+    taskMode,
+    ...inputGroupProps
+  } = props;
   const dispatch = useAppDispatch();
   const [row, column] = useContext(CoordinatesContext);
   const structure = useAppSelector((state) => state.todo.structure);
 
+  const [mode, setMode] = useState(taskMode);
   const [text, setText] = useState("");
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
@@ -43,7 +52,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     const task: Todo = {
       id: crypto.randomUUID(),
       title: {
-        text: text.toLowerCase(),
+        text: text,
         emoji: getRandomEmoji(text),
       },
       createdAt: new Date(),
@@ -73,10 +82,16 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup variant="outline" opacity={0.9} size="md" ref={ref} {...props}>
-      <InputLeftElement pointerEvents="none">
+    <InputGroup
+      variant="outline"
+      opacity={0.9}
+      size="md"
+      ref={ref}
+      {...inputGroupProps}
+    >
+      <InputLeftElement>
         {text.length === 0 ? (
-          <Plusik isActive />
+          <Plusik isActive>{"👊"}</Plusik>
         ) : (
           <span>{getRandomEmoji(text)}</span>
         )}
@@ -88,17 +103,10 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
         value={text}
         onChange={handleChange}
         onBlur={onAdd}
-        placeholder={placeholder}
-        _placeholder={{
-          color: "white",
-        }}
+        placeholder={mode} // it doesn't work if you pass it to input group for some reason
         onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
         bg="gray.900"
-        borderColor="blackAlpha.900"
       />
-      {/* <InputRightElement onClick={onAdd} fontSize="2xl" alignItems="center">
-        ↵
-      </InputRightElement> */}
     </InputGroup>
   );
 });

@@ -13,10 +13,12 @@ import {
   ModalOverlay,
   VStack,
   useDisclosure,
+  Text,
 } from "@chakra-ui/react";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLongPress } from "use-long-press";
+import FistButton from "./FistButton";
 import {
   Todo,
   TodoState,
@@ -29,48 +31,37 @@ import {
 interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
+  mode: "slow" | "fast";
 }
 
 export const Task = (props: Props) => {
-  const { task, where, ...restItemProps } = props;
+  const { task, where, mode, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const hueref = useRef<number>();
+
   const [progress, setProgress] = useState(task.progress);
+  const [startProgress, stop] = useAnimationFrame(() => {
+    setProgress((progress) => progress + 1);
+  });
 
-  const addSome = useCallback(() => {
-    setProgress((progress) => progress + 2.66);
+  const stopProgress = useCallback(() => {
+    stop();
 
-    if (hueref.current) cancelAnimationFrame(hueref.current);
-    hueref.current = requestAnimationFrame(addSome);
-  }, [task.progress, where, task.id]);
+    dispatch(
+      updateProgress({
+        key: where,
+        id: task.id,
+        progress,
+      }),
+    );
+  }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => {}, {
-    onStart: () => {
-      hueref.current = requestAnimationFrame(addSome);
-    },
-    onCancel: () => {
-      if (hueref.current) {
-        cancelAnimationFrame(hueref.current);
-      }
-    },
-    onFinish: () => {
-      console.log("finihsh");
-      if (hueref.current) {
-        cancelAnimationFrame(hueref.current);
-      }
-      dispatch(
-        updateProgress({
-          key: where,
-          id: task.id,
-          progress,
-        }),
-      );
-    },
-    onMove: () => {
-      console.log("move");
-    },
-    threshold: 222, // In milliseconds
+    onStart: startProgress,
+    onCancel: stopProgress,
+    onFinish: stopProgress,
+    threshold: 100, // In milliseconds
   });
 
   const onRemoveClick = () => {
@@ -83,35 +74,45 @@ export const Task = (props: Props) => {
   };
 
   useEffect(() => {
-    if (progress > 300) {
+    if (progress > 100) {
       onRemoveClick();
     }
   }, [progress]);
 
   return (
-    <>
-      <VStack
-        align="start"
-        py={2}
-        userSelect="none"
-        {...restItemProps}
-        spacing={0}
-        filter={`blur(${progress / 100}px)`}
-      >
-        <HStack w="full" align="start" justify="space-between">
-          <Title task={task} onOpen={onOpen} />
-          <Button
+    <VStack
+      align="start"
+      py={2}
+      userSelect="none"
+      {...restItemProps}
+      spacing={0}
+      filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
+    >
+      <HStack w="full" align="center" justify="space-between">
+        <Title
+          opacity={mode == "slow" ? 1 - progress / 110 : 1}
+          onOpen={onOpen}
+        >
+          {task.title.emoji}
+          {task.title.text}
+          <Text display="inline" fontSize="xs" ml="auto">
+            {mode === "slow" && progress > 0 && `(${progress}%)`}
+          </Text>
+        </Title>
+        {mode === "slow" ? (
+          <FistButton
+            // border="4px solid gray"
+            filter={`saturate(${progress / 50})`}
             {...bind()}
-            variant="unstyled"
-            size="xs"
-            borderRadius="50%"
-            borderColor="gray.600"
-            borderWidth={`${5 + progress / 32}px`}
-          ></Button>
-        </HStack>
-        <Overlay isOpen={isOpen} onClose={onClose} {...props} />
-      </VStack>
-    </>
+          >
+            👊
+          </FistButton>
+        ) : (
+          <FistButton onClick={onRemoveClick}>👊</FistButton>
+        )}
+      </HStack>
+      <Overlay isOpen={isOpen} onClose={onClose} {...props} />
+    </VStack>
   );
 };
 
@@ -199,15 +200,45 @@ export const Overlay = ({
   );
 };
 
-const Title = ({ task, onOpen }: Props & OverlayProps) => (
+const Title = ({ children, onOpen, ...rest }: Props & OverlayProps) => (
   <Box
     w="100%"
     textAlign="left"
     as="span"
-    fontSize="xl"
-    fontWeight={600}
+    fontSize="lg"
+    fontWeight={500}
     onClick={onOpen}
+    {...rest}
   >
-    {task.title.emoji} {task.title.text}
+    {children}
   </Box>
 );
+
+const useAnimationFrame = (callback: (time: number) => void) => {
+  // Use useRef for mutable variables that we want to persist
+  // without triggering a re-render on their change
+  const requestRef = useRef<number>();
+  const previousTimeRef = useRef<number>();
+
+  const animate = useCallback((time: number) => {
+    if (previousTimeRef.current != undefined) {
+      const deltaTime = time - previousTimeRef.current;
+      if (deltaTime > 20) {
+        previousTimeRef.current = time;
+
+        callback(deltaTime);
+      }
+    }
+    if (!previousTimeRef.current) previousTimeRef.current = time;
+    requestRef.current = requestAnimationFrame(animate);
+  }, []);
+
+  const start = useCallback(() => {
+    requestRef.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(requestRef.current!);
+  }, []); // Make sure the effect runs only once
+
+  const stop = useCallback(() => cancelAnimationFrame(requestRef.current!), []);
+
+  return [start, stop];
+};
