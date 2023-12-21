@@ -1,5 +1,7 @@
 import {
   AccordionItemProps,
+  Box,
+  BoxProps,
   Button,
   Center,
   HStack,
@@ -12,10 +14,16 @@ import {
   ModalOverlay,
   Text,
   VStack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useLongPress } from "use-long-press";
 import {
   Todo,
@@ -51,11 +59,11 @@ export const Task = (props: Props) => {
         key: where,
         id: task.id,
         progress,
-      }),
+      })
     );
   }, [dispatch, updateProgress, hueref.current, progress]);
 
-  const bind = useLongPress(() => {}, {
+  const bind = useLongPress(() => { }, {
     onStart: startProgress,
     onCancel: stopProgress,
     onFinish: stopProgress,
@@ -67,7 +75,7 @@ export const Task = (props: Props) => {
       removeTask({
         key: where,
         id: task.id,
-      }),
+      })
     );
   };
 
@@ -87,27 +95,22 @@ export const Task = (props: Props) => {
       filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
     >
       <HStack w="full" align="center" justify="space-between">
-        <Title
-          opacity={mode == "slow" ? 1 - progress / 110 : 1}
-          onOpen={onOpen}
-          title={task.title.emoji + "" + task.title.text}
-          progress={progress}
-        >
+        <Title onClick={onOpen} progress={progress}>
           {task.title.emoji}
           {task.title.text}
         </Title>
-          <Button
-            variant="outline"
-            colorScheme="blue"
-            filter={`saturate(${progress / 50})`}
-            borderColor="gray.900"
-            borderWidth="2px"
-            p={1}
-            {...bind()}
-          >
-            👊
-          </Button>
-        ) 
+        <Button
+          variant="outline"
+          colorScheme="blue"
+          filter={`saturate(${progress / 50})`}
+          borderColor="gray.900"
+          borderWidth="2px"
+          p={1}
+          {...bind()}
+        >
+          👊
+        </Button>
+        )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
     </VStack>
@@ -131,7 +134,7 @@ export const Overlay = ({
         from: where,
         to: screen,
         id: task.id,
-      }),
+      })
     );
 
     onClose();
@@ -198,20 +201,25 @@ export const Overlay = ({
   );
 };
 
-const Title = ({ children, onOpen, progress, title, ...rest }: Props & OverlayProps) => {
+const Title = ({
+  children,
+  progress,
+  ...rest
+}: BoxProps & PropsWithChildren<{ progress: number }>) => {
   return (
-    <Text
-      w="100%"
-      textAlign="left"
-      as="span"
-      fontSize="lg"
-      fontWeight={500}
-      onClick={onOpen}
-      {...rest}
-    >
-      {children}{' '}
-      <Text display="inline" color="gray.600" fontSize="sm">{progress}%</Text>
-    </Text>
+    <Box w="100%" textAlign="left" as="span" {...rest}>
+      <Text
+        display="inline"
+        fontSize="lg"
+        opacity={1 - progress / 150}
+        fontWeight={500}
+      >
+        {children}{" "}
+      </Text>
+      <Text display="inline" color="gray.600" fontSize="sm">
+        ({progress}%)
+      </Text>
+    </Box>
   );
 };
 
@@ -243,19 +251,3 @@ const useAnimationFrame = (callback: (time: number) => void) => {
 
   return [start, stop];
 };
-
-import { HTMLMotionProps, motion } from "framer-motion";
-
-interface Props extends HTMLMotionProps<"div"> {
-  text: string;
-  delay?: number;
-  duration?: number;
-}
-
-const MotionHeading = motion(Heading)
-
-
-
-
-
-
