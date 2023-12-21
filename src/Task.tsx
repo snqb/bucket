@@ -16,9 +16,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import { useLongPress } from "use-long-press";
-import FistButton from "./FistButton";
 import {
   Todo,
   TodoState,
@@ -90,26 +89,26 @@ export const Task = (props: Props) => {
     >
       <HStack w="full" align="center" justify="space-between">
         <Title
-          opacity={mode == "slow" ? 1 - progress / 110 : 1}
+          // opacity={mode == "slow" ? 1 - progress / 110 : 1}
           onOpen={onOpen}
+          title={task.title.emoji + "" + task.title.text}
+          progress={progress}
         >
           {task.title.emoji}
           {task.title.text}
           <Text display="inline" fontSize="xs" ml="auto">
-            {mode === "slow" && progress > 0 && `(${progress}%)`}
+            {progress > 0 && `(${progress}%)`}
           </Text>
         </Title>
-        {mode === "slow" ? (
           <FistButton
-            // border="4px solid gray"
+            variant="unstyled"
+            width="12px"
             filter={`saturate(${progress / 50})`}
             {...bind()}
           >
             👊
           </FistButton>
-        ) : (
-          <FistButton onClick={onRemoveClick}>👊</FistButton>
-        )}
+        ) 
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
     </VStack>
@@ -200,19 +199,29 @@ export const Overlay = ({
   );
 };
 
-const Title = ({ children, onOpen, ...rest }: Props & OverlayProps) => (
-  <Box
-    w="100%"
-    textAlign="left"
-    as="span"
-    fontSize="lg"
-    fontWeight={500}
-    onClick={onOpen}
-    {...rest}
-  >
-    {children}
-  </Box>
-);
+const Title = ({ children, onOpen, progress, title, ...rest }: Props & OverlayProps) => {
+  return (
+    <Text
+      w="100%"
+      textAlign="left"
+      as="span"
+      fontSize="lg"
+      fontWeight={500}
+      onClick={onOpen}
+      {...rest}
+    >
+      {(title).split("").map((letter, index, arr) => {
+        const each = 100/arr.length;
+        const x = (progress > each * index) ? Math.max(0.2, 1 - progress / 100) : undefined;
+        return <Box key={index} as="span" sx={{
+          filter: x && `blur(${x*5}px)`,
+          transition: "filter 0.3s ease",
+        }}>{letter}</Box>;
+      })}{" "}
+      <Text display="inline" color="gray.600" fontSize="xs">{progress}%</Text>
+    </Text>
+  );
+};
 
 const useAnimationFrame = (callback: (time: number) => void) => {
   // Use useRef for mutable variables that we want to persist
@@ -242,3 +251,20 @@ const useAnimationFrame = (callback: (time: number) => void) => {
 
   return [start, stop];
 };
+
+import { motion, Variants, HTMLMotionProps } from "framer-motion";
+import { FistButton } from "./FistButton";
+
+interface Props extends HTMLMotionProps<"div"> {
+  text: string;
+  delay?: number;
+  duration?: number;
+}
+
+const MotionHeading = motion(Heading)
+
+
+
+
+
+

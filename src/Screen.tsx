@@ -40,7 +40,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       px={[5, 5, 10, 20, 300]}
       pt={4}
       height="100dvh"
-      spacing={1}
+      spacing={3}
       id="later"
       align="stretch"
       bg={getBg(name)}
@@ -59,7 +59,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           <StackDivider borderBottomColor="red.600" borderBottomWidth="1px" />
         }
       >
-        <VStack align="stretch" spacing={1} ref={animationParent as any}>
+        <VStack align="stretch" spacing={0} ref={animationParent as any}>
           <TaskAdder key="slow-adder" mode="slow" />
           {todos.map((task) => (
             <Task mode="slow" key={task.id} task={task} where={name} />

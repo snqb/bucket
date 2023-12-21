@@ -1,82 +1,76 @@
-import { Button, ButtonProps } from "@chakra-ui/react";
-import { motion } from "framer-motion";
-import { PropsWithChildren, useState } from "react";
-import ReactDOM from "react-dom";
+import { Box, Button, ButtonProps } from "@chakra-ui/react";
 
-const FadingEmoji = ({
-  x,
-  y,
-  onComplete,
-  children,
-}: PropsWithChildren<{
-  x: number;
-  y: number;
-  onComplete: () => void;
-}>) => {
-  const animationProps = {
-    initial: { scale: 3, opacity: 1 },
-    animate: { scale: 1, opacity: 0 },
-    transition: { duration: 1 },
-    onAnimationComplete: onComplete,
-  };
+// https://www.joshwcomeau.com/animation/3d-button/ copy paste basically
 
-  // Create a portal and position the emoji at the specified (x, y) coordinates
-  return ReactDOM.createPortal(
-    <motion.div
-      style={{
-        zIndex: 10,
-        position: "fixed",
-        left: `${x}px`,
-        top: `${y}px`,
-        fontSize: "40px",
-      }}
-      {...animationProps}
-    >
-      {children}
-    </motion.div>,
-    document.body,
-  );
-};
-
-const FistButton = ({ children, ...restProps }: ButtonProps) => {
-  const [coords, setCoords] = useState<{ x: number; y: number } | null>(null);
-  const handleButtonClick = (e: any) => {
-    const rect = e.target.getBoundingClientRect();
-    const x = rect.left + window.scrollX;
-    const y = rect.top + window.scrollY;
-    setCoords({ x, y });
-  };
-
-  const handleAnimationComplete = () => {
-    setCoords(null);
-    // @ts-ignore
-    restProps.onClick?.();
-  };
-
+export const FistButton = ({ children, ...props }: ButtonProps) => {
   return (
-    <>
-      <Button
-        variant="unstyled"
-        size="sm"
-        borderRadius="50%"
-        borderColor="gray.800"
-        p={0}
-        onClick={handleButtonClick}
-        {...restProps}
+    <Button
+      sx={{
+        position: "relative",
+        border: "none",
+        background: "transparent",
+        padding: 0,
+        cursor: "pointer",
+        outlineOffset: "4px",
+        transition: "filter 250ms",
+        _hover: { filter: "brightness(110%)" },
+        _focus: { outline: "none" },
+      }}
+      {...props}
+    >
+      {/* shadow */}
+      <Box
+        as="span"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          borderRadius: "12px",
+          background: "hsl(0deg 0% 0% / 0.25)",
+          willChange: "transform",
+          transform: "translateY(2px)",
+          transition: "transform 600ms cubic-bezier(.3, .7, .4, 1)",
+          _hover: { transform: "translateY(4px)" },
+          _active: { transform: "translateY(1px)" },
+        }}
+      />
+      {/* back */}
+      <Box
+        as="span"
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          borderRadius: "12px",
+          background:
+            "linear-gradient(to left, hsl(340deg 88% 16%) 0%, hsl(340deg 88% 32%) 8%, hsl(340deg 88% 32%) 92%, hsl(340deg 88% 16%) 100%)",
+        }}
+      />
+      {/* front */}
+      <Box
+        as="span"
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          position: "relative",
+          padding: "2px 6px",
+          borderRadius: "12px",
+          fontSize: "1.25rem",
+          color: "white",
+          background: "hsl(345deg 88% 53%)",
+          willChange: "transform",
+          transform: "translateY(-4px)",
+          transition: "transform font-size 600ms cubic-bezier(.3, .7, .4, 1)",
+          _hover: { transform: "translateY(-6px)", fontSize: "1.5rem" },
+          _active: { transform: "translateY(-2px)" },
+        }}
       >
         {children}
-      </Button>
-      {coords && (
-        <FadingEmoji
-          x={coords.x - 30}
-          y={coords.y}
-          onComplete={handleAnimationComplete}
-        >
-          {children}
-        </FadingEmoji>
-      )}
-    </>
+      </Box>
+    </Button>
   );
 };
-
-export default FistButton;
