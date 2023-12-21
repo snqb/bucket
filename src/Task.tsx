@@ -1,6 +1,5 @@
 import {
   AccordionItemProps,
-  Box,
   Button,
   Center,
   HStack,
@@ -11,12 +10,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  VStack,
-  useDisclosure,
   Text,
+  VStack,
+  useDisclosure
 } from "@chakra-ui/react";
 
-import { PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLongPress } from "use-long-press";
 import {
   Todo,
@@ -89,25 +88,25 @@ export const Task = (props: Props) => {
     >
       <HStack w="full" align="center" justify="space-between">
         <Title
-          // opacity={mode == "slow" ? 1 - progress / 110 : 1}
+          opacity={mode == "slow" ? 1 - progress / 110 : 1}
           onOpen={onOpen}
           title={task.title.emoji + "" + task.title.text}
           progress={progress}
         >
           {task.title.emoji}
           {task.title.text}
-          <Text display="inline" fontSize="xs" ml="auto">
-            {progress > 0 && `(${progress}%)`}
-          </Text>
         </Title>
-          <FistButton
-            variant="unstyled"
-            width="12px"
+          <Button
+            variant="outline"
+            colorScheme="blue"
             filter={`saturate(${progress / 50})`}
+            borderColor="gray.900"
+            borderWidth="2px"
+            p={1}
             {...bind()}
           >
             👊
-          </FistButton>
+          </Button>
         ) 
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
@@ -210,15 +209,8 @@ const Title = ({ children, onOpen, progress, title, ...rest }: Props & OverlayPr
       onClick={onOpen}
       {...rest}
     >
-      {(title).split("").map((letter, index, arr) => {
-        const each = 100/arr.length;
-        const x = (progress > each * index) ? Math.max(0.2, 1 - progress / 100) : undefined;
-        return <Box key={index} as="span" sx={{
-          filter: x && `blur(${x*5}px)`,
-          transition: "filter 0.3s ease",
-        }}>{letter}</Box>;
-      })}{" "}
-      <Text display="inline" color="gray.600" fontSize="xs">{progress}%</Text>
+      {children}{' '}
+      <Text display="inline" color="gray.600" fontSize="sm">{progress}%</Text>
     </Text>
   );
 };
@@ -252,8 +244,7 @@ const useAnimationFrame = (callback: (time: number) => void) => {
   return [start, stop];
 };
 
-import { motion, Variants, HTMLMotionProps } from "framer-motion";
-import { FistButton } from "./FistButton";
+import { HTMLMotionProps, motion } from "framer-motion";
 
 interface Props extends HTMLMotionProps<"div"> {
   text: string;

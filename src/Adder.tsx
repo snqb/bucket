@@ -98,6 +98,8 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       </InputLeftElement>
       <Input
         enterKeyHint="done"
+      colorScheme="blue"
+
         type="text"
         autoComplete="off"
         value={text}

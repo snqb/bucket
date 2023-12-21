@@ -97,7 +97,7 @@ const GridTitle = ({
         border="1px solid"
         borderColor="gray.400"
         borderRadius="4px"
-        shadow="outline"
+        shadow="inner"
       >
         <Heading
           fontSize="md"
