@@ -54,8 +54,10 @@ const AsGrid = () => {
         }
       },
       onPinchEnd: (state) => {
-        if (state.movement) {
-          console.log(state)
+        if (state.movement[0] > 0) {
+          setZoom(zoom + 0.1)
+        } else {
+          setZoom(zoom - 0.1)
         }
 
       },
@@ -97,7 +99,7 @@ const AsGrid = () => {
 
   return (
     <Box transition="all 1s ease-in-out">
-      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}
+      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{zoom}
       <Screen
         fake
         key={'asdjklasd'}
