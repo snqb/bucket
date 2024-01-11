@@ -54,17 +54,16 @@ const AsGrid = () => {
         }
       },
       onPinchEnd: (state) => {
-        if (state.movement[0] > 0) {
-          setZoom(zoom + 0.1)
-        } else {
-          setZoom(zoom - 0.1)
-        }
-
+        console.log(state.offset)
+        setZoom(state.offset[0])
       },
     },
     {
       target: window,
-      eventOptions: { passive: false }
+      eventOptions: { passive: false },
+      pinch: {
+        scaleBounds: { min: 1, max: 10 },
+      }
     }
   )
 
