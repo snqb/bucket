@@ -13,7 +13,9 @@ import { Map } from "./Map";
 import { useGesture } from "@use-gesture/react";
 import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
+import { lock, unlock } from 'tua-body-scroll-lock'
 
+lock()
 
 enableReactTracking({
   auto: true,
@@ -63,20 +65,21 @@ const AsGrid = () => {
         console.log(state.direction)
         mode$.set(prev => prev + state.direction[0])
       }
-    },  
+    },
     {
       target: window,
       eventOptions: { passive: false },
       pinch: {
         scaleBounds: { min: 1, max: 10 },
-      }
+      },
+
     }
   )
 
   const name = structure[getColumn(position[1], structure[getRow(position[0], structure.length)].length)][getRow(position[0], structure.length)];
 
   return (
-    <Box transition="all 1s ease-in-out">
+    <Box transition="all 1s ease-in-out" {...bind}>
       {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}
       {mode === 1 ? <Screen name={structure[0][0]} /> : "Haha"}
     </Box>

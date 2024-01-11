@@ -83,6 +83,9 @@ dependencies:
   swiper:
     specifier: ^11.0.4
     version: 11.0.4
+  tua-body-scroll-lock:
+    specifier: ^1.4.0
+    version: 1.4.0
   use-long-press:
     specifier: ^3.2.0
     version: 3.2.0(react@18.2.0)
@@ -4835,6 +4838,10 @@ packages:
 
   /tslib@2.5.2:
     resolution: {integrity: sha512-5svOrSA2w3iGFDs1HibEVBGbDrAY82bFQ3HZ3ixB+88nsbsWQoKqDRb5UBYAUPEzbBn6dAp5gRNXglySbx1MlA==}
+    dev: false
+
+  /tua-body-scroll-lock@1.4.0:
+    resolution: {integrity: sha512-pbl411d7RSxjYXt5pB5GdBQ5BraVg1PMvr8BSUXc4buCMeK1OYu7L10PuOU8EhdfWoxGiAfvLrioSQe6Cr9m1g==}
     dev: false
 
   /type-fest@0.16.0:
