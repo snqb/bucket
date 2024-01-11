@@ -11,19 +11,25 @@ import Screen from "./Screen";
 import { persistor, store, useAppSelector } from "./store";
 import { Map } from "./Map";
 import { useGesture } from "@use-gesture/react";
+import { observable } from "@legendapp/state";
+import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
+
+
+enableReactTracking({
+  auto: true,
+});
+const mode$ = observable(1);
 
 export const CoordinatesContext = createContext<[number, number]>([0, 0]);
 
 function App() {
-  const [mode, setMode] = useState(1);
-
+  const mode = mode$.get();
 
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
         <Flex overflowY="hidden">
-          {mode === 0 && <TwoDeeThing />}
-          {mode === 1 && <AsGrid />}
+          <AsGrid />
           <ReloadPrompt />
         </Flex>
       </PersistGate>
@@ -35,12 +41,12 @@ const AsGrid = () => {
   const { structure, values } = useAppSelector((state) => state.todo);
   const [position, setPosition] = useState<[number, number]>([0, 0]);
   const [zoom, setZoom] = useState(1);
+  const mode = mode$.get();
+  console.log(mode)
 
-  console.log(structure)
   const bind = useGesture(
     {
       onDragEnd: (state) => {
-        console.log(state.movement)
         const [dx, dy] = state.swipe;
         if (dx === 0 && dy === 0) return;
         if (!state.intentional) return;
@@ -54,8 +60,12 @@ const AsGrid = () => {
         }
       },
       onPinchEnd: (state) => {
-        console.log(state.offset, state.movement)
-        setZoom(state.movement[0])
+        console.log(state.movement)
+        if (state.movement[0] < 1) {
+          mode$.set(prev => prev - 1)
+        } else {
+          mode$.set(prev => prev + 1)
+        }
       },
     },
     {
@@ -67,47 +77,12 @@ const AsGrid = () => {
     }
   )
 
-  const getRow = (row: number, max: number) => {
-    let x;
-    if (row < 0) {
-      const z = Math.abs(row) % max;
-      x = (max - z) % max;
-    } else if (row >= max) {
-      x = row % max;
-    } else {
-      x = row;
-    }
-
-    return x;
-  }
-
-  const getColumn = (column: number, max: number) => {
-    let y;
-    if (column < 0) {
-      const z = Math.abs(column) % max;
-      y = (max - z) % max;
-    } else if (column >= max) {
-      y = column % max;
-    } else {
-      y = column;
-    }
-    return y;
-  }
-
   const name = structure[getColumn(position[1], structure[getRow(position[0], structure.length)].length)][getRow(position[0], structure.length)];
 
   return (
     <Box transition="all 1s ease-in-out">
-      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{zoom}
-      <Screen
-        fake
-        key={'asdjklasd'}
-        transform="scale(1)"
-        width="100dvw"
-        height="100dvh"
-        name={name}
-        {...bind}
-      />
+      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}
+      {mode === 1 ? <Screen name={structure[0][0]} /> : "Haha"}
     </Box>
   );
 };
@@ -198,3 +173,31 @@ const swiperProps: SwiperProps = {
 };
 
 export default App;
+
+
+const getRow = (row: number, max: number) => {
+  let x;
+  if (row < 0) {
+    const z = Math.abs(row) % max;
+    x = (max - z) % max;
+  } else if (row >= max) {
+    x = row % max;
+  } else {
+    x = row;
+  }
+
+  return x;
+}
+
+const getColumn = (column: number, max: number) => {
+  let y;
+  if (column < 0) {
+    const z = Math.abs(column) % max;
+    y = (max - z) % max;
+  } else if (column >= max) {
+    y = column % max;
+  } else {
+    y = column;
+  }
+  return y;
+}
