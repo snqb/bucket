@@ -47,9 +47,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       bg={getBg(name)}
       {...stackProps}
     >
-      {/* <Box mb={2}>
-        <Map onClick={alert} />
-      </Box> */}
+
       <Heading fontSize="2xl" fontWeight="bold" mb={2}>
         {getRandomEmoji(name)}{name}
       </Heading>

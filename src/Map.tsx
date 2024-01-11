@@ -5,11 +5,13 @@ import { CoordinatesContext } from "./App";
 import { Plusik } from "./Plusik";
 import { removeScreen, useAppDispatch, useAppSelector } from "./store";
 
-interface Props extends StackProps { }
+interface Props extends StackProps {
+  x: number;
+  y: number;
+}
 
-export const Map = (props: Props) => {
+export const Map = ({ x: activeRow, y: activeColumn, ...props }: Props) => {
   const coords = useContext(CoordinatesContext);
-  const [activeRow, activeColumn] = coords;
   const dispatch = useAppDispatch();
 
   const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();

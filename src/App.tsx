@@ -1,4 +1,4 @@
-import { Box, Flex, Grid, GridItem } from "@chakra-ui/react";
+import { Box, Flex, Grid, GridItem, Heading } from "@chakra-ui/react";
 
 import { createContext, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
@@ -62,7 +62,6 @@ const AsGrid = () => {
         }
       },
       onPinch: (state) => {
-        console.log(state.offset[0])
         mode$.set(state.offset[0])
       }
     },
@@ -71,18 +70,24 @@ const AsGrid = () => {
       eventOptions: { passive: false },
       pinch: {
         scaleBounds: { min: 1, max: 3 },
-        threshold: 0.01,
       },
 
     }
   )
 
   const name = structure[getColumn(position[1], structure[getRow(position[0], structure.length)].length)][getRow(position[0], structure.length)];
+  const x = getColumn(position[1], structure[getRow(position[0], structure.length)].length);
+  const y = getRow(position[0], structure.length);
 
   return (
     <Box transition="all 1s ease-in-out" {...bind}>
-      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}
-      {mode === 1 ? <Screen name={structure[0][0]} /> : "Haha"}
+      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}\
+      <Box mb={2}>
+        <Map onClick={alert} x={x} y={y} />
+      </Box>
+      {mode === 1 && <Heading>Huemoe</Heading>}
+      {mode > 1 && mode < 3 && <Screen name={structure[x][y]} />}
+      {mode >= 3 && <Heading>detailed</Heading>}
     </Box>
   );
 };
