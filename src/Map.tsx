@@ -1,11 +1,13 @@
-import { Box, Button, HStack, Heading, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Heading, StackProps, VStack } from "@chakra-ui/react";
 import { PropsWithChildren, useContext, useMemo } from "react";
 import Adder, { getRandomEmoji } from "./Adder";
 import { CoordinatesContext } from "./App";
 import { Plusik } from "./Plusik";
 import { removeScreen, useAppDispatch, useAppSelector } from "./store";
 
-export const Map = () => {
+interface Props extends StackProps { }
+
+export const Map = (props: Props) => {
   const coords = useContext(CoordinatesContext);
   const [activeRow, activeColumn] = coords;
   const dispatch = useAppDispatch();
@@ -13,7 +15,7 @@ export const Map = () => {
   const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();
 
   return (
-    <HStack align="stretch" justify="space-between">
+    <HStack align="stretch" justify="space-between" {...props}>
       <VStack align="baseline" gap="0">
         <VStack
           w="min-content"
@@ -70,7 +72,7 @@ export const Map = () => {
         </VStack>
       </VStack>
 
-      <HStack align="baseline">
+      {/* <HStack align="baseline">
         <Button
           type="button"
           size="sm"
@@ -81,7 +83,7 @@ export const Map = () => {
         >
           🗑️
         </Button>
-      </HStack>
+      </HStack> */}
     </HStack>
   );
 };

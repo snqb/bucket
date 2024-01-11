@@ -18,11 +18,13 @@ import {
   useAppDispatch,
   useAppSelector,
   type Todo,
+  TodoState,
 } from "./store";
 export interface Props extends InputGroupProps {
   what: "task" | "screen";
   taskMode?: "fast" | "slow";
   initialEmoji?: string;
+  where?: keyof TodoState;
 }
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
@@ -31,6 +33,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     what = "task",
     initialEmoji = "+",
     taskMode,
+    where,
     ...inputGroupProps
   } = props;
   const dispatch = useAppDispatch();
@@ -50,7 +53,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     if (!text) return;
 
     const task: Todo = {
-      id: crypto.randomUUID(),
+      id: window.crypto.randomUUID(),
       title: {
         text: text,
         emoji: getRandomEmoji(text),
@@ -61,11 +64,11 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 
     try {
       if (what === "task") {
-        const where = structure[row][column];
+        const destination = where ?? structure[row][column];
 
         dispatch(
           addTask({
-            key: where,
+            key: destination,
             task,
             coords: [row, column],
           }),

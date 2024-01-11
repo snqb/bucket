@@ -3,20 +3,15 @@ import {
   Box,
   BoxProps,
   Button,
-  Center,
+  Flex,
   HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
+  Progress,
   Text,
   VStack,
+  useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
-
+import { PlayIcon } from "@chakra-ui/icons";
 import {
   PropsWithChildren,
   useCallback,
@@ -28,31 +23,51 @@ import { useLongPress } from "use-long-press";
 import {
   Todo,
   TodoState,
-  moveTask,
   removeTask,
   updateProgress,
   useAppDispatch,
-  useAppSelector,
 } from "./store";
-interface Props extends AccordionItemProps {
+import { Overlay } from "./Overlay";
+import { motion, useCycle } from "framer-motion";
+import { pipe } from "ramda";
+import { FistButton } from "./FistButton";
+export interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
   mode: "slow" | "fast";
 }
 
+const MotionBox = motion(Box)
+
+const variants = {
+  jiggle: {
+    x: [0, -5, 0, 5, 0], // Forward and backward movement
+    // skewX: [0, 10, -10, 10, 0], // Bending effect
+  },
+  idle: {
+    scale: 1,
+    rotate: 0,
+  },
+};
+
 export const Task = (props: Props) => {
   const { task, where, mode, ...restItemProps } = props;
   const dispatch = useAppDispatch();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen: openMoverScreen, onClose } = useDisclosure();
   const hueref = useRef<number>();
+  const [animateVariant, cycle] = useCycle("idle", "jiggle");
+  const [isHolding, { on, off }] = useBoolean()
 
   const [progress, setProgress] = useState(task.progress);
   const [startProgress, stop] = useAnimationFrame(() => {
     setProgress((progress) => progress + 1);
+    cycle();
+    on()
   });
 
   const stopProgress = useCallback(() => {
     stop();
+    off()
 
     dispatch(
       updateProgress({
@@ -64,7 +79,7 @@ export const Task = (props: Props) => {
   }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => { }, {
-    onStart: startProgress,
+    onStart: pipe(startProgress),
     onCancel: stopProgress,
     onFinish: stopProgress,
     threshold: 100, // In milliseconds
@@ -93,23 +108,41 @@ export const Task = (props: Props) => {
       {...restItemProps}
       spacing={0}
       filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
+      boxSizing="border-box"
     >
+
       <HStack w="full" align="center" justify="space-between">
-        <Title onClick={onOpen} progress={progress}>
-          {task.title.emoji}
-          {task.title.text}
-        </Title>
-        <Button
-          variant="outline"
-          colorScheme="blue"
-          filter={`saturate(${progress / 50})`}
+        <MotionBox w="100%" textAlign="left" as="span" onClick={openMoverScreen}
+          variants={variants}>
+          <Text
+            display="inline"
+            fontSize="lg"
+            opacity={1 - progress / 200}
+            fontWeight={500}
+          >
+            {task.title.emoji}
+            {task.title.text}
+          </Text>
+          <Text display="inline" color="gray.600" fontSize="sm">
+            ({progress}%)
+          </Text>
+        </MotionBox>
+        <FistButton
+          progress={progress}
+          as={motion.button}
+          size="sm"
+          w="42px"
+          h="18px"
+          variant="unstyled"
+          display="flex"
+          color="gray.100"
+        // filter={`saturate(${progress / 50})`}
           borderColor="gray.900"
           borderWidth="2px"
           p={1}
           {...bind()}
         >
-          👊
-        </Button>
+        </FistButton>
         )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
@@ -117,111 +150,6 @@ export const Task = (props: Props) => {
   );
 };
 
-type OverlayProps = any;
-
-export const Overlay = ({
-  isOpen,
-  onClose,
-  task,
-  where,
-}: Props & OverlayProps) => {
-  const dispatch = useAppDispatch();
-  const { structure } = useAppSelector((state) => state.todo);
-
-  const handleMove = (screen: string) => {
-    dispatch(
-      moveTask({
-        from: where,
-        to: screen,
-        id: task.id,
-      })
-    );
-
-    onClose();
-  };
-
-  return (
-    <Modal
-      isCentered
-      motionPreset="none"
-      size="xl"
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      <ModalOverlay backdropFilter="blur(10px)" backdropBlur="1px" />
-      <ModalContent bg="gray.900">
-        <ModalHeader>
-          <Heading as="h3" size="xl">
-            {task.title.text}
-          </Heading>
-        </ModalHeader>
-        <ModalBody>
-          <VStack align="start">
-            {structure.map((row, index) => {
-              return (
-                <HStack key={"qwe" + row[index]} flex={1} align="start">
-                  {row.map((screen, index) => {
-                    return (
-                      <Button
-                        variant="outline"
-                        tabIndex={-1}
-                        key={"ss" + index}
-                        bg="blackAlpha.800"
-                        color="white"
-                        fontSize="sm"
-                        isDisabled={screen === where}
-                        sx={{
-                          _disabled: {
-                            bg: "blackAlpha.100",
-                          },
-                        }}
-                        onClick={() => handleMove(screen)}
-                      >
-                        {screen === where ? (
-                          <Center fontSize="large">⋒</Center>
-                        ) : (
-                          screen
-                        )}
-                      </Button>
-                    );
-                  })}
-                </HStack>
-              );
-            })}
-          </VStack>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button colorScheme="gray" variant="outline" mr={3} onClick={onClose}>
-            ✖️
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-  );
-};
-
-const Title = ({
-  children,
-  progress,
-  ...rest
-}: BoxProps & PropsWithChildren<{ progress: number }>) => {
-  return (
-    <Box w="100%" textAlign="left" as="span" {...rest}>
-      <Text
-        display="inline"
-        fontSize="lg"
-        opacity={1 - progress / 150}
-        fontWeight={500}
-      >
-        {children}{" "}
-      </Text>
-      <Text display="inline" color="gray.600" fontSize="sm">
-        ({progress}%)
-      </Text>
-    </Box>
-  );
-};
 
 const useAnimationFrame = (callback: (time: number) => void) => {
   // Use useRef for mutable variables that we want to persist

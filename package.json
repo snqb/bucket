@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@chakra-ui/anatomy": "^2.2.1",
+    "@chakra-ui/icons": "^2.1.1",
     "@chakra-ui/react": "^2.8.1",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
@@ -19,6 +20,8 @@
     "@types/randomcolor": "^0.5.9",
     "@types/react": "^18.2.7",
     "@types/react-dom": "^18.2.4",
+    "@use-gesture/react": "^10.3.0",
+    "dough-js": "^0.0.8",
     "emoji-from-text": "^1.1.12",
     "framer-motion": "^10.12.16",
     "ramda": "^0.29.0",
