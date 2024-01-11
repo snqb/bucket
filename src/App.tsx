@@ -55,7 +55,7 @@ const AsGrid = () => {
       },
       onPinchEnd: (state) => {
         console.log(state.offset, state.movement)
-        setZoom(state.movement)
+        setZoom(state.movement[0])
       },
     },
     {
