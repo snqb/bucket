@@ -63,7 +63,7 @@ const AsGrid = () => {
       },
       onPinchEnd: (state) => {
         console.log(state.offset[0])
-        mode$.set(state.offset[0])
+        mode$.set(prev => prev + state.direction[0])
       }
     },
     {
