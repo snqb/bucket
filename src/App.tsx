@@ -61,18 +61,17 @@ const AsGrid = () => {
           setPosition([position[0], position[1] + where])
         }
       },
-      onPinchEnd: (state) => {
+      onPinch: (state) => {
         console.log(state.offset[0])
-        mode$.set(prev => prev + state.direction[0])
+        mode$.set(state.offset[0])
       }
     },
     {
       target: window,
       eventOptions: { passive: false },
       pinch: {
-        scaleBounds: { min: 0, max: 3 },
-        threshold: 0.1,
-
+        scaleBounds: { min: 1, max: 3 },
+        threshold: 0.01,
       },
 
     }
