@@ -60,14 +60,10 @@ const AsGrid = () => {
         }
       },
       onPinchEnd: (state) => {
-        console.log(state.movement)
-        if (state.movement[0] < 1) {
-          mode$.set(prev => prev - 1)
-        } else {
-          mode$.set(prev => prev + 1)
-        }
-      },
-    },
+        console.log(state.direction)
+        mode$.set(prev => prev + state.direction[0])
+      }
+    },  
     {
       target: window,
       eventOptions: { passive: false },
