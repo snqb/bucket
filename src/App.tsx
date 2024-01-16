@@ -5,7 +5,7 @@ import ReloadPrompt from "./ReloadPrompt";
 
 import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { useGesture } from "@use-gesture/react";
+import { useGesture, useDrag } from "@use-gesture/react";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Virtual } from "swiper/modules";
@@ -45,16 +45,12 @@ const AsGrid = () => {
     {
       onPinchEnd: (state) => {
         console.log(state)
-        mode$.set(state.offset[0])
+        mode$.set(prev => prev + state.direction[0])
       }
     },
     {
       target: window,
       eventOptions: { passive: false },
-      pinch: {
-        scaleBounds: { min: 1, max: 3 },
-      },
-
     }
   )
 
@@ -109,38 +105,29 @@ const TwoDeeThing = () => {
 
   const name = structure[y][x];
 
-  const bind = useGesture(
-    {
-      onDragEnd: (state) => {
-        console.log(state)
-        const [dx, dy] = state.swipe;
-        if (dx === 0 && dy === 0) return;
-        if (!state.intentional) return;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          const max = structure[position[1]].length
-          const where = -dx;
-          const next = getRow(position[0] + where, max);
-          console.log("where?", where, position[0], max, "and next is", next)
-          setPosition([next, position[1]])
-        } else {
-          const where = dy < 0 ? 1 : -1;
-          const next = getRow(position[1] + where, structure.length)
-          setPosition([position[0], next])
-        }
-      },
-    },
-    {
-      target: window,
-      eventOptions: { passive: false },
-      pinch: {
-        scaleBounds: { min: 1, max: 3 },
-      },
-
+  const xx = useDrag((state) => {
+    console.log(state)
+    const [dx, dy] = state.swipe;
+    if (dx === 0 && dy === 0) return;
+    if (!state.intentional) return;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      const max = structure[position[1]].length
+      const where = -dx;
+      const next = getRow(position[0] + where, max);
+      console.log("where?", where, position[0], max, "and next is", next)
+      setPosition([next, position[1]])
+    } else {
+      const where = dy < 0 ? 1 : -1;
+      const next = getRow(position[1] + where, structure.length)
+      setPosition([position[0], next])
     }
-  )
+  }, {
+    // preventScroll: true
+    target: window,
+  })
 
   return (
-    <Box {...bind}>
+    <Box {...xx}>
       <Box m={2}><Map x={position[1]} y={position[0]} /></Box>
       <Screen w="100dvw" name={name} />
     </Box>
