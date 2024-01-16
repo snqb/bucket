@@ -142,7 +142,7 @@ const TwoDeeThing = () => {
   return (
     <Box {...bind}>
       <Box m={2}><Map x={position[1]} y={position[0]} /></Box>
-      <Screen name={name} />
+      <Screen w="100dvw" name={name} />
     </Box>
   );
 };
