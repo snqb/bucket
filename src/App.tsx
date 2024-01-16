@@ -1,19 +1,19 @@
-import { Box, Flex, Grid, GridItem, Heading } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Heading, VStack } from "@chakra-ui/react";
 
 import { createContext, useState } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
-import { Provider } from "react-redux";
-import { PersistGate } from "redux-persist/integration/react";
-import { Virtual } from "swiper/modules";
-import { SwiperSlide as Slide, Swiper, SwiperProps } from "swiper/react";
-import Screen from "./Screen";
-import { persistor, store, useAppSelector } from "./store";
-import { Map } from "./Map";
-import { useGesture } from "@use-gesture/react";
 import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { lock, unlock } from 'tua-body-scroll-lock'
+import { useGesture } from "@use-gesture/react";
+import { Provider, useDispatch } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+import { Virtual } from "swiper/modules";
+import { SwiperProps } from "swiper/react";
+import { lock } from 'tua-body-scroll-lock';
+import { Map } from "./Map";
+import Screen from "./Screen";
+import { addScreen, persistor, store, useAppSelector } from "./store";
 
 lock()
 
@@ -25,8 +25,6 @@ const mode$ = observable(1);
 export const CoordinatesContext = createContext<[number, number]>([0, 0]);
 
 function App() {
-  const mode = mode$.get();
-
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
@@ -40,28 +38,13 @@ function App() {
 }
 
 const AsGrid = () => {
-  const { structure, values } = useAppSelector((state) => state.todo);
-  const [position, setPosition] = useState<[number, number]>([0, 0]);
-  const [zoom, setZoom] = useState(1);
   const mode = mode$.get();
   console.log(mode)
 
   const bind = useGesture(
     {
-      onDragEnd: (state) => {
-        const [dx, dy] = state.swipe;
-        if (dx === 0 && dy === 0) return;
-        if (!state.intentional) return;
-        if (Math.abs(dx) > Math.abs(dy)) {
-          const where = dx < 0 ? 1 : -1;
-          const next = getColumn(position[1] + where, structure[getRow(position[0], structure.length)].length);
-          setPosition([position[0] + where, position[1]])
-        } else {
-          const where = dy < 0 ? 1 : -1;
-          setPosition([position[0], position[1] + where])
-        }
-      },
-      onPinch: (state) => {
+      onPinchEnd: (state) => {
+        console.log(state)
         mode$.set(state.offset[0])
       }
     },
@@ -75,91 +58,92 @@ const AsGrid = () => {
     }
   )
 
-  const name = structure[getColumn(position[1], structure[getRow(position[0], structure.length)].length)][getRow(position[0], structure.length)];
-  const x = getColumn(position[1], structure[getRow(position[0], structure.length)].length);
-  const y = getRow(position[0], structure.length);
 
   return (
     <Box transition="all 1s ease-in-out" {...bind}>
-      {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}\
-      <Box mb={2}>
-        <Map onClick={alert} x={x} y={y} />
-      </Box>
-      {mode === 1 && <Heading>Huemoe</Heading>}
-      {mode > 1 && mode < 3 && <Screen name={structure[x][y]} />}
+      {/* {position.join(":")},<br />{getRow(position[0], structure.length)},{getColumn(position[1], structure[getRow(position[0], structure.length)].length)}<br />{mode}\ */}
+
+      {mode === 1 && <Widest />}
+      {mode > 1 && mode < 3 && <TwoDeeThing />}
       {mode >= 3 && <Heading>detailed</Heading>}
     </Box>
   );
 };
 
+
+const Widest = () => {
+  const structure = useAppSelector((state) => state.todo.structure);
+  const dispatch = useDispatch();
+
+
+  console.log(structure)
+  return <VStack minH="20dvh" overflow="auto" align="start">
+    {structure.map((row, rowIndex) => {
+      return <HStack>
+        {row.map((name, columnIndex) => (
+          <Flex direction="column" align="center">
+            <Flex align="center">
+              <Screen h="60dvh" w="60dvw" key={name + columnIndex} name={name} />
+              <Button variant="outline" onClick={() => {
+                dispatch(addScreen({ title: "new " + crypto.randomUUID().slice(0, 3), x: columnIndex + 1, y: rowIndex }))
+              }}>+</Button>
+            </Flex>
+            <Button variant="outline" onClick={() => {
+              dispatch(addScreen({ title: "new " + crypto.randomUUID().slice(0, 3), x: columnIndex, y: rowIndex + 1 }))
+            }}>+</Button>
+          </Flex>
+        ))}
+      </HStack>
+    })}
+
+  </VStack >
+
+}
+
 const TwoDeeThing = () => {
   const structure = useAppSelector((state) => state.todo.structure);
-  const [activeRow, setRow] = useState(0);
-  const [activeColumn, setColumn] = useState(0);
+  const [position, setPosition] = useState<[number, number]>([0, 0]);
 
-  const isCorrectIndex = (index: number | undefined) =>
-    index !== undefined && Number.isSafeInteger(index);
+  const x = getColumn(position[0], structure[getRow(position[0], structure.length)].length);
+  const y = getRow(position[0], structure.length);
+
+  const name = structure[y][x];
+
+  const bind = useGesture(
+    {
+      onDragEnd: (state) => {
+        console.log(state)
+        const [dx, dy] = state.swipe;
+        if (dx === 0 && dy === 0) return;
+        if (!state.intentional) return;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          const max = structure[position[1]].length
+          const where = -dx;
+          const next = getRow(position[0] + where, max);
+          console.log("where?", where, position[0], max, "and next is", next)
+          setPosition([next, position[1]])
+        } else {
+          const where = dy < 0 ? 1 : -1;
+          const next = getRow(position[1] + where, structure.length)
+          setPosition([position[0], next])
+        }
+      },
+    },
+    {
+      target: window,
+      eventOptions: { passive: false },
+      pinch: {
+        scaleBounds: { min: 1, max: 3 },
+      },
+
+    }
+  )
 
   return (
-    <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
-      <Box
-        mb={2}
-        position="fixed"
-        bottom={10}
-        right={0}
-        id="huemoe"
-        zIndex="sticky"
-      >
-        <Map onClick={alert} />
-      </Box>
-      <Swiper
-        {...swiperProps}
-        onRealIndexChange={(swiper) => {
-          if (isCorrectIndex(swiper.realIndex)) {
-            setRow(swiper.realIndex);
-          }
-        }}
-        direction="vertical"
-      >
-        {structure.map((row, rowIndex) => {
-          return (
-            <Slide key={"slide" + rowIndex} virtualIndex={rowIndex}>
-              <Swiper
-                {...swiperProps}
-                key={rowIndex}
-                direction="horizontal"
-                onRealIndexChange={(swiper) => {
-                  if (isCorrectIndex(swiper.realIndex)) {
-                    setColumn(swiper.realIndex);
-                  }
-                }}
-                initialSlide={Math.min(
-                  activeColumn,
-                  structure[activeRow]?.length - 1
-                )}
-              >
-                {structure[rowIndex].map((name, columnIndex) => (
-                  <Slide key={name + columnIndex} virtualIndex={columnIndex}>
-                    <Screen name={name} />
-                  </Slide>
-                ))}
-                {row.length > activeColumn - 1 && (
-                  <Slide virtualIndex={row.length}>
-                    <Screen
-                      fake
-                      name={"new " + crypto.randomUUID().slice(0, 3)}
-                    />
-                  </Slide>
-                )}
-              </Swiper>
-            </Slide>
-          );
-        })}
-        <Slide virtualIndex={structure.length}>
-          <Screen fake name={"new  " + crypto.randomUUID().slice(0, 3)} />
-        </Slide>
-      </Swiper>
-    </CoordinatesContext.Provider>
+    <Box {...bind}>
+      <Box m={2}><Map x={position[1]} y={position[0]} /></Box>
+      <Screen name={name} />
+    </Box>
   );
 };
 

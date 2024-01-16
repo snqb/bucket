@@ -38,10 +38,12 @@ const todoSlice = createSlice({
         key: string;
         task: Todo;
         coords: [number, number];
-      }>,
+      }>
     ) => {
       const { key, coords } = action.payload;
       const [row, column] = coords;
+
+      console.log(key, coords);
 
       if (!state.structure[row] || !state.structure[row][column]) {
         state.structure[row] = [];
@@ -53,6 +55,23 @@ const todoSlice = createSlice({
 
       state.values[key].unshift(action.payload.task);
     },
+    addScreen: (
+      { structure, values },
+      action: PayloadAction<{ title: string; x: number; y: number }>
+    ) => {
+      const { title, y, x } = action.payload;
+      console.log(y, x, structure.flat().join("\n"));
+      if (!structure[y]) {
+        structure[y] = [];
+      }
+
+      structure[y].splice(x, 0, title);
+      // if (structure[y]) {
+      //   structure[y] = [];
+      // }
+      // structure[y][x] = title;
+      // values[title] = [];
+    },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
       state.values[action.payload.key] = state.values[
         action.payload.key
@@ -62,7 +81,7 @@ const todoSlice = createSlice({
       state,
       {
         payload: { key, id, progress },
-      }: PayloadAction<{ key: string; id: string; progress: number }>,
+      }: PayloadAction<{ key: string; id: string; progress: number }>
     ) {
       const value = state.values[key].find((task) => task.id === id);
       if (value) value.progress = progress;
@@ -73,10 +92,10 @@ const todoSlice = createSlice({
         from: string;
         to: string;
         id: string;
-      }>,
+      }>
     ) => {
       const taskIndex = state.values[action.payload.from].findIndex(
-        (task) => task.id === action.payload.id,
+        (task) => task.id === action.payload.id
       );
       if (taskIndex > -1) {
         const [task] = state.values[action.payload.from].splice(taskIndex, 1);
@@ -85,7 +104,7 @@ const todoSlice = createSlice({
     },
     renameScreen: (
       state,
-      action: PayloadAction<{ title: string; coords: [number, number] }>,
+      action: PayloadAction<{ title: string; coords: [number, number] }>
     ) => {
       const { title, coords } = action.payload;
       const [row, column] = coords;
@@ -106,7 +125,7 @@ const todoSlice = createSlice({
     },
     removeScreen: (
       state,
-      action: PayloadAction<{ coords: [number, number] }>,
+      action: PayloadAction<{ coords: [number, number] }>
     ) => {
       const { coords } = action.payload;
       const [row, column] = coords;
@@ -128,6 +147,7 @@ export const {
   renameScreen,
   removeScreen,
   updateProgress,
+  addScreen,
 } = todoSlice.actions;
 
 const persistConfig = {
