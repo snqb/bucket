@@ -1,25 +1,17 @@
 import {
   AccordionItemProps,
   Box,
-  BoxProps,
   Button,
-  Flex,
   HStack,
-  Progress,
   Text,
   VStack,
-  useBoolean,
   useDisclosure,
 } from "@chakra-ui/react";
-import { PlayIcon } from "@chakra-ui/icons";
-import {
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { motion } from "framer-motion";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLongPress } from "use-long-press";
+import { mode$ } from "./App";
+import { Overlay } from "./Overlay";
 import {
   Todo,
   TodoState,
@@ -27,11 +19,6 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
-import { Overlay } from "./Overlay";
-import { motion, useCycle } from "framer-motion";
-import { pipe } from "ramda";
-import { FistButton } from "./FistButton";
-import { mode$ } from "./App";
 export interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
@@ -40,36 +27,18 @@ export interface Props extends AccordionItemProps {
 
 const MotionBox = motion(Box);
 
-const variants = {
-  jiggle: {
-    x: [0, -5, 0, 5, 0], // Forward and backward movement
-    // skewX: [0, 10, -10, 10, 0], // Bending effect
-  },
-  idle: {
-    scale: 1,
-    rotate: 0,
-  },
-};
-
 export const Task = (props: Props) => {
   const { task, where, mode, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen: openMoverScreen, onClose } = useDisclosure();
   const hueref = useRef<number>();
-  const [animateVariant, cycle] = useCycle("idle", "jiggle");
-  const [isHolding, { on, off }] = useBoolean();
 
   const [progress, setProgress] = useState(task.progress);
   const [startProgress, stop] = useAnimationFrame(() => {
     setProgress((progress) => progress + 1);
-    cycle();
-    on();
   });
 
   const stopProgress = useCallback(() => {
-    stop();
-    off();
-
     dispatch(
       updateProgress({
         key: where,
@@ -77,10 +46,12 @@ export const Task = (props: Props) => {
         progress,
       })
     );
+
+    return stop;
   }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => {}, {
-    onStart: pipe(startProgress),
+    onStart: startProgress,
     onCancel: stopProgress,
     onFinish: stopProgress,
     threshold: 100, // In milliseconds
@@ -117,7 +88,6 @@ export const Task = (props: Props) => {
           textAlign="left"
           as="span"
           onClick={openMoverScreen}
-          variants={variants}
         >
           <Text
             display="inline"

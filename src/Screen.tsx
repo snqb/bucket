@@ -5,7 +5,8 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { motion } from "framer-motion";
 import randomColor from "randomcolor";
 import { ComponentProps, useMemo, useTransition } from "react";
-import Adder, { getRandomEmoji } from "./Adder";
+import Adder from "./Adder";
+import { getRandomEmoji } from "./emojis";
 import { useAppSelector } from "./store";
 
 const MVStack = motion(VStack);
@@ -84,15 +85,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           what="task"
           variant="filled"
           size="md"
-          taskMode="slow"
-          boxShadow={`inset 0 0 0.5px 1px hsla(0, 0%,  
-        100%, 0.075),
-        /* shadow ring 👇 */
-        0 0 0 5px hsla(0, 0%, 0%, 0.05),
-        /* multiple soft shadows 👇 */
-        0 0.3px 0.4px hsla(0, 0%, 0%, 0.02),
-        0 0.9px 1.5px hsla(0, 0%, 0%, 0.045),
-        0 3.5px 6px hsla(0, 0%, 0%, 0.09);`}
         />
         {todos.map((task) => (
           <Task mode="slow" key={task.id} task={task} where={name} />

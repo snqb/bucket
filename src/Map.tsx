@@ -6,20 +6,17 @@ import {
   StackProps,
   VStack,
 } from "@chakra-ui/react";
-import { PropsWithChildren, useContext, useMemo } from "react";
-import Adder, { getRandomEmoji } from "./Adder";
-import { CoordinatesContext, position$ } from "./App";
-import { Plusik } from "./Plusik";
+import { PropsWithChildren } from "react";
+import { getRandomEmoji } from "./emojis";
+import { position$ } from "./App";
 import { removeScreen, useAppDispatch, useAppSelector } from "./store";
 
 interface Props extends StackProps {}
 
 export const Map = (props: Props) => {
   const [currentRow, currentColumn] = position$.get();
-  const coords = useContext(CoordinatesContext);
   const dispatch = useAppDispatch();
-
-  const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();
+  const { structure } = useAppSelector((state) => state.todo);
 
   return (
     <HStack
@@ -71,17 +68,9 @@ export const Map = (props: Props) => {
                     </Box>
                   );
                 })}
-                {isActiveRow && (isOnLastX || isOutOnX) && (
-                  <Box>{isOnLastX ? <Plusik /> : <FakeAdder />}</Box>
-                )}
               </HStack>
             );
           })}
-          {(isOnLastY || isOutOnY) && (
-            <span>
-              {isOnLastY ? <Plusik /> : isOutOnY ? <FakeAdder /> : null}
-            </span>
-          )}
         </VStack>
       </VStack>
 
@@ -92,7 +81,7 @@ export const Map = (props: Props) => {
           variant="ghost"
           onClick={(e) => {
             e.stopPropagation();
-            dispatch(removeScreen({ coords }));
+            dispatch(removeScreen({ coords: [currentRow, currentColumn] }));
           }}
         >
           🗑️
@@ -140,43 +129,4 @@ const GridTitle = ({
       </Heading>
     </Box>
   );
-};
-
-const FakeAdder = () => {
-  return (
-    <HStack w="max-content">
-      {/* <Plusik isActive /> */}
-      <Adder
-        size="xs"
-        // variant="filled"
-        placeholder="add screen"
-        what="screen"
-        border="1px"
-        borderColor="gray.600"
-      />
-    </HStack>
-  );
-};
-
-const useGrid = () => {
-  const [y, x] = useContext(CoordinatesContext);
-  const { structure } = useAppSelector((state) => state.todo);
-  const isOutOnY = y === structure.length;
-  const isOnLastY = y === structure.length - 1;
-  const isOutOnX = x === structure?.[y]?.length;
-  const isOnLastX = x === structure?.[y]?.length - 1;
-
-  const values = useMemo(() => {
-    return {
-      y,
-      x,
-      isOutOnY,
-      isOutOnX,
-      structure,
-      isOnLastX,
-      isOnLastY,
-    };
-  }, [y, x, isOutOnY, isOutOnX, structure, isOnLastX, isOnLastY]);
-
-  return values;
 };
