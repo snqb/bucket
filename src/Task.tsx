@@ -1,6 +1,5 @@
 import {
   AccordionItemProps,
-  Box,
   Button,
   HStack,
   Text,
@@ -8,7 +7,13 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useLongPress } from "use-long-press";
 import { mode$ } from "./App";
 import { Overlay } from "./Overlay";
@@ -19,16 +24,18 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
-export interface Props extends AccordionItemProps {
-  task: Todo;
-  where: keyof TodoState;
-  mode: "slow" | "fast";
-}
 
-const MotionBox = motion(Box);
+const MVStack = motion(VStack);
+type H = ComponentProps<typeof MVStack>;
+
+type Props = AccordionItemProps &
+  H & {
+    task: Todo;
+    where: keyof TodoState;
+  };
 
 export const Task = (props: Props) => {
-  const { task, where, mode, ...restItemProps } = props;
+  const { task, where, ...restItemProps } = props;
   const dispatch = useAppDispatch();
   const { isOpen, onOpen: openMoverScreen, onClose } = useDisclosure();
   const hueref = useRef<number>();
@@ -77,13 +84,13 @@ export const Task = (props: Props) => {
   const zoomedOut = mode$.get() === 1;
 
   return (
-    <VStack
+    <MVStack
       align="start"
       py={2}
       userSelect="none"
       {...restItemProps}
       spacing={0}
-      filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
+      filter={`blur(${progress / 200}px)`}
       boxSizing="border-box"
     >
       <HStack w="full" align="center" justify="space-between">
@@ -127,7 +134,7 @@ export const Task = (props: Props) => {
         )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
-    </VStack>
+    </MVStack>
   );
 };
 

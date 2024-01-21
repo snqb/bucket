@@ -7,8 +7,7 @@ import {
 } from "@chakra-ui/react";
 import { Task } from "./Task";
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import randomColor from "randomcolor";
 import { ComponentProps, useMemo, useTransition } from "react";
 import Adder from "./Adder";
@@ -40,10 +39,6 @@ const getBg = (name: string) => {
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
-  const [animationParent] = useAutoAnimate({
-    duration: 420,
-    easing: "ease-out",
-  });
   const dispatch = useAppDispatch();
   const [row, column] = position$.get();
 
@@ -120,11 +115,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
-      <VStack
-        align="stretch"
-        spacing={fake ? 1 : 4}
-        ref={animationParent as any}
-      >
+      <VStack align="stretch" spacing={fake ? 1 : 4}>
         <Adder
           where={name}
           initialEmoji={"👊"}
@@ -134,9 +125,23 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           variant="filled"
           size="md"
         />
-        {todos.map((task) => (
-          <Task mode="slow" key={task.id} task={task} where={name} />
-        ))}
+        <AnimatePresence>
+          {todos.map((task) => (
+            <Task
+              initial={{ transform: "translateY(-100%)" }}
+              animate={{
+                transform: "translateY(0)",
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              mode="slow"
+              key={task.id}
+              task={task}
+              where={name}
+            />
+          ))}
+        </AnimatePresence>
       </VStack>
     </MVStack>
   );
