@@ -1,4 +1,10 @@
-import { Heading, StackDivider, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Heading,
+  StackDivider,
+  VStack,
+} from "@chakra-ui/react";
 import { Task } from "./Task";
 
 import { useAutoAnimate } from "@formkit/auto-animate/react";
@@ -6,8 +12,14 @@ import { motion } from "framer-motion";
 import randomColor from "randomcolor";
 import { ComponentProps, useMemo, useTransition } from "react";
 import Adder from "./Adder";
+import { mode$, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
-import { useAppSelector } from "./store";
+import {
+  removeScreen,
+  renameScreen,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -32,10 +44,14 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
     duration: 420,
     easing: "ease-out",
   });
+  const dispatch = useAppDispatch();
+  const [row, column] = position$.get();
 
   const todos = tasks[name] ?? [];
 
   if (todos === undefined) return null;
+
+  const zoomedOut = mode$.get() === 1;
 
   useTransition();
   return (
@@ -64,12 +80,43 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={3}
       id="later"
       align="stretch"
+      textAlign={zoomedOut ? "left" : "right"}
+      overflow="hidden"
       {...stackProps}
     >
-      <Heading fontSize="2xl" fontWeight="bold" mb={2}>
-        {getRandomEmoji(name)}
-        {name}
-      </Heading>
+      <HStack justify="space-between">
+        {!zoomedOut && (
+          <HStack>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(removeScreen({ coords: [row, column] }));
+              }}
+            >
+              🗑️
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const newName = prompt(`${name} -> to what?`);
+                if (newName && !tasks[newName]) {
+                  dispatch(renameScreen({ coords: [row, column], newName }));
+                }
+              }}
+            >
+              ✏️
+            </Button>
+          </HStack>
+        )}
+        <Heading fontSize="2xl" fontWeight="bold" mb={2}>
+          {getRandomEmoji(name)}
+          {name}
+        </Heading>
+      </HStack>
 
       <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
@@ -82,6 +129,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           where={name}
           initialEmoji={"👊"}
           autoFocus
+          placeholder="..."
           what="task"
           variant="filled"
           size="md"

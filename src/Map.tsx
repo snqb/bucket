@@ -1,93 +1,71 @@
-import {
-  Box,
-  Button,
-  HStack,
-  Heading,
-  StackProps,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, HStack, Heading, StackProps, VStack } from "@chakra-ui/react";
+import { motion } from "framer-motion";
 import { PropsWithChildren } from "react";
-import { getRandomEmoji } from "./emojis";
 import { position$ } from "./App";
-import { removeScreen, useAppDispatch, useAppSelector } from "./store";
+import { getRandomEmoji } from "./emojis";
+import { useAppSelector } from "./store";
 
 interface Props extends StackProps {}
 
+const MVStack = motion(VStack);
+
 export const Map = (props: Props) => {
   const [currentRow, currentColumn] = position$.get();
-  const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
 
   return (
-    <HStack
-      userSelect="none"
-      align="stretch"
-      justify="space-between"
-      {...props}
+    <MVStack
+      animate={{
+        transform: "rotate(3.14deg)",
+      }}
+      exit={{
+        transform: "rotate(0deg)",
+      }}
+      transition={{ repeat: Infinity, duration: 6.66, repeatType: "reverse" }}
+      w="min-content"
+      borderColor="red.400"
+      fontSize="md"
+      align="left"
+      gap={0}
     >
-      <VStack align="baseline" gap="0">
-        <VStack
-          w="min-content"
-          borderColor="red.400"
-          fontSize="md"
-          align="left"
-          gap={0}
-        >
-          {structure.map((row, rowIndex) => {
-            const isActiveRow = rowIndex === currentRow;
-            return (
-              <HStack gap={0} key={rowIndex}>
-                {row.map((name, colIndex) => {
-                  const isActiveCol =
-                    colIndex === currentColumn ||
-                    row.length - 1 < currentColumn;
-                  const isActiveCell = isActiveRow && isActiveCol;
+      {structure.map((row, rowIndex) => {
+        const isActiveRow = rowIndex === currentRow;
+        return (
+          <HStack gap={0} key={rowIndex}>
+            {row.map((name, colIndex) => {
+              const isActiveCol =
+                colIndex === currentColumn || row.length - 1 < currentColumn;
+              const isActiveCell = isActiveRow && isActiveCol;
 
-                  const isXNeighbour =
-                    isActiveRow && Math.abs(currentColumn - colIndex) <= 1;
+              const isXNeighbour =
+                isActiveRow && Math.abs(currentColumn - colIndex) <= 1;
 
-                  const isYNeighbour =
-                    isActiveCol && Math.abs(currentRow - rowIndex) <= 1;
+              const isYNeighbour =
+                isActiveCol && Math.abs(currentRow - rowIndex) <= 1;
 
-                  const rowDistance = Math.abs(currentRow - rowIndex);
-                  const scale = 2 * (rowDistance - 1);
+              const rowDistance = Math.abs(currentRow - rowIndex);
+              const scale = 2 * (rowDistance - 1);
 
-                  return (
-                    <Box
-                      transform={`rotateZ(${scale}deg)`}
-                      key={`${rowIndex}-${colIndex}`}
-                    >
-                      <GridTitle isActive={isActiveCell}>
-                        {getRandomEmoji(name)}
-                        {(isXNeighbour || isYNeighbour) && (
-                          <Box as="span" fontSize="md" fontStyle="italic">
-                            {name.slice(0, 3)}
-                          </Box>
-                        )}
-                      </GridTitle>
-                    </Box>
-                  );
-                })}
-              </HStack>
-            );
-          })}
-        </VStack>
-      </VStack>
-
-      <HStack align="baseline">
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          onClick={(e) => {
-            e.stopPropagation();
-            dispatch(removeScreen({ coords: [currentRow, currentColumn] }));
-          }}
-        >
-          🗑️
-        </Button>
-      </HStack>
-    </HStack>
+              return (
+                <Box
+                  transform={`rotateZ(${scale}deg)`}
+                  key={`${rowIndex}-${colIndex}`}
+                >
+                  <GridTitle isActive={isActiveCell}>
+                    {getRandomEmoji(name)}
+                    {isActiveCell && (
+                      <Box as="span" fontSize="md" fontStyle="italic">
+                        {name}
+                      </Box>
+                    )}
+                  </GridTitle>
+                </Box>
+              );
+            })}
+          </HStack>
+        );
+      })}
+    </MVStack>
   );
 };
 

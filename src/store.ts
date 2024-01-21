@@ -1,4 +1,5 @@
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
+import { clone } from "ramda";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
@@ -60,17 +61,12 @@ const todoSlice = createSlice({
       action: PayloadAction<{ title: string; x: number; y: number }>
     ) => {
       const { title, y, x } = action.payload;
-      console.log(y, x, structure.flat().join("\n"));
-      if (!structure[y]) {
+      console.log(y, x, structure.flat().join);
+      if (structure[y]) {
         structure[y] = [];
       }
-
-      structure[y].splice(x, 0, title);
-      // if (structure[y]) {
-      //   structure[y] = [];
-      // }
-      // structure[y][x] = title;
-      // values[title] = [];
+      structure[y][x] = title;
+      values[title] = [];
     },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
       state.values[action.payload.key] = state.values[
@@ -103,25 +99,18 @@ const todoSlice = createSlice({
       }
     },
     renameScreen: (
-      state,
-      action: PayloadAction<{ title: string; coords: [number, number] }>
+      { values, structure },
+      action: PayloadAction<{ newName: string; coords: [number, number] }>
     ) => {
-      const { title, coords } = action.payload;
+      const { newName, coords } = action.payload;
+      console.log(coords, newName);
       const [row, column] = coords;
 
-      const oldName = state.structure?.[row]?.[column];
-      if (oldName && state.values[oldName]) {
-        state.values[title] = [...state.values[oldName]];
-        delete state.values[oldName];
-      } else {
-        state.values[title] = [];
-      }
+      const oldName = structure[row][column];
+      values[newName] = clone(values[oldName]);
+      delete values[oldName];
 
-      if (!state.structure[row]) {
-        state.structure[row] = [title];
-      } else {
-        state.structure[row][column] = title;
-      }
+      structure[row][column] = newName;
     },
     removeScreen: (
       state,

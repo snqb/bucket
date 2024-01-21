@@ -61,8 +61,8 @@ const Widest = () => {
               <VStack align="center" key={columnIndex}>
                 <HStack align="center">
                   <Screen
-                    h="60dvh"
-                    w="60dvw"
+                    h="66dvh"
+                    w="66dvw"
                     key={name + columnIndex}
                     name={name}
                     drag={false}
@@ -128,8 +128,17 @@ const TwoDeeThing = () => {
 
   return (
     <Box>
-      <Box position="fixed" bottom={0} right={0} m={2}>
-        <Map onClick={() => mode$.set(1)} />
+      <Box
+        onClick={() => {
+          console.log("ashjdkas");
+          mode$.set(1);
+        }}
+        position="fixed"
+        bottom={0}
+        right={0}
+        m={2}
+      >
+        <Map />
       </Box>
       <AnimatePresence>
         <Screen

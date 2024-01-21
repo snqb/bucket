@@ -9,12 +9,10 @@ import { ChangeEventHandler, useContext, useState } from "react";
 
 import * as R from "ramda";
 import { CoordinatesContext } from "./App";
-import { Plusik } from "./Plusik";
 import { getRandomEmoji } from "./emojis";
 import {
   TodoState,
   addTask,
-  renameScreen,
   useAppDispatch,
   useAppSelector,
   type Todo,
@@ -59,19 +57,15 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     };
 
     try {
-      if (what === "task") {
-        const destination = where ?? structure[row][column];
+      const destination = where ?? structure[row][column];
 
-        dispatch(
-          addTask({
-            key: destination,
-            task,
-            coords: [row, column],
-          })
-        );
-      } else if (what === "screen") {
-        dispatch(renameScreen({ title: text, coords: [row, column] }));
-      }
+      dispatch(
+        addTask({
+          key: destination,
+          task,
+          coords: [row, column],
+        })
+      );
     } catch (e) {
       console.error(e);
       alert("dev is stupid, text him t.me/snqba");
@@ -98,11 +92,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       {...inputGroupProps}
     >
       <InputLeftElement>
-        {text.length === 0 ? (
-          <Plusik isActive>{"👊"}</Plusik>
-        ) : (
-          <span>{getRandomEmoji(text)}</span>
-        )}
+        <span>{R.isEmpty(text) ? "👊" : getRandomEmoji(text)}</span>
       </InputLeftElement>
       <Input
         enterKeyHint="done"

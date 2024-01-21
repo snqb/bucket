@@ -47,6 +47,8 @@ export const Task = (props: Props) => {
       })
     );
 
+    stop();
+
     return stop;
   }, [dispatch, updateProgress, hueref.current, progress]);
 
@@ -72,6 +74,8 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
+  const zoomedOut = mode$.get() === 1;
+
   return (
     <VStack
       align="start"
@@ -83,12 +87,18 @@ export const Task = (props: Props) => {
       boxSizing="border-box"
     >
       <HStack w="full" align="center" justify="space-between">
-        <MotionBox
+        <HStack
+          as={motion.div}
           w="100%"
-          textAlign="left"
-          as="span"
+          justify="space-between"
           onClick={openMoverScreen}
         >
+          {!zoomedOut && (
+            <Text display="inline" color="gray.600" fontSize="sm">
+              {progress}%
+            </Text>
+          )}
+
           <Text
             display="inline"
             fontSize="lg"
@@ -98,12 +108,11 @@ export const Task = (props: Props) => {
             {task.title.emoji}
             {task.title.text}
           </Text>
-          <Text display="inline" color="gray.600" fontSize="sm">
-            ({progress}%)
-          </Text>
-        </MotionBox>
-        {mode$.get() !== 1 && (
+        </HStack>
+        {!zoomedOut && (
           <Button
+            as={motion.button}
+            whileTap={{ scale: 0.9 }}
             variant="outline"
             colorScheme="blue"
             filter={`saturate(${progress / 50})`}
