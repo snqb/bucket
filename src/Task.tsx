@@ -31,13 +31,14 @@ import { Overlay } from "./Overlay";
 import { motion, useCycle } from "framer-motion";
 import { pipe } from "ramda";
 import { FistButton } from "./FistButton";
+import { mode$ } from "./App";
 export interface Props extends AccordionItemProps {
   task: Todo;
   where: keyof TodoState;
   mode: "slow" | "fast";
 }
 
-const MotionBox = motion(Box)
+const MotionBox = motion(Box);
 
 const variants = {
   jiggle: {
@@ -56,18 +57,18 @@ export const Task = (props: Props) => {
   const { isOpen, onOpen: openMoverScreen, onClose } = useDisclosure();
   const hueref = useRef<number>();
   const [animateVariant, cycle] = useCycle("idle", "jiggle");
-  const [isHolding, { on, off }] = useBoolean()
+  const [isHolding, { on, off }] = useBoolean();
 
   const [progress, setProgress] = useState(task.progress);
   const [startProgress, stop] = useAnimationFrame(() => {
     setProgress((progress) => progress + 1);
     cycle();
-    on()
+    on();
   });
 
   const stopProgress = useCallback(() => {
     stop();
-    off()
+    off();
 
     dispatch(
       updateProgress({
@@ -78,7 +79,7 @@ export const Task = (props: Props) => {
     );
   }, [dispatch, updateProgress, hueref.current, progress]);
 
-  const bind = useLongPress(() => { }, {
+  const bind = useLongPress(() => {}, {
     onStart: pipe(startProgress),
     onCancel: stopProgress,
     onFinish: stopProgress,
@@ -110,10 +111,14 @@ export const Task = (props: Props) => {
       filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
       boxSizing="border-box"
     >
-
       <HStack w="full" align="center" justify="space-between">
-        <MotionBox w="100%" textAlign="left" as="span" onClick={openMoverScreen}
-          variants={variants}>
+        <MotionBox
+          w="100%"
+          textAlign="left"
+          as="span"
+          onClick={openMoverScreen}
+          variants={variants}
+        >
           <Text
             display="inline"
             fontSize="lg"
@@ -127,29 +132,25 @@ export const Task = (props: Props) => {
             ({progress}%)
           </Text>
         </MotionBox>
-        <FistButton
-          progress={progress}
-          as={motion.button}
-          size="sm"
-          w="42px"
-          h="18px"
-          variant="unstyled"
-          display="flex"
-          color="gray.100"
-        // filter={`saturate(${progress / 50})`}
-          borderColor="gray.900"
-          borderWidth="2px"
-          p={1}
-          {...bind()}
-        >
-        </FistButton>
+        {mode$.get() !== 1 && (
+          <Button
+            variant="outline"
+            colorScheme="blue"
+            filter={`saturate(${progress / 50})`}
+            borderColor="gray.900"
+            borderWidth="2px"
+            p={1}
+            {...bind()}
+          >
+            👊
+          </Button>
+        )}
         )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
     </VStack>
   );
 };
-
 
 const useAnimationFrame = (callback: (time: number) => void) => {
   // Use useRef for mutable variables that we want to persist

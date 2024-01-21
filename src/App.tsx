@@ -15,7 +15,7 @@ import { addScreen, persistor, store, useAppSelector } from "./store";
 enableReactTracking({
   auto: true,
 });
-const mode$ = observable(2);
+export const mode$ = observable(2);
 export const position$ = observable([0, 0]);
 
 export const CoordinatesContext = createContext<[number, number]>([0, 0]);
@@ -48,6 +48,7 @@ const AsGrid = () => {
 
 const Widest = () => {
   const structure = useAppSelector((state) => state.todo.structure);
+  const values = useAppSelector((state) => state.todo.values);
   const dispatch = useDispatch();
 
   console.log(structure);
@@ -57,48 +58,59 @@ const Widest = () => {
         return (
           <HStack key={rowIndex}>
             {row.map((name, columnIndex) => (
-              <Flex direction="column" align="center" key={columnIndex}>
-                <Flex align="center">
+              <VStack align="center" key={columnIndex}>
+                <HStack align="center">
                   <Screen
                     h="60dvh"
                     w="60dvw"
                     key={name + columnIndex}
                     name={name}
+                    drag={false}
                     onClick={() => {
                       mode$.set(2);
                       position$.set([rowIndex, columnIndex]);
                     }}
                   />
                   <Button
-                    variant="outline"
+                    size="sm"
+                    bg="gray.800"
                     onClick={() => {
-                      dispatch(
-                        addScreen({
-                          title: "new " + crypto.randomUUID().slice(0, 3),
-                          x: columnIndex + 1,
-                          y: rowIndex,
-                        })
-                      );
+                      const x = prompt("What is the name of the screen?");
+
+                      if (x && !values[x]) {
+                        dispatch(
+                          addScreen({
+                            title: x,
+                            x: columnIndex + 1,
+                            y: rowIndex,
+                          })
+                        );
+                      }
                     }}
                   >
-                    +
+                    🪣
                   </Button>
-                </Flex>
+                </HStack>
                 <Button
-                  variant="outline"
+                  bg="gray.800"
+                  size="sm"
                   onClick={() => {
-                    dispatch(
-                      addScreen({
-                        title: "new " + crypto.randomUUID().slice(0, 3),
-                        x: columnIndex,
-                        y: rowIndex + 1,
-                      })
-                    );
+                    const x = prompt("What is the name of the screen?");
+
+                    if (x && !values[x]) {
+                      dispatch(
+                        addScreen({
+                          title: x,
+                          x: columnIndex,
+                          y: rowIndex + 1,
+                        })
+                      );
+                    }
                   }}
                 >
-                  +
+                  🪣
                 </Button>
-              </Flex>
+              </VStack>
             ))}
           </HStack>
         );

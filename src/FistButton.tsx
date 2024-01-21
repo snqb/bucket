@@ -10,7 +10,6 @@ interface Props extends ButtonProps {
 
 export const FistButton = ({ children, progress, ...props }: Props) => {
 
-  return <dough-pressable>{children}</dough-pressable>
   return (
     <Button
       sx={{

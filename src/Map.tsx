@@ -64,7 +64,7 @@ export const Map = (props: Props) => {
                         {getRandomEmoji(name)}
                         {(isXNeighbour || isYNeighbour) && (
                           <Box as="span" fontSize="md" fontStyle="italic">
-                            {name}
+                            {name.slice(0, 3)}
                           </Box>
                         )}
                       </GridTitle>
@@ -90,7 +90,8 @@ export const Map = (props: Props) => {
           type="button"
           size="sm"
           variant="ghost"
-          onClick={() => {
+          onClick={(e) => {
+            e.stopPropagation();
             dispatch(removeScreen({ coords }));
           }}
         >
