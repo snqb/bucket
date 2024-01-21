@@ -17,9 +17,6 @@ dependencies:
   '@fontsource-variable/noto-sans-mono':
     specifier: ^5.0.18
     version: 5.0.18
-  '@formkit/auto-animate':
-    specifier: 1.0.0-beta.6
-    version: 1.0.0-beta.6
   '@legendapp/state':
     specifier: ^2.1.4
     version: 2.1.4(react@18.2.0)
@@ -2762,10 +2759,6 @@ packages:
 
   /@fontsource-variable/noto-sans-mono@5.0.18:
     resolution: {integrity: sha512-bMDYkZJLyIzl5ENzFX+HY1phM6jgHUDbtvgKtIePRIXcYC0cvvNfqPAoUNP80/swxT3HTE3dx6iO9ftw5BnAyQ==}
-    dev: false
-
-  /@formkit/auto-animate@1.0.0-beta.6:
-    resolution: {integrity: sha512-PVDhLAlr+B4Xb7e+1wozBUWmXa6BFU8xUPR/W/E+TsQhPS1qkAdAsJ25keEnFrcePSnXHrOsh3tiFbEToOzV9w==}
     dev: false
 
   /@jridgewell/gen-mapping@0.3.3:
