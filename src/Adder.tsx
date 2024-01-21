@@ -45,7 +45,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
-    setText,
+    setText
   );
 
   const onAdd = (e: any) => {
@@ -71,7 +71,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
             key: destination,
             task,
             coords: [row, column],
-          }),
+          })
         );
       } else if (what === "screen") {
         dispatch(renameScreen({ title: text, coords: [row, column] }));
@@ -88,6 +88,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     <InputGroup
       variant="outline"
       opacity={0.9}
+      borderRadius="4px"
       size="md"
       ref={ref}
       {...inputGroupProps}
@@ -101,8 +102,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
       </InputLeftElement>
       <Input
         enterKeyHint="done"
-      colorScheme="blue"
-
+        colorScheme="blue"
         type="text"
         autoComplete="off"
         value={text}

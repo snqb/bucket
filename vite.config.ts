@@ -76,4 +76,7 @@ export default defineConfig({
   build: {
     target: "safari11",
   },
+  server: {
+    port: 4000,
+  },
 });

@@ -1,23 +1,33 @@
-import { Box, Button, HStack, Heading, StackProps, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Heading,
+  StackProps,
+  VStack,
+} from "@chakra-ui/react";
 import { PropsWithChildren, useContext, useMemo } from "react";
 import Adder, { getRandomEmoji } from "./Adder";
-import { CoordinatesContext } from "./App";
+import { CoordinatesContext, position$ } from "./App";
 import { Plusik } from "./Plusik";
 import { removeScreen, useAppDispatch, useAppSelector } from "./store";
 
-interface Props extends StackProps {
-  x: number;
-  y: number;
-}
+interface Props extends StackProps {}
 
-export const Map = ({ x: activeRow, y: activeColumn, ...props }: Props) => {
+export const Map = (props: Props) => {
+  const [currentRow, currentColumn] = position$.get();
   const coords = useContext(CoordinatesContext);
   const dispatch = useAppDispatch();
 
   const { structure, isOutOnX, isOutOnY, isOnLastX, isOnLastY } = useGrid();
 
   return (
-    <HStack align="stretch" justify="space-between" {...props}>
+    <HStack
+      userSelect="none"
+      align="stretch"
+      justify="space-between"
+      {...props}
+    >
       <VStack align="baseline" gap="0">
         <VStack
           w="min-content"
@@ -27,21 +37,22 @@ export const Map = ({ x: activeRow, y: activeColumn, ...props }: Props) => {
           gap={0}
         >
           {structure.map((row, rowIndex) => {
-            const isActiveRow = rowIndex === activeRow;
+            const isActiveRow = rowIndex === currentRow;
             return (
               <HStack gap={0} key={rowIndex}>
                 {row.map((name, colIndex) => {
                   const isActiveCol =
-                    colIndex === activeColumn || row.length - 1 < activeColumn;
+                    colIndex === currentColumn ||
+                    row.length - 1 < currentColumn;
                   const isActiveCell = isActiveRow && isActiveCol;
 
                   const isXNeighbour =
-                    isActiveRow && Math.abs(activeColumn - colIndex) <= 1;
+                    isActiveRow && Math.abs(currentColumn - colIndex) <= 1;
 
                   const isYNeighbour =
-                    isActiveCol && Math.abs(activeRow - rowIndex) <= 1;
+                    isActiveCol && Math.abs(currentRow - rowIndex) <= 1;
 
-                  const rowDistance = Math.abs(activeRow - rowIndex);
+                  const rowDistance = Math.abs(currentRow - rowIndex);
                   const scale = 2 * (rowDistance - 1);
 
                   return (
@@ -74,7 +85,7 @@ export const Map = ({ x: activeRow, y: activeColumn, ...props }: Props) => {
         </VStack>
       </VStack>
 
-      {/* <HStack align="baseline">
+      <HStack align="baseline">
         <Button
           type="button"
           size="sm"
@@ -85,7 +96,7 @@ export const Map = ({ x: activeRow, y: activeColumn, ...props }: Props) => {
         >
           🗑️
         </Button>
-      </HStack> */}
+      </HStack>
     </HStack>
   );
 };
