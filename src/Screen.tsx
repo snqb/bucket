@@ -75,7 +75,6 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       spacing={3}
       id="later"
       align="stretch"
-      textAlign={zoomedOut ? "left" : "right"}
       overflow="hidden"
       {...stackProps}
     >

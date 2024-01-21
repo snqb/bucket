@@ -100,12 +100,6 @@ export const Task = (props: Props) => {
           justify="space-between"
           onClick={openMoverScreen}
         >
-          {!zoomedOut && (
-            <Text display="inline" color="gray.600" fontSize="sm">
-              {progress}%
-            </Text>
-          )}
-
           <Text
             display="inline"
             fontSize="lg"
@@ -116,6 +110,11 @@ export const Task = (props: Props) => {
             {task.title.text}
           </Text>
         </HStack>
+        {!zoomedOut && (
+          <Text display="inline" color="gray.600" fontSize="sm">
+            {progress}%
+          </Text>
+        )}
         {!zoomedOut && (
           <Button
             as={motion.button}
