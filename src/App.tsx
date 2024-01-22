@@ -35,7 +35,6 @@ function App() {
 
 const AsGrid = () => {
   const mode = mode$.get();
-  console.log(mode);
 
   return (
     <Box transition="all 1s ease-in-out">
