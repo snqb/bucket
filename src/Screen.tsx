@@ -124,7 +124,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
           variant="filled"
           size="md"
         />
-        <AnimatePresence>
+        <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
               initial={{ transform: "translateY(-100%)" }}
