@@ -9,14 +9,7 @@ import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import App from "./App";
 // Supports weights 100-900
-import '@fontsource-variable/noto-sans-mono';
-// @ts-ignore
-import { sliderAnatomy as parts } from "@chakra-ui/anatomy";
-import { createMultiStyleConfigHelpers } from "@chakra-ui/react";
-const { definePartsStyle, defineMultiStyleConfig } =
-  createMultiStyleConfigHelpers(parts.keys);
-
-import "swiper/css";
+import "@fontsource-variable/noto-sans-mono";
 
 const theme: ThemeConfig = extendTheme({
   initialColorMode: "dark",
@@ -53,7 +46,7 @@ if (container) {
 
         <App />
       </ChakraProvider>
-    </React.StrictMode>,
+    </React.StrictMode>
   );
 }
 

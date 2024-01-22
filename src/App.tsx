@@ -1,14 +1,22 @@
-import { Flex } from "@chakra-ui/react";
+import { Box, Button, Flex, HStack, Heading, VStack } from "@chakra-ui/react";
 
-import { createContext, useState } from "react";
+import { createContext } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
-import { Provider } from "react-redux";
+import { observable } from "@legendapp/state";
+import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
+import { AnimatePresence } from "framer-motion";
+import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
-import { Virtual } from "swiper/modules";
-import { SwiperSlide as Slide, Swiper, SwiperProps } from "swiper/react";
+import { Map } from "./Map";
 import Screen from "./Screen";
-import { persistor, store, useAppSelector } from "./store";
+import { addScreen, persistor, store, useAppSelector } from "./store";
+
+enableReactTracking({
+  auto: true,
+});
+export const mode$ = observable(2);
+export const position$ = observable([0, 0]);
 
 export const CoordinatesContext = createContext<[number, number]>([0, 0]);
 
@@ -17,8 +25,7 @@ function App() {
     <Provider store={store}>
       <PersistGate persistor={persistor}>
         <Flex overflowY="hidden">
-          <TwoDeeThing />
-
+          <AsGrid />
           <ReloadPrompt />
         </Flex>
       </PersistGate>
@@ -26,80 +33,147 @@ function App() {
   );
 }
 
-const TwoDeeThing = () => {
-  const structure = useAppSelector((state) => state.todo.structure);
-
-  const [activeRow, setRow] = useState(0);
-  const [activeColumn, setColumn] = useState(0);
-
-  const isCorrectIndex = (index: number | undefined) =>
-    index !== undefined && Number.isSafeInteger(index);
+const AsGrid = () => {
+  const mode = mode$.get();
 
   return (
-    <CoordinatesContext.Provider value={[activeRow, activeColumn]}>
-      <Swiper
-        {...swiperProps}
-        onRealIndexChange={(swiper) => {
-          if (isCorrectIndex(swiper.realIndex)) {
-            setRow(swiper.realIndex);
-          }
-        }}
-        direction="vertical"
-      >
-        {structure.map((row, rowIndex) => {
-          return (
-            <Slide key={"slide" + rowIndex} virtualIndex={rowIndex}>
-              <Swiper
-                {...swiperProps}
-                key={rowIndex}
-                direction="horizontal"
-                onRealIndexChange={(swiper) => {
-                  if (isCorrectIndex(swiper.realIndex)) {
-                    setColumn(swiper.realIndex);
-                  }
-                }}
-                initialSlide={Math.min(
-                  activeColumn,
-                  structure[activeRow]?.length - 1,
-                )}
-              >
-                {structure[rowIndex].map((name, columnIndex) => (
-                  <Slide key={name + columnIndex} virtualIndex={columnIndex}>
-                    <Screen name={name} />
-                  </Slide>
-                ))}
-                {row.length > activeColumn - 1 && (
-                  <Slide virtualIndex={row.length}>
-                    <Screen
-                      fake
-                      name={"new " + crypto.randomUUID().slice(0, 3)}
-                    />
-                  </Slide>
-                )}
-              </Swiper>
-            </Slide>
-          );
-        })}
-        <Slide virtualIndex={structure.length}>
-          <Screen fake name={"new  " + crypto.randomUUID().slice(0, 3)} />
-        </Slide>
-      </Swiper>
-    </CoordinatesContext.Provider>
+    <Box transition="all 1s ease-in-out">
+      {mode === 1 && <Widest />}
+      {mode > 1 && mode < 3 && <TwoDeeThing />}
+      {mode >= 3 && <Heading>detailed</Heading>}
+    </Box>
   );
 };
 
-const swiperProps: SwiperProps = {
-  modules: [Virtual],
-  slidesPerView: 1,
-  loop: true,
-  style: {
-    height: "100dvh",
-    width: "100%",
-  },
-  observer: true, // cause I add slides
-  virtual: true, // Slides are virtual, I add/remove all the time
-  loopAddBlankSlides: true,
-  loopAdditionalSlides: 1,
+const Widest = () => {
+  const structure = useAppSelector((state) => state.todo.structure);
+  const values = useAppSelector((state) => state.todo.values);
+  const dispatch = useDispatch();
+
+  console.log(structure);
+  return (
+    <VStack minH="20dvh" overflow="auto" align="start">
+      {structure.map((row, rowIndex) => {
+        return (
+          <HStack key={rowIndex}>
+            {row.map((name, columnIndex) => (
+              <VStack align="center" key={columnIndex}>
+                <HStack align="center">
+                  <Screen
+                    h="66dvh"
+                    w="66dvw"
+                    key={name + columnIndex}
+                    name={name}
+                    drag={false}
+                    onClick={() => {
+                      mode$.set(2);
+                      position$.set([rowIndex, columnIndex]);
+                    }}
+                  />
+                  <Button
+                    size="sm"
+                    bg="gray.800"
+                    onClick={() => {
+                      const x = prompt("What is the name of the screen?");
+
+                      if (x && !values[x]) {
+                        dispatch(
+                          addScreen({
+                            title: x,
+                            x: columnIndex + 1,
+                            y: rowIndex,
+                          })
+                        );
+                      }
+                    }}
+                  >
+                    🪣
+                  </Button>
+                </HStack>
+                <Button
+                  bg="gray.800"
+                  size="sm"
+                  onClick={() => {
+                    const x = prompt("What is the name of the screen?");
+
+                    if (x && !values[x]) {
+                      dispatch(
+                        addScreen({
+                          title: x,
+                          x: columnIndex,
+                          y: rowIndex + 1,
+                        })
+                      );
+                    }
+                  }}
+                >
+                  🪣
+                </Button>
+              </VStack>
+            ))}
+          </HStack>
+        );
+      })}
+    </VStack>
+  );
+};
+
+const TwoDeeThing = () => {
+  const structure = useAppSelector((state) => state.todo.structure);
+
+  const [row, column] = position$.get();
+
+  const name = structure[row][column];
+
+  return (
+    <Box>
+      <Box
+        onClick={() => {
+          console.log("ashjdkas");
+          mode$.set(1);
+        }}
+        position="fixed"
+        bottom={0}
+        right={0}
+        m={2}
+      >
+        <Map />
+      </Box>
+      <AnimatePresence>
+        <Screen
+          onDragEnd={(e, { offset: { x, y } }) => {
+            if (Math.abs(x) > Math.abs(y)) {
+              const where = x < 0 ? 1 : -1;
+              const next = looped(column + where, structure[row].length);
+              position$.set([row, next]);
+            } else {
+              const where = y < 0 ? 1 : -1;
+              const next = looped(row + where, structure.length);
+              console.log(`now is ${column}:${row}, next row is ${next}`);
+              position$.set([next, column]);
+            }
+          }}
+          w="100dvw"
+          minH="60vh"
+          name={name}
+        />
+      </AnimatePresence>
+    </Box>
+  );
 };
 
 export default App;
+
+const looped = (row: number, max: number) => {
+  let x;
+  if (row < 0) {
+    const z = Math.abs(row) % max;
+    x = (max - z) % max;
+  } else if (row >= max) {
+    x = row % max;
+  } else {
+    x = row;
+  }
+
+  return x;
+};

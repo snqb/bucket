@@ -1,49 +1,43 @@
 import {
   AccordionItemProps,
-  Box,
-  BoxProps,
   Button,
-  Center,
   HStack,
-  Heading,
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-
+import { motion } from "framer-motion";
 import {
-  PropsWithChildren,
+  ComponentProps,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { useLongPress } from "use-long-press";
+import { mode$ } from "./App";
+import { Overlay } from "./Overlay";
 import {
   Todo,
   TodoState,
-  moveTask,
   removeTask,
   updateProgress,
   useAppDispatch,
-  useAppSelector,
 } from "./store";
-interface Props extends AccordionItemProps {
-  task: Todo;
-  where: keyof TodoState;
-  mode: "slow" | "fast";
-}
+
+const MVStack = motion(VStack);
+type H = ComponentProps<typeof MVStack>;
+
+type Props = AccordionItemProps &
+  H & {
+    task: Todo;
+    where: keyof TodoState;
+  };
 
 export const Task = (props: Props) => {
-  const { task, where, mode, ...restItemProps } = props;
+  const { task, where, ...restItemProps } = props;
   const dispatch = useAppDispatch();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { isOpen, onOpen: openMoverScreen, onClose } = useDisclosure();
   const hueref = useRef<number>();
 
   const [progress, setProgress] = useState(task.progress);
@@ -52,8 +46,6 @@ export const Task = (props: Props) => {
   });
 
   const stopProgress = useCallback(() => {
-    stop();
-
     dispatch(
       updateProgress({
         key: where,
@@ -61,9 +53,13 @@ export const Task = (props: Props) => {
         progress,
       })
     );
+
+    stop();
+
+    return stop;
   }, [dispatch, updateProgress, hueref.current, progress]);
 
-  const bind = useLongPress(() => { }, {
+  const bind = useLongPress(() => {}, {
     onStart: startProgress,
     onCancel: stopProgress,
     onFinish: stopProgress,
@@ -85,141 +81,59 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
+  const zoomedOut = mode$.get() === 1;
+
   return (
-    <VStack
+    <MVStack
       align="start"
       py={2}
       userSelect="none"
       {...restItemProps}
       spacing={0}
-      filter={mode === "slow" ? `blur(${progress / 200}px)` : "none"}
+      filter={`blur(${progress / 200}px)`}
+      boxSizing="border-box"
     >
       <HStack w="full" align="center" justify="space-between">
-        <Title onClick={onOpen} progress={progress}>
-          {task.title.emoji}
-          {task.title.text}
-        </Title>
-        <Button
-          variant="outline"
-          colorScheme="blue"
-          filter={`saturate(${progress / 50})`}
-          borderColor="gray.900"
-          borderWidth="2px"
-          p={1}
-          {...bind()}
+        <HStack
+          as={motion.div}
+          w="100%"
+          justify="space-between"
+          onClick={openMoverScreen}
         >
-          👊
-        </Button>
+          <Text
+            display="inline"
+            fontSize="lg"
+            opacity={1 - progress / 200}
+            fontWeight={500}
+          >
+            {task.title.emoji}
+            {task.title.text}
+          </Text>
+        </HStack>
+        {!zoomedOut && (
+          <Text display="inline" color="gray.600" fontSize="sm">
+            {progress}%
+          </Text>
+        )}
+        {!zoomedOut && (
+          <Button
+            as={motion.button}
+            whileTap={{ scale: 0.9 }}
+            variant="outline"
+            colorScheme="blue"
+            filter={`saturate(${progress / 50})`}
+            borderColor="gray.900"
+            borderWidth="2px"
+            p={1}
+            {...bind()}
+          >
+            👊
+          </Button>
+        )}
         )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
-    </VStack>
-  );
-};
-
-type OverlayProps = any;
-
-export const Overlay = ({
-  isOpen,
-  onClose,
-  task,
-  where,
-}: Props & OverlayProps) => {
-  const dispatch = useAppDispatch();
-  const { structure } = useAppSelector((state) => state.todo);
-
-  const handleMove = (screen: string) => {
-    dispatch(
-      moveTask({
-        from: where,
-        to: screen,
-        id: task.id,
-      })
-    );
-
-    onClose();
-  };
-
-  return (
-    <Modal
-      isCentered
-      motionPreset="none"
-      size="xl"
-      isOpen={isOpen}
-      onClose={onClose}
-    >
-      <ModalOverlay backdropFilter="blur(10px)" backdropBlur="1px" />
-      <ModalContent bg="gray.900">
-        <ModalHeader>
-          <Heading as="h3" size="xl">
-            {task.title.text}
-          </Heading>
-        </ModalHeader>
-        <ModalBody>
-          <VStack align="start">
-            {structure.map((row, index) => {
-              return (
-                <HStack key={"qwe" + row[index]} flex={1} align="start">
-                  {row.map((screen, index) => {
-                    return (
-                      <Button
-                        variant="outline"
-                        tabIndex={-1}
-                        key={"ss" + index}
-                        bg="blackAlpha.800"
-                        color="white"
-                        fontSize="sm"
-                        isDisabled={screen === where}
-                        sx={{
-                          _disabled: {
-                            bg: "blackAlpha.100",
-                          },
-                        }}
-                        onClick={() => handleMove(screen)}
-                      >
-                        {screen === where ? (
-                          <Center fontSize="large">⋒</Center>
-                        ) : (
-                          screen
-                        )}
-                      </Button>
-                    );
-                  })}
-                </HStack>
-              );
-            })}
-          </VStack>
-        </ModalBody>
-
-        <ModalFooter>
-          <Button colorScheme="gray" variant="outline" mr={3} onClick={onClose}>
-            ✖️
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
-  );
-};
-
-const Title = ({
-  children,
-  progress,
-  ...rest
-}: BoxProps & PropsWithChildren<{ progress: number }>) => {
-  return (
-    <Box w="100%" textAlign="left" as="span" {...rest}>
-      <Text
-        display="inline"
-        fontSize="lg"
-        opacity={1 - progress / 150}
-        fontWeight={500}
-      >
-        {children}{" "}
-      </Text>
-      <Text display="inline" color="gray.600" fontSize="sm">
-        ({progress}%)
-      </Text>
-    </Box>
+    </MVStack>
   );
 };
 

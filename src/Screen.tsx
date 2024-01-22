@@ -1,16 +1,31 @@
-import { Box, StackDivider, StackProps, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Heading,
+  StackDivider,
+  VStack,
+} from "@chakra-ui/react";
 import { Task } from "./Task";
 
-import { useAutoAnimate } from "@formkit/auto-animate/react";
-import { lt, partition, pipe, prop } from "ramda";
+import { AnimatePresence, motion } from "framer-motion";
 import randomColor from "randomcolor";
+import { ComponentProps, useMemo, useTransition } from "react";
 import Adder from "./Adder";
-import { Map } from "./Map";
-import { useAppSelector } from "./store";
-interface Props extends StackProps {
+import { mode$, position$ } from "./App";
+import { getRandomEmoji } from "./emojis";
+import {
+  removeScreen,
+  renameScreen,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
+
+const MVStack = motion(VStack);
+type H = ComponentProps<typeof MVStack>;
+type Props = H & {
   name: string;
   fake?: boolean;
-}
+};
 
 const getBg = (name: string) => {
   return randomColor({
@@ -22,84 +37,112 @@ const getBg = (name: string) => {
 };
 
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
+  const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
-  const [animationParent] = useAutoAnimate({
-    duration: 420,
-    easing: "ease-out",
-  });
+  const dispatch = useAppDispatch();
+  const [row, column] = position$.get();
 
   const todos = tasks[name] ?? [];
 
   if (todos === undefined) return null;
 
-  const divideSlowsAndFasts = partition(pipe(prop("progress"), lt(0)));
-  const [slows, fasts] = divideSlowsAndFasts(todos);
+  const zoomedOut = mode$.get() === 1;
 
+  useTransition();
   return (
-    <VStack
+    <MVStack
+      drag
+      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+      dragElastic={0.3}
+      whileDrag={{
+        filter: "saturate(20%)",
+      }}
+      transition={{
+        type: "tween",
+        duration: 0.1,
+        ease: "easeInOut",
+      }}
+      initial={{ opacity: 0.5 }}
+      exit={{ opacity: 0 }}
+      animate={{
+        opacity: 1,
+      }}
+      bg={bg}
+      key={name}
       px={[5, 5, 10, 20, 300]}
       pt={4}
       height="100dvh"
       spacing={3}
       id="later"
       align="stretch"
-      bg={getBg(name)}
+      overflow="hidden"
       {...stackProps}
     >
-      <Box mb={2}>
-        <Map />
-      </Box>
+      <HStack justify="space-between">
+        {!zoomedOut && (
+          <HStack>
+            <Button
+              type="button"
+              size="sm"
+              variant="ghost"
+              onClick={(e) => {
+                e.stopPropagation();
+                dispatch(removeScreen({ coords: [row, column] }));
+              }}
+            >
+              🗑️
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                const newName = prompt(`${name} -> to what?`);
+                if (newName && !tasks[newName]) {
+                  dispatch(renameScreen({ coords: [row, column], newName }));
+                }
+              }}
+            >
+              ✏️
+            </Button>
+          </HStack>
+        )}
+        <Heading fontSize="2xl" fontWeight="bold" mb={2}>
+          {getRandomEmoji(name)}
+          {name}
+        </Heading>
+      </HStack>
 
       <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
-      <VStack
-        key={name}
-        align="stretch"
-        divider={
-          <StackDivider borderBottomColor="red.600" borderBottomWidth="1px" />
-        }
-      >
-        <VStack align="stretch" spacing={1} ref={animationParent as any}>
-          <TaskAdder key="slow-adder" mode="slow" />
+      <VStack align="stretch" spacing={fake ? 1 : 4}>
+        <Adder
+          where={name}
+          initialEmoji={"👊"}
+          autoFocus
+          placeholder="..."
+          what="task"
+          variant="filled"
+          size="md"
+        />
+        <AnimatePresence initial={false}>
           {todos.map((task) => (
-            <Task mode="slow" key={task.id} task={task} where={name} />
+            <Task
+              initial={{ transform: "translateY(-100%)" }}
+              animate={{
+                transform: "translateY(0)",
+              }}
+              exit={{
+                opacity: 0,
+              }}
+              mode="slow"
+              key={task.id}
+              task={task}
+              where={name}
+            />
           ))}
-          {/* {slows.map((task) => (
-            <Task mode="slow" key={task.id} task={task} where={name} />
-          ))} */}
-        </VStack>
-
-        {/* <VStack align="stretch" spacing={1} ref={animationParent as any}>
-          <TaskAdder key="fast-adder" mode="fast" />
-          
-        </VStack> */}
+        </AnimatePresence>
       </VStack>
-    </VStack>
-  );
-};
-
-const TaskAdder = ({ mode = "slow" }: { mode?: "slow" | "fast" }) => {
-  return (
-    <Adder
-      initialEmoji={mode === "fast" ? "👊" : "🌊"}
-      autoFocus
-      placeholder={`+ ${mode} +`}
-      what="task"
-      variant="filled"
-      size="md"
-      taskMode={mode}
-      sx={{
-        borderRadius: "4px",
-      }}
-      boxShadow={`inset 0 0 0.5px 1px hsla(0, 0%,  
-        100%, 0.075),
-        /* shadow ring 👇 */
-        0 0 0 5px hsla(0, 0%, 0%, 0.05),
-        /* multiple soft shadows 👇 */
-        0 0.3px 0.4px hsla(0, 0%, 0%, 0.02),
-        0 0.9px 1.5px hsla(0, 0%, 0%, 0.045),
-        0 3.5px 6px hsla(0, 0%, 0%, 0.09);`}
-    />
+    </MVStack>
   );
 };
 
