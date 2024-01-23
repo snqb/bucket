@@ -1,16 +1,16 @@
 import { Box, Button, Flex, HStack, Heading, VStack } from "@chakra-ui/react";
-
-import { createContext } from "react";
+import { createContext, useRef } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, Target, Target } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Map } from "./Map";
 import Screen from "./Screen";
 import { addScreen, persistor, store, useAppSelector } from "./store";
+import { useGesture } from "@use-gesture/react";
 
 enableReactTracking({
   auto: true,
@@ -33,11 +33,32 @@ function App() {
   );
 }
 
+const handlePinch = ({ _delta }) => {
+  const direction = _delta[0];
+  console.log(direction);
+  if (direction > 0) {
+    console.log("down");
+    mode$.set((prevMode) => Math.min(prevMode + 1, 3));
+  } else if (direction < 0) {
+    console.log("up");
+    mode$.set((prevMode) => Math.max(prevMode - 1, 1));
+  }
+};
+
 const AsGrid = () => {
   const mode = mode$.get();
+  const ref = useRef() as any;
+  const bind = useGesture(
+    {
+      onPinchEnd: handlePinch,
+    },
+    {
+      target: ref,
+    }
+  );
 
   return (
-    <Box transition="all 1s ease-in-out">
+    <Box transition="all 1s ease-in-out" ref={ref}>
       {mode === 1 && <Widest />}
       {mode > 1 && mode < 3 && <TwoDeeThing />}
       {mode >= 3 && <Heading>detailed</Heading>}

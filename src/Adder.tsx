@@ -8,7 +8,7 @@ import {
 import { ChangeEventHandler, useContext, useState } from "react";
 
 import * as R from "ramda";
-import { CoordinatesContext } from "./App";
+import { CoordinatesContext, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
 import {
   TodoState,
@@ -32,7 +32,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
     ...inputGroupProps
   } = props;
   const dispatch = useAppDispatch();
-  const [row, column] = useContext(CoordinatesContext);
+  const [row, column] = position$.get();
   const structure = useAppSelector((state) => state.todo.structure);
 
   const [text, setText] = useState("");

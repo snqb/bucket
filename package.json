@@ -17,6 +17,7 @@
     "@reduxjs/toolkit": "^1.9.5",
     "@types/react": "^18.2.7",
     "@types/react-dom": "^18.2.4",
+    "@use-gesture/react": "^10.3.0",
     "framer-motion": "^10.12.16",
     "ramda": "^0.29.1",
     "rand-seed": "^1.0.2",
@@ -29,8 +30,8 @@
     "use-long-press": "^3.2.0"
   },
   "devDependencies": {
-    "@types/randomcolor": "^0.5.9",
     "@types/ramda": "^0.29.2",
+    "@types/randomcolor": "^0.5.9",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.24",
     "prettier": "2.8.8",
