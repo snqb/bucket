@@ -53,11 +53,6 @@ export const Map = (props: Props) => {
                 >
                   <GridTitle isActive={isActiveCell}>
                     {getRandomEmoji(name)}
-                    {isActiveCell && (
-                      <Box as="span" fontSize="md" fontStyle="italic">
-                        {name}
-                      </Box>
-                    )}
                   </GridTitle>
                 </Box>
               );

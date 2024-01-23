@@ -60,7 +60,9 @@ export const Task = (props: Props) => {
   }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => {}, {
-    onStart: startProgress,
+    onStart: () => {
+      startProgress();
+    },
     onCancel: stopProgress,
     onFinish: stopProgress,
     threshold: 100, // In milliseconds
@@ -121,7 +123,7 @@ export const Task = (props: Props) => {
             whileTap={{ scale: 0.9 }}
             variant="outline"
             colorScheme="blue"
-            filter={`saturate(${progress / 50})`}
+            filter={`hue-rotate(${-progress * 1}deg)`}
             borderColor="gray.900"
             borderWidth="2px"
             p={1}

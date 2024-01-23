@@ -80,10 +80,10 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
     >
       <HStack justify="space-between">
         {!zoomedOut && (
-          <HStack>
+          <HStack filter="saturate(0)">
             <Button
               type="button"
-              size="sm"
+              size="xs"
               variant="ghost"
               onClick={(e) => {
                 e.stopPropagation();
@@ -93,7 +93,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
               🗑️
             </Button>
             <Button
-              size="sm"
+              size="xs"
               variant="ghost"
               onClick={() => {
                 const newName = prompt(`${name} -> to what?`);
@@ -114,7 +114,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
 
       <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
 
-      <VStack align="stretch" spacing={fake ? 1 : 4}>
+      <VStack align="stretch" spacing={1}>
         <Adder
           where={name}
           initialEmoji={"👊"}

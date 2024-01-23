@@ -129,7 +129,6 @@ const TwoDeeThing = () => {
     <Box>
       <Box
         onClick={() => {
-          console.log("ashjdkas");
           mode$.set(1);
         }}
         position="fixed"
@@ -141,7 +140,8 @@ const TwoDeeThing = () => {
       </Box>
       <AnimatePresence>
         <Screen
-          onDragEnd={(e, { offset: { x, y } }) => {
+          onDragEnd={(e, { offset: { x, y }, ...props }) => {
+            console.log(e);
             if (Math.abs(x) > Math.abs(y)) {
               const where = x < 0 ? 1 : -1;
               const next = looped(column + where, structure[row].length);
