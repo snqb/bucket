@@ -45,23 +45,19 @@ export const Task = (props: Props) => {
     setProgress((progress) => progress + 1);
   });
 
-  const stopProgress = useCallback(
-    (e) => {
-      e.stopPropagation();
-      dispatch(
-        updateProgress({
-          key: where,
-          id: task.id,
-          progress,
-        })
-      );
+  const stopProgress = useCallback(() => {
+    dispatch(
+      updateProgress({
+        key: where,
+        id: task.id,
+        progress,
+      })
+    );
 
-      stop();
+    stop();
 
-      return stop;
-    },
-    [dispatch, updateProgress, hueref.current, progress]
-  );
+    return stop;
+  }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => {}, {
     onStart: startProgress,
@@ -130,8 +126,6 @@ export const Task = (props: Props) => {
             borderWidth="2px"
             p={1}
             {...bind()}
-            onPointerMove={(e) => e.stopPropagation()}
-            onMouseMove={(e) => e.stopPropagation()}
           >
             👊
           </Button>

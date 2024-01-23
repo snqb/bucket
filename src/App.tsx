@@ -140,8 +140,8 @@ const TwoDeeThing = () => {
       </Box>
       <AnimatePresence>
         <Screen
-          onDragEnd={(e, { offset: { x, y }, ...props }) => {
-            console.log(e);
+          onDragEnd={(e, { delta: { x, y }, ...props }) => {
+            if (x === 0 && y === 0) return;
             if (Math.abs(x) > Math.abs(y)) {
               const where = x < 0 ? 1 : -1;
               const next = looped(column + where, structure[row].length);
