@@ -9,7 +9,7 @@ import { Task } from "./Task";
 
 import { AnimatePresence, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { ComponentProps, useMemo, useTransition } from "react";
+import { ComponentProps, memo, useMemo, useTransition } from "react";
 import Adder from "./Adder";
 import { mode$, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
@@ -25,7 +25,6 @@ const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
 type Props = H & {
   name: string;
-  fake?: boolean;
 };
 
 const getBg = (name: string) => {
@@ -39,7 +38,7 @@ const getBg = (name: string) => {
 
 export const preventDrag$ = observable(false);
 
-const Screen = ({ name, fake = false, ...stackProps }: Props) => {
+const Screen = ({ name, ...stackProps }: Props) => {
   const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
@@ -140,4 +139,4 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   );
 };
 
-export default Screen;
+export default memo(Screen);

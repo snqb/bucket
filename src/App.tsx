@@ -90,7 +90,11 @@ const Widest = () => {
     const name = structure[row][column];
 
     const scrollRaf = requestAnimationFrame(() => {
-      document.querySelector(`[data-name="${name}"]`)?.scrollIntoView();
+      document.querySelector(`[data-name="${name}"]`)?.scrollIntoView({
+        behavior: "instant",
+        block: "nearest",
+        inline: "nearest",
+      });
     });
 
     e.onCleanup = () => {
@@ -113,6 +117,11 @@ const Widest = () => {
       overflow="auto"
       align="start"
       p={6}
+      minW={
+        // as 66 is because screen is 66dvw
+        structure.reduce((acc, row) => Math.max(acc, row.length), 0) * 66 +
+        "dvw"
+      }
     >
       {structure.map((row, rowIndex) => {
         return (
