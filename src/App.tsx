@@ -156,7 +156,7 @@ const TwoDeeThing = () => {
         position="fixed"
         bottom={0}
         right={0}
-        m={2}
+        p={3}
       >
         <Map />
       </Box>
