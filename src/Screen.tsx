@@ -19,6 +19,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { observable } from "@legendapp/state";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -36,6 +37,8 @@ const getBg = (name: string) => {
   });
 };
 
+export const preventDrag$ = observable(false);
+
 const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
@@ -51,21 +54,21 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
   useTransition();
   return (
     <MVStack
-      drag
+      drag={!preventDrag$.get()}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.3}
+      dragElastic={0.2}
       whileDrag={{
-        filter: "saturate(20%)",
+        filter: "saturate(80%)",
       }}
       transition={{
         type: "tween",
         duration: 0.1,
         ease: "easeInOut",
       }}
-      initial={{ opacity: 0.5 }}
-      exit={{ opacity: 0 }}
+      initial={{ left: "-100%" }}
+      exit={{ left: "100%" }}
       animate={{
-        opacity: 1,
+        left: 0,
       }}
       bg={bg}
       key={name}

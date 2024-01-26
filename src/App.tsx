@@ -48,12 +48,13 @@ const handlePinch = ({ _delta }) => {
 const AsGrid = () => {
   const mode = mode$.get();
   const ref = useRef() as any;
-  const bind = useGesture(
+  useGesture(
     {
       onPinchEnd: handlePinch,
     },
     {
-      target: ref,
+      target: window,
+      preventScroll: true,
     }
   );
 

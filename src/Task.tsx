@@ -24,6 +24,7 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
+import { preventDrag$ } from "./Screen";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -41,11 +42,19 @@ export const Task = (props: Props) => {
   const hueref = useRef<number>();
 
   const [progress, setProgress] = useState(task.progress);
-  const [startProgress, stop] = useAnimationFrame(() => {
+  const [start, stop] = useAnimationFrame(() => {
     setProgress((progress) => progress + 1);
   });
 
+  const startProgress = useCallback(() => {
+    start();
+    preventDrag$.set(true);
+  }, [start]);
+
   const stopProgress = useCallback(() => {
+    preventDrag$.set(false);
+
+    stop();
     dispatch(
       updateProgress({
         key: where,
@@ -53,8 +62,6 @@ export const Task = (props: Props) => {
         progress,
       })
     );
-
-    stop();
 
     return stop;
   }, [dispatch, updateProgress, hueref.current, progress]);
@@ -146,7 +153,7 @@ const useAnimationFrame = (callback: (time: number) => void) => {
   const animate = useCallback((time: number) => {
     if (previousTimeRef.current != undefined) {
       const deltaTime = time - previousTimeRef.current;
-      if (deltaTime > 20) {
+      if (deltaTime > 16) {
         previousTimeRef.current = time;
 
         callback(deltaTime);
