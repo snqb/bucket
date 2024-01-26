@@ -73,7 +73,7 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       px={[5, 5, 10, 20, 300]}
       pt={4}
       spacing={3}
-      className="later"
+      data-name={name}
       align="stretch"
       overflow="hidden"
       {...stackProps}

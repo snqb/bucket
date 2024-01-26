@@ -4,14 +4,13 @@ import ReloadPrompt from "./ReloadPrompt";
 
 import { observable, observe } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { AnimatePresence, Target, Target, motion } from "framer-motion";
+import { usePinch } from "@use-gesture/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Map } from "./Map";
 import Screen from "./Screen";
 import { addScreen, persistor, store, useAppSelector } from "./store";
-import { useGesture } from "@use-gesture/react";
-import { o } from "ramda";
 
 enableReactTracking({
   auto: true,
@@ -38,7 +37,7 @@ function App() {
 const handlePinch = (props: any) => {
   const direction = props.direction[0];
   if (direction > 0) {
-    mode$.set((prevMode) => Math.min(prevMode + 1, 3));
+    mode$.set((prevMode) => Math.min(prevMode + 1, 2));
   } else if (direction < 0) {
     mode$.set((prevMode) => Math.max(prevMode - 1, 1));
   }
@@ -47,13 +46,25 @@ const handlePinch = (props: any) => {
 const AsGrid = () => {
   const mode = mode$.get();
   const ref = useRef() as any;
-  useGesture(
-    {
-      onPinchEnd: handlePinch,
+  const { structure } = useAppSelector((state) => state.todo);
+  usePinch(
+    (e) => {
+      const name = (e.target as any).dataset.name;
+      const coords = structure.reduce((acc, row, rowIndex, all) => {
+        const columnIndex = row.indexOf(name);
+        if (columnIndex > -1) {
+          return [rowIndex, columnIndex];
+        }
+        return acc;
+      }, position$.get());
+
+      if (coords) {
+        position$.set(coords);
+      }
+      handlePinch(e);
     },
     {
       target: window,
-      pinchOnWheel: false,
       preventDefault: true,
     }
   );
@@ -61,8 +72,7 @@ const AsGrid = () => {
   return (
     <Box transition="all 1s ease-in-out" ref={ref}>
       {mode === 1 && <Widest />}
-      {mode > 1 && mode < 3 && <TwoDeeThing />}
-      {mode >= 3 && <Heading>detailed</Heading>}
+      {mode > 1 && mode <= 2 && <TwoDeeThing />}
     </Box>
   );
 };
@@ -132,7 +142,6 @@ const Widest = () => {
                 <VStack align="center" key={columnIndex}>
                   <HStack align="center" h="100%">
                     <Screen
-                      data-name={name}
                       maxH="66dvh"
                       minH="24dvh"
                       w="66dvw"
