@@ -117,11 +117,9 @@ export const Task = (props: Props) => {
             {task.title.text}
           </Text>
         </HStack>
-        {!zoomedOut && (
-          <Text display="inline" color="gray.600" fontSize="sm">
-            {progress}%
-          </Text>
-        )}
+        <Text display="inline" color="gray.600" fontSize="sm">
+          {progress}%
+        </Text>
         {!zoomedOut && (
           <Button
             as={motion.button}

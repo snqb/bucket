@@ -2,7 +2,7 @@ import { Box, Button, Flex, HStack, Heading, VStack } from "@chakra-ui/react";
 import { createContext, useRef } from "react";
 import ReloadPrompt from "./ReloadPrompt";
 
-import { observable } from "@legendapp/state";
+import { observable, observe } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { AnimatePresence, Target, Target, motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
@@ -16,6 +16,7 @@ import { o } from "ramda";
 enableReactTracking({
   auto: true,
 });
+
 export const mode$ = observable(2);
 export const position$ = observable([0, 0]);
 
@@ -25,7 +26,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Flex overflowY="hidden">
+        <Flex>
           <AsGrid />
           <ReloadPrompt />
         </Flex>
@@ -34,15 +35,11 @@ function App() {
   );
 }
 
-const lastX$ = observable([0, 0]);
-const handlePinch = ({ _delta }) => {
-  const direction = _delta[0];
-  console.log(direction);
+const handlePinch = (props: any) => {
+  const direction = props.direction[0];
   if (direction > 0) {
-    console.log("down");
     mode$.set((prevMode) => Math.min(prevMode + 1, 3));
   } else if (direction < 0) {
-    console.log("up");
     mode$.set((prevMode) => Math.max(prevMode - 1, 1));
   }
 };
@@ -56,20 +53,13 @@ const AsGrid = () => {
     },
     {
       target: window,
-      preventScroll: true,
+      pinchOnWheel: false,
+      preventDefault: true,
     }
   );
 
   return (
-    <Box
-      transition="all 1s ease-in-out"
-      ref={ref}
-      onClick={(e) => {
-        //get position of the click
-        console.log(e.clientX);
-        lastX$.set([e.clientX, e.clientY]);
-      }}
-    >
+    <Box transition="all 1s ease-in-out" ref={ref}>
       {mode === 1 && <Widest />}
       {mode > 1 && mode < 3 && <TwoDeeThing />}
       {mode >= 3 && <Heading>detailed</Heading>}
@@ -85,7 +75,19 @@ const Widest = () => {
   const values = useAppSelector((state) => state.todo.values);
   const dispatch = useDispatch();
 
-  console.log(structure);
+  observe((e) => {
+    const [row, column] = position$.get();
+    const name = structure[row][column];
+
+    const scrollRaf = requestAnimationFrame(() => {
+      document.querySelector(`[data-name="${name}"]`)?.scrollIntoView();
+    });
+
+    e.onCleanup = () => {
+      cancelAnimationFrame(scrollRaf);
+    };
+  });
+
   return (
     <MVStack
       initial={{ opacity: 0.8, scale: 2, x: 100, y: 100 }}
@@ -100,65 +102,70 @@ const Widest = () => {
       minH="20dvh"
       overflow="auto"
       align="start"
+      p={6}
     >
       {structure.map((row, rowIndex) => {
         return (
-          <HStack key={rowIndex}>
-            {row.map((name, columnIndex) => (
-              <VStack align="center" key={columnIndex}>
-                <HStack align="center">
-                  <Screen
-                    h="66dvh"
-                    w="66dvw"
-                    key={name + columnIndex}
-                    name={name}
-                    drag={false}
-                    onClick={() => {
-                      mode$.set(2);
-                      position$.set([rowIndex, columnIndex]);
-                    }}
-                  />
+          <HStack key={rowIndex} align="stretch">
+            {row.map((name, columnIndex) => {
+              const createScreen = (axis: "horizontal" | "vertical") => () => {
+                const title = prompt("What is the name of the screen?");
+                if (title && !values[title]) {
+                  dispatch(
+                    addScreen({
+                      title: title,
+                      x: columnIndex + (axis === "horizontal" ? 1 : 0),
+                      y: rowIndex + (axis === "vertical" ? 1 : 0),
+                    })
+                  );
+                }
+              };
+
+              const isActive =
+                rowIndex === position$.get()[0] &&
+                columnIndex === position$.get()[1];
+
+              if (isActive) {
+              }
+
+              return (
+                <VStack align="center" key={columnIndex}>
+                  <HStack align="center" h="100%">
+                    <Screen
+                      data-name={name}
+                      maxH="66dvh"
+                      minH="24dvh"
+                      w="66dvw"
+                      pb={4}
+                      px={2}
+                      key={name + columnIndex}
+                      name={name}
+                      drag={false}
+                      onClick={() => {
+                        mode$.set(2);
+                        position$.set([rowIndex, columnIndex]);
+                      }}
+                    />
+                    <Button
+                      size="xs"
+                      aspectRatio="1/1"
+                      bg="gray.800"
+                      onClick={createScreen("horizontal")}
+                    >
+                      ➕
+                    </Button>
+                  </HStack>
                   <Button
-                    size="sm"
                     bg="gray.800"
-                    onClick={() => {
-                      const x = prompt("What is the name of the screen?");
-
-                      if (x && !values[x]) {
-                        dispatch(
-                          addScreen({
-                            title: x,
-                            x: columnIndex + 1,
-                            y: rowIndex,
-                          })
-                        );
-                      }
-                    }}
+                    size="xs"
+                    aspectRatio="1/1"
+                    onClick={createScreen("vertical")}
                   >
-                    🪣
+                    ➕
                   </Button>
-                </HStack>
-                <Button
-                  bg="gray.800"
-                  size="sm"
-                  onClick={() => {
-                    const x = prompt("What is the name of the screen?");
-
-                    if (x && !values[x]) {
-                      dispatch(
-                        addScreen({
-                          title: x,
-                          x: columnIndex,
-                          y: rowIndex + 1,
-                        })
-                      );
-                    }
-                  }}
-                >
-                  🪣
-                </Button>
-              </VStack>
-            ))}
+                </VStack>
+              );
+            })}
           </HStack>
         );
       })}
@@ -167,18 +174,17 @@ const Widest = () => {
 };
 
 const TwoDeeThing = () => {
-  const structure = useAppSelector((state) => state.todo.structure);
-
   const [row, column] = position$.get();
+  const structure = useAppSelector((state) => state.todo.structure);
 
   const name = structure[row][column];
 
-  const [x, y] = lastX$.get();
-  console.log(x, y);
-
   return (
     <MBox
-      initial={{ opacity: 0.7, scale: 0.5, x: x / 2, y: y / 2 }}
+      initial={{
+        opacity: 0.7,
+        scale: 0.6,
+      }}
       animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
       exit={{ opacity: 0, scale: 0.2 }}
       transition={{
@@ -210,12 +216,11 @@ const TwoDeeThing = () => {
             } else {
               const where = y < 0 ? 1 : -1;
               const next = looped(row + where, structure.length);
-              console.log(`now is ${column}:${row}, next row is ${next}`);
               position$.set([next, column]);
             }
           }}
           w="100dvw"
-          minH="60vh"
+          h="100dvh"
           name={name}
         />
       </AnimatePresence>

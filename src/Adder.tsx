@@ -18,19 +18,12 @@ import {
   type Todo,
 } from "./store";
 export interface Props extends InputGroupProps {
-  what: "task" | "screen";
   initialEmoji?: string;
   where?: keyof TodoState;
 }
 
 const Adder = forwardRef<Props, "div">((props, ref) => {
-  const {
-    placeholder,
-    what = "task",
-    initialEmoji = "+",
-    where,
-    ...inputGroupProps
-  } = props;
+  const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
   const dispatch = useAppDispatch();
   const [row, column] = position$.get();
   const structure = useAppSelector((state) => state.todo.structure);

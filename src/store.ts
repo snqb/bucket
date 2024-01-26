@@ -44,7 +44,6 @@ const todoSlice = createSlice({
       const { key, coords } = action.payload;
       const [row, column] = coords;
 
-      console.log(key, coords);
 
       if (!state.structure[row] || !state.structure[row][column]) {
         state.structure[row] = [];
@@ -61,11 +60,15 @@ const todoSlice = createSlice({
       action: PayloadAction<{ title: string; x: number; y: number }>
     ) => {
       const { title, y, x } = action.payload;
-      console.log(y, x, structure.flat().join);
-      if (structure[y]) {
-        structure[y] = [];
+
+      const isAvailable = !structure[y] || !structure[y][x];
+      if (isAvailable) {
+        structure[y] = structure[y] || [];
+        structure[y][x] = title;
+      } else {
+        structure.splice(y, 0, [title]);
       }
-      structure[y][x] = title;
+      
       values[title] = [];
     },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
@@ -103,7 +106,6 @@ const todoSlice = createSlice({
       action: PayloadAction<{ newName: string; coords: [number, number] }>
     ) => {
       const { newName, coords } = action.payload;
-      console.log(coords, newName);
       const [row, column] = coords;
 
       const oldName = structure[row][column];

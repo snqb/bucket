@@ -69,11 +69,11 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
       }}
       bg={bg}
       key={name}
+      height="full"
       px={[5, 5, 10, 20, 300]}
       pt={4}
-      height="100dvh"
       spacing={3}
-      id="later"
+      className="later"
       align="stretch"
       overflow="hidden"
       {...stackProps}
@@ -112,18 +112,12 @@ const Screen = ({ name, fake = false, ...stackProps }: Props) => {
         </Heading>
       </HStack>
 
-      <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
+      {!zoomedOut && (
+        <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
+      )}
 
       <VStack align="stretch" spacing={1}>
-        <Adder
-          where={name}
-          initialEmoji={"👊"}
-          autoFocus
-          placeholder="..."
-          what="task"
-          variant="filled"
-          size="md"
-        />
+        {!zoomedOut && <Adder where={name} />}
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
