@@ -4,13 +4,14 @@ import ReloadPrompt from "./ReloadPrompt";
 
 import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { AnimatePresence, Target, Target } from "framer-motion";
+import { AnimatePresence, Target, Target, motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Map } from "./Map";
 import Screen from "./Screen";
 import { addScreen, persistor, store, useAppSelector } from "./store";
 import { useGesture } from "@use-gesture/react";
+import { o } from "ramda";
 
 enableReactTracking({
   auto: true,
@@ -33,6 +34,7 @@ function App() {
   );
 }
 
+const lastX$ = observable([0, 0]);
 const handlePinch = ({ _delta }) => {
   const direction = _delta[0];
   console.log(direction);
@@ -59,13 +61,24 @@ const AsGrid = () => {
   );
 
   return (
-    <Box transition="all 1s ease-in-out" ref={ref}>
+    <Box
+      transition="all 1s ease-in-out"
+      ref={ref}
+      onClick={(e) => {
+        //get position of the click
+        console.log(e.clientX);
+        lastX$.set([e.clientX, e.clientY]);
+      }}
+    >
       {mode === 1 && <Widest />}
       {mode > 1 && mode < 3 && <TwoDeeThing />}
       {mode >= 3 && <Heading>detailed</Heading>}
     </Box>
   );
 };
+
+const MBox = motion(Box);
+const MVStack = motion(VStack);
 
 const Widest = () => {
   const structure = useAppSelector((state) => state.todo.structure);
@@ -74,7 +87,20 @@ const Widest = () => {
 
   console.log(structure);
   return (
-    <VStack minH="20dvh" overflow="auto" align="start">
+    <MVStack
+      initial={{ opacity: 0.8, scale: 2, x: 100, y: 100 }}
+      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+      exit={{ scale: 0 }}
+      transition={{
+        duration: 0.5,
+        type: "spring",
+        damping: 20,
+        stiffness: 200,
+      }}
+      minH="20dvh"
+      overflow="auto"
+      align="start"
+    >
       {structure.map((row, rowIndex) => {
         return (
           <HStack key={rowIndex}>
@@ -136,7 +162,7 @@ const Widest = () => {
           </HStack>
         );
       })}
-    </VStack>
+    </MVStack>
   );
 };
 
@@ -147,8 +173,21 @@ const TwoDeeThing = () => {
 
   const name = structure[row][column];
 
+  const [x, y] = lastX$.get();
+  console.log(x, y);
+
   return (
-    <Box>
+    <MBox
+      initial={{ opacity: 0.7, scale: 0.5, x: x / 2, y: y / 2 }}
+      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+      exit={{ opacity: 0, scale: 0.2 }}
+      transition={{
+        duration: 0.5,
+        type: "spring",
+        damping: 20,
+        stiffness: 200,
+      }}
+    >
       <Box
         onClick={() => {
           mode$.set(1);
@@ -180,7 +219,7 @@ const TwoDeeThing = () => {
           name={name}
         />
       </AnimatePresence>
-    </Box>
+    </MBox>
   );
 };
 
