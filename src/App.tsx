@@ -72,7 +72,7 @@ const AsGrid = () => {
   return (
     <Box ref={ref}>
       <AnimatePresence>
-        {mode === 1 && <Widest />}
+        {mode <= 1 && <Widest />}
         {mode > 1 && mode <= 2 && <TwoDeeThing />}
       </AnimatePresence>
     </Box>
