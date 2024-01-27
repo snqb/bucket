@@ -5,7 +5,7 @@ import ReloadPrompt from "./ReloadPrompt";
 import { observable, observe } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { usePinch } from "@use-gesture/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useMotionValue } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Map } from "./Map";
@@ -91,34 +91,37 @@ const Widest = () => {
     const [row, column] = position$.get();
     const name = structure[row][column];
 
-    const scrollRaf = requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
       document.querySelector(`[data-name="${name}"]`)?.scrollIntoView({
-        behavior: "instant",
-        block: "nearest",
-        inline: "nearest",
+        block: "center",
       });
     });
 
     e.onCleanup = () => {
-      cancelAnimationFrame(scrollRaf);
+      // cancelAnimationFrame(scrollRaf);
     };
   });
 
   return (
     <MVStack
-      initial={{ opacity: 0.8, scale: 2, x: 100, y: 100, width: "100%" }}
+      initial={{
+        opacity: 0.8,
+        scale: 2,
+        x: 100,
+        y: 100,
+      }}
       animate={{
         opacity: 1,
         scale: 1,
         x: 0,
         y: 0,
-        width:
+        minWidth:
           structure.reduce((acc, row) => Math.max(acc, row.length), 0) * 76 +
           "dvw",
       }}
       exit={{ scale: 0 }}
       transition={{
-        duration: 0.42,
+        duration: 0.3,
         type: "spring",
         damping: 20,
         stiffness: 200,
@@ -211,7 +214,7 @@ const TwoDeeThing = () => {
       animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
       exit={{ opacity: 0, scale: 0.2 }}
       transition={{
-        duration: 0.42,
+        duration: 0.3,
         type: "spring",
         damping: 20,
         stiffness: 200,
