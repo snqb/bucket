@@ -28,6 +28,7 @@ type Props = H & {
 };
 
 const getBg = (name: string) => {
+  console.log(name);
   return randomColor({
     luminosity: "light",
     seed: name,
@@ -55,11 +56,10 @@ const Screen = ({ name, ...stackProps }: Props) => {
     <MVStack
       drag={!preventDrag$.get()}
       dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.2}
+      dragElastic={0.3}
       transition={{
-        type: "tween",
-        duration: 0.1,
-        ease: "easeInOut",
+        type: "spring",
+        duration: 0.2,
       }}
       initial={{ left: "-100%" }}
       exit={{ left: "100%" }}

@@ -70,9 +70,11 @@ const AsGrid = () => {
   );
 
   return (
-    <Box transition="all 1s ease-in-out" ref={ref}>
-      {mode === 1 && <Widest />}
-      {mode > 1 && mode <= 2 && <TwoDeeThing />}
+    <Box ref={ref}>
+      <AnimatePresence>
+        {mode === 1 && <Widest />}
+        {mode > 1 && mode <= 2 && <TwoDeeThing />}
+      </AnimatePresence>
     </Box>
   );
 };
@@ -104,11 +106,19 @@ const Widest = () => {
 
   return (
     <MVStack
-      initial={{ opacity: 0.8, scale: 2, x: 100, y: 100 }}
-      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+      initial={{ opacity: 0.8, scale: 2, x: 100, y: 100, width: "100%" }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        x: 0,
+        y: 0,
+        width:
+          structure.reduce((acc, row) => Math.max(acc, row.length), 0) * 76 +
+          "dvw",
+      }}
       exit={{ scale: 0 }}
       transition={{
-        duration: 0.5,
+        duration: 0.42,
         type: "spring",
         damping: 20,
         stiffness: 200,
@@ -117,11 +127,6 @@ const Widest = () => {
       overflow="auto"
       align="start"
       p={6}
-      minW={
-        // as 66 is because screen is 66dvw
-        structure.reduce((acc, row) => Math.max(acc, row.length), 0) * 66 +
-        "dvw"
-      }
     >
       {structure.map((row, rowIndex) => {
         return (
@@ -206,7 +211,7 @@ const TwoDeeThing = () => {
       animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
       exit={{ opacity: 0, scale: 0.2 }}
       transition={{
-        duration: 0.5,
+        duration: 0.42,
         type: "spring",
         damping: 20,
         stiffness: 200,
