@@ -66,6 +66,7 @@ const AsGrid = () => {
     {
       target: window,
       preventDefault: true,
+      enabled: false,
     }
   );
 
