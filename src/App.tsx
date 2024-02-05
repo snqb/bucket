@@ -88,20 +88,38 @@ const Widest = () => {
   const values = useAppSelector((state) => state.todo.values);
   const dispatch = useDispatch();
 
+  const _scrollRef = useRef<number>();
+
   observe((e) => {
     const [row, column] = position$.get();
     const name = structure[row][column];
 
-    requestAnimationFrame(() => {
+    _scrollRef.current = requestAnimationFrame(() => {
       document.querySelector(`[data-name="${name}"]`)?.scrollIntoView({
         block: "center",
+        inline: "center",
       });
     });
 
     e.onCleanup = () => {
-      // cancelAnimationFrame(scrollRaf);
+      _scrollRef?.current && cancelAnimationFrame(_scrollRef?.current);
     };
   });
+
+  const createScreen =
+    (axis: "horizontal" | "vertical", { x, y }: { y: number; x: number }) =>
+    () => {
+      const title = prompt("What is the name of the screen?");
+      if (title && !values[title]) {
+        dispatch(
+          addScreen({
+            title: title,
+            x: x + (axis === "horizontal" ? 1 : 0),
+            y: y + (axis === "vertical" ? 1 : 0),
+          })
+        );
+      }
+    };
 
   return (
     <MVStack
@@ -132,32 +150,16 @@ const Widest = () => {
       align="start"
       p={6}
     >
-      {structure.map((row, rowIndex) => {
+      {structure.map((row, y) => {
         return (
-          <HStack key={rowIndex} align="stretch">
-            {row.map((name, columnIndex) => {
-              const createScreen = (axis: "horizontal" | "vertical") => () => {
-                const title = prompt("What is the name of the screen?");
-                if (title && !values[title]) {
-                  dispatch(
-                    addScreen({
-                      title: title,
-                      x: columnIndex + (axis === "horizontal" ? 1 : 0),
-                      y: rowIndex + (axis === "vertical" ? 1 : 0),
-                    })
-                  );
-                }
-              };
-
-              const isActive =
-                rowIndex === position$.get()[0] &&
-                columnIndex === position$.get()[1];
-
-              if (isActive) {
-              }
+          <HStack key={y} align="stretch">
+            {row.map((name, x) => {
+              // const isActive =
+              //   rowIndex === position$.get()[0] &&
+              //   columnIndex === position$.get()[1];
 
               return (
-                <VStack align="center" key={columnIndex}>
+                <VStack align="center" key={x}>
                   <HStack align="center" h="100%">
                     <Screen
                       maxH="66dvh"
@@ -165,19 +167,19 @@ const Widest = () => {
                       w="66dvw"
                       pb={4}
                       px={2}
-                      key={name + columnIndex}
+                      key={name + x}
                       name={name}
                       drag={false}
                       onClick={() => {
                         mode$.set(2);
-                        position$.set([rowIndex, columnIndex]);
+                        position$.set([y, x]);
                       }}
                     />
                     <Button
                       size="xs"
                       aspectRatio="1/1"
                       bg="gray.800"
-                      onClick={createScreen("horizontal")}
+                      onClick={createScreen("horizontal", { x, y })}
                     >
                       ➕
                     </Button>
@@ -186,7 +188,7 @@ const Widest = () => {
                     bg="gray.800"
                     size="xs"
                     aspectRatio="1/1"
-                    onClick={createScreen("vertical")}
+                    onClick={createScreen("vertical", { x, y })}
                   >
                     ➕
                   </Button>

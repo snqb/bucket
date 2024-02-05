@@ -44,7 +44,6 @@ const todoSlice = createSlice({
       const { key, coords } = action.payload;
       const [row, column] = coords;
 
-
       if (!state.structure[row] || !state.structure[row][column]) {
         state.structure[row] = [];
         state.structure[row][column] = key;
@@ -61,6 +60,7 @@ const todoSlice = createSlice({
     ) => {
       const { title, y, x } = action.payload;
 
+
       const isAvailable = !structure[y] || !structure[y][x];
       if (isAvailable) {
         structure[y] = structure[y] || [];
@@ -68,7 +68,7 @@ const todoSlice = createSlice({
       } else {
         structure.splice(y, 0, [title]);
       }
-      
+
       values[title] = [];
     },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
