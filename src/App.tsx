@@ -134,9 +134,6 @@ const Widest = () => {
         scale: 1,
         x: 0,
         y: 0,
-        minWidth:
-          structure.reduce((acc, row) => Math.max(acc, row.length), 0) * 76 +
-          "dvw",
       }}
       exit={{ scale: 0 }}
       transition={{
@@ -162,9 +159,9 @@ const Widest = () => {
                 <VStack align="center" key={x}>
                   <HStack align="center" h="100%">
                     <Screen
-                      maxH="66dvh"
-                      minH="24dvh"
-                      w="66dvw"
+                      maxH="66vh"
+                      minH="24vh"
+                      w="66vw"
                       pb={4}
                       px={2}
                       key={name + x}
@@ -248,8 +245,10 @@ const TwoDeeThing = () => {
               position$.set([next, column]);
             }
           }}
-          w="100dvw"
-          h="100dvh"
+          // min is a hack here to achieve fallback without duplicating props, it sucks
+          // and I'm not even sure it works
+          w="min(100dvw, 100vw)"
+          h="min(100dvh, 100vh)"
           name={name}
         />
       </AnimatePresence>
