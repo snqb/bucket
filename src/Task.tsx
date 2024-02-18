@@ -15,7 +15,7 @@ import {
   useState,
 } from "react";
 import { useLongPress } from "use-long-press";
-import { mode$ } from "./App";
+import { level$ } from "./App";
 import { Overlay } from "./Overlay";
 import {
   Todo,
@@ -24,7 +24,6 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
-import { preventDrag$ } from "./Screen";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -42,35 +41,20 @@ export const Task = (props: Props) => {
   const hueref = useRef<number>();
 
   const [progress, setProgress] = useState(task.progress);
-  const [start, stop] = useAnimationFrame(() => {
-    setProgress((progress) => progress + 1);
-  });
 
-  const startProgress = useCallback(() => {
-    start();
-    preventDrag$.set(true);
-  }, [start]);
-
-  const stopProgress = useCallback(() => {
-    preventDrag$.set(false);
-
-    stop();
+  const killTask = useCallback(() => {
     dispatch(
-      updateProgress({
+      removeTask({
         key: where,
         id: task.id,
-        progress,
       })
     );
-
-    return stop;
   }, [dispatch, updateProgress, hueref.current, progress]);
 
   const bind = useLongPress(() => {}, {
-    onStart: startProgress,
-    onCancel: stopProgress,
-    onFinish: stopProgress,
-    threshold: 100, // In milliseconds
+    onCancel: console.log,
+    // onFinish: killTask,
+    threshold: 500, // In milliseconds
   });
 
   const onRemoveClick = () => {
@@ -88,7 +72,7 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
-  const zoomedOut = mode$.get() === 1;
+  const isZoomedOut = level$.get() === 1;
 
   return (
     <MVStack
@@ -104,8 +88,8 @@ export const Task = (props: Props) => {
         <HStack
           as={motion.div}
           w="100%"
-          justify="space-between"
-          onClick={openMoverScreen}
+          align="baseline"
+          onClick={isZoomedOut ? undefined : openMoverScreen}
         >
           <Text
             display="inline"
@@ -116,19 +100,39 @@ export const Task = (props: Props) => {
             {task.title.emoji}
             {task.title.text}
           </Text>
+          <Text display="inline" color="gray.600" fontSize="sm">
+            {progress}%
+          </Text>
         </HStack>
-        <Text display="inline" color="gray.600" fontSize="sm">
-          {progress}%
-        </Text>
-        {!zoomedOut && (
+        {!isZoomedOut && (
           <Button
             as={motion.button}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{
+              transition: { duration: 0.5, type: "spring" },
+              scale: 3,
+              transitionEnd: { scale: 0.9 },
+            }}
+            whileHover={{
+              transition: { duration: 0.5, type: "spring" },
+              scale: 3,
+              transitionEnd: { scale: 0.9 },
+            }}
             variant="outline"
             colorScheme="blue"
             filter={`hue-rotate(${-progress * 1}deg)`}
             borderColor="gray.900"
             borderWidth="2px"
+            onClick={() => {
+              const next = progress + Math.ceil(Math.random() * 8);
+              dispatch(
+                updateProgress({
+                  key: where,
+                  id: task.id,
+                  progress: next,
+                })
+              );
+              setProgress(next);
+            }}
             p={1}
             {...bind()}
           >
@@ -142,31 +146,4 @@ export const Task = (props: Props) => {
   );
 };
 
-const useAnimationFrame = (callback: (time: number) => void) => {
-  // Use useRef for mutable variables that we want to persist
-  // without triggering a re-render on their change
-  const requestRef = useRef<number>();
-  const previousTimeRef = useRef<number>();
 
-  const animate = useCallback((time: number) => {
-    if (previousTimeRef.current != undefined) {
-      const deltaTime = time - previousTimeRef.current;
-      if (deltaTime > 16) {
-        previousTimeRef.current = time;
-
-        callback(deltaTime);
-      }
-    }
-    if (!previousTimeRef.current) previousTimeRef.current = time;
-    requestRef.current = requestAnimationFrame(animate);
-  }, []);
-
-  const start = useCallback(() => {
-    requestRef.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(requestRef.current!);
-  }, []); // Make sure the effect runs only once
-
-  const stop = useCallback(() => cancelAnimationFrame(requestRef.current!), []);
-
-  return [start, stop];
-};

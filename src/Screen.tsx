@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   HStack,
   Heading,
@@ -7,11 +8,18 @@ import {
 } from "@chakra-ui/react";
 import { Task } from "./Task";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useInView } from "framer-motion";
 import randomColor from "randomcolor";
-import { ComponentProps, memo, useMemo, useTransition } from "react";
+import {
+  ComponentProps,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useTransition,
+} from "react";
 import Adder from "./Adder";
-import { mode$, position$ } from "./App";
+import { $currentScreen, level$, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
 import {
   removeScreen,
@@ -19,6 +27,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { Map } from "./Map";
 import { observable } from "@legendapp/state";
 
 const MVStack = motion(VStack);
@@ -28,7 +37,6 @@ type Props = H & {
 };
 
 const getBg = (name: string) => {
-  console.log(name);
   return randomColor({
     luminosity: "light",
     seed: name,
@@ -44,19 +52,29 @@ const Screen = ({ name, ...stackProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const [row, column] = position$.get();
+  const ref = useRef();
+
+  const isInView = useInView(ref, {
+    amount: 1,
+    root: "#screens",
+  });
+
+  const level = level$.get();
+
+  useEffect(() => {
+    if (isInView && level === 2) {
+      $currentScreen.set(name);
+    }
+  }, [isInView, name]);
 
   const todos = tasks[name] ?? [];
 
   if (todos === undefined) return null;
 
-  const zoomedOut = mode$.get() === 1;
-
   useTransition();
   return (
     <MVStack
-      drag={!preventDrag$.get()}
-      dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-      dragElastic={0.3}
+      ref={ref}
       transition={{
         type: "spring",
         duration: 0.2,
@@ -78,7 +96,7 @@ const Screen = ({ name, ...stackProps }: Props) => {
       {...stackProps}
     >
       <HStack justify="space-between">
-        {!zoomedOut && (
+        {level === 2 && (
           <HStack filter="saturate(0)">
             <Button
               type="button"
@@ -105,18 +123,16 @@ const Screen = ({ name, ...stackProps }: Props) => {
             </Button>
           </HStack>
         )}
-        <Heading fontSize="2xl" fontWeight="bold" mb={2}>
+        <Heading fontSize="2xl" fontWeight="bold" mb={2} whiteSpace="nowrap">
           {getRandomEmoji(name)}
           {name}
         </Heading>
       </HStack>
 
-      {!zoomedOut && (
-        <StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />
-      )}
+      {<StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />}
 
       <VStack align="stretch" spacing={1}>
-        {!zoomedOut && <Adder where={name} />}
+        {<Adder where={name} />}
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task

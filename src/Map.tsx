@@ -1,7 +1,7 @@
 import { Box, HStack, Heading, StackProps, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { PropsWithChildren } from "react";
-import { position$ } from "./App";
+import { $currentScreen, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
 import { useAppSelector } from "./store";
 
@@ -10,7 +10,7 @@ interface Props extends StackProps {}
 const MVStack = motion(VStack);
 
 export const Map = (props: Props) => {
-  const [currentRow, currentColumn] = position$.get();
+  const [currentRow] = position$.get();
   const { structure } = useAppSelector((state) => state.todo);
 
   return (
@@ -29,28 +29,13 @@ export const Map = (props: Props) => {
       gap={0}
     >
       {structure.map((row, rowIndex) => {
-        const isActiveRow = rowIndex === currentRow;
         return (
           <HStack gap={0} key={rowIndex}>
             {row.map((name, colIndex) => {
-              const isActiveCol =
-                colIndex === currentColumn || row.length - 1 < currentColumn;
-              const isActiveCell = isActiveRow && isActiveCol;
-
-              const isXNeighbour =
-                isActiveRow && Math.abs(currentColumn - colIndex) <= 1;
-
-              const isYNeighbour =
-                isActiveCol && Math.abs(currentRow - rowIndex) <= 1;
-
-              const rowDistance = Math.abs(currentRow - rowIndex);
-              const scale = 2 * (rowDistance - 1);
+              const isActiveCell = $currentScreen.get() === name;
 
               return (
-                <Box
-                  transform={`rotateZ(${scale}deg)`}
-                  key={`${rowIndex}-${colIndex}`}
-                >
+                <Box key={`${rowIndex}-${colIndex}`}>
                   <GridTitle isActive={isActiveCell}>
                     {getRandomEmoji(name)}
                   </GridTitle>

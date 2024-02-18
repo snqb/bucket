@@ -1,11 +1,9 @@
-import { Box, Button, Flex, HStack, Heading, VStack } from "@chakra-ui/react";
-import { createContext, useRef } from "react";
+import { Box, Button, Flex, HStack, VStack } from "@chakra-ui/react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { observable, observe } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { usePinch } from "@use-gesture/react";
-import { AnimatePresence, motion, useMotionValue } from "framer-motion";
+import { motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Map } from "./Map";
@@ -16,17 +14,22 @@ enableReactTracking({
   auto: true,
 });
 
-export const mode$ = observable(2);
+/** 
+  1: Wide screen
+  2: Individual screen
+  3: TBA -> Task level
+*/
+export const level$ = observable(1);
+/** position in a coordinate system, x is row, y is column */
 export const position$ = observable([0, 0]);
-
-export const CoordinatesContext = createContext<[number, number]>([0, 0]);
+export const $currentScreen = observable("");
 
 function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
         <Flex>
-          <AsGrid />
+          <Widest />
           <ReloadPrompt />
         </Flex>
       </PersistGate>
@@ -34,77 +37,12 @@ function App() {
   );
 }
 
-const handlePinch = (props: any) => {
-  const direction = props.direction[0];
-  if (direction > 0) {
-    mode$.set((prevMode) => Math.min(prevMode + 1, 2));
-  } else if (direction < 0) {
-    mode$.set((prevMode) => Math.max(prevMode - 1, 1));
-  }
-};
-
-const AsGrid = () => {
-  const mode = mode$.get();
-  const ref = useRef() as any;
-  const { structure } = useAppSelector((state) => state.todo);
-  usePinch(
-    (e) => {
-      const name = (e.target as any).dataset.name;
-      const coords = structure.reduce((acc, row, rowIndex, all) => {
-        const columnIndex = row.indexOf(name);
-        if (columnIndex > -1) {
-          return [rowIndex, columnIndex];
-        }
-        return acc;
-      }, position$.get());
-
-      if (coords) {
-        position$.set(coords);
-      }
-      handlePinch(e);
-    },
-    {
-      target: window,
-      preventDefault: true,
-      enabled: false,
-    }
-  );
-
-  return (
-    <Box ref={ref}>
-      <AnimatePresence>
-        {mode <= 1 && <Widest />}
-        {mode > 1 && mode <= 2 && <TwoDeeThing />}
-      </AnimatePresence>
-    </Box>
-  );
-};
-
-const MBox = motion(Box);
 const MVStack = motion(VStack);
 
 const Widest = () => {
   const structure = useAppSelector((state) => state.todo.structure);
   const values = useAppSelector((state) => state.todo.values);
   const dispatch = useDispatch();
-
-  const _scrollRef = useRef<number>();
-
-  observe((e) => {
-    const [row, column] = position$.get();
-    const name = structure[row][column];
-
-    _scrollRef.current = requestAnimationFrame(() => {
-      document.querySelector(`[data-name="${name}"]`)?.scrollIntoView({
-        block: "center",
-        inline: "center",
-      });
-    });
-
-    e.onCleanup = () => {
-      _scrollRef?.current && cancelAnimationFrame(_scrollRef?.current);
-    };
-  });
 
   const createScreen =
     (axis: "horizontal" | "vertical", { x, y }: { y: number; x: number }) =>
@@ -120,6 +58,14 @@ const Widest = () => {
         );
       }
     };
+
+  observe(() => {
+    const screen = $currentScreen.get();
+    const element = document.querySelector(`[data-name="${screen}"]`);
+    if (element) {
+      element.scrollIntoView({});
+    }
+  });
 
   return (
     <MVStack
@@ -142,41 +88,65 @@ const Widest = () => {
         damping: 20,
         stiffness: 200,
       }}
-      minH="20dvh"
+      w="100vw"
+      h="100vh"
       overflow="auto"
       align="start"
-      p={6}
+      scrollSnapType="both mandatory"
+      transform={level$.get() === 1 ? "scale(0.5)" : "scale(1)"}
     >
+      {level$.get() === 2 && (
+        <Box
+          onClick={() => {
+            level$.set((x) => (x === 1 ? 2 : 1));
+          }}
+          position="fixed"
+          top="72vh"
+          left="72vw"
+          p={3}
+        >
+          <Map />
+        </Box>
+      )}
       {structure.map((row, y) => {
         return (
           <HStack key={y} align="stretch">
             {row.map((name, x) => {
-              // const isActive =
-              //   rowIndex === position$.get()[0] &&
-              //   columnIndex === position$.get()[1];
-
               return (
                 <VStack align="center" key={x}>
-                  <HStack align="center" h="100%">
+                  <HStack
+                    align="start"
+                    h="100%"
+                    scrollSnapAlign="start"
+                    scrollSnapStop="always"
+                    id="screens"
+                  >
                     <Screen
-                      maxH="66vh"
-                      minH="24vh"
-                      w="66vw"
+                      h={level$.get() === 2 ? "100vh" : "100%"}
+                      w={level$.get() === 2 ? "100vw" : "100%"}
+                      minW="28ch"
                       pb={4}
                       px={2}
                       key={name + x}
                       name={name}
                       drag={false}
-                      onClick={() => {
-                        mode$.set(2);
-                        position$.set([y, x]);
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        console.log(e.target);
+                        level$.set(2);
+                        $currentScreen.set(name);
+                        setTimeout(() => {
+                          (e.target as Element)?.scrollIntoView();
+                        }, 0);
                       }}
+                      border="1px solid gray"
                     />
                     <Button
                       size="xs"
                       aspectRatio="1/1"
                       bg="gray.800"
                       onClick={createScreen("horizontal", { x, y })}
+                      alignSelf="center"
                     >
                       ➕
                     </Button>
@@ -199,75 +169,4 @@ const Widest = () => {
   );
 };
 
-const TwoDeeThing = () => {
-  const [row, column] = position$.get();
-  const structure = useAppSelector((state) => state.todo.structure);
-
-  const name = structure[row][column];
-
-  return (
-    <MBox
-      initial={{
-        opacity: 0.7,
-        scale: 0.6,
-      }}
-      animate={{ opacity: 1, scale: 1, x: 0, y: 0 }}
-      exit={{ opacity: 0, scale: 0.2 }}
-      transition={{
-        duration: 0.3,
-        type: "spring",
-        damping: 20,
-        stiffness: 200,
-      }}
-    >
-      <Box
-        onClick={() => {
-          mode$.set(1);
-        }}
-        position="fixed"
-        bottom={0}
-        right={0}
-        p={3}
-      >
-        <Map />
-      </Box>
-      <AnimatePresence>
-        <Screen
-          onDragEnd={(e, { delta: { x, y }, ...props }) => {
-            if (x === 0 && y === 0) return;
-            if (Math.abs(x) > Math.abs(y)) {
-              const where = x < 0 ? 1 : -1;
-              const next = looped(column + where, structure[row].length);
-              position$.set([row, next]);
-            } else {
-              const where = y < 0 ? 1 : -1;
-              const next = looped(row + where, structure.length);
-              position$.set([next, column]);
-            }
-          }}
-          // min is a hack here to achieve fallback without duplicating props, it sucks
-          // and I'm not even sure it works
-          w="min(100dvw, 100vw)"
-          h="min(100dvh, 100vh)"
-          name={name}
-        />
-      </AnimatePresence>
-    </MBox>
-  );
-};
-
 export default App;
-
-const looped = (row: number, max: number) => {
-  let x;
-  if (row < 0) {
-    const z = Math.abs(row) % max;
-    x = (max - z) % max;
-  } else if (row >= max) {
-    x = row % max;
-  } else {
-    x = row;
-  }
-
-  return x;
-};

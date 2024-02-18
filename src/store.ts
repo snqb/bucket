@@ -60,7 +60,6 @@ const todoSlice = createSlice({
     ) => {
       const { title, y, x } = action.payload;
 
-
       const isAvailable = !structure[y] || !structure[y][x];
       if (isAvailable) {
         structure[y] = structure[y] || [];

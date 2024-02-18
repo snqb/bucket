@@ -5,10 +5,10 @@ import {
   InputLeftElement,
   forwardRef,
 } from "@chakra-ui/react";
-import { ChangeEventHandler, useContext, useState } from "react";
+import { ChangeEventHandler, useState } from "react";
 
 import * as R from "ramda";
-import { CoordinatesContext, position$ } from "./App";
+import { position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
 import {
   TodoState,
