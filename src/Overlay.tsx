@@ -55,19 +55,23 @@ export const Overlay = ({ isOpen, onClose, task, where }: OverlayProps) => {
   };
 
   return (
-    <Modal
-      isCentered
-      motionPreset="none"
-      size="xl"
-      isOpen={isOpen}
-      onClose={onClose}
-    >
+    <Modal motionPreset="none" size="full" isOpen={isOpen} onClose={onClose}>
       <ModalOverlay backdropFilter="blur(10px)" backdropBlur="1px" />
       <ModalContent bg="gray.900">
         <ModalHeader>
-          <Heading as="h3" size="xl">
-            {task.title.text}
-          </Heading>
+          <HStack justify="space-between">
+            <Heading as="h3" size="xl">
+              {task.title.text}
+            </Heading>
+            <Button
+              colorScheme="gray"
+              variant="outline"
+              mr={3}
+              onClick={onClose}
+            >
+              ✖️
+            </Button>
+          </HStack>
         </ModalHeader>
         <ModalBody>
           <VStack align="start" spacing={2}>
@@ -121,12 +125,6 @@ export const Overlay = ({ isOpen, onClose, task, where }: OverlayProps) => {
             })}
           </VStack>
         </ModalBody>
-
-        <ModalFooter>
-          <Button colorScheme="gray" variant="outline" mr={3} onClick={onClose}>
-            ✖️
-          </Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );

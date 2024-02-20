@@ -24,6 +24,7 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
+import { none } from "ramda";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -96,20 +97,19 @@ export const Task = (props: Props) => {
             fontSize="sm"
             filter="saturate(0)"
           >
-            {progress}✨
-          </Text>
+            {progress}
+          </Text>{" "}
         </HStack>
         {!isZoomedOut && (
           <>
             <Button
               as={motion.button}
               whileTap={{
-                transition: { duration: 0.5, type: "spring" },
-                scale: 3,
-                transitionEnd: { scale: 0.9 },
+                transition: { duration: 0.6, type: "spring" },
+                scale: 2,
               }}
               whileHover={{
-                scale: 3,
+                scale: 1.3,
               }}
               size="sm"
               variant="unstyled"
@@ -124,15 +124,17 @@ export const Task = (props: Props) => {
             <Button
               as={motion.button}
               whileTap={{
-                transition: { duration: 0.5, type: "spring" },
-                scale: 3,
-                transitionEnd: { scale: 0.9 },
-              }}
-              whileHover={{
-                scale: 3,
+                transition: { duration: 1, type: "spring", mass: 0.2 },
+                scale: 5,
+                filter: "contrast(5)",
+                border: "none",
+                transitionEnd: {
+                  scale: 0.8,
+                  filter: "initial",
+                },
               }}
               variant="unstyled"
-              filter={`hue-rotate(${-progress * 1}deg)`}
+              // filter={`hue-rotate(${-progress * 1}deg)`}
               borderColor="gray.900"
               _focus={{
                 bg: "initial",
