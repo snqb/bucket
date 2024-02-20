@@ -101,8 +101,8 @@ const Widest = () => {
             level$.set((x) => (x === 1 ? 2 : 1));
           }}
           position="fixed"
-          top="72vh"
-          left="72vw"
+          bottom="2vh"
+          right="0"
           p={3}
         >
           <Map />
@@ -132,14 +132,13 @@ const Widest = () => {
                       drag={false}
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log(e.target);
                         level$.set(2);
                         $currentScreen.set(name);
                         setTimeout(() => {
                           (e.target as Element)?.scrollIntoView();
                         }, 0);
                       }}
-                      border="1px solid gray"
+                      border={level$.get() === 1 ? "1px solid gray" : undefined}
                     />
                     <Button
                       size="xs"
