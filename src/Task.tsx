@@ -57,18 +57,9 @@ export const Task = (props: Props) => {
     threshold: 500, // In milliseconds
   });
 
-  const onRemoveClick = () => {
-    dispatch(
-      removeTask({
-        key: where,
-        id: task.id,
-      })
-    );
-  };
-
   useEffect(() => {
     if (progress > 100) {
-      onRemoveClick();
+      killTask();
     }
   }, [progress]);
 
@@ -81,7 +72,6 @@ export const Task = (props: Props) => {
       userSelect="none"
       {...restItemProps}
       spacing={0}
-      filter={`blur(${progress / 200}px)`}
       boxSizing="border-box"
     >
       <HStack w="full" align="center" justify="space-between">
@@ -100,44 +90,71 @@ export const Task = (props: Props) => {
             {task.title.emoji}
             {task.title.text}
           </Text>
-          <Text display="inline" color="gray.600" fontSize="sm">
-            {progress}%
+          <Text
+            display="inline"
+            color="gray.500"
+            fontSize="sm"
+            filter="saturate(0)"
+          >
+            {progress}✨
           </Text>
         </HStack>
         {!isZoomedOut && (
-          <Button
-            as={motion.button}
-            whileTap={{
-              transition: { duration: 0.5, type: "spring" },
-              scale: 3,
-              transitionEnd: { scale: 0.9 },
-            }}
-            whileHover={{
-              transition: { duration: 0.5, type: "spring" },
-              scale: 3,
-              transitionEnd: { scale: 0.9 },
-            }}
-            variant="outline"
-            colorScheme="blue"
-            filter={`hue-rotate(${-progress * 1}deg)`}
-            borderColor="gray.900"
-            borderWidth="2px"
-            onClick={() => {
-              const next = progress + Math.ceil(Math.random() * 8);
-              dispatch(
-                updateProgress({
-                  key: where,
-                  id: task.id,
-                  progress: next,
-                })
-              );
-              setProgress(next);
-            }}
-            p={1}
-            {...bind()}
-          >
-            👊
-          </Button>
+          <>
+            <Button
+              as={motion.button}
+              whileTap={{
+                transition: { duration: 0.5, type: "spring" },
+                scale: 3,
+                transitionEnd: { scale: 0.9 },
+              }}
+              whileHover={{
+                scale: 3,
+              }}
+              size="sm"
+              variant="unstyled"
+              filter={`saturate(0)`}
+              borderColor="gray.900"
+              onClick={killTask}
+              p={1}
+              {...bind()}
+            >
+              ❌
+            </Button>
+            <Button
+              as={motion.button}
+              whileTap={{
+                transition: { duration: 0.5, type: "spring" },
+                scale: 3,
+                transitionEnd: { scale: 0.9 },
+              }}
+              whileHover={{
+                scale: 3,
+              }}
+              variant="unstyled"
+              filter={`hue-rotate(${-progress * 1}deg)`}
+              borderColor="gray.900"
+              _focus={{
+                bg: "initial",
+              }}
+              borderWidth="2px"
+              onClick={() => {
+                const next = progress + 1;
+                dispatch(
+                  updateProgress({
+                    key: where,
+                    id: task.id,
+                    progress: next,
+                  })
+                );
+                setProgress(next);
+              }}
+              p={1}
+              {...bind()}
+            >
+              ✨
+            </Button>
+          </>
         )}
         )
       </HStack>
@@ -145,5 +162,3 @@ export const Task = (props: Props) => {
     </MVStack>
   );
 };
-
-
