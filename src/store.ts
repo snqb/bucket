@@ -84,6 +84,15 @@ const todoSlice = createSlice({
       const value = state.values[key].find((task) => task.id === id);
       if (value) value.progress = progress;
     },
+    updateDescription: function (
+      state,
+      {
+        payload: { key, id, text },
+      }: PayloadAction<{ key: string; id: string; text: string }>
+    ) {
+      const value = state.values[key].find((task) => task.id === id);
+      if (value) value.description = text;
+    },
     moveTask: (
       state,
       action: PayloadAction<{
@@ -138,6 +147,7 @@ export const {
   removeScreen,
   updateProgress,
   addScreen,
+  updateDescription,
 } = todoSlice.actions;
 
 const persistConfig = {

@@ -8,19 +8,27 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay, VStack
+  ModalOverlay,
+  Textarea,
+  VStack,
 } from "@chakra-ui/react";
 import {
-  moveTask, useAppDispatch,
-  useAppSelector
+  Todo,
+  moveTask,
+  updateDescription,
+  useAppDispatch,
+  useAppSelector,
 } from "./store";
-import { Props } from "./Task";
+import { getRandomEmoji } from "./emojis";
 
-type OverlayProps = any;
+type OverlayProps = {
+  task: Todo;
+  isOpen: boolean;
+  onClose: () => void;
+  where: string;
+};
 
-export const Overlay = ({
-  isOpen, onClose, task, where,
-}: Props & OverlayProps) => {
+export const Overlay = ({ isOpen, onClose, task, where }: OverlayProps) => {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
 
@@ -34,6 +42,16 @@ export const Overlay = ({
     );
 
     onClose();
+  };
+
+  const handleUpdateDescription = (text: string) => {
+    dispatch(
+      updateDescription({
+        key: where,
+        id: task.id,
+        text,
+      })
+    );
   };
 
   return (
@@ -52,10 +70,25 @@ export const Overlay = ({
           </Heading>
         </ModalHeader>
         <ModalBody>
-          <VStack align="start">
+          <VStack align="start" spacing={2}>
+            <Heading fontSize="lg">Details</Heading>
+            <Textarea
+              onFocus={(e) => {
+                const element = e.target;
+                element.setSelectionRange(
+                  element.value.length,
+                  element.value.length
+                );
+              }}
+              defaultValue={task.description}
+              onBlur={(e) => handleUpdateDescription(e.currentTarget.value)}
+              rows={5}
+              placeholder="Longer text"
+            />
+            <Heading fontSize="lg">Move to:</Heading>
             {structure.map((row, index) => {
               return (
-                <HStack key={"qwe" + row[index]} flex={1} align="start">
+                <HStack key={index} flex={1} align="start">
                   {row.map((screen, index) => {
                     return (
                       <Button
@@ -64,6 +97,7 @@ export const Overlay = ({
                         key={"ss" + index}
                         bg="blackAlpha.800"
                         color="white"
+                        px={1}
                         fontSize="sm"
                         isDisabled={screen === where}
                         sx={{
@@ -73,6 +107,7 @@ export const Overlay = ({
                         }}
                         onClick={() => handleMove(screen)}
                       >
+                        {getRandomEmoji(screen)}
                         {screen === where ? (
                           <Center fontSize="large">⋒</Center>
                         ) : (
