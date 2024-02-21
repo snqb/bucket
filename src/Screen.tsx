@@ -131,7 +131,7 @@ const Screen = ({ name, ...stackProps }: Props) => {
 
       {<StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />}
 
-      <VStack align="stretch" spacing={1}>
+      <VStack align="stretch" spacing={2}>
         {<Adder where={name} />}
         <AnimatePresence initial={false}>
           {todos.map((task) => (

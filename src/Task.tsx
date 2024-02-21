@@ -67,7 +67,6 @@ export const Task = (props: Props) => {
       userSelect="none"
       {...restItemProps}
       spacing={0}
-      boxSizing="border-box"
     >
       <HStack w="full" align="center" justify="space-between">
         <HStack
