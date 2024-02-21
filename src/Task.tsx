@@ -1,12 +1,13 @@
 import {
   AccordionItemProps,
+  Box,
   Button,
   HStack,
   Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { motion } from "framer-motion";
+import { animate, motion } from "framer-motion";
 import {
   ComponentProps,
   useCallback,
@@ -14,8 +15,8 @@ import {
   useRef,
   useState,
 } from "react";
-import { useLongPress } from "use-long-press";
 import { level$ } from "./App";
+import Glowing from "./Glowing";
 import { Overlay } from "./Overlay";
 import {
   Todo,
@@ -24,7 +25,6 @@ import {
   updateProgress,
   useAppDispatch,
 } from "./store";
-import { none } from "ramda";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
@@ -43,7 +43,7 @@ export const Task = (props: Props) => {
 
   const [progress, setProgress] = useState(task.progress);
 
-  const killTask = useCallback(() => {
+  const deleteTask = useCallback(() => {
     dispatch(
       removeTask({
         key: where,
@@ -52,15 +52,9 @@ export const Task = (props: Props) => {
     );
   }, [dispatch, updateProgress, hueref.current, progress]);
 
-  const bind = useLongPress(() => {}, {
-    onCancel: console.log,
-    // onFinish: killTask,
-    threshold: 500, // In milliseconds
-  });
-
   useEffect(() => {
     if (progress > 100) {
-      killTask();
+      deleteTask();
     }
   }, [progress]);
 
@@ -92,75 +86,84 @@ export const Task = (props: Props) => {
             {task.title.text}
           </Text>
           <Text
+            as={motion.div}
             display="inline"
             color="gray.500"
             fontSize="sm"
             filter="saturate(0)"
           >
             {progress}
-          </Text>{" "}
+          </Text>
         </HStack>
         {!isZoomedOut && (
           <>
-            <Button
-              as={motion.button}
-              whileTap={{
-                transition: { duration: 0.6, type: "spring" },
-                scale: 2,
-              }}
-              whileHover={{
-                scale: 1.3,
-              }}
-              size="sm"
-              variant="unstyled"
-              filter={`saturate(0)`}
-              borderColor="gray.900"
-              onClick={killTask}
-              p={1}
-              {...bind()}
-            >
-              ❌
-            </Button>
-            <Button
-              as={motion.button}
-              whileTap={{
-                transition: { duration: 1, type: "spring", mass: 0.2 },
-                scale: 5,
-                filter: "contrast(5)",
-                border: "none",
-                transitionEnd: {
-                  scale: 0.8,
-                  filter: "initial",
-                },
-              }}
-              variant="unstyled"
-              // filter={`hue-rotate(${-progress * 1}deg)`}
-              borderColor="gray.900"
-              _focus={{
-                bg: "initial",
-              }}
-              borderWidth="2px"
+            <RemoveButton
               onClick={() => {
-                const next = progress + 1;
-                dispatch(
-                  updateProgress({
-                    key: where,
-                    id: task.id,
-                    progress: next,
-                  })
-                );
-                setProgress(next);
+                animate(progress, 100, {
+                  duration: 1,
+                  onComplete: deleteTask,
+                  onUpdate: (it) => setProgress(Math.round(it)),
+                });
               }}
-              p={1}
-              {...bind()}
-            >
-              ✨
-            </Button>
+            />
+            <Glowing>
+              <Box
+                as={motion.div}
+                borderColor="gray.900"
+                _focus={{
+                  bg: "initial",
+                }}
+                minW="4.5ch"
+                borderWidth="1px"
+                letterSpacing="-0.5rem"
+                pl={1}
+                onClick={() => {
+                  const next = progress + 1;
+                  dispatch(
+                    updateProgress({
+                      key: where,
+                      id: task.id,
+                      progress: next,
+                    })
+                  );
+                  setProgress(next);
+                }}
+              >
+                ✨✨
+              </Box>
+            </Glowing>
           </>
         )}
         )
       </HStack>
       <Overlay isOpen={isOpen} onClose={onClose} {...props} />
     </MVStack>
+  );
+};
+
+const RemoveButton = ({ onClick }: { onClick: () => void }) => {
+  const [pressedCount, setPressedCount] = useState(0);
+
+  if (pressedCount > 1) return null;
+
+  const handleClick = () => {
+    if (pressedCount === 1) {
+      onClick();
+    }
+    setPressedCount(1);
+  };
+
+  return (
+    <Button
+      transform={`scale(${pressedCount === 1 ? 1.2 : 1})`}
+      size="xs"
+      variant="unstyled"
+      filter={`saturate(${pressedCount})`}
+      borderColor="gray.900"
+      onClick={handleClick}
+      p={1}
+    >
+      ❌
+    </Button>
   );
 };
