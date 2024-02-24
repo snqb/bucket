@@ -1,29 +1,36 @@
 import { PropsWithChildren, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useSpring } from "framer-motion";
 
 const Glowing = ({ children }: PropsWithChildren) => {
   const [isShining, setIsShining] = useState(false);
+  const shining = useSpring(0);
   const timeoutRef = useRef<NodeJS.Timeout>();
 
   const handleClick = () => {
     setIsShining(true);
+    shining.set(shining.get() * 1.08);
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    timeoutRef.current = setTimeout(() => setIsShining(false), 300); // Reset shining after 1 second
+
+    console.log(shining.get());
+    timeoutRef.current = setTimeout(() => {
+      shining.set(Math.max(shining.get() / 1.08, 0));
+      setIsShining(false);
+    }, 420); // Reset shining after 1 second
   };
 
   return (
     <motion.div
-      initial={{ scale: 1 }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
+      whileTap={{
+        scale: shining.get() < 0.5 ? shining.get() + 0.5 : shining.get(),
+      }}
       animate={{
         opacity: isShining ? 1 : 0.5,
         filter: isShining ? "brightness(160%)" : "brightness(100%)",
       }}
-      transition={{ duration: 0.3 }}
-      onMouseUp={handleClick}
+      transition={{ duration: 0.67 }}
+      onClick={handleClick}
       style={{ cursor: "pointer" }}
     >
       {children}
@@ -31,7 +38,6 @@ const Glowing = ({ children }: PropsWithChildren) => {
         <motion.span
           role="img"
           aria-label="Sparkles"
-          animate={{}}
           style={{
             fontSize: "3em",
             position: "absolute",

@@ -74,7 +74,7 @@ export const Overlay = ({ isOpen, onClose, task, where }: OverlayProps) => {
           </HStack>
         </ModalHeader>
         <ModalBody>
-          <VStack align="start" spacing={2}>
+          <VStack align="start" spacing={4} filter="saturate(0.2)">
             <Heading fontSize="lg">Details</Heading>
             <Textarea
               onFocus={(e) => {
@@ -86,7 +86,7 @@ export const Overlay = ({ isOpen, onClose, task, where }: OverlayProps) => {
               }}
               defaultValue={task.description}
               onBlur={(e) => handleUpdateDescription(e.currentTarget.value)}
-              rows={5}
+              rows={10}
               placeholder="Longer text"
             />
             <Heading fontSize="lg">Move to:</Heading>

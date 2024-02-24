@@ -119,6 +119,7 @@ const Widest = () => {
                     h="100%"
                     scrollSnapAlign="start"
                     scrollSnapStop="always"
+                    scrollPaddingRight="20px"
                     id="screens"
                   >
                     <Screen

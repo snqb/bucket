@@ -77,7 +77,7 @@ export const Task = (props: Props) => {
         >
           <Text
             display="inline"
-            fontSize="lg"
+            fontSize="xl"
             opacity={1 - progress / 200}
             fontWeight={500}
           >
@@ -105,32 +105,31 @@ export const Task = (props: Props) => {
                 });
               }}
             />
-            <Glowing>
-              <Box
-                as={motion.div}
-                borderColor="gray.900"
-                _focus={{
-                  bg: "initial",
-                }}
-                minW="4.5ch"
-                borderWidth="1px"
-                letterSpacing="-0.5rem"
-                pl={1}
-                onClick={() => {
-                  const next = progress + 1;
-                  dispatch(
-                    updateProgress({
-                      key: where,
-                      id: task.id,
-                      progress: next,
-                    })
-                  );
-                  setProgress(next);
-                }}
-              >
-                ✨✨
-              </Box>
-            </Glowing>
+            <Box
+              as={motion.div}
+              borderColor="gray.900"
+              _focus={{
+                bg: "initial",
+              }}
+              minW="5.5ch"
+              borderWidth="1px"
+              letterSpacing="-0.5rem"
+              p={1}
+              pl={2}
+              onClick={() => {
+                const next = progress + 1;
+                dispatch(
+                  updateProgress({
+                    key: where,
+                    id: task.id,
+                    progress: next,
+                  })
+                );
+                setProgress(next);
+              }}
+            >
+              <Glowing>✨✨</Glowing>
+            </Box>
           </>
         )}
         )
