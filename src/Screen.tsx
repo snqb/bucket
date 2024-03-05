@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   HStack,
   Heading,
@@ -10,14 +9,7 @@ import { Task } from "./Task";
 
 import { AnimatePresence, motion, useInView } from "framer-motion";
 import randomColor from "randomcolor";
-import {
-  ComponentProps,
-  memo,
-  useEffect,
-  useMemo,
-  useRef,
-  useTransition,
-} from "react";
+import { ComponentProps, memo, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { $currentScreen, level$, position$ } from "./App";
 import { getRandomEmoji } from "./emojis";
@@ -27,13 +19,14 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { Map } from "./Map";
 import { observable } from "@legendapp/state";
 
 const MVStack = motion(VStack);
 type H = ComponentProps<typeof MVStack>;
 type Props = H & {
   name: string;
+  x: number;
+  y: number;
 };
 
 const getBg = (name: string) => {
@@ -47,11 +40,10 @@ const getBg = (name: string) => {
 
 export const preventDrag$ = observable(false);
 
-const Screen = ({ name, ...stackProps }: Props) => {
+const Screen = ({ name, x, y, ...stackProps }: Props) => {
   const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
-  const [row, column] = position$.get();
   const ref = useRef();
 
   const isInView = useInView(ref, {
@@ -71,7 +63,6 @@ const Screen = ({ name, ...stackProps }: Props) => {
 
   if (todos === undefined) return null;
 
-  useTransition();
   return (
     <MVStack
       ref={ref}
@@ -96,33 +87,31 @@ const Screen = ({ name, ...stackProps }: Props) => {
       {...stackProps}
     >
       <HStack justify="space-between">
-        {level === 2 && (
-          <HStack filter="saturate(0)">
-            <Button
-              type="button"
-              size="xs"
-              variant="ghost"
-              onClick={(e) => {
-                e.stopPropagation();
-                dispatch(removeScreen({ coords: [row, column] }));
-              }}
-            >
-              🗑️
-            </Button>
-            <Button
-              size="xs"
-              variant="ghost"
-              onClick={() => {
-                const newName = prompt(`${name} -> to what?`);
-                if (newName && !tasks[newName]) {
-                  dispatch(renameScreen({ coords: [row, column], newName }));
-                }
-              }}
-            >
-              ✏️
-            </Button>
-          </HStack>
-        )}
+        <HStack filter="saturate(0)" opacity={level === 1 ? 0.5 : 1}>
+          <Button
+            type="button"
+            size="xs"
+            variant="ghost"
+            onClick={(e) => {
+              e.stopPropagation();
+              dispatch(removeScreen({ coords: [y, x] }));
+            }}
+          >
+            🗑️
+          </Button>
+          <Button
+            size="xs"
+            variant="ghost"
+            onClick={() => {
+              const newName = prompt(`${name} -> to what?`);
+              if (newName && !tasks[newName]) {
+                dispatch(renameScreen({ coords: [y, x], newName }));
+              }
+            }}
+          >
+            ✏️
+          </Button>
+        </HStack>
         <Heading fontSize="2xl" fontWeight="bold" mb={2} whiteSpace="nowrap">
           {getRandomEmoji(name)}
           {name}

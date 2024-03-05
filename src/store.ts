@@ -1,5 +1,5 @@
 import { PayloadAction, configureStore, createSlice } from "@reduxjs/toolkit";
-import { clone } from "ramda";
+import { clamp, clone } from "ramda";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { persistReducer, persistStore } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
@@ -60,15 +60,25 @@ const todoSlice = createSlice({
     ) => {
       const { title, y, x } = action.payload;
 
-      const isAvailable = !structure[y] || !structure[y][x];
-      if (isAvailable) {
-        structure[y] = structure[y] || [];
-        structure[y][x] = title;
-      } else {
-        structure.splice(y, 0, [title]);
+      // Bounds Checking
+      if (y < 0 || x < 0) {
+        console.error("Coordinates out of bounds");
+        return;
       }
 
-      values[title] = [];
+      if (y >= structure.length) {
+        structure.push([]);
+      }
+
+      const isAddingOnEmpty = !(structure[y] && structure[y][x]);
+
+      if (isAddingOnEmpty) {
+        const position = clamp(0, structure[y].length, x);
+        structure[y][position] = title;
+      } else {
+        structure[y].splice(x, 0, title);
+      }
+      Object.assign(values, { [title]: [] });
     },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
       state.values[action.payload.key] = state.values[

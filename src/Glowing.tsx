@@ -13,7 +13,6 @@ const Glowing = ({ children }: PropsWithChildren) => {
       clearTimeout(timeoutRef.current);
     }
 
-    console.log(shining.get());
     timeoutRef.current = setTimeout(() => {
       shining.set(Math.max(shining.get() / 1.08, 0));
       setIsShining(false);

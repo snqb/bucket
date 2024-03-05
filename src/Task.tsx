@@ -81,8 +81,7 @@ export const Task = (props: Props) => {
             opacity={1 - progress / 200}
             fontWeight={500}
           >
-            {task.title.emoji}
-            {task.title.text}
+            {/* {task.title.emoji} */}● {task.title.text}
           </Text>
           <Text
             as={motion.div}
@@ -128,7 +127,7 @@ export const Task = (props: Props) => {
                 setProgress(next);
               }}
             >
-              <Glowing>✨✨</Glowing>
+              <Glowing>✨s✨</Glowing>
             </Box>
           </>
         )}

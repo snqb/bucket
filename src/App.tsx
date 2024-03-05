@@ -2,6 +2,7 @@ import { Box, Button, Flex, HStack, VStack } from "@chakra-ui/react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { observable, observe } from "@legendapp/state";
+import { observer } from "@legendapp/state/react";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
@@ -19,7 +20,7 @@ enableReactTracking({
   2: Individual screen
   3: TBA -> Task level
 */
-export const level$ = observable(1);
+export const level$ = observable(import.meta.env.DEV ? 2 : 1);
 /** position in a coordinate system, x is row, y is column */
 export const position$ = observable([0, 0]);
 export const $currentScreen = observable("");
@@ -39,7 +40,7 @@ function App() {
 
 const MVStack = motion(VStack);
 
-const Widest = () => {
+const Widestt = () => {
   const structure = useAppSelector((state) => state.todo.structure);
   const values = useAppSelector((state) => state.todo.values);
   const dispatch = useDispatch();
@@ -108,7 +109,7 @@ const Widest = () => {
           <Map />
         </Box>
       )}
-      {structure.map((row, y) => {
+      {structure.map((row, y, { length: yLength }) => {
         return (
           <HStack key={y} align="stretch">
             {row.map((name, x) => {
@@ -126,6 +127,8 @@ const Widest = () => {
                       h={level$.get() === 2 ? "100vh" : "100%"}
                       w={level$.get() === 2 ? "100vw" : "100%"}
                       minW="28ch"
+                      x={x}
+                      y={y}
                       pb={4}
                       px={2}
                       key={name + x}
@@ -135,9 +138,9 @@ const Widest = () => {
                         e.stopPropagation();
                         level$.set(2);
                         $currentScreen.set(name);
-                        setTimeout(() => {
-                          (e.target as Element)?.scrollIntoView();
-                        }, 0);
+                        // setTimeout(() => {
+                        //   (e.target as Element)?.scrollIntoView();
+                        // }, 0);
                       }}
                       border={level$.get() === 1 ? "1px solid gray" : undefined}
                     />
@@ -151,14 +154,16 @@ const Widest = () => {
                       ➕
                     </Button>
                   </HStack>
-                  <Button
-                    bg="gray.800"
-                    size="xs"
-                    aspectRatio="1/1"
-                    onClick={createScreen("vertical", { x, y })}
-                  >
-                    ➕
-                  </Button>
+                  {y === yLength - 1 && x === 0 && (
+                    <Button
+                      bg="gray.800"
+                      size="xs"
+                      aspectRatio="1/1"
+                      onClick={createScreen("vertical", { x, y })}
+                    >
+                      ➕
+                    </Button>
+                  )}
                 </VStack>
               );
             })}
@@ -169,4 +174,5 @@ const Widest = () => {
   );
 };
 
+const Widest = observer(Widestt);
 export default App;
