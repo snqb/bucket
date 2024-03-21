@@ -93,8 +93,13 @@ const Widestt = () => {
       h="100vh"
       overflow="auto"
       align="start"
-      scrollSnapType="both mandatory"
+      
+      scrollSnapType={level$.get() === 1 ? "initial" : "both mandatory"}
       transform={level$.get() === 1 ? "scale(0.5)" : "scale(1)"}
+      // backgroundColor="black"
+      backgroundImage="url(https://ahoylemon.github.io/BG2COOL//patterns/random/gramma-shower-curtain.png)"
+      backgroundSize="12%"
+      backgroundPosition="23% 45%"
     >
       {level$.get() === 2 && (
         <Box
@@ -126,6 +131,7 @@ const Widestt = () => {
                     <Screen
                       h={level$.get() === 2 ? "100vh" : "100%"}
                       w={level$.get() === 2 ? "100vw" : "100%"}
+
                       minW="28ch"
                       x={x}
                       y={y}
@@ -138,9 +144,9 @@ const Widestt = () => {
                         e.stopPropagation();
                         level$.set(2);
                         $currentScreen.set(name);
-                        // setTimeout(() => {
-                        //   (e.target as Element)?.scrollIntoView();
-                        // }, 0);
+                        setTimeout(() => {
+                          (e.target as Element)?.scrollIntoView();
+                        }, 0);
                       }}
                       border={level$.get() === 1 ? "1px solid gray" : undefined}
                     />

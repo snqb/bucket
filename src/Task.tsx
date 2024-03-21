@@ -73,24 +73,19 @@ export const Task = (props: Props) => {
           as={motion.div}
           w="100%"
           align="baseline"
+          opacity={1 - progress / 150}
+
           onClick={isZoomedOut ? undefined : openMoverScreen}
         >
+          <Text fontSize="xs" textAlign="center" w="2.5rem"  border="1px solid gray">
+            {progress}%
+          </Text>
           <Text
             display="inline"
             fontSize="xl"
-            opacity={1 - progress / 200}
             fontWeight={500}
           >
-            {/* {task.title.emoji} */}● {task.title.text}
-          </Text>
-          <Text
-            as={motion.div}
-            display="inline"
-            color="gray.500"
-            fontSize="sm"
-            filter="saturate(0)"
-          >
-            {progress}
+            {/* {task.title.emoji} ●*/} {task.title.text}
           </Text>
         </HStack>
         {!isZoomedOut && (
@@ -106,7 +101,7 @@ export const Task = (props: Props) => {
             />
             <Box
               as={motion.div}
-              borderColor="gray.900"
+              borderColor="gray"
               _focus={{
                 bg: "initial",
               }}
@@ -127,7 +122,7 @@ export const Task = (props: Props) => {
                 setProgress(next);
               }}
             >
-              <Glowing>✨s✨</Glowing>
+              <Glowing>✨✨</Glowing>
             </Box>
           </>
         )}

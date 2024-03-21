@@ -1,7 +1,7 @@
 import { Box, HStack, Heading, StackProps, VStack } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import { PropsWithChildren } from "react";
-import { $currentScreen, position$ } from "./App";
+import { $currentScreen } from "./App";
 import { getRandomEmoji } from "./emojis";
 import { useAppSelector } from "./store";
 
@@ -10,7 +10,6 @@ interface Props extends StackProps {}
 const MVStack = motion(VStack);
 
 export const Map = (props: Props) => {
-  const [currentRow] = position$.get();
   const { structure } = useAppSelector((state) => state.todo);
 
   return (

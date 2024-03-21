@@ -29,25 +29,25 @@ type Props = H & {
   y: number;
 };
 
-const getBg = (name: string) => {
+const getBg = (name: string, alpha = 0.07) => {
   return randomColor({
-    luminosity: "light",
+    luminosity: "dark",
+    hue: "random",
     seed: name,
-    format: "rgba",
-    alpha: 0.07,
+    format: "hsla",
+    alpha,
   });
 };
 
 export const preventDrag$ = observable(false);
 
 const Screen = ({ name, x, y, ...stackProps }: Props) => {
-  const bg = useMemo(() => getBg(name), [name]);
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const ref = useRef();
 
   const isInView = useInView(ref, {
-    amount: 1,
+    amount: 0.8,
     root: "#screens",
   });
 
@@ -75,7 +75,8 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
       animate={{
         left: 0,
       }}
-      bg={bg}
+      opacity={level === 1 && todos.length === 0 ? 0.15 : 1}
+      bg={getBg(name, level === 1 ? 0.8 : 0.9)}
       key={name}
       height="full"
       px={[5, 5, 10, 20, 300]}
@@ -121,7 +122,7 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
       {<StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />}
 
       <VStack align="stretch" spacing={2}>
-        {<Adder where={name} />}
+        {level === 2 && <Adder where={name} />}
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
