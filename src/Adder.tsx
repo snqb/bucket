@@ -1,11 +1,4 @@
-import {
-  Input,
-  InputGroup,
-  InputGroupProps,
-  InputLeftElement,
-  forwardRef,
-} from "@chakra-ui/react";
-import { ChangeEventHandler, useState } from "react";
+import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
 import { position$ } from "./App";
@@ -17,12 +10,13 @@ import {
   useAppSelector,
   type Todo,
 } from "./store";
-export interface Props extends InputGroupProps {
+import { Input } from "./components/ui/input";
+export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
   where?: keyof TodoState;
 }
 
-const Adder = forwardRef<Props, "div">((props, ref) => {
+const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
   const dispatch = useAppDispatch();
   const [row, column] = position$.get();
@@ -32,7 +26,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
-    setText
+    setText,
   );
 
   const onAdd = (e: any) => {
@@ -57,7 +51,7 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
           key: destination,
           task,
           coords: [row, column],
-        })
+        }),
       );
     } catch (e) {
       console.error(e);
@@ -68,38 +62,17 @@ const Adder = forwardRef<Props, "div">((props, ref) => {
   };
 
   return (
-    <InputGroup
-      ref={ref}
-      variant="outline"
-      opacity={0.9}
-      borderRadius="4px"
-      size="md"
-      boxShadow={`inset 0 0 0.5px 1px hsla(0, 0%,  
-        100%, 0.075),
-        /* shadow ring 👇 */
-        0 0 0 5px hsla(0, 0%, 0%, 0.05),
-        /* multiple soft shadows 👇 */
-        0 0.3px 0.4px hsla(0, 0%, 0%, 0.02),
-        0 0.9px 1.5px hsla(0, 0%, 0%, 0.045),
-        0 3.5px 6px hsla(0, 0%, 0%, 0.09);`}
-      {...inputGroupProps}
-    >
-      <InputLeftElement>
-        <span>{R.isEmpty(text) ? "👊" : getRandomEmoji(text)}</span>
-      </InputLeftElement>
-      <Input
-        enterKeyHint="done"
-        colorScheme="blue"
-        type="text"
-        autoComplete="off"
-        value={text}
-        onChange={handleChange}
-        onBlur={onAdd}
-        onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
-        bg="gray.900"
-        placeholder={props.placeholder}
-      />
-    </InputGroup>
+    <Input
+      className="w-full bg-gray-900 bg-opacity-80"
+      enterKeyHint="done"
+      type="text"
+      autoComplete="off"
+      value={text}
+      onChange={handleChange}
+      onBlur={onAdd}
+      onKeyDown={R.when((e) => e.key === "Enter", onAdd)}
+      placeholder={props.placeholder ?? "..."}
+    />
   );
 });
 

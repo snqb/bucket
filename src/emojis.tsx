@@ -1,7 +1,4 @@
 import Rand from "rand-seed";
-import { emojis } from "./emojis";
-
-import { emojis } from "./emojis";
 
 export const emojis = [
   "😄",

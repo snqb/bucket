@@ -1,9 +1,8 @@
-import { Box, Button, Flex, HStack, VStack } from "@chakra-ui/react";
 import ReloadPrompt from "./ReloadPrompt";
 
 import { observable, observe } from "@legendapp/state";
-import { observer } from "@legendapp/state/react";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
+import { observer } from "@legendapp/state/react";
 import { motion } from "framer-motion";
 import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
@@ -29,16 +28,14 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Flex>
+        <div className="">
           <Widest />
           <ReloadPrompt />
-        </Flex>
+        </div>
       </PersistGate>
     </Provider>
   );
 }
-
-const MVStack = motion(VStack);
 
 const Widestt = () => {
   const structure = useAppSelector((state) => state.todo.structure);
@@ -55,7 +52,7 @@ const Widestt = () => {
             title: title,
             x: x + (axis === "horizontal" ? 1 : 0),
             y: y + (axis === "vertical" ? 1 : 0),
-          })
+          }),
         );
       }
     };
@@ -68,8 +65,13 @@ const Widestt = () => {
     }
   });
 
+  const level = level$.get();
+
   return (
-    <MVStack
+    <motion.div
+      className={`align-start h-full w-full overflow-auto ${
+        level === 1 ? "scale-50" : "snap scale-100 snap-both snap-mandatory"
+      }`}
       initial={{
         opacity: 0.8,
         scale: 2,
@@ -89,68 +91,49 @@ const Widestt = () => {
         damping: 20,
         stiffness: 200,
       }}
-      w="100vw"
-      h="100vh"
-      overflow="auto"
-      align="start"
-      
-      scrollSnapType={level$.get() === 1 ? "initial" : "both mandatory"}
-      transform={level$.get() === 1 ? "scale(0.5)" : "scale(1)"}
-      // backgroundColor="black"
-      backgroundImage="url(https://ahoylemon.github.io/BG2COOL//patterns/random/gramma-shower-curtain.png)"
-      backgroundSize="12%"
-      backgroundPosition="23% 45%"
+      style={{
+        background: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB2aWV3Qm94PSIwIDAgNzAwIDcwMCIgd2lkdGg9IjcwMCIgaGVpZ2h0PSI3MDAiIG9wYWNpdHk9IjEiPjxkZWZzPjxmaWx0ZXIgaWQ9Im5ubm9pc2UtZmlsdGVyIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIiBmaWx0ZXJVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHByaW1pdGl2ZVVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJsaW5lYXJSR0IiPgoJPGZlVHVyYnVsZW5jZSB0eXBlPSJ0dXJidWxlbmNlIiBiYXNlRnJlcXVlbmN5PSIwLjA3MSIgbnVtT2N0YXZlcz0iNCIgc2VlZD0iMTUiIHN0aXRjaFRpbGVzPSJzdGl0Y2giIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgcmVzdWx0PSJ0dXJidWxlbmNlIj48L2ZlVHVyYnVsZW5jZT4KCTxmZVNwZWN1bGFyTGlnaHRpbmcgc3VyZmFjZVNjYWxlPSIxMCIgc3BlY3VsYXJDb25zdGFudD0iMS44IiBzcGVjdWxhckV4cG9uZW50PSIyMCIgbGlnaHRpbmctY29sb3I9IiM2ODQ1ZGUiIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgaW49InR1cmJ1bGVuY2UiIHJlc3VsdD0ic3BlY3VsYXJMaWdodGluZyI+CiAgICAJCTxmZURpc3RhbnRMaWdodCBhemltdXRoPSIzIiBlbGV2YXRpb249IjExMCI+PC9mZURpc3RhbnRMaWdodD4KICAJPC9mZVNwZWN1bGFyTGlnaHRpbmc+CiAgCjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idHJhbnNwYXJlbnQiPjwvcmVjdD48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0iIzY4NDVkZSIgZmlsdGVyPSJ1cmwoI25ubm9pc2UtZmlsdGVyKSI+PC9yZWN0Pjwvc3ZnPg==")`,
+      }}
     >
-      {level$.get() === 2 && (
-        <Box
-          onClick={() => {
-            level$.set((x) => (x === 1 ? 2 : 1));
-          }}
-          position="fixed"
-          bottom="2vh"
-          right="0"
-          p={3}
-        >
-          <Map />
-        </Box>
-      )}
-      {structure.map((row, y, { length: yLength }) => {
-        return (
-          <HStack key={y} align="stretch">
-            {row.map((name, x) => {
-              return (
-                <VStack align="center" key={x}>
-                  <HStack
-                    align="start"
-                    h="100%"
-                    scrollSnapAlign="start"
-                    scrollSnapStop="always"
-                    scrollPaddingRight="20px"
-                    id="screens"
-                  >
-                    <Screen
-                      h={level$.get() === 2 ? "100vh" : "100%"}
-                      w={level$.get() === 2 ? "100vw" : "100%"}
-
-                      minW="28ch"
-                      x={x}
-                      y={y}
-                      pb={4}
-                      px={2}
-                      key={name + x}
-                      name={name}
-                      drag={false}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        level$.set(2);
-                        $currentScreen.set(name);
-                        setTimeout(() => {
-                          (e.target as Element)?.scrollIntoView();
-                        }, 0);
-                      }}
-                      border={level$.get() === 1 ? "1px solid gray" : undefined}
-                    />
-                    <Button
+      <>
+        {level$.get() === 2 && (
+          <div
+            className="fixed bottom-[2vh] right-0 p-3"
+            onClick={() => {
+              level$.set((x) => (x === 1 ? 2 : 1));
+            }}
+          >
+            <Map />
+          </div>
+        )}
+      </>
+      <>
+        {structure.map((row, y) => {
+          return (
+            <div className="flex items-stretch gap-1" key={y}>
+              {row.map((name, x) => {
+                return (
+                  <div className="flex flex-col items-center" key={x}>
+                    <div
+                      className="h-full snap-both snap-start scroll-p-4 items-start"
+                      id="screens"
+                    >
+                      <Screen
+                        x={x}
+                        y={y}
+                        key={name + x}
+                        name={name}
+                        drag={false}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          level$.set(2);
+                          $currentScreen.set(name);
+                          setTimeout(() => {
+                            (e.target as Element)?.scrollIntoView();
+                          }, 0);
+                        }}
+                      />
+                      {/* <Button
                       size="xs"
                       aspectRatio="1/1"
                       bg="gray.800"
@@ -158,9 +141,9 @@ const Widestt = () => {
                       alignSelf="center"
                     >
                       ➕
-                    </Button>
-                  </HStack>
-                  {y === yLength - 1 && x === 0 && (
+                    </Button> */}
+                    </div>
+                    {/* {y === yLength - 1 && x === 0 && (
                     <Button
                       bg="gray.800"
                       size="xs"
@@ -169,14 +152,15 @@ const Widestt = () => {
                     >
                       ➕
                     </Button>
-                  )}
-                </VStack>
-              );
-            })}
-          </HStack>
-        );
-      })}
-    </MVStack>
+                  )} */}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </>
+    </motion.div>
   );
 };
 

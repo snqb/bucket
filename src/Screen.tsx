@@ -1,17 +1,17 @@
-import {
-  Button,
-  HStack,
-  Heading,
-  StackDivider,
-  VStack,
-} from "@chakra-ui/react";
 import { Task } from "./Task";
 
-import { AnimatePresence, motion, useInView } from "framer-motion";
+import { observable } from "@legendapp/state";
+import {
+  AnimatePresence,
+  HTMLMotionProps,
+  motion,
+  useInView,
+} from "framer-motion";
 import randomColor from "randomcolor";
-import { ComponentProps, memo, useEffect, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
-import { $currentScreen, level$, position$ } from "./App";
+import { $currentScreen, level$ } from "./App";
+import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
 import {
   removeScreen,
@@ -19,11 +19,8 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { observable } from "@legendapp/state";
 
-const MVStack = motion(VStack);
-type H = ComponentProps<typeof MVStack>;
-type Props = H & {
+type Props = HTMLMotionProps<"div"> & {
   name: string;
   x: number;
   y: number;
@@ -41,14 +38,13 @@ const getBg = (name: string, alpha = 0.07) => {
 
 export const preventDrag$ = observable(false);
 
-const Screen = ({ name, x, y, ...stackProps }: Props) => {
+const Screen = ({ name, x, y, ...divProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
-  const ref = useRef();
+  const ref = useRef<Element>(document.querySelector("#screens")!);
 
   const isInView = useInView(ref, {
     amount: 0.8,
-    root: "#screens",
   });
 
   const level = level$.get();
@@ -61,11 +57,21 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
 
   const todos = tasks[name] ?? [];
 
+  const bg = useMemo(() => getBg(name, 0.8), [name, level]);
   if (todos === undefined) return null;
 
+  const opacity = level === 1 && todos.length === 0 ? "opacity-0" : "";
+  const border = level === 1 ? "border border-gray-400" : "";
+
   return (
-    <MVStack
-      ref={ref}
+    <motion.div
+      className={`flex h-full flex-col ${opacity} min-w-[28ch] items-stretch gap-3 overflow-hidden px-5 py-4 ${border} bg-opacity-75`}
+      style={{
+        background: bg,
+        height: level$.get() === 2 ? "100svh" : "100%",
+        width: level$.get() === 2 ? "100svw" : "100%",
+      }}
+      ref={ref as any}
       transition={{
         type: "spring",
         duration: 0.2,
@@ -75,23 +81,12 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
       animate={{
         left: 0,
       }}
-      opacity={level === 1 && todos.length === 0 ? 0.15 : 1}
-      bg={getBg(name, level === 1 ? 0.8 : 0.9)}
-      key={name}
-      height="full"
-      px={[5, 5, 10, 20, 300]}
-      pt={4}
-      spacing={3}
-      data-name={name}
-      align="stretch"
-      overflow="hidden"
-      {...stackProps}
+      {...divProps}
     >
-      <HStack justify="space-between">
-        <HStack filter="saturate(0)" opacity={level === 1 ? 0.5 : 1}>
+      <div className="flex justify-between">
+        <div className={`flex saturate-0 opacity-${level === 1 ? 50 : 100}`}>
           <Button
-            type="button"
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
@@ -101,7 +96,7 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
             🗑️
           </Button>
           <Button
-            size="xs"
+            size="sm"
             variant="ghost"
             onClick={() => {
               const newName = prompt(`${name} -> to what?`);
@@ -112,16 +107,16 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
           >
             ✏️
           </Button>
-        </HStack>
-        <Heading fontSize="2xl" fontWeight="bold" mb={2} whiteSpace="nowrap">
+        </div>
+        <h2 className="mb-2 whitespace-nowrap text-2xl font-bold">
           {getRandomEmoji(name)}
           {name}
-        </Heading>
-      </HStack>
+        </h2>
+      </div>
 
-      {<StackDivider borderBottomColor="gray.700" borderBottomWidth="1px" />}
+      <hr className="border-gray-500" />
 
-      <VStack align="stretch" spacing={2}>
+      <div className="flex flex-col items-stretch gap-2">
         {level === 2 && <Adder where={name} />}
         <AnimatePresence initial={false}>
           {todos.map((task) => (
@@ -133,15 +128,14 @@ const Screen = ({ name, x, y, ...stackProps }: Props) => {
               exit={{
                 opacity: 0,
               }}
-              mode="slow"
               key={task.id}
               task={task}
               where={name}
             />
           ))}
         </AnimatePresence>
-      </VStack>
-    </MVStack>
+      </div>
+    </motion.div>
   );
 };
 

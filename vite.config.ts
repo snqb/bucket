@@ -1,4 +1,4 @@
-import autoprefixer from "autoprefixer";
+import * as path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
 
@@ -27,7 +27,6 @@ const PWA = VitePWA({
     "apple-splash-dark-750-1334.jpg",
     "apple-splash-dark-640-1136.jpg",
     "apple-icon-180.png",
-
     "wave3.png",
     "line2.svg",
   ],
@@ -68,11 +67,14 @@ const PWA = VitePWA({
 
 export default defineConfig({
   css: {
-    postcss: {
-      plugins: [autoprefixer()],
-    },
+    postcss: "./postcss.config.js",
   },
   plugins: [PWA],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
   build: {
     target: "safari11",
   },
