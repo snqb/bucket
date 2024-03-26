@@ -69,8 +69,8 @@ const Widestt = () => {
 
   return (
     <motion.div
-      className={`align-start h-full w-full overflow-auto ${
-        level === 1 ? "scale-50" : "snap scale-100 snap-both snap-mandatory"
+      className={`align-start overflow-none h-min w-max snap-both snap-mandatory ${
+        level === 1 ? "scale-50" : "scale-100"
       }`}
       initial={{
         opacity: 0.8,
@@ -85,55 +85,44 @@ const Widestt = () => {
         y: 0,
       }}
       exit={{ scale: 0 }}
-      transition={{
-        duration: 0.3,
-        type: "spring",
-        damping: 20,
-        stiffness: 200,
-      }}
+      // transition={{
+      //   duration: 0.3,
+      //   type: "spring",
+      //   damping: 20,
+      //   stiffness: 200,
+      // }}
       style={{
         background: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB2aWV3Qm94PSIwIDAgNzAwIDcwMCIgd2lkdGg9IjcwMCIgaGVpZ2h0PSI3MDAiIG9wYWNpdHk9IjEiPjxkZWZzPjxmaWx0ZXIgaWQ9Im5ubm9pc2UtZmlsdGVyIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIiBmaWx0ZXJVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHByaW1pdGl2ZVVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJsaW5lYXJSR0IiPgoJPGZlVHVyYnVsZW5jZSB0eXBlPSJ0dXJidWxlbmNlIiBiYXNlRnJlcXVlbmN5PSIwLjA3MSIgbnVtT2N0YXZlcz0iNCIgc2VlZD0iMTUiIHN0aXRjaFRpbGVzPSJzdGl0Y2giIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgcmVzdWx0PSJ0dXJidWxlbmNlIj48L2ZlVHVyYnVsZW5jZT4KCTxmZVNwZWN1bGFyTGlnaHRpbmcgc3VyZmFjZVNjYWxlPSIxMCIgc3BlY3VsYXJDb25zdGFudD0iMS44IiBzcGVjdWxhckV4cG9uZW50PSIyMCIgbGlnaHRpbmctY29sb3I9IiM2ODQ1ZGUiIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgaW49InR1cmJ1bGVuY2UiIHJlc3VsdD0ic3BlY3VsYXJMaWdodGluZyI+CiAgICAJCTxmZURpc3RhbnRMaWdodCBhemltdXRoPSIzIiBlbGV2YXRpb249IjExMCI+PC9mZURpc3RhbnRMaWdodD4KICAJPC9mZVNwZWN1bGFyTGlnaHRpbmc+CiAgCjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idHJhbnNwYXJlbnQiPjwvcmVjdD48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0iIzY4NDVkZSIgZmlsdGVyPSJ1cmwoI25ubm9pc2UtZmlsdGVyKSI+PC9yZWN0Pjwvc3ZnPg==")`,
       }}
     >
-      <>
-        {level$.get() === 2 && (
+      {structure.map((row, y) => {
+        return (
           <div
-            className="fixed bottom-[2vh] right-0 p-3"
-            onClick={() => {
-              level$.set((x) => (x === 1 ? 2 : 1));
-            }}
+            className="flex snap-start snap-always items-stretch gap-1"
+            key={y}
           >
-            <Map />
-          </div>
-        )}
-      </>
-      <>
-        {structure.map((row, y) => {
-          return (
-            <div className="flex items-stretch gap-1" key={y}>
-              {row.map((name, x) => {
-                return (
-                  <div className="flex flex-col items-center" key={x}>
-                    <div
-                      className="h-full snap-both snap-start scroll-p-4 items-start"
-                      id="screens"
-                    >
-                      <Screen
-                        x={x}
-                        y={y}
-                        key={name + x}
-                        name={name}
-                        drag={false}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          level$.set(2);
-                          $currentScreen.set(name);
-                          setTimeout(() => {
-                            (e.target as Element)?.scrollIntoView();
-                          }, 0);
-                        }}
-                      />
-                      {/* <Button
+            {row.map((name, x) => {
+              return (
+                <div className="flex flex-col items-center" key={x}>
+                  <Screen
+                    x={x}
+                    y={y}
+                    key={name + x}
+                    name={name}
+                    drag={false}
+                    onClick={(e) => {
+                      if (level$.get() === 2) return;
+                      e.stopPropagation();
+                      level$.set(2);
+                      $currentScreen.set(name);
+                      setTimeout(() => {
+                        (e.target as Element)?.scrollIntoView();
+                      }, 0);
+
+                      console.log("HAHA");
+                    }}
+                  />
+                  {/* <Button
                       size="xs"
                       aspectRatio="1/1"
                       bg="gray.800"
@@ -142,8 +131,7 @@ const Widestt = () => {
                     >
                       ➕
                     </Button> */}
-                    </div>
-                    {/* {y === yLength - 1 && x === 0 && (
+                  {/* {y === yLength - 1 && x === 0 && (
                     <Button
                       bg="gray.800"
                       size="xs"
@@ -153,13 +141,24 @@ const Widestt = () => {
                       ➕
                     </Button>
                   )} */}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </>
+                </div>
+              );
+            })}
+            <>
+              {level$.get() === 2 && (
+                <div
+                  className="fixed bottom-[2vh] right-0 p-3"
+                  onClick={() => {
+                    level$.set((x) => (x === 1 ? 2 : 1));
+                  }}
+                >
+                  <Map />
+                </div>
+              )}
+            </>
+          </div>
+        );
+      })}
     </motion.div>
   );
 };
