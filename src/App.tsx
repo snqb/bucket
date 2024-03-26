@@ -119,7 +119,6 @@ const Widestt = () => {
                         (e.target as Element)?.scrollIntoView();
                       }, 0);
 
-                      console.log("HAHA");
                     }}
                   />
                   {/* <Button
