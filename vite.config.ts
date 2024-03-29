@@ -72,12 +72,12 @@ export default defineConfig({
   },
   plugins: [
     PWA,
-    // million.vite({
-    //   auto: {
-    //     threshold: 0.05,
-    //     skip: ["useBadHook", /badVariable/g],
-    //   },
-    // }),
+    million.vite({
+      auto: {
+        threshold: 0.05,
+        skip: ["useBadHook", /badVariable/g],
+      },
+    }),
   ],
   resolve: {
     alias: {

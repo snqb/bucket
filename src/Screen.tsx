@@ -65,11 +65,9 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`flex h-full flex-col ${opacity} min-w-[28ch] items-stretch gap-3 overflow-hidden px-5 py-4 ${border} bg-opacity-75`}
+      className={`flex h-full flex-col ${opacity} min-w-[${todos.length > 0 ? 42 : 21}ch] items-stretch gap-3 overflow-hidden px-5 py-4 ${border} bg-opacity-75`}
       style={{
         background: bg,
-        height: level$.get() === 2 ? "100svh" : "100%",
-        width: level$.get() === 2 ? "100svw" : "100%",
       }}
       ref={ref as any}
       transition={{
@@ -83,14 +81,14 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className="flex justify-between">
+      <div className="max-w-screen flex justify-between">
         <div className={`flex saturate-0 opacity-${level === 1 ? 50 : 100}`}>
           <Button
             size="sm"
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              dispatch(removeScreen({ coords: [y, x] }));
+              // dispatch(removeScreen({ coords: [y, x] }));
             }}
           >
             🗑️
@@ -108,7 +106,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             ✏️
           </Button>
         </div>
-        <h2 className="mb-2 whitespace-nowrap text-2xl font-bold">
+        <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
           {getRandomEmoji(name)}
           {name}
         </h2>
@@ -119,7 +117,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       <div className="flex flex-col items-stretch gap-2">
         {level === 2 && <Adder where={name} />}
         <AnimatePresence initial={false}>
-          {todos.map((task) => (
+          {todos.map((task, index) => (
             <Task
               initial={{ transform: "translateY(-100%)" }}
               animate={{
@@ -128,7 +126,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
               exit={{
                 opacity: 0,
               }}
-              key={task.id}
+              key={task.id + index}
               task={task}
               where={name}
             />

@@ -1,17 +1,7 @@
 import { HTMLMotionProps, animate, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+import { Pressable, SpaceContext } from "react-zoomable-ui";
 import { level$ } from "./App";
-import { Button } from "./components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "./components/ui/dialog";
-import { Textarea } from "./components/ui/textarea";
-import { getRandomEmoji } from "./emojis";
 import {
   Todo,
   TodoState,
@@ -22,6 +12,9 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { Button } from "./components/ui/button";
+import { Textarea } from "./components/ui/textarea";
+import { getRandomEmoji } from "./emojis";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -31,8 +24,11 @@ type Props = HTMLMotionProps<"div"> & {
 export const Task = (props: Props) => {
   const { task, where } = props;
   const dispatch = useAppDispatch();
-  const hueref = useRef<number>();
   const { structure } = useAppSelector((state) => state.todo);
+  const { viewPort: viewport } = useContext(SpaceContext);
+  const x = useContext(SpaceContext);
+  const [show, setShow] = useState(false);
+  console.log(x);
 
   const [progress, setProgress] = useState(task.progress);
 
@@ -43,7 +39,7 @@ export const Task = (props: Props) => {
         id: task.id,
       }),
     );
-  }, [dispatch, updateProgress, hueref.current, progress]);
+  }, [dispatch, updateProgress, progress]);
 
   const updateTaskDescription = (text: string) => {
     dispatch(
@@ -62,9 +58,8 @@ export const Task = (props: Props) => {
   }, [progress]);
 
   const isZoomedOut = level$.get() === 1;
-
   return (
-    <Dialog>
+    <div>
       <div className="flex w-full select-none items-baseline py-1">
         <motion.div
           className="flex w-full items-baseline gap-2 "
@@ -75,9 +70,24 @@ export const Task = (props: Props) => {
           <div className="max-h-6 min-w-[4ch] border border-gray-400 p-1 text-center text-xs">
             {progress}%
           </div>
-          <DialogTrigger>
+          <Pressable
+            onTap={() => {
+              setShow(true);
+
+              setTimeout(() => {
+                const element = document.querySelector(
+                  `[data-task="${task.id}"]`,
+                ) as HTMLElement;
+                console.log(element);
+
+                if (viewport && element) {
+                  viewport.camera.centerFitElementIntoView(element);
+                }
+              }, 400);
+            }}
+          >
             <p className="text-xl">{task.title.text}</p>
-          </DialogTrigger>
+          </Pressable>
         </motion.div>
         {!isZoomedOut && (
           <div className="flex min-w-[100px] items-baseline gap-4">
@@ -90,10 +100,8 @@ export const Task = (props: Props) => {
                 });
               }}
             />
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
+            <Pressable
+              onTap={() => {
                 const next = progress + 1;
                 dispatch(
                   updateProgress({
@@ -104,59 +112,62 @@ export const Task = (props: Props) => {
                 );
                 setProgress(next);
               }}
-              className="w-15 group relative h-7 rounded-lg px-1 font-bold text-white"
             >
-              <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-              <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-              <span className="relative">✨✨</span>
-            </div>
+              <div className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white">
+                <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+                <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+                <span className="relative">✨✨</span>
+              </div>
+            </Pressable>
           </div>
         )}
       </div>
-      <DialogContent className="h-full w-full bg-gray-800">
-        <DialogHeader>
-          <DialogTitle className="mb-4 text-xl">{task.title.text}</DialogTitle>
 
-          <h4 className="text-md text-left">Content:</h4>
-          <Textarea
-            className="bg-gray-800 text-white"
-            defaultValue={task.description}
-            onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-            rows={10}
-            placeholder="Longer text"
-          />
+      <div
+        data-task={task.id}
+        className={`${show ? "flex" : "hidden"} flex-col items-stretch`}
+      >
+        {/* <p className="mb-4 text-xl">{task.title.text}</p> */}
 
-          <h4 className="text-md mt-4 text-left">Move to:</h4>
-          <div className="flex flex-col gap-1">
-            {structure.map((row, index) => (
-              <div key={index} className="flex flex-row gap-1">
-                {row.map((screen, index) => (
-                  <DialogClose asChild>
-                    <Button
-                      key={"ss" + index}
-                      variant="outline"
-                      className="bg-black px-1 text-white"
-                      onClick={() => {
-                        dispatch(
-                          moveTask({
-                            from: where,
-                            to: screen,
-                            id: task.id,
-                          }),
-                        );
-                      }}
-                    >
-                      {getRandomEmoji(screen)}
-                      {screen}
-                    </Button>
-                  </DialogClose>
-                ))}
-              </div>
-            ))}
-          </div>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
+        {/* <h4 className="text-md text-left">Content:</h4> */}
+        <Textarea
+          className="bg-gray-800 text-white"
+          defaultValue={task.description}
+          onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
+          rows={10}
+          placeholder="Longer text"
+        />
+
+        <h4 className="text-md mt-4 text-left">Move to:</h4>
+        <div className="flex flex-col gap-1">
+          {structure.map((row, index) => (
+            <div key={"ss" + index} className="flex flex-row gap-1">
+              {row.map((screen, index) => (
+                // <DialogClose asChild key={index}>
+                <Button
+                  variant="outline"
+                  className="bg-black px-1 text-white"
+                  onClick={() => {
+                    dispatch(
+                      moveTask({
+                        from: where,
+                        to: screen,
+                        id: task.id,
+                      }),
+                    );
+                  }}
+                >
+                  {getRandomEmoji(screen)}
+                  {screen}
+                </Button>
+                // </DialogClose>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div />
+    </div>
   );
 };
 
