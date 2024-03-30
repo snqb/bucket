@@ -100,8 +100,8 @@ export const Task = (props: Props) => {
             }}
           >
             <div className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white">
-              <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
-              <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+              <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
+              <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
               <span className="relative">✨✨</span>
             </div>
           </Pressable>
