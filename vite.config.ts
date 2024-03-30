@@ -29,7 +29,7 @@ const PWA = VitePWA({
     "apple-splash-dark-640-1136.jpg",
     "apple-icon-180.png",
     "wave3.png",
-    "line2.svg",
+    "bg.svg",
   ],
   manifest: {
     name: "Bucket",

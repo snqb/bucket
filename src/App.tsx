@@ -9,6 +9,7 @@ import { Space } from "react-zoomable-ui";
 import { PersistGate } from "redux-persist/integration/react";
 import Screen from "./Screen";
 import { persistor, store, useAppSelector } from "./store";
+import { Button } from "./components/ui/button";
 
 enableReactTracking({
   auto: true,
@@ -55,9 +56,6 @@ const Widestt = () => {
         damping: 20,
         stiffness: 200,
       }}
-      style={{
-        background: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIHhtbG5zOnN2Z2pzPSJodHRwOi8vc3ZnanMuZGV2L3N2Z2pzIiB2aWV3Qm94PSIwIDAgNzAwIDcwMCIgd2lkdGg9IjcwMCIgaGVpZ2h0PSI3MDAiIG9wYWNpdHk9IjEiPjxkZWZzPjxmaWx0ZXIgaWQ9Im5ubm9pc2UtZmlsdGVyIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTQwJSIgaGVpZ2h0PSIxNDAlIiBmaWx0ZXJVbml0cz0ib2JqZWN0Qm91bmRpbmdCb3giIHByaW1pdGl2ZVVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJsaW5lYXJSR0IiPgoJPGZlVHVyYnVsZW5jZSB0eXBlPSJ0dXJidWxlbmNlIiBiYXNlRnJlcXVlbmN5PSIwLjA3MSIgbnVtT2N0YXZlcz0iNCIgc2VlZD0iMTUiIHN0aXRjaFRpbGVzPSJzdGl0Y2giIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgcmVzdWx0PSJ0dXJidWxlbmNlIj48L2ZlVHVyYnVsZW5jZT4KCTxmZVNwZWN1bGFyTGlnaHRpbmcgc3VyZmFjZVNjYWxlPSIxMCIgc3BlY3VsYXJDb25zdGFudD0iMS44IiBzcGVjdWxhckV4cG9uZW50PSIyMCIgbGlnaHRpbmctY29sb3I9IiM2ODQ1ZGUiIHg9IjAlIiB5PSIwJSIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgaW49InR1cmJ1bGVuY2UiIHJlc3VsdD0ic3BlY3VsYXJMaWdodGluZyI+CiAgICAJCTxmZURpc3RhbnRMaWdodCBhemltdXRoPSIzIiBlbGV2YXRpb249IjExMCI+PC9mZURpc3RhbnRMaWdodD4KICAJPC9mZVNwZWN1bGFyTGlnaHRpbmc+CiAgCjwvZmlsdGVyPjwvZGVmcz48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0idHJhbnNwYXJlbnQiPjwvcmVjdD48cmVjdCB3aWR0aD0iNzAwIiBoZWlnaHQ9IjcwMCIgZmlsbD0iIzY4NDVkZSIgZmlsdGVyPSJ1cmwoI25ubm9pc2UtZmlsdGVyKSI+PC9yZWN0Pjwvc3ZnPg==")`,
-      }}
     >
       {structure.map((row, y) => {
         return (
@@ -80,9 +78,138 @@ const Widestt = () => {
           </div>
         );
       })}
+      <Button
+        variant="ghost"
+        size="lg"
+        className="fixed bottom-0 right-0 p-4 text-xs text-white"
+      >
+        🏠
+      </Button>
     </motion.div>
   );
 };
 
 const Widest = observer(Widestt);
 export default App;
+
+const Bg = () => {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      version="1.1"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
+      xmlBase="http://www.w3.org/2000/svg"
+      viewBox="0 0 700 700"
+      width="700"
+      height="700"
+    >
+      <defs>
+        <linearGradient
+          gradientTransform="rotate(-57, 0.5, 0.5)"
+          x1="50%"
+          y1="0%"
+          x2="50%"
+          y2="100%"
+          id="gggrain-gradient2"
+        >
+          <stop
+            stop-color="hsla(221, 83%, 49%, 1.00)"
+            stop-opacity="1"
+            offset="-0%"
+          ></stop>
+          <stop
+            stop-color="rgba(255,255,255,0)"
+            stop-opacity="0"
+            offset="100%"
+          ></stop>
+        </linearGradient>
+        <linearGradient
+          gradientTransform="rotate(57, 0.5, 0.5)"
+          x1="50%"
+          y1="0%"
+          x2="50%"
+          y2="100%"
+          id="gggrain-gradient3"
+        >
+          <stop stop-color="hsl(316, 100%, 50%)" stop-opacity="1"></stop>
+          <stop
+            stop-color="rgba(255,255,255,0)"
+            stop-opacity="0"
+            offset="100%"
+          ></stop>
+        </linearGradient>
+        <filter
+          id="gggrain-filter"
+          x="-20%"
+          y="-20%"
+          width="140%"
+          height="140%"
+          filterUnits="objectBoundingBox"
+          primitiveUnits="userSpaceOnUse"
+          color-interpolation-filters="sRGB"
+        >
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.55"
+            numOctaves="2"
+            seed="2"
+            stitchTiles="stitch"
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+            result="turbulence"
+          ></feTurbulence>
+          <feColorMatrix
+            type="saturate"
+            values="0"
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+            in="turbulence"
+            result="colormatrix"
+          ></feColorMatrix>
+          <feComponentTransfer
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+            in="colormatrix"
+            result="componentTransfer"
+          >
+            <feFuncR type="linear" slope="3"></feFuncR>
+            <feFuncG type="linear" slope="3"></feFuncG>
+            <feFuncB type="linear" slope="3"></feFuncB>
+          </feComponentTransfer>
+          <feColorMatrix
+            x="0%"
+            y="0%"
+            width="100%"
+            height="100%"
+            in="componentTransfer"
+            result="colormatrix2"
+            type="matrix"
+            values="1 0 0 0 0
+          0 1 0 0 0
+          0 0 1 0 0
+          0 0 0 21 -13"
+          ></feColorMatrix>
+        </filter>
+      </defs>
+      <g>
+        <rect width="100%" height="100%" fill="hsl(0, 100%, 60%)"></rect>
+        <rect width="100%" height="100%" fill="url(#gggrain-gradient3)"></rect>
+        <rect width="100%" height="100%" fill="url(#gggrain-gradient2)"></rect>
+        <rect
+          width="100%"
+          height="100%"
+          fill="transparent"
+          filter="url(#gggrain-filter)"
+          opacity="1"
+          style="mix-blend-mode: soft-light"
+        ></rect>
+      </g>
+    </svg>
+  );
+};

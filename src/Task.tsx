@@ -1,6 +1,9 @@
 import { HTMLMotionProps, animate, motion } from "framer-motion";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Pressable, SpaceContext } from "react-zoomable-ui";
+import { Button } from "./components/ui/button";
+import { Textarea } from "./components/ui/textarea";
+import { getRandomEmoji } from "./emojis";
 import {
   Todo,
   TodoState,
@@ -11,9 +14,6 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { Button } from "./components/ui/button";
-import { Textarea } from "./components/ui/textarea";
-import { getRandomEmoji } from "./emojis";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -70,18 +70,7 @@ export const Task = (props: Props) => {
           </div>
           <Pressable
             onTap={() => {
-              setShow(true);
-
-              setTimeout(() => {
-                const element = document.querySelector(
-                  `[data-task="${task.id}"]`,
-                ) as HTMLElement;
-                console.log(element);
-
-                if (viewport && element) {
-                  viewport.camera.centerFitElementIntoView(element);
-                }
-              }, 400);
+              setShow((prev) => !prev);
             }}
           >
             <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
