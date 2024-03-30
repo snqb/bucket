@@ -89,29 +89,14 @@ const Widestt = () => {
             key={y}
           >
             {row.map((name, x) => {
-              const id = `${name}-${x}-${y}`;
+              const id = `screen-${name}`;
               return (
-                <Pressable
+                <div
                   key={id}
-                  className="flex flex-col items-stretch gap-2"
-                  onTap={() => {
-                    const element = document.querySelector(
-                      `#${id}`,
-                    ) as HTMLElement;
-                    if (viewPort) {
-                      console.log(element);
-                      viewPort?.camera.centerFitElementIntoView(
-                        element,
-                        undefined,
-                        {
-                          durationMilliseconds: 400,
-                        },
-                      );
-                    }
-                  }}
+                  className="max-w-screen flex flex-col items-stretch gap-2"
                 >
                   <Screen id={id} x={x} y={y} name={name} drag={false} />
-                </Pressable>
+                </div>
               );
             })}
             <></>

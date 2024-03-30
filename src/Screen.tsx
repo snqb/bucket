@@ -8,17 +8,13 @@ import {
   useInView,
 } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useContext, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { $currentScreen, level$ } from "./App";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
-import {
-  removeScreen,
-  renameScreen,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
+import { renameScreen, useAppDispatch, useAppSelector } from "./store";
+import { Pressable, SpaceContext } from "react-zoomable-ui";
 
 type Props = HTMLMotionProps<"div"> & {
   name: string;
@@ -42,6 +38,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const ref = useRef<Element>(document.querySelector("#screens")!);
+  const { viewPort } = useContext(SpaceContext);
 
   const isInView = useInView(ref, {
     amount: 0.8,
@@ -88,7 +85,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             variant="ghost"
             onClick={(e) => {
               e.stopPropagation();
-              // dispatch(removeScreen({ coords: [y, x] }));
             }}
           >
             🗑️
@@ -106,10 +102,24 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             ✏️
           </Button>
         </div>
-        <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-          {getRandomEmoji(name)}
-          {name}
-        </h2>
+        <Pressable
+          onTap={() => {
+            const element = document.querySelector(
+              `#screen-${name}`,
+            ) as HTMLElement;
+            if (viewPort) {
+              console.log(element);
+              viewPort?.camera.centerFitElementIntoView(element, undefined, {
+                durationMilliseconds: 400,
+              });
+            }
+          }}
+        >
+          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
+            {getRandomEmoji(name)}
+            {name}
+          </h2>
+        </Pressable>
       </div>
 
       <hr className="border-gray-500" />
