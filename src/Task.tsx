@@ -58,7 +58,7 @@ export const Task = (props: Props) => {
 
   return (
     <div>
-      <div className="flex w-full select-none items-baseline py-1">
+      <div className="flex w-full select-none items-baseline gap-2 py-1">
         <motion.div
           className="flex w-full items-baseline gap-2 "
           style={{
@@ -84,7 +84,7 @@ export const Task = (props: Props) => {
               }, 400);
             }}
           >
-            <p className="text-xl">{task.title.text}</p>
+            <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
           </Pressable>
         </motion.div>
         <div className="flex min-w-[100px] items-baseline gap-4">
