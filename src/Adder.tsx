@@ -1,26 +1,17 @@
 import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
-import { position$ } from "./App";
-import { getRandomEmoji } from "./emojis";
-import {
-  TodoState,
-  addTask,
-  useAppDispatch,
-  useAppSelector,
-  type Todo,
-} from "./store";
 import { Input } from "./components/ui/input";
+import { getRandomEmoji } from "./emojis";
+import { TodoState, addTask, useAppDispatch, type Todo } from "./store";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
-  where?: keyof TodoState;
+  where: keyof TodoState;
 }
 
 const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
   const dispatch = useAppDispatch();
-  const [row, column] = position$.get();
-  const structure = useAppSelector((state) => state.todo.structure);
 
   const [text, setText] = useState("");
 
@@ -44,13 +35,10 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
     };
 
     try {
-      const destination = where ?? structure[row][column];
-
       dispatch(
         addTask({
-          key: destination,
+          key: where,
           task,
-          coords: [row, column],
         }),
       );
     } catch (e) {

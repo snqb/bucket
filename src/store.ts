@@ -38,11 +38,20 @@ const todoSlice = createSlice({
       action: PayloadAction<{
         key: string;
         task: Todo;
-        coords: [number, number];
-      }>
+      }>,
     ) => {
-      const { key, coords } = action.payload;
-      const [row, column] = coords;
+      const { key } = action.payload;
+
+      const [row, column] = state.structure.reduce(
+        (acc, row, rowIndex) => {
+          const columnIndex = row.indexOf(key);
+          if (columnIndex > -1) {
+            acc = [rowIndex, columnIndex];
+          }
+          return acc;
+        },
+        [-1, -1],
+      );
 
       if (!state.structure[row] || !state.structure[row][column]) {
         state.structure[row] = [];
@@ -56,7 +65,7 @@ const todoSlice = createSlice({
     },
     addScreen: (
       { structure, values },
-      action: PayloadAction<{ title: string; x: number; y: number }>
+      action: PayloadAction<{ title: string; x: number; y: number }>,
     ) => {
       const { title, y, x } = action.payload;
 
@@ -89,7 +98,7 @@ const todoSlice = createSlice({
       state,
       {
         payload: { key, id, progress },
-      }: PayloadAction<{ key: string; id: string; progress: number }>
+      }: PayloadAction<{ key: string; id: string; progress: number }>,
     ) {
       const value = state.values[key].find((task) => task.id === id);
       if (value) value.progress = progress;
@@ -98,7 +107,7 @@ const todoSlice = createSlice({
       state,
       {
         payload: { key, id, text },
-      }: PayloadAction<{ key: string; id: string; text: string }>
+      }: PayloadAction<{ key: string; id: string; text: string }>,
     ) {
       const value = state.values[key].find((task) => task.id === id);
       if (value) value.description = text;
@@ -109,10 +118,10 @@ const todoSlice = createSlice({
         from: string;
         to: string;
         id: string;
-      }>
+      }>,
     ) => {
       const taskIndex = state.values[action.payload.from].findIndex(
-        (task) => task.id === action.payload.id
+        (task) => task.id === action.payload.id,
       );
       if (taskIndex > -1) {
         const [task] = state.values[action.payload.from].splice(taskIndex, 1);
@@ -121,7 +130,7 @@ const todoSlice = createSlice({
     },
     renameScreen: (
       { values, structure },
-      action: PayloadAction<{ newName: string; coords: [number, number] }>
+      action: PayloadAction<{ newName: string; coords: [number, number] }>,
     ) => {
       const { newName, coords } = action.payload;
       const [row, column] = coords;
@@ -134,7 +143,7 @@ const todoSlice = createSlice({
     },
     removeScreen: (
       state,
-      action: PayloadAction<{ coords: [number, number] }>
+      action: PayloadAction<{ coords: [number, number] }>,
     ) => {
       const { coords } = action.payload;
       const [row, column] = coords;

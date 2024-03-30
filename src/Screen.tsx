@@ -10,7 +10,6 @@ import {
 import randomColor from "randomcolor";
 import { memo, useContext, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
-import { $currentScreen, level$ } from "./App";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
 import { renameScreen, useAppDispatch, useAppSelector } from "./store";
@@ -44,25 +43,14 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
     amount: 0.8,
   });
 
-  const level = level$.get();
-
-  useEffect(() => {
-    if (isInView && level === 2) {
-      $currentScreen.set(name);
-    }
-  }, [isInView, name]);
-
   const todos = tasks[name] ?? [];
 
-  const bg = useMemo(() => getBg(name, 0.8), [name, level]);
+  const bg = useMemo(() => getBg(name, 0.8), [name]);
   if (todos === undefined) return null;
-
-  const opacity = level === 1 && todos.length === 0 ? "opacity-0" : "";
-  const border = level === 1 ? "border border-gray-400" : "";
 
   return (
     <motion.div
-      className={`flex h-full flex-col ${opacity} min-w-[${todos.length > 0 ? 42 : 21}ch] items-stretch gap-3 overflow-hidden px-5 py-4 ${border} bg-opacity-75`}
+      className={`flex h-full flex-col  min-w-[${todos.length > 0 ? 42 : 21}ch] items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-75 px-5 py-4`}
       style={{
         background: bg,
       }}
@@ -79,7 +67,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       {...divProps}
     >
       <div className="max-w-screen flex justify-between">
-        <div className={`flex saturate-0 opacity-${level === 1 ? 50 : 100}`}>
+        <div className={`flex saturate-0`}>
           <Button
             size="sm"
             variant="ghost"
@@ -125,7 +113,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-        {level === 2 && <Adder where={name} />}
+        <Adder where={name} />
         <AnimatePresence initial={false}>
           {todos.map((task, index) => (
             <Task

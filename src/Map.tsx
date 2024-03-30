@@ -1,6 +1,4 @@
 import { motion } from "framer-motion";
-import { PropsWithChildren } from "react";
-import { $currentScreen } from "./App";
 import { getRandomEmoji } from "./emojis";
 import { useAppSelector } from "./store";
 
@@ -18,43 +16,21 @@ export const Map = () => {
       }}
       transition={{ repeat: Infinity, duration: 6.66, repeatType: "reverse" }}
     >
-      {structure.map((row, rowIndex) => {
-        return (
-          <div className="flex gap-0" key={rowIndex}>
-            {row.map((name, colIndex) => {
-              const isActiveCell = $currentScreen.get() === name;
-
-              return (
-                <div key={`${rowIndex}-${colIndex}`}>
-                  <GridTitle isActive={isActiveCell}>
+      {structure.map((row, rowIndex) => (
+        <div className="flex gap-0" key={rowIndex}>
+          {row.map((name, colIndex) => {
+            return (
+              <div key={`${rowIndex}-${colIndex}`}>
+                <div className="border border-r-2 border-gray-500 px-1 text-gray-400 opacity-50">
+                  <h3 className="whitespace-nowrap text-sm capitalize">
                     {getRandomEmoji(name)}
-                  </GridTitle>
+                  </h3>
                 </div>
-              );
-            })}
-          </div>
-        );
-      })}
+              </div>
+            );
+          })}
+        </div>
+      ))}
     </motion.div>
-  );
-};
-
-const GridTitle = ({
-  isActive,
-  children,
-}: PropsWithChildren<{ isActive: boolean }>) => {
-  if (isActive) {
-    return (
-      <div className="border border-r-2 border-gray-400 px-2 shadow-inner">
-        <h3 className="text-md whitespace-nowrap capitalize text-white">
-          {children}
-        </h3>
-      </div>
-    );
-  }
-  return (
-    <div className="border border-r-2 border-gray-500 px-1 text-gray-400 opacity-50">
-      <h3 className="whitespace-nowrap text-sm capitalize">{children}</h3>
-    </div>
   );
 };

@@ -1,50 +1,28 @@
 import ReloadPrompt from "./ReloadPrompt";
 
-import { observable } from "@legendapp/state";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { observer } from "@legendapp/state/react";
 import { motion } from "framer-motion";
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef } from "react";
 import { Provider } from "react-redux";
-import { Pressable, Space, SpaceContext, ViewPort } from "react-zoomable-ui";
+import { Space, SpaceContext } from "react-zoomable-ui";
 import { PersistGate } from "redux-persist/integration/react";
 import Screen from "./Screen";
-import { Button } from "./components/ui/button";
 import { persistor, store, useAppSelector } from "./store";
 
 enableReactTracking({
   auto: true,
 });
 
-/** 
-  1: Wide screen
-  2: Individual screen
-  3: TBA -> Task level
-*/
-export const level$ = observable(import.meta.env.DEV ? 2 : 1);
-/** position in a coordinate system, x is row, y is column */
-export const position$ = observable([0, 0]);
-export const $currentScreen = observable("");
-
 function App() {
   const spaceRef = useRef<Space | null>(null);
-  const [viewport, setViewport] = useState<ViewPort>();
 
   console.log(spaceRef.current);
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Space onUpdated={setViewport} ref={spaceRef} className="h-full w-full">
+        <Space ref={spaceRef} className="h-full w-full">
           <Widest />
-
-          {/* <div
-            className="bg-red absolute bottom-[2vh] right-0 p-3"
-            onClick={() => {
-              level$.set((x) => (x === 1 ? 2 : 1));
-            }}
-          >
-            <Map />
-          </div> */}
           <ReloadPrompt />
         </Space>
       </PersistGate>
