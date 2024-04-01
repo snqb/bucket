@@ -56,20 +56,22 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       animate={{
         left: 0,
       }}
-      onClick={() => {
-        const element = document.querySelector(
-          `#screen-${name}`,
-        ) as HTMLElement;
-        if (viewPort) {
-          console.log(element);
-          viewPort?.camera.centerFitElementIntoView(element, undefined, {
-            durationMilliseconds: 400,
-          });
-        }
-      }}
       {...divProps}
     >
-      <div className="max-w-screen flex justify-between">
+      <Pressable
+        onTap={() => {
+          const element = document.querySelector(
+            `#screen-${name}`,
+          ) as HTMLElement;
+          if (viewPort) {
+            console.log(element);
+            viewPort?.camera.centerFitElementIntoView(element, undefined, {
+              durationMilliseconds: 400,
+            });
+          }
+        }}
+        className="max-w-screen flex justify-between"
+      >
         <div className={`flex saturate-0`}>
           <Button
             size="sm"
@@ -113,7 +115,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             {name}
           </h2>
         </Pressable>
-      </div>
+      </Pressable>
 
       <hr className="border-gray-500" />
 
