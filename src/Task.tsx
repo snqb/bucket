@@ -1,6 +1,6 @@
 import { HTMLMotionProps, animate, motion } from "framer-motion";
-import { useCallback, useContext, useEffect, useState } from "react";
-import { Pressable, SpaceContext } from "react-zoomable-ui";
+import { useCallback, useEffect, useState } from "react";
+import { Pressable } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
 import { getRandomEmoji } from "./emojis";
@@ -24,10 +24,7 @@ export const Task = (props: Props) => {
   const { task, where } = props;
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
-  const { viewPort: viewport } = useContext(SpaceContext);
-  const x = useContext(SpaceContext);
   const [show, setShow] = useState(false);
-  console.log(x);
 
   const [progress, setProgress] = useState(task.progress);
 

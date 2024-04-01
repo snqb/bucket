@@ -24,8 +24,8 @@ function App() {
       <PersistGate persistor={persistor}>
         <Space ref={spaceRef} className="h-full w-full">
           <Widest />
-          <ReloadPrompt />
         </Space>
+        <ReloadPrompt />
       </PersistGate>
     </Provider>
   );

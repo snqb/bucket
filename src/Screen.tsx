@@ -1,19 +1,14 @@
 import { Task } from "./Task";
 
 import { observable } from "@legendapp/state";
-import {
-  AnimatePresence,
-  HTMLMotionProps,
-  motion,
-  useInView,
-} from "framer-motion";
+import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useContext, useEffect, useMemo, useRef } from "react";
+import { memo, useContext, useMemo, useRef } from "react";
+import { Pressable, SpaceContext } from "react-zoomable-ui";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
 import { renameScreen, useAppDispatch, useAppSelector } from "./store";
-import { Pressable, SpaceContext } from "react-zoomable-ui";
 
 type Props = HTMLMotionProps<"div"> & {
   name: string;
@@ -39,10 +34,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const { viewPort } = useContext(SpaceContext);
 
-  const isInView = useInView(ref, {
-    amount: 0.8,
-  });
-
   const todos = tasks[name] ?? [];
 
   const bg = useMemo(() => getBg(name, 0.8), [name]);
@@ -50,9 +41,10 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`flex h-full flex-col  min-w-[${todos.length > 0 ? 42 : 21}ch] items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-75 px-5 pb-9 pt-6`}
+      className={`flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-75 px-5 pb-9 pt-6`}
       style={{
         background: bg,
+        width: "min(100vw, 480px)",
       }}
       ref={ref as any}
       transition={{
@@ -63,6 +55,17 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       exit={{ left: "100%" }}
       animate={{
         left: 0,
+      }}
+      onClick={() => {
+        const element = document.querySelector(
+          `#screen-${name}`,
+        ) as HTMLElement;
+        if (viewPort) {
+          console.log(element);
+          viewPort?.camera.centerFitElementIntoView(element, undefined, {
+            durationMilliseconds: 400,
+          });
+        }
       }}
       {...divProps}
     >
@@ -80,7 +83,9 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
           <Button
             size="sm"
             variant="ghost"
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
+
               const newName = prompt(`${name} -> to what?`);
               if (newName && !tasks[newName]) {
                 dispatch(renameScreen({ coords: [y, x], newName }));
