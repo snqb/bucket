@@ -57,7 +57,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-gray-600 bg-opacity-75 px-5 pb-9 pt-6`}
+      className={`m-2 flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-gray-800 bg-opacity-65 px-5 pb-9 pt-6`}
       style={{
         width: "min(100vw, 480px)",
       }}
