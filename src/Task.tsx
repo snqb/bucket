@@ -1,6 +1,14 @@
-import { HTMLMotionProps, animate, motion } from "framer-motion";
-import { useCallback, useEffect, useState } from "react";
-import { Pressable } from "react-zoomable-ui";
+import {
+  HTMLMotionProps,
+  animate,
+  motion,
+  useAnimate,
+  useAnimationFrame,
+  useInView,
+  useMotionValue,
+} from "framer-motion";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { NoPanArea, Pressable, SpaceContext } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
 import { getRandomEmoji } from "./emojis";
@@ -22,11 +30,18 @@ type Props = HTMLMotionProps<"div"> & {
 
 export const Task = (props: Props) => {
   const { task, where } = props;
+  const aProgress = useMotionValue(task.progress);
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
   const [show, setShow] = useState(false);
+  const ref = useRef<any>();
+  const [isHolding, setIsHolding] = useState(false);
 
   const [progress, setProgress] = useState(task.progress);
+  const { viewPort } = useContext(SpaceContext);
+  const isInView = useInView(ref, {
+    amount: "all",
+  });
 
   const deleteTask = useCallback(() => {
     dispatch(
@@ -53,8 +68,18 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
+  const centerCamera = useCallback(() => {
+    const element = document.querySelector(`#screen-${where}`) as HTMLElement;
+
+    if (viewPort && !isInView) {
+      viewPort.camera.centerFitElementIntoView(element, undefined, {
+        durationMilliseconds: 400,
+      });
+    }
+  }, [viewPort]);
+
   return (
-    <div>
+    <NoPanArea ref={ref}>
       <div className="flex w-full select-none items-baseline gap-2 py-1">
         <motion.div
           className="flex w-full items-baseline gap-2 "
@@ -62,9 +87,12 @@ export const Task = (props: Props) => {
             opacity: 1 - progress / 150,
           }}
         >
-          <div className="max-h-6 min-w-[4ch] border border-gray-400 p-1 text-center text-xs">
+          <motion.div
+            style={{ content: aProgress }}
+            className="max-h-6 min-w-[4ch] border border-gray-400 p-1 text-center text-xs"
+          >
             {progress}%
-          </div>
+          </motion.div>
           <Pressable
             onTap={() => {
               setShow((prev) => !prev);
@@ -84,6 +112,10 @@ export const Task = (props: Props) => {
             }}
           />
           <Pressable
+            onLongTap={() => {
+              console.log("haha");
+            }}
+            longTapThresholdMs={1000}
             onTap={() => {
               const next = progress + 1;
               dispatch(
@@ -94,13 +126,18 @@ export const Task = (props: Props) => {
                 }),
               );
               setProgress(next);
+              centerCamera();
             }}
           >
-            <div className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white">
-              <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-              <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-              <span className="relative">✨✨</span>
-            </div>
+            {(x) => {
+              return (
+                <div className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white">
+                  <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
+                  <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
+                  <span className="relative">✨✨</span>
+                </div>
+              );
+            }}
           </Pressable>
         </div>
       </div>
@@ -123,6 +160,7 @@ export const Task = (props: Props) => {
             <div key={"ss" + index} className="flex flex-row gap-1">
               {row.map((screen, index) => (
                 <Button
+                  key={screen + index}
                   variant="outline"
                   className="bg-black px-1 text-white"
                   onClick={() => {
@@ -144,7 +182,7 @@ export const Task = (props: Props) => {
         </div>
       </div>
       <div />
-    </div>
+    </NoPanArea>
   );
 };
 

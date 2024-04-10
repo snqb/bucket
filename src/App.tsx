@@ -3,7 +3,7 @@ import ReloadPrompt from "./ReloadPrompt";
 import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
 import { observer } from "@legendapp/state/react";
 import { motion } from "framer-motion";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Provider } from "react-redux";
 import { Space } from "react-zoomable-ui";
 import { PersistGate } from "redux-persist/integration/react";
@@ -33,6 +33,23 @@ function App() {
 
 const Widestt = () => {
   const structure = useAppSelector((state) => state.todo.structure);
+  const observer = useRef(
+    new IntersectionObserver(
+      (entries) => {
+        if (entries.length === 1) {
+          entries.at(0)?.target.scrollIntoView({});
+        }
+      },
+      { threshold: 0.95 },
+    ),
+  );
+
+  useEffect(() => {
+    observer.current.observe(document.querySelector("[data-screen]")!);
+    return () => {
+      observer.current.disconnect();
+    };
+  }, [observer.current]);
 
   return (
     <motion.div
@@ -68,6 +85,7 @@ const Widestt = () => {
               return (
                 <div
                   key={id}
+                  data-screen={name}
                   className="max-w-screen flex flex-col items-stretch gap-2"
                 >
                   <Screen id={id} x={x} y={y} name={name} drag={false} />

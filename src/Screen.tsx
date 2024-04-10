@@ -1,9 +1,14 @@
 import { Task } from "./Task";
 
 import { observable } from "@legendapp/state";
-import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  HTMLMotionProps,
+  motion,
+  useInView,
+} from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useContext, useMemo, useRef } from "react";
+import { memo, useCallback, useContext, useMemo, useRef } from "react";
 import { Pressable, SpaceContext } from "react-zoomable-ui";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
@@ -37,13 +42,23 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const todos = tasks[name] ?? [];
 
   const bg = useMemo(() => getBg(name, 0.8), [name]);
+
+  const centerCamera = useCallback(() => {
+    const element = document.querySelector(`#screen-${name}`) as HTMLElement;
+
+    if (viewPort) {
+      viewPort?.camera.centerFitElementIntoView(element, undefined, {
+        durationMilliseconds: 400,
+      });
+    }
+  }, [viewPort]);
+
   if (todos === undefined) return null;
 
   return (
     <motion.div
-      className={`flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-75 px-5 pb-9 pt-6`}
+      className={`flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-gray-600 bg-opacity-75 px-5 pb-9 pt-6`}
       style={{
-        background: bg,
         width: "min(100vw, 480px)",
       }}
       ref={ref as any}
@@ -58,63 +73,36 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <Pressable
-        onTap={() => {
-          const element = document.querySelector(
-            `#screen-${name}`,
-          ) as HTMLElement;
-          if (viewPort) {
-            console.log(element);
-            viewPort?.camera.centerFitElementIntoView(element, undefined, {
-              durationMilliseconds: 400,
-            });
-          }
-        }}
-        className="max-w-screen flex justify-between"
-      >
-        <div className={`flex saturate-0`}>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-          >
-            🗑️
-          </Button>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={(e) => {
-              e.stopPropagation();
+      <div className={`flex saturate-0`}>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
+          }}
+        >
+          🗑️
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={(e) => {
+            e.stopPropagation();
 
-              const newName = prompt(`${name} -> to what?`);
-              if (newName && !tasks[newName]) {
-                dispatch(renameScreen({ coords: [y, x], newName }));
-              }
-            }}
-          >
-            ✏️
-          </Button>
-        </div>
-        <Pressable
-          onTap={() => {
-            const element = document.querySelector(
-              `#screen-${name}`,
-            ) as HTMLElement;
-            if (viewPort) {
-              console.log(element);
-              viewPort?.camera.centerFitElementIntoView(element, undefined, {
-                durationMilliseconds: 400,
-              });
+            const newName = prompt(`${name} -> to what?`);
+            if (newName && !tasks[newName]) {
+              dispatch(renameScreen({ coords: [y, x], newName }));
             }
           }}
         >
-          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-            {getRandomEmoji(name)}
-            {name}
-          </h2>
-        </Pressable>
+          ✏️
+        </Button>
+      </div>
+      <Pressable onTap={centerCamera}>
+        <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
+          {getRandomEmoji(name)}
+          {name}
+        </h2>
       </Pressable>
 
       <hr className="border-gray-500" />
