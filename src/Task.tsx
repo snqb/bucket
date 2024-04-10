@@ -7,7 +7,13 @@ import {
   useInView,
   useMotionValue,
 } from "framer-motion";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { NoPanArea, Pressable, SpaceContext } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
@@ -35,7 +41,6 @@ export const Task = (props: Props) => {
   const { structure } = useAppSelector((state) => state.todo);
   const [show, setShow] = useState(false);
   const ref = useRef<any>();
-  const [isHolding, setIsHolding] = useState(false);
 
   const [progress, setProgress] = useState(task.progress);
   const { viewPort } = useContext(SpaceContext);
@@ -71,37 +76,27 @@ export const Task = (props: Props) => {
   const centerCamera = useCallback(() => {
     const element = document.querySelector(`#screen-${where}`) as HTMLElement;
 
+    console.log(element, isInView);
+
     if (viewPort && !isInView) {
       viewPort.camera.centerFitElementIntoView(element, undefined, {
         durationMilliseconds: 400,
       });
     }
-  }, [viewPort]);
+  }, [viewPort, isInView]);
 
   return (
-    <NoPanArea ref={ref}>
-      <div className="flex w-full select-none items-baseline gap-2 py-1">
+    <NoPanArea>
+      <div
+        className="flex w-full select-none items-baseline gap-2 py-1"
+        ref={ref}
+      >
         <motion.div
           className="flex w-full items-baseline gap-2 "
           style={{
             opacity: 1 - progress / 150,
           }}
         >
-          <motion.div
-            style={{ content: aProgress }}
-            className="max-h-6 min-w-[4ch] border border-gray-400 p-1 text-center text-xs"
-          >
-            {progress}%
-          </motion.div>
-          <Pressable
-            onTap={() => {
-              setShow((prev) => !prev);
-            }}
-          >
-            <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
-          </Pressable>
-        </motion.div>
-        <div className="flex min-w-[100px] items-baseline gap-4">
           <RemoveButton
             onClick={() => {
               animate(progress, 100, {
@@ -110,12 +105,32 @@ export const Task = (props: Props) => {
                 onUpdate: (it) => setProgress(Math.round(it)),
               });
             }}
-          />
+          >
+            <motion.div
+              style={{ content: aProgress }}
+              className="box-border min-h-5 min-w-[4ch] border border-gray-400 p-1 text-center text-xs"
+            >
+              {progress > 0 && `${progress}%`}
+            </motion.div>
+          </RemoveButton>
+          <Pressable
+            onTap={() => {
+              setShow((prev) => !prev);
+            }}
+          >
+            <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
+          </Pressable>
+        </motion.div>
+        <div className="flex w-fit items-baseline gap-4">
           <Pressable
             onLongTap={() => {
-              console.log("haha");
+              console.log(progress);
+              animate(progress, progress + 10, {
+                duration: 0.5,
+                onUpdate: (it) => setProgress(Math.round(it)),
+              });
             }}
-            longTapThresholdMs={1000}
+            longTapThresholdMs={300}
             onTap={() => {
               const next = progress + 1;
               dispatch(
@@ -128,16 +143,11 @@ export const Task = (props: Props) => {
               setProgress(next);
               centerCamera();
             }}
+            className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white"
           >
-            {(x) => {
-              return (
-                <div className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white">
-                  <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-                  <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-active:translate-x-0 group-active:translate-y-0"></span>
-                  <span className="relative">✨✨</span>
-                </div>
-              );
-            }}
+            <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+            <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+            <span className="relative">✨✨</span>
           </Pressable>
         </div>
       </div>
@@ -186,7 +196,13 @@ export const Task = (props: Props) => {
   );
 };
 
-const RemoveButton = ({ onClick }: { onClick: () => void }) => {
+const RemoveButton = ({
+  onClick,
+  children,
+}: {
+  onClick: () => void;
+  children: React.ReactNode;
+}) => {
   const [pressedCount, setPressedCount] = useState(0);
 
   if (pressedCount > 1) return null;
@@ -196,16 +212,19 @@ const RemoveButton = ({ onClick }: { onClick: () => void }) => {
       onClick();
     }
     setPressedCount(1);
+    setTimeout(() => {
+      setPressedCount(0);
+    }, 3000);
   };
 
   return (
     <button
       className={`text-m ${
-        pressedCount === 1 ? "saturate-100" : "saturate-0"
+        pressedCount === 1 ? "bg-100" : "bg-0"
       } scale-${pressedCount ? "110" : "100"} border-gray-900`}
       onClick={handleClick}
     >
-      ❌
+      {pressedCount === 1 ? "❌" : children}
     </button>
   );
 };

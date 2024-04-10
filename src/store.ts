@@ -25,7 +25,10 @@ const initialState: {
   structure: string[][];
   values: { [key: string]: Todo[] };
 } = {
-  structure: [["Today"]],
+  structure: [
+    ["Today", "Later"],
+    ["Work", "Family"],
+  ],
   values: {},
 };
 

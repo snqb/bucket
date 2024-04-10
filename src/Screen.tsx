@@ -97,13 +97,13 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
         >
           ✏️
         </Button>
+        <Pressable className="ml-auto" onTap={centerCamera}>
+          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
+            {getRandomEmoji(name)}
+            {name}
+          </h2>
+        </Pressable>
       </div>
-      <Pressable onTap={centerCamera}>
-        <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-          {getRandomEmoji(name)}
-          {name}
-        </h2>
-      </Pressable>
 
       <hr className="border-gray-500" />
 
