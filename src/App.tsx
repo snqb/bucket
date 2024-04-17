@@ -36,11 +36,13 @@ const Widestt = () => {
   const observer = useRef(
     new IntersectionObserver(
       (entries) => {
+        console.log(entries);
         if (entries.length === 1) {
-          entries.at(0)?.target.scrollIntoView({});
+          console.log(entries.at(0)?.target);
+          entries.at(0)?.target.scrollIntoView();
         }
       },
-      { threshold: 0.95 },
+      { threshold: 0.8 },
     ),
   );
 
@@ -88,7 +90,14 @@ const Widestt = () => {
                   data-screen={name}
                   className="max-w-screen flex flex-col items-stretch gap-2"
                 >
-                  <Screen id={id} x={x} y={y} name={name} drag={false} />
+                  <Screen
+                    id={id}
+                    className="min-h-[90vh] w-[90vw] p-4"
+                    x={x}
+                    y={y}
+                    name={name}
+                    drag={false}
+                  />
                 </div>
               );
             })}

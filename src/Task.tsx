@@ -2,8 +2,6 @@ import {
   HTMLMotionProps,
   animate,
   motion,
-  useAnimate,
-  useAnimationFrame,
   useInView,
   useMotionValue,
 } from "framer-motion";
@@ -14,7 +12,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { NoPanArea, Pressable, SpaceContext } from "react-zoomable-ui";
+import { Pressable, SpaceContext } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
 import { getRandomEmoji } from "./emojis";
@@ -86,7 +84,7 @@ export const Task = (props: Props) => {
   }, [viewPort, isInView]);
 
   return (
-    <NoPanArea>
+    <div className={`${show ? "border border-gray-200 p-2 py-2" : ""}`}>
       <div
         className="flex w-full select-none items-baseline gap-2 py-1"
         ref={ref}
@@ -154,25 +152,17 @@ export const Task = (props: Props) => {
 
       <div
         data-task={task.id}
-        className={`${show ? "flex" : "hidden"} flex-col items-stretch`}
+        className={`${show ? "flex" : "hidden"} flex-col items-stretch gap-2`}
       >
-        <Textarea
-          className="bg-gray-800 text-white"
-          defaultValue={task.description}
-          onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-          rows={10}
-          placeholder="Longer text"
-        />
-
-        <h4 className="text-md mt-4 text-left">Move to:</h4>
-        <div className="flex flex-col gap-1">
+        <div className="flex items-baseline gap-1">
+          <h4 className="text-md my-4 text-left">Move to: </h4>
           {structure.map((row, index) => (
             <div key={"ss" + index} className="flex flex-row gap-1">
               {row.map((screen, index) => (
                 <Button
                   key={screen + index}
-                  variant="outline"
-                  className="bg-black px-1 text-white"
+                  variant="link"
+                  className=" px-1 text-white"
                   onClick={() => {
                     dispatch(
                       moveTask({
@@ -190,9 +180,16 @@ export const Task = (props: Props) => {
             </div>
           ))}
         </div>
+        <Textarea
+          className="border-0 bg-gray-800 text-white"
+          defaultValue={task.description}
+          onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
+          rows={10}
+          placeholder="Longer text"
+        />
       </div>
       <div />
-    </NoPanArea>
+    </div>
   );
 };
 

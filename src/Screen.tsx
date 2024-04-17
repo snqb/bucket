@@ -6,9 +6,17 @@ import {
   HTMLMotionProps,
   motion,
   useInView,
+  useScroll,
 } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useCallback, useContext, useMemo, useRef } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { Pressable, SpaceContext } from "react-zoomable-ui";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
@@ -38,16 +46,19 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const dispatch = useAppDispatch();
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const { viewPort } = useContext(SpaceContext);
+  const { scrollYProgress } = useScroll({
+    target: ref as any,
+    offset: ["end end", "start start"],
+  });
 
+  const inView = useInView(ref, { amount: 0.95 });
   const todos = tasks[name] ?? [];
 
-  const bg = useMemo(() => getBg(name, 0.8), [name]);
+  const bg = useMemo(() => getBg(name, 0.1), [name]);
 
   const centerCamera = useCallback(() => {
-    const element = document.querySelector(`#screen-${name}`) as HTMLElement;
-
     if (viewPort) {
-      viewPort?.camera.centerFitElementIntoView(element, undefined, {
+      viewPort?.camera.centerFitElementIntoView(ref.current as any, undefined, {
         durationMilliseconds: 400,
       });
     }
@@ -57,9 +68,10 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`m-2 flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-gray-800 bg-opacity-65 px-5 pb-9 pt-6`}
+      className={`m-2 flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6`}
       style={{
         width: "min(100vw, 480px)",
+        background: bg,
       }}
       ref={ref as any}
       transition={{
@@ -70,6 +82,11 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       exit={{ left: "100%" }}
       animate={{
         left: 0,
+      }}
+      onClick={(e) => {
+        if (!inView) {
+          centerCamera();
+        }
       }}
       {...divProps}
     >
