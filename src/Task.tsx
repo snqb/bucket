@@ -9,10 +9,11 @@ import React, {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
-import { Pressable, SpaceContext } from "react-zoomable-ui";
+import { Pressable, PressableProps, SpaceContext } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
 import { Textarea } from "./components/ui/textarea";
 import { getRandomEmoji } from "./emojis";
@@ -26,6 +27,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { Progress } from "./components/ui/progress";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -45,6 +47,8 @@ export const Task = (props: Props) => {
   const isInView = useInView(ref, {
     amount: "all",
   });
+
+  const MotionProgress = motion(Progress);
 
   const deleteTask = useCallback(() => {
     dispatch(
@@ -74,14 +78,14 @@ export const Task = (props: Props) => {
   const centerCamera = useCallback(() => {
     const element = document.querySelector(`#screen-${where}`) as HTMLElement;
 
-    console.log(element, isInView);
-
     if (viewPort && !isInView) {
       viewPort.camera.centerFitElementIntoView(element, undefined, {
         durationMilliseconds: 400,
       });
     }
   }, [viewPort, isInView]);
+
+  const sharedPressableProps = useMemo<PressableProps>(() => ({}), []);
 
   return (
     <div className={`${show ? "border border-gray-200 p-2 py-2" : ""}`}>
@@ -90,27 +94,15 @@ export const Task = (props: Props) => {
         ref={ref}
       >
         <motion.div
-          className="flex w-full items-baseline gap-2 "
+          className="flex w-full items-center gap-2 "
           style={{
             opacity: 1 - progress / 150,
           }}
         >
-          <RemoveButton
-            onClick={() => {
-              animate(progress, 100, {
-                duration: 1,
-                onComplete: deleteTask,
-                onUpdate: (it) => setProgress(Math.round(it)),
-              });
-            }}
-          >
-            <motion.div
-              style={{ content: aProgress }}
-              className="box-border min-h-5 min-w-[4ch] border border-gray-400 p-1 text-center text-xs"
-            >
-              {progress > 0 && `${progress}%`}
-            </motion.div>
-          </RemoveButton>
+          <MotionProgress
+            className="box-border min-h-4 w-[5ch] border border-gray-700 p-0 text-center text-xs"
+            value={progress}
+          />
           <Pressable
             onTap={() => {
               setShow((prev) => !prev);
@@ -119,35 +111,35 @@ export const Task = (props: Props) => {
             <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
           </Pressable>
         </motion.div>
-        <div className="flex w-fit items-baseline gap-4">
-          <Pressable
-            onLongTap={() => {
-              console.log(progress);
-              animate(progress, progress + 10, {
-                duration: 0.5,
-                onUpdate: (it) => setProgress(Math.round(it)),
-              });
-            }}
-            longTapThresholdMs={300}
-            onTap={() => {
-              const next = progress + 1;
-              dispatch(
-                updateProgress({
-                  key: where,
-                  id: task.id,
-                  progress: next,
-                }),
-              );
-              setProgress(next);
-              centerCamera();
-            }}
-            className="w-15 font-bold group relative h-7 rounded-lg px-1 text-white"
-          >
-            <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-purple-800 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
-            <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-800 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
-            <span className="relative">✨✨</span>
-          </Pressable>
-        </div>
+        <Pressable
+          onLongTap={() => {
+            animate(progress, progress + 50, {
+              duration: 0.6,
+              onUpdate: (it) => setProgress(Math.round(it)),
+            });
+          }}
+          longTapThresholdMs={420}
+          onTap={() => {
+            const next = progress + 10;
+            animate(progress, next, {
+              duration: 0.2,
+              onUpdate: (it) => setProgress(Math.round(it)),
+            });
+            dispatch(
+              updateProgress({
+                key: where,
+                id: task.id,
+                progress: next,
+              }),
+            );
+            centerCamera();
+          }}
+          className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
+        >
+          <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+          <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
+          <span className="relative">✨✨</span>
+        </Pressable>
       </div>
 
       <div
