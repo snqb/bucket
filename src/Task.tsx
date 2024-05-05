@@ -137,7 +137,7 @@ export const Task = (props: Props) => {
               setShow((prev) => !prev);
             }}
           >
-            <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
+            <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
           </Pressable>
         </motion.div>
         <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">

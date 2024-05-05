@@ -51,7 +51,7 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
 
   return (
     <Input
-      className="w-full bg-gray-900 bg-opacity-80"
+      className="w-full border-gray-700 bg-gray-900 bg-opacity-80"
       enterKeyHint="done"
       type="text"
       autoComplete="off"
