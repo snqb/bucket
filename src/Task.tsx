@@ -85,24 +85,53 @@ export const Task = (props: Props) => {
     }
   }, [viewPort, isInView]);
 
-  const sharedPressableProps = useMemo<PressableProps>(() => ({}), []);
+  const sharedPressableProps = useMemo<PressableProps>(
+    () => ({
+      onLongTap: () => {
+        animate(progress, progress + 42, {
+          duration: 0.6,
+          onUpdate: (it) => setProgress(Math.round(it)),
+        });
+      },
+      longTapThresholdMs: 420,
+      onTap: () => {
+        const next = progress + 6;
+        animate(progress, next, {
+          duration: 0.2,
+          onUpdate: (it) => setProgress(Math.round(it)),
+        });
+        dispatch(
+          updateProgress({
+            key: where,
+            id: task.id,
+            progress: next,
+          }),
+        );
+        centerCamera();
+      },
+      potentialTapClassName: "translate-y-0 translate-x-0",
+    }),
+    [progress],
+  );
 
   return (
     <div className={`${show ? "border border-gray-200 p-2 py-2" : ""}`}>
       <div
-        className="flex w-full select-none items-baseline gap-2 py-1"
+        className="flex w-full select-none items-center gap-2 py-1"
         ref={ref}
       >
         <motion.div
-          className="flex w-full items-center gap-2 "
+          className="flex w-full items-baseline gap-2 "
           style={{
             opacity: 1 - progress / 150,
           }}
         >
           <MotionProgress
-            className="box-border min-h-4 w-[5ch] border border-gray-700 p-0 text-center text-xs"
+            className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
             value={progress}
-          />
+          >
+            {/* <span className="absolute left-0 top-0">{progress}%</span> */}
+          </MotionProgress>
           <Pressable
             onTap={() => {
               setShow((prev) => !prev);
@@ -111,50 +140,31 @@ export const Task = (props: Props) => {
             <p className="max-w-[21ch] break-all text-xl">{task.title.text}</p>
           </Pressable>
         </motion.div>
-        <Pressable
-          onLongTap={() => {
-            animate(progress, progress + 50, {
-              duration: 0.6,
-              onUpdate: (it) => setProgress(Math.round(it)),
-            });
-          }}
-          longTapThresholdMs={420}
-          onTap={() => {
-            const next = progress + 10;
-            animate(progress, next, {
-              duration: 0.2,
-              onUpdate: (it) => setProgress(Math.round(it)),
-            });
-            dispatch(
-              updateProgress({
-                key: where,
-                id: task.id,
-                progress: next,
-              }),
-            );
-            centerCamera();
-          }}
-          className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
-        >
-          <span className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
-          <span className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"></span>
-          <span className="relative">✨✨</span>
-        </Pressable>
+        <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">
+          <Pressable
+            {...sharedPressableProps}
+            className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+          />
+          <Pressable
+            {...sharedPressableProps}
+            className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+          />
+        </span>
       </div>
 
       <div
         data-task={task.id}
         className={`${show ? "flex" : "hidden"} flex-col items-stretch gap-2`}
       >
-        <div className="flex items-baseline gap-1">
+        <div className="grid grid-flow-row">
           <h4 className="text-md my-4 text-left">Move to: </h4>
           {structure.map((row, index) => (
             <div key={"ss" + index} className="flex flex-row gap-1">
               {row.map((screen, index) => (
                 <Button
                   key={screen + index}
-                  variant="link"
-                  className=" px-1 text-white"
+                  variant="ghost"
+                  className="border border-gray-800 px-1 text-white"
                   onClick={() => {
                     dispatch(
                       moveTask({
