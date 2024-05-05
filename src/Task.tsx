@@ -195,35 +195,3 @@ export const Task = (props: Props) => {
   );
 };
 
-const RemoveButton = ({
-  onClick,
-  children,
-}: {
-  onClick: () => void;
-  children: React.ReactNode;
-}) => {
-  const [pressedCount, setPressedCount] = useState(0);
-
-  if (pressedCount > 1) return null;
-
-  const handleClick = () => {
-    if (pressedCount === 1) {
-      onClick();
-    }
-    setPressedCount(1);
-    setTimeout(() => {
-      setPressedCount(0);
-    }, 3000);
-  };
-
-  return (
-    <button
-      className={`text-m ${
-        pressedCount === 1 ? "bg-100" : "bg-0"
-      } scale-${pressedCount ? "110" : "100"} border-gray-900`}
-      onClick={handleClick}
-    >
-      {pressedCount === 1 ? "❌" : children}
-    </button>
-  );
-};

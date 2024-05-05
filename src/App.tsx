@@ -8,7 +8,13 @@ import { Provider } from "react-redux";
 import { Space } from "react-zoomable-ui";
 import { PersistGate } from "redux-persist/integration/react";
 import Screen from "./Screen";
-import { persistor, store, useAppSelector } from "./store";
+import {
+  addScreen,
+  persistor,
+  store,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
 import { Button } from "./components/ui/button";
 
 enableReactTracking({
@@ -22,7 +28,11 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        <Space ref={spaceRef} className="h-full w-full">
+        <Space
+          ref={spaceRef}
+          className="h-full w-full"
+          treatTwoFingerTrackPadGesturesLikeTouch
+        >
           <Widest />
         </Space>
         <ReloadPrompt />
@@ -33,6 +43,8 @@ function App() {
 
 const Widestt = () => {
   const structure = useAppSelector((state) => state.todo.structure);
+  const dispatch = useAppDispatch();
+
   const observer = useRef(
     new IntersectionObserver(
       (entries) => {
@@ -54,65 +66,79 @@ const Widestt = () => {
   }, [observer.current]);
 
   return (
-    <motion.div
-      className={`align-start overflow-none h-min w-max snap-both snap-mandatory`}
-      initial={{
-        opacity: 0.8,
-        scale: 2,
-        x: 100,
-        y: 100,
-      }}
-      animate={{
-        opacity: 1,
-        scale: 1,
-        x: 0,
-        y: 0,
-      }}
-      exit={{ scale: 0 }}
-      transition={{
-        duration: 0.3,
-        type: "spring",
-        damping: 20,
-        stiffness: 200,
-      }}
-    >
-      {structure.map((row, y) => {
-        return (
-          <div
-            className="flex snap-start snap-always items-stretch gap-2"
-            key={y}
-          >
-            {row.map((name, x) => {
-              const id = `screen-${name}`;
-              return (
-                <div
-                  key={id}
-                  data-screen={name}
-                  className="max-w-screen flex flex-col items-stretch gap-2"
-                >
-                  <Screen
-                    id={id}
-                    className="min-h-[90vh] w-[90vw] p-4"
-                    x={x}
-                    y={y}
-                    name={name}
-                    drag={false}
-                  />
-                </div>
-              );
-            })}
-            <></>
-          </div>
-        );
-      })}
+    <>
       <Button
-        variant="ghost"
-        size="lg"
-        className="fixed bottom-0 right-0 p-4 text-xs text-white"
+        onClick={() => {
+          dispatch(
+            addScreen({
+              title: "New Screen",
+            }),
+          );
+        }}
+        className="absolute left-[-40px] top-0"
       >
-        🏠
+        +
       </Button>
-    </motion.div>
+      <motion.div
+        className={`overflow-none flex h-min w-max snap-both snap-mandatory flex-col gap-4`}
+        initial={{
+          opacity: 0.8,
+          scale: 2,
+          x: 100,
+          y: 100,
+        }}
+        animate={{
+          opacity: 1,
+          scale: 1,
+          x: 0,
+          y: 0,
+        }}
+        exit={{ scale: 0 }}
+        transition={{
+          duration: 0.3,
+          type: "spring",
+          damping: 20,
+          stiffness: 200,
+        }}
+      >
+        {structure.map((row, y) => {
+          return (
+            <div
+              className="flex snap-start snap-always items-stretch gap-4"
+              key={y}
+            >
+              {row.map((name, x) => {
+                const id = `screen-${name}`;
+                return (
+                  <div
+                    key={id}
+                    data-screen={name}
+                    className="max-w-screen flex flex-col"
+                  >
+                    <Screen
+                      id={id}
+                      className="min-h-[40vh] w-[90vw] p-4"
+                      x={x}
+                      y={y}
+                      name={name}
+                      drag={false}
+                    />
+                  </div>
+                );
+              })}
+              <></>
+            </div>
+          );
+        })}
+        <Button
+          variant="ghost"
+          size="lg"
+          className="fixed bottom-0 right-0 p-4 text-xs text-white"
+        >
+          🏠
+        </Button>
+      </motion.div>
+    </>
   );
 };
 

@@ -68,9 +68,13 @@ const todoSlice = createSlice({
     },
     addScreen: (
       { structure, values },
-      action: PayloadAction<{ title: string; x: number; y: number }>,
+      { payload }: PayloadAction<{ title: string; x?: number; y?: number }>,
     ) => {
-      const { title, y, x } = action.payload;
+      const y = payload.y || structure.length - 1;
+      const x =
+        payload.x ||
+        structure.reduce((acc, row) => Math.max(acc, row.length), 0);
+      const { title } = payload;
 
       // Bounds Checking
       if (y < 0 || x < 0) {

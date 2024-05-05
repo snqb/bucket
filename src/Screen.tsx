@@ -21,7 +21,12 @@ import { Pressable, SpaceContext } from "react-zoomable-ui";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
-import { renameScreen, useAppDispatch, useAppSelector } from "./store";
+import {
+  removeScreen,
+  renameScreen,
+  useAppDispatch,
+  useAppSelector,
+} from "./store";
 
 type Props = HTMLMotionProps<"div"> & {
   name: string;
@@ -70,7 +75,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
     <motion.div
       className={`m-2 flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6`}
       style={{
-        width: "min(100vw, 480px)",
         background: bg,
       }}
       ref={ref as any}
@@ -83,7 +87,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       animate={{
         left: 0,
       }}
-      onClick={(e) => {
+      onClick={() => {
         if (!inView) {
           centerCamera();
         }
@@ -91,11 +95,22 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       {...divProps}
     >
       <div className={`flex saturate-0`}>
+        <Pressable className="auto" onTap={centerCamera}>
+          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
+            {getRandomEmoji(name)}
+            {name}
+          </h2>
+        </Pressable>
         <Button
           size="sm"
           variant="ghost"
+          className="ml-auto"
           onClick={(e) => {
             e.stopPropagation();
+            const confirm = window.confirm(`Delete ${name}?`);
+            if (confirm) {
+              dispatch(removeScreen({ coords: [y, x] }));
+            }
           }}
         >
           🗑️
@@ -114,12 +129,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
         >
           ✏️
         </Button>
-        <Pressable className="ml-auto" onTap={centerCamera}>
-          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-            {getRandomEmoji(name)}
-            {name}
-          </h2>
-        </Pressable>
       </div>
 
       <hr className="border-gray-500" />
