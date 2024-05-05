@@ -51,10 +51,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const dispatch = useAppDispatch();
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const { viewPort } = useContext(SpaceContext);
-  const { scrollYProgress } = useScroll({
-    target: ref as any,
-    offset: ["end end", "start start"],
-  });
 
   const inView = useInView(ref, { amount: 0.95 });
   const todos = tasks[name] ?? [];
@@ -86,11 +82,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       exit={{ left: "100%" }}
       animate={{
         left: 0,
-      }}
-      onClick={() => {
-        if (!inView) {
-          centerCamera();
-        }
       }}
       {...divProps}
     >

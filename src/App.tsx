@@ -113,11 +113,11 @@ const Widestt = () => {
                   <div
                     key={id}
                     data-screen={name}
-                    className="max-w-screen flex flex-col"
+                    className="max-w-screen flex min-w-[40ch] flex-col md:max-w-[70ch]"
                   >
                     <Screen
                       id={id}
-                      className="min-h-[40vh] w-[90vw] p-4"
+                      className="min-h-[40vh]  p-4"
                       x={x}
                       y={y}
                       name={name}
