@@ -1,20 +1,14 @@
-import {
-  HTMLMotionProps,
-  animate,
-  motion,
-  useInView,
-  useMotionValue,
-} from "framer-motion";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import { Pressable, PressableProps, SpaceContext } from "react-zoomable-ui";
+import { HTMLMotionProps, animate, motion } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, PressableProps } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTrigger,
+} from "./components/ui/dialog";
+import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 import { getRandomEmoji } from "./emojis";
 import {
@@ -27,29 +21,21 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { Progress } from "./components/ui/progress";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
   where: keyof TodoState;
 };
 
+const MotionProgress = motion(Progress);
+
 export const Task = (props: Props) => {
   const { task, where } = props;
-  const aProgress = useMotionValue(task.progress);
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
-  const [show, setShow] = useState(false);
   const ref = useRef<any>();
 
   const [progress, setProgress] = useState(task.progress);
-  const { viewPort } = useContext(SpaceContext);
-  const isInView = useInView(ref, {
-    amount: "all",
-  });
-
-  const MotionProgress = motion(Progress);
-
   const deleteTask = useCallback(() => {
     dispatch(
       removeTask({
@@ -75,16 +61,6 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
-  const centerCamera = useCallback(() => {
-    const element = document.querySelector(`#screen-${where}`) as HTMLElement;
-
-    if (viewPort && !isInView) {
-      viewPort.camera.centerFitElementIntoView(element, undefined, {
-        durationMilliseconds: 400,
-      });
-    }
-  }, [viewPort, isInView]);
-
   const sharedPressableProps = useMemo<PressableProps>(
     () => ({
       onLongTap: () => {
@@ -107,7 +83,6 @@ export const Task = (props: Props) => {
             progress: next,
           }),
         );
-        centerCamera();
       },
       potentialTapClassName: "translate-y-0 translate-x-0",
     }),
@@ -115,83 +90,81 @@ export const Task = (props: Props) => {
   );
 
   return (
-    <div className={`${show ? "border border-gray-200 p-2 py-2" : ""}`}>
-      <div
-        className="flex w-full select-none items-center gap-2 py-1"
-        ref={ref}
-      >
-        <motion.div
-          className="flex w-full items-baseline gap-2 "
-          style={{
-            opacity: 1 - progress / 150,
-          }}
+    <Dialog>
+      <div>
+        <div
+          className="flex w-full select-none items-center gap-2 py-1"
+          ref={ref}
         >
-          <MotionProgress
-            className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
-            value={progress}
-          >
-            {/* <span className="absolute left-0 top-0">{progress}%</span> */}
-          </MotionProgress>
-          <Pressable
-            onTap={() => {
-              setShow((prev) => !prev);
+          <motion.div
+            className="flex w-full items-baseline gap-2 "
+            style={{
+              opacity: 1 - progress / 150,
             }}
           >
-            <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
-          </Pressable>
-        </motion.div>
-        <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">
-          <Pressable
-            {...sharedPressableProps}
-            className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
-          />
-          <Pressable
-            {...sharedPressableProps}
-            className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
-          />
-        </span>
-      </div>
-
-      <div
-        data-task={task.id}
-        className={`${show ? "flex" : "hidden"} flex-col items-stretch gap-2`}
-      >
-        <div className="grid grid-flow-row">
-          <h4 className="text-md my-4 text-left">Move to: </h4>
-          {structure.map((row, index) => (
-            <div key={"ss" + index} className="flex flex-row gap-1">
-              {row.map((screen, index) => (
-                <Button
-                  key={screen + index}
-                  variant="ghost"
-                  className="border border-gray-800 px-1 text-white"
-                  onClick={() => {
-                    dispatch(
-                      moveTask({
-                        from: where,
-                        to: screen,
-                        id: task.id,
-                      }),
-                    );
-                  }}
-                >
-                  {getRandomEmoji(screen)}
-                  {screen}
-                </Button>
-              ))}
-            </div>
-          ))}
+            <MotionProgress
+              className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
+              value={progress}
+            ></MotionProgress>
+            <DialogTrigger asChild>
+              <p className="max-w-[21ch] break-all text-lg">
+                {task.title.text}
+              </p>
+            </DialogTrigger>
+          </motion.div>
+          <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">
+            <Pressable
+              {...sharedPressableProps}
+              className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+            />
+            <Pressable
+              {...sharedPressableProps}
+              className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+            />
+          </span>
         </div>
-        <Textarea
-          className="border-0 bg-gray-800 text-white"
-          defaultValue={task.description}
-          onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-          rows={10}
-          placeholder="Longer text"
-        />
+
+        <div />
       </div>
-      <div />
-    </div>
+      <DialogContent className="bg-black">
+        <DialogHeader>{task.title.text}</DialogHeader>
+        <div data-task={task.id} className="flex flex-col items-stretch gap-4">
+          <h4 className="text-md  text-left">Move to: </h4>
+          <div className="grid grid-flow-row gap-1">
+            {structure.map((row, index) => (
+              <div key={"ss" + index} className="flex flex-row gap-2">
+                {row.map((screen, index) => (
+                  <Button
+                    tabIndex={-1}
+                    key={screen + index}
+                    variant="ghost"
+                    className="border border-gray-800 px-2 text-white"
+                    onClick={() => {
+                      dispatch(
+                        moveTask({
+                          from: where,
+                          to: screen,
+                          id: task.id,
+                        }),
+                      );
+                    }}
+                  >
+                    {getRandomEmoji(screen)}
+                    {screen}
+                  </Button>
+                ))}
+              </div>
+            ))}
+          </div>
+          <Textarea
+            className="border-0 bg-gray-800 text-white"
+            defaultValue={task.description}
+            onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
+            rows={10}
+            placeholder="Longer text"
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
-
