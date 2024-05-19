@@ -24,7 +24,6 @@ enableReactTracking({
 function App() {
   const spaceRef = useRef<Space | null>(null);
 
-  console.log(spaceRef.current);
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
@@ -48,9 +47,7 @@ const Widestt = () => {
   const observer = useRef(
     new IntersectionObserver(
       (entries) => {
-        console.log(entries);
         if (entries.length === 1) {
-          console.log(entries.at(0)?.target);
           entries.at(0)?.target.scrollIntoView();
         }
       },

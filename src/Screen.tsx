@@ -85,7 +85,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className={`flex saturate-0`}>
+      <div className={`flex saturate-0`} id={`screen-${name}`}>
         <Pressable className="auto" onTap={centerCamera}>
           <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
             {getRandomEmoji(name)}
@@ -126,7 +126,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
 
       <div className="flex flex-col items-stretch gap-2">
         <Adder where={name} />
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={false} mode="popLayout">
           {todos.map((task, index) => (
             <Task
               initial={{ transform: "translateY(-100%)" }}
@@ -136,7 +136,13 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
               exit={{
                 opacity: 0,
               }}
-              key={task.id + index}
+              transition={{
+                type: "spring",
+                damping: 200,
+                stiffness: 200,
+                duration: 0.8,
+              }}
+              key={task.id}
               task={task}
               where={name}
             />

@@ -6,6 +6,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
+  DialogPortal,
   DialogTrigger,
 } from "./components/ui/dialog";
 import { Progress } from "./components/ui/progress";
@@ -69,6 +70,9 @@ export const Task = (props: Props) => {
           onUpdate: (it) => setProgress(Math.round(it)),
         });
       },
+      onCapturePressMove: () => console.log("MOVING"),
+      onCapturePressStart: () => console.log("STARTED"),
+      onCapturePressEnd: () => console.log("ENDED"),
       longTapThresholdMs: 420,
       onTap: () => {
         const next = progress + 6;
@@ -90,7 +94,7 @@ export const Task = (props: Props) => {
   );
 
   return (
-    <Dialog>
+    <Dialog modal={false}>
       <div>
         <div
           className="flex w-full select-none items-center gap-2 py-1"
@@ -102,15 +106,13 @@ export const Task = (props: Props) => {
               opacity: 1 - progress / 150,
             }}
           >
-            <MotionProgress
-              className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
-              value={progress}
-            ></MotionProgress>
             <DialogTrigger asChild>
-              <p className="max-w-[21ch] break-all text-lg">
-                {task.title.text}
-              </p>
+              <MotionProgress
+                className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
+                value={progress}
+              />
             </DialogTrigger>
+            <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
           </motion.div>
           <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">
             <Pressable
@@ -126,45 +128,50 @@ export const Task = (props: Props) => {
 
         <div />
       </div>
-      <DialogContent className="bg-black">
-        <DialogHeader>{task.title.text}</DialogHeader>
-        <div data-task={task.id} className="flex flex-col items-stretch gap-4">
-          <h4 className="text-md  text-left">Move to: </h4>
-          <div className="grid grid-flow-row gap-1">
-            {structure.map((row, index) => (
-              <div key={"ss" + index} className="flex flex-row gap-2">
-                {row.map((screen, index) => (
-                  <Button
-                    tabIndex={-1}
-                    key={screen + index}
-                    variant="ghost"
-                    className="border border-gray-800 px-2 text-white"
-                    onClick={() => {
-                      dispatch(
-                        moveTask({
-                          from: where,
-                          to: screen,
-                          id: task.id,
-                        }),
-                      );
-                    }}
-                  >
-                    {getRandomEmoji(screen)}
-                    {screen}
-                  </Button>
-                ))}
-              </div>
-            ))}
+      <DialogPortal container={document.getElementById(`screen-${where}`)}>
+        <DialogContent className="bg-black">
+          <DialogHeader>{task.title.text}</DialogHeader>
+          <div
+            data-task={task.id}
+            className="flex flex-col items-stretch gap-4"
+          >
+            <h4 className="text-md  text-left">Move to: </h4>
+            <div className="grid grid-flow-row gap-1">
+              {structure.map((row, index) => (
+                <div key={"ss" + index} className="flex flex-row gap-2">
+                  {row.map((screen, index) => (
+                    <Button
+                      tabIndex={-1}
+                      key={screen + index}
+                      variant="ghost"
+                      className="border border-gray-800 px-2 text-white"
+                      onClick={() => {
+                        dispatch(
+                          moveTask({
+                            from: where,
+                            to: screen,
+                            id: task.id,
+                          }),
+                        );
+                      }}
+                    >
+                      {getRandomEmoji(screen)}
+                      {screen}
+                    </Button>
+                  ))}
+                </div>
+              ))}
+            </div>
+            <Textarea
+              className="border-0 bg-gray-800 text-white"
+              defaultValue={task.description}
+              onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
+              rows={10}
+              placeholder="Longer text"
+            />
           </div>
-          <Textarea
-            className="border-0 bg-gray-800 text-white"
-            defaultValue={task.description}
-            onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-            rows={10}
-            placeholder="Longer text"
-          />
-        </div>
-      </DialogContent>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   );
 };

@@ -13,23 +13,19 @@ function ReloadPrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
-      console.log(`Service Worker at: ${swUrl}`);
       // @ts-expect-error just ignore
       if (reloadSW === "true") {
         r &&
           setInterval(() => {
             // rome-disable-next-line no-console
-            console.log("Checking for sw update");
             r.update();
           }, 20000 /* 20s for testing purposes */);
       } else {
         // rome-disable-next-line prefer-template,no-console
-        console.log(`SW Registered: ${r}`);
       }
     },
     onRegisterError(error) {
       // rome-disable-next-line no-console
-      console.log("SW registration error", error);
     },
   });
 
