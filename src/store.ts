@@ -113,6 +113,12 @@ const todoSlice = createSlice({
       }
       Object.assign(values, { [title]: [] });
     },
+    swap: (state, action: PayloadAction<{ from: string; to: string }>) => {
+      const { from, to } = action.payload;
+      const a = state.structure
+        .find((row) => row.includes(from))
+        ?.find((col) => col === from);
+    },
     removeTask: (state, action: PayloadAction<{ key: string; id: string }>) => {
       state.values[action.payload.key] = state.values[
         action.payload.key

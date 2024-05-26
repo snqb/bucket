@@ -69,12 +69,12 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
-  const sadawd = useLongPress(
+  const longPressProps = useLongPress(
     () => {
       {
         const next = progress + 7;
         animate(progress, next, {
-          duration: 0.2,
+          duration: 0,
           onUpdate: (it) => setProgress(Math.round(it)),
         });
         dispatch(
@@ -90,16 +90,20 @@ export const Task = (props: Props) => {
       onStart: () => {
         const next = 100;
         timeoutRef.current = animate(progress, next, {
-          duration: 5,
+          duration: 2.8,
           onUpdate: (it) => setProgress(Math.round(it)),
+          onComplete: () => {
+            deleteTask();
+          },
+          damping: 66,
+          bounce: 10,
+          bounceDamping: 100,
         });
       },
       onFinish: () => {
-        console.log("finish", timeoutRef.current);
         timeoutRef.current?.stop();
       },
       onCancel: () => {
-        console.log("cancel", timeoutRef.current);
         timeoutRef.current?.stop();
       },
     },
@@ -128,7 +132,7 @@ export const Task = (props: Props) => {
           </motion.div>
           <span
             className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
-            {...sadawd}
+            {...longPressProps}
           >
             <button
               // {...sharedPressableProps}

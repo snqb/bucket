@@ -27,13 +27,7 @@ function App() {
   return (
     <Provider store={store}>
       <PersistGate persistor={persistor}>
-        {/* <Space
-          ref={spaceRef}
-          className="h-full w-full"
-          treatTwoFingerTrackPadGesturesLikeTouch
-        > */}
         <Widest />
-        {/* </Space> */}
         <ReloadPrompt />
       </PersistGate>
     </Provider>
@@ -63,7 +57,7 @@ const Widestt = () => {
   }, [observer.current]);
 
   return (
-    <div className="flex min-h-screen flex-col overflow-scroll">
+    <div className="flex h-max min-h-screen flex-col">
       <Button
         onClick={() => {
           dispatch(
@@ -77,7 +71,7 @@ const Widestt = () => {
         +
       </Button>
       <motion.div
-        className={`overflow-none flex h-min w-max snap-both snap-mandatory flex-col gap-4`}
+        className={`flex h-max w-max snap-both snap-mandatory flex-col gap-4 overflow-auto`}
       >
         {structure.map((row, y) => {
           return (
@@ -101,7 +95,11 @@ const Widestt = () => {
                       name={name}
                       drag={false}
                       onClick={(e) =>
-                        e.currentTarget.scrollIntoView({ block: "center" })
+                        e.currentTarget.scrollIntoView({
+                          block: "center",
+                          inline: "center",
+                          behavior: "smooth",
+                        })
                       }
                     />
                   </div>
