@@ -70,10 +70,25 @@ const todoSlice = createSlice({
       { structure, values },
       { payload }: PayloadAction<{ title: string; x?: number; y?: number }>,
     ) => {
-      const y = payload.y || structure.length - 1;
-      const x =
-        payload.x ||
-        structure.reduce((acc, row) => Math.max(acc, row.length), 0);
+      let x, y;
+      const width = structure.reduce(
+        (acc, row) => Math.max(acc, row.length),
+        0,
+      );
+      const height = structure.length;
+
+      console.log(width, height);
+      if (height > width) {
+        y = width + 1;
+        x = height;
+      } else if (height === width) {
+        y = width + 1;
+        x = 0;
+      } else {
+        y = width;
+        x = height + 1;
+      }
+
       const { title } = payload;
 
       // Bounds Checking
@@ -83,7 +98,9 @@ const todoSlice = createSlice({
       }
 
       if (y >= structure.length) {
-        structure.push([]);
+        for (let i = structure.length; i <= y; i++) {
+          structure.push([]);
+        }
       }
 
       const isAddingOnEmpty = !(structure[y] && structure[y][x]);

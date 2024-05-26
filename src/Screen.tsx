@@ -50,20 +50,20 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
   const tasks = useAppSelector((state) => state.todo.values);
   const dispatch = useAppDispatch();
   const ref = useRef<Element>(document.querySelector("#screens")!);
-  const { viewPort } = useContext(SpaceContext);
+  // const { viewPort } = useContext(SpaceContext);
 
   const inView = useInView(ref, { amount: 0.95 });
   const todos = tasks[name] ?? [];
 
   const bg = useMemo(() => getBg(name, 0.1), [name]);
 
-  const centerCamera = useCallback(() => {
-    if (viewPort) {
-      viewPort?.camera.centerFitElementIntoView(ref.current as any, undefined, {
-        durationMilliseconds: 400,
-      });
-    }
-  }, [viewPort]);
+  // const centerCamera = useCallback(() => {
+  //   if (viewPort) {
+  //     viewPort?.camera.centerFitElementIntoView(ref.current as any, undefined, {
+  //       durationMilliseconds: 400,
+  //     });
+  //   }
+  // }, [viewPort]);
 
   if (todos === undefined) return null;
 
@@ -86,12 +86,12 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       {...divProps}
     >
       <div className={`flex saturate-0`} id={`screen-${name}`}>
-        <Pressable className="auto" onTap={centerCamera}>
+        <div className="">
           <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
             {getRandomEmoji(name)}
             {name}
           </h2>
-        </Pressable>
+        </div>
         <Button
           size="sm"
           variant="ghost"

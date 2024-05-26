@@ -1,4 +1,9 @@
-import { HTMLMotionProps, animate, motion } from "framer-motion";
+import {
+  AnimationPlaybackControls,
+  HTMLMotionProps,
+  animate,
+  motion,
+} from "framer-motion";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, PressableProps } from "react-zoomable-ui";
 import { Button } from "./components/ui/button";
@@ -22,6 +27,7 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
+import { useLongPress } from "@uidotdev/usehooks";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -35,6 +41,7 @@ export const Task = (props: Props) => {
   const dispatch = useAppDispatch();
   const { structure } = useAppSelector((state) => state.todo);
   const ref = useRef<any>();
+  let timeoutRef = useRef<AnimationPlaybackControls>();
 
   const [progress, setProgress] = useState(task.progress);
   const deleteTask = useCallback(() => {
@@ -62,20 +69,10 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
-  const sharedPressableProps = useMemo<PressableProps>(
-    () => ({
-      onLongTap: () => {
-        animate(progress, progress + 42, {
-          duration: 0.6,
-          onUpdate: (it) => setProgress(Math.round(it)),
-        });
-      },
-      onCapturePressMove: () => console.log("MOVING"),
-      onCapturePressStart: () => console.log("STARTED"),
-      onCapturePressEnd: () => console.log("ENDED"),
-      longTapThresholdMs: 420,
-      onTap: () => {
-        const next = progress + 6;
+  const sadawd = useLongPress(
+    () => {
+      {
+        const next = progress + 7;
         animate(progress, next, {
           duration: 0.2,
           onUpdate: (it) => setProgress(Math.round(it)),
@@ -87,10 +84,25 @@ export const Task = (props: Props) => {
             progress: next,
           }),
         );
+      }
+    },
+    {
+      onStart: () => {
+        const next = 100;
+        timeoutRef.current = animate(progress, next, {
+          duration: 5,
+          onUpdate: (it) => setProgress(Math.round(it)),
+        });
       },
-      potentialTapClassName: "translate-y-0 translate-x-0",
-    }),
-    [progress],
+      onFinish: () => {
+        console.log("finish", timeoutRef.current);
+        timeoutRef.current?.stop();
+      },
+      onCancel: () => {
+        console.log("cancel", timeoutRef.current);
+        timeoutRef.current?.stop();
+      },
+    },
   );
 
   return (
@@ -114,13 +126,16 @@ export const Task = (props: Props) => {
             </DialogTrigger>
             <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
           </motion.div>
-          <span className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12">
-            <Pressable
-              {...sharedPressableProps}
+          <span
+            className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
+            {...sadawd}
+          >
+            <button
+              // {...sharedPressableProps}
               className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
-            <Pressable
-              {...sharedPressableProps}
+            <button
+              // {...sharedPressableProps}
               className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
           </span>
@@ -128,7 +143,7 @@ export const Task = (props: Props) => {
 
         <div />
       </div>
-      <DialogPortal container={document.getElementById(`screen-${where}`)}>
+      <DialogPortal>
         <DialogContent className="bg-black">
           <DialogHeader>{task.title.text}</DialogHeader>
           <div
