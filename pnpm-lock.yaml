@@ -53,9 +53,15 @@ importers:
       lucide-react:
         specifier: ^0.363.0
         version: 0.363.0(react@18.2.0)
+      magic-grid:
+        specifier: ^3.2.4
+        version: 3.2.4
       million:
         specifier: ^3.0.6
         version: 3.0.6(rollup@2.79.1)
+      pocketbase:
+        specifier: ^0.21.3
+        version: 0.21.3
       ramda:
         specifier: ^0.29.1
         version: 0.29.1
@@ -77,6 +83,9 @@ importers:
       react-geiger:
         specifier: ^1.1.0
         version: 1.1.0(react@18.2.0)
+      react-grid-layout:
+        specifier: ^1.4.4
+        version: 1.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       react-redux:
         specifier: ^8.1.2
         version: 8.1.2(@types/react-dom@18.2.4)(@types/react@18.2.7)(react-dom@18.2.0(react@18.2.0))(react@18.2.0)(redux@4.2.1)
@@ -1579,6 +1588,10 @@ packages:
   class-variance-authority@0.7.0:
     resolution: {integrity: sha512-jFI8IQw4hczaL4ALINxqLEXQbWcNjoSkloa4IaufXCJr6QawJyw7tuRysRsrE8w2p/4gGaxKIt/hX3qz/IbD1A==}
 
+  clsx@1.2.1:
+    resolution: {integrity: sha512-EcR6r5a8bj6pu3ycsa/E/cKVGuTgZJZdsyUYHOksG/UHIiKfjxzRxYJpyVBwYaQeOvghal9fcc4PidlgzugAQg==}
+    engines: {node: '>=6'}
+
   clsx@2.0.0:
     resolution: {integrity: sha512-rQ1+kcj+ttHG0MKVGBUXwayCCF1oh39BF5COIpRzuCEv8Mwjv0XucrI2ExNTOn9IlLifGClWQcU9BrZORvtw6Q==}
     engines: {node: '>=6'}
@@ -1722,6 +1735,9 @@ packages:
 
   fast-deep-equal@3.1.3:
     resolution: {integrity: sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==}
+
+  fast-equals@4.0.3:
+    resolution: {integrity: sha512-G3BSX9cfKttjr+2o1O22tYMLq0DPluZnYtq1rXumE1SpL/F/SLIfHx08WYQoWSIpeMYf8sRbJ8++71+v6Pnxfg==}
 
   fast-glob@3.3.2:
     resolution: {integrity: sha512-oX2ruAFQwf/Orj8m737Y5adxDQO0LAB7/S5MnxCdTNDd4p6BsyIVsv9JQsATbTSq8KHRpLwIHbVlUNatxd+1Ow==}
@@ -2070,6 +2086,9 @@ packages:
     peerDependencies:
       react: ^16.5.1 || ^17.0.0 || ^18.0.0
 
+  magic-grid@3.2.4:
+    resolution: {integrity: sha512-zdV8b4q3YpmWZKLcbbfKisxAWlYF9S2dguCi3LR9pq59yq2pl140td4ViwDqYkZGZ6TP+B7YaExaVE3YNqN7/g==}
+
   magic-string@0.25.9:
     resolution: {integrity: sha512-RmF0AsMzgt25qzqqLc1+MbHmhdx0ojF2Fvs4XnOqz2ZOBXzzkEwc/dJQZCYHAn7v1jbVOjAZfK8msRn4BxO4VQ==}
 
@@ -2185,6 +2204,9 @@ packages:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}
     engines: {node: '>= 6'}
 
+  pocketbase@0.21.3:
+    resolution: {integrity: sha512-bsQRZ1mj4dhPJ4P5iSrDqWQtBX2NtuBkf6IOZwTv27zZOw6zrISgo963i5JD/99qKKD5aMSMDPGk1BE9ZyI7Cg==}
+
   postcss-import@15.1.0:
     resolution: {integrity: sha512-hpr+J05B2FVYUAXHeK1YyI267J/dDDhMU6B6civm8hSY1jYJnBXxzKDKDswzJmtLHryrjhnDjqqp/49t8FALew==}
     engines: {node: '>=14.0.0'}
@@ -2295,6 +2317,9 @@ packages:
     resolution: {integrity: sha512-mQUvGU6aUFQ+rNvTIAcZuWGRT9a6f6Yrg9bHs4ImKF+HZCEK+plBvnAZYSIQztknZF2qnzNtr6F8s0+IuptdlQ==}
     engines: {node: ^14.13.1 || >=16.0.0}
 
+  prop-types@15.8.1:
+    resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
+
   punycode@2.3.0:
     resolution: {integrity: sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==}
     engines: {node: '>=6'}
@@ -2319,6 +2344,12 @@ packages:
     peerDependencies:
       react: ^18.2.0
 
+  react-draggable@4.4.6:
+    resolution: {integrity: sha512-LtY5Xw1zTPqHkVmtM3X8MUOxNDOUhv/khTgBgrUvwaS064bwVvxT+q5El0uUFNx5IEPKXuRejr7UqLwBIg5pdw==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
+
   react-easy-sort@1.6.0:
     resolution: {integrity: sha512-zd9Nn90wVlZPEwJrpqElN87sf9GZnFR1StfjgNQVbSpR5QTSzCHjEYK6REuwq49Ip+76KOMSln9tg/ST2KLelg==}
     engines: {node: '>=16'}
@@ -2330,6 +2361,12 @@ packages:
     resolution: {integrity: sha512-Zi5MGdrDaVevzVrmhrGld0449LNvJugvKplzM/OXn8zbcX/9rJOmxAtNwCTNu8o/gJzkcN730fsw4YCF4CkhEw==}
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0
+
+  react-grid-layout@1.4.4:
+    resolution: {integrity: sha512-7+Lg8E8O8HfOH5FrY80GCIR1SHTn2QnAYKh27/5spoz+OHhMmEhU/14gIkRzJOtympDPaXcVRX/nT1FjmeOUmQ==}
+    peerDependencies:
+      react: '>= 16.3.0'
+      react-dom: '>= 16.3.0'
 
   react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
@@ -2377,6 +2414,11 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  react-resizable@3.0.5:
+    resolution: {integrity: sha512-vKpeHhI5OZvYn82kXOs1bC8aOXktGU5AmKAgaZS4F5JPburCtbmDPqE7Pzp+1kN4+Wb81LlF33VpGwWwtXem+w==}
+    peerDependencies:
+      react: '>= 16.3'
 
   react-style-singleton@2.2.1:
     resolution: {integrity: sha512-ZWj0fHEMyWkHzKYUr2Bs/4zU6XLmq9HsgBURm7g5pAVfyn49DgUiNgY2d4lXRlYSiCif9YBGpQleewkcqddc7g==}
@@ -2455,6 +2497,9 @@ packages:
 
   reselect@4.1.8:
     resolution: {integrity: sha512-ab9EmR80F/zQTMNeneUr4cv+jSwPJgIlvEmVwLerwrWVbpLlBuls9XHzIeTFy4cegU2NHBp3va0LKOzU5qFEYQ==}
+
+  resize-observer-polyfill@1.5.1:
+    resolution: {integrity: sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==}
 
   resolve@1.22.2:
     resolution: {integrity: sha512-Sb+mjNHOULsBv818T40qSPeRiuWLyaGMa5ewydRLFimneixmVy2zdivRl+AF6jaYPC8ERxGDmFSiqui6SfPd+g==}
@@ -4444,6 +4489,8 @@ snapshots:
     dependencies:
       clsx: 2.0.0
 
+  clsx@1.2.1: {}
+
   clsx@2.0.0: {}
 
   clsx@2.1.0: {}
@@ -4605,6 +4652,8 @@ snapshots:
   esutils@2.0.3: {}
 
   fast-deep-equal@3.1.3: {}
+
+  fast-equals@4.0.3: {}
 
   fast-glob@3.3.2:
     dependencies:
@@ -4928,6 +4977,8 @@ snapshots:
     dependencies:
       react: 18.2.0
 
+  magic-grid@3.2.4: {}
+
   magic-string@0.25.9:
     dependencies:
       sourcemap-codec: 1.4.8
@@ -5025,6 +5076,8 @@ snapshots:
 
   pirates@4.0.6: {}
 
+  pocketbase@0.21.3: {}
+
   postcss-import@15.1.0(postcss@8.4.33):
     dependencies:
       postcss: 8.4.33
@@ -5078,6 +5131,12 @@ snapshots:
 
   pretty-bytes@6.1.1: {}
 
+  prop-types@15.8.1:
+    dependencies:
+      loose-envify: 1.4.0
+      object-assign: 4.1.1
+      react-is: 16.13.1
+
   punycode@2.3.0: {}
 
   queue-microtask@1.2.3: {}
@@ -5098,6 +5157,13 @@ snapshots:
       react: 18.2.0
       scheduler: 0.23.0
 
+  react-draggable@4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      clsx: 1.2.1
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+
   react-easy-sort@1.6.0(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
     dependencies:
       array-move: 3.0.1
@@ -5108,6 +5174,17 @@ snapshots:
   react-geiger@1.1.0(react@18.2.0):
     dependencies:
       react: 18.2.0
+
+  react-grid-layout@1.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      clsx: 2.1.0
+      fast-equals: 4.0.3
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+      react-draggable: 4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      react-resizable: 3.0.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+      resize-observer-polyfill: 1.5.1
 
   react-is@16.13.1: {}
 
@@ -5146,6 +5223,14 @@ snapshots:
       use-sidecar: 1.1.2(@types/react@18.2.7)(react@18.2.0)
     optionalDependencies:
       '@types/react': 18.2.7
+
+  react-resizable@3.0.5(react-dom@18.2.0(react@18.2.0))(react@18.2.0):
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-draggable: 4.4.6(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
+    transitivePeerDependencies:
+      - react-dom
 
   react-style-singleton@2.2.1(@types/react@18.2.7)(react@18.2.0):
     dependencies:
@@ -5224,6 +5309,8 @@ snapshots:
   require-from-string@2.0.2: {}
 
   reselect@4.1.8: {}
+
+  resize-observer-polyfill@1.5.1: {}
 
   resolve@1.22.2:
     dependencies:

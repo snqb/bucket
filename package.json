@@ -24,7 +24,9 @@
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.22",
     "lucide-react": "^0.363.0",
+    "magic-grid": "^3.2.4",
     "million": "^3.0.6",
+    "pocketbase": "^0.21.3",
     "ramda": "^0.29.1",
     "rand-seed": "^1.0.2",
     "randomcolor": "^0.6.2",
@@ -32,6 +34,7 @@
     "react-dom": "^18.2.0",
     "react-easy-sort": "^1.6.0",
     "react-geiger": "^1.1.0",
+    "react-grid-layout": "^1.4.4",
     "react-redux": "^8.1.2",
     "react-zoomable-ui": "^0.11.0",
     "redux-persist": "^6.0.0",
@@ -61,5 +64,6 @@
   },
   "volta": {
     "node": "20.11.0"
-  }
+  },
+  "packageManager": "pnpm@9.4.0+sha512.f549b8a52c9d2b8536762f99c0722205efc5af913e77835dbccc3b0b0b2ca9e7dc8022b78062c17291c48e88749c70ce88eb5a74f1fa8c4bf5e18bb46c8bd83a"
 }
