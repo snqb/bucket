@@ -1,11 +1,11 @@
+import { useLongPress } from "@uidotdev/usehooks";
 import {
   AnimationPlaybackControls,
   HTMLMotionProps,
   animate,
   motion,
 } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, PressableProps } from "react-zoomable-ui";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./components/ui/button";
 import {
   Dialog,
@@ -27,7 +27,6 @@ import {
   useAppDispatch,
   useAppSelector,
 } from "./store";
-import { useLongPress } from "@uidotdev/usehooks";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -38,29 +37,27 @@ const MotionProgress = motion(Progress);
 
 export const Task = (props: Props) => {
   const { task, where } = props;
-  const dispatch = useAppDispatch();
-  const { structure } = useAppSelector((state) => state.todo);
   const ref = useRef<any>();
   let timeoutRef = useRef<AnimationPlaybackControls>();
 
   const [progress, setProgress] = useState(task.progress);
   const deleteTask = useCallback(() => {
-    dispatch(
-      removeTask({
-        key: where,
-        id: task.id,
-      }),
-    );
-  }, [dispatch, updateProgress, progress]);
+    // dispatch(
+    //   removeTask({
+    //     key: where,
+    //     id: task.id,
+    //   }),
+    // );
+  }, [updateProgress, progress]);
 
   const updateTaskDescription = (text: string) => {
-    dispatch(
-      updateDescription({
-        key: where,
-        id: task.id,
-        text,
-      }),
-    );
+    // dispatch(
+    //   updateDescription({
+    //     key: where,
+    //     id: task.id,
+    //     text,
+    //   }),
+    // );
   };
 
   useEffect(() => {
@@ -77,13 +74,13 @@ export const Task = (props: Props) => {
           duration: 0,
           onUpdate: (it) => setProgress(Math.round(it)),
         });
-        dispatch(
-          updateProgress({
-            key: where,
-            id: task.id,
-            progress: next,
-          }),
-        );
+        // dispatch(
+        //   updateProgress({
+        //     key: where,
+        //     id: task.id,
+        //     progress: next,
+        //   }),
+        // );
       }
     },
     {
@@ -128,7 +125,7 @@ export const Task = (props: Props) => {
                 value={progress}
               />
             </DialogTrigger>
-            <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
+            <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
           </motion.div>
           <span
             className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
@@ -147,9 +144,9 @@ export const Task = (props: Props) => {
 
         <div />
       </div>
-      <DialogPortal>
+      {/* <DialogPortal>
         <DialogContent className="bg-black">
-          <DialogHeader>{task.title.text}</DialogHeader>
+          <DialogHeader>{task.title}</DialogHeader>
           <div
             data-task={task.id}
             className="flex flex-col items-stretch gap-4"
@@ -190,7 +187,7 @@ export const Task = (props: Props) => {
             />
           </div>
         </DialogContent>
-      </DialogPortal>
+      </DialogPortal> */}
     </Dialog>
   );
 };

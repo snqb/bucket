@@ -1,35 +1,21 @@
 import { Task } from "./Task";
 
-import { observable } from "@legendapp/state";
 import {
-  AnimatePresence,
-  HTMLMotionProps,
-  motion,
-  useInView,
-  useScroll,
-} from "framer-motion";
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
+import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { Pressable, SpaceContext } from "react-zoomable-ui";
+import { memo, useMemo, useRef } from "react";
 import Adder from "./Adder";
+import { pb } from "./App";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
-import {
-  removeScreen,
-  renameScreen,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
 
 type Props = HTMLMotionProps<"div"> & {
   name: string;
+  collectionId: string;
   x: number;
   y: number;
 };
@@ -44,26 +30,31 @@ const getBg = (name: string, alpha = 0.07) => {
   });
 };
 
-export const preventDrag$ = observable(false);
-
-const Screen = ({ name, x, y, ...divProps }: Props) => {
-  const tasks = useAppSelector((state) => state.todo.values);
-  const dispatch = useAppDispatch();
+const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
   const ref = useRef<Element>(document.querySelector("#screens")!);
-  // const { viewPort } = useContext(SpaceContext);
+  const client = useQueryClient();
+  const { data: todos } = useSuspenseQuery({
+    queryKey: ["task", name],
+    queryFn: async () => {
+      const task = await pb
+        .collection("tasks")
+        .getFullList({ filter: `screen.title = "${name}"` });
+      return task;
+    },
+  });
 
-  const inView = useInView(ref, { amount: 0.95 });
-  const todos = tasks[name] ?? [];
+  const remove = useMutation({
+    mutationFn: async () => {
+      await pb.collection("screens").delete(collectionId);
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ["screens"],
+      });
+    },
+  });
 
   const bg = useMemo(() => getBg(name, 0.1), [name]);
-
-  // const centerCamera = useCallback(() => {
-  //   if (viewPort) {
-  //     viewPort?.camera.centerFitElementIntoView(ref.current as any, undefined, {
-  //       durationMilliseconds: 400,
-  //     });
-  //   }
-  // }, [viewPort]);
 
   if (todos === undefined) return null;
 
@@ -100,7 +91,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             e.stopPropagation();
             const confirm = window.confirm(`Delete ${name}?`);
             if (confirm) {
-              dispatch(removeScreen({ coords: [y, x] }));
+              remove.mutate();
             }
           }}
         >
@@ -113,9 +104,9 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             e.stopPropagation();
 
             const newName = prompt(`${name} -> to what?`);
-            if (newName && !tasks[newName]) {
-              dispatch(renameScreen({ coords: [y, x], newName }));
-            }
+            // if (newName && !tasks[newName]) {
+            //   dispatch(renameScreen({ coords: [y, x], newName }));
+            // }
           }}
         >
           ✏️
@@ -125,7 +116,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-        <Adder where={name} />
+        <Adder collectionId={collectionId} where={name} />
         <AnimatePresence initial={false} mode="popLayout">
           {todos.map((task, index) => (
             <Task

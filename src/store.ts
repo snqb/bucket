@@ -7,16 +7,11 @@ import thunk from "redux-thunk";
 
 export type Todo = {
   id: string;
-  title: Title;
+  title: string;
   createdAt: Date;
   progress: number;
   description?: string;
   subtasks?: Todo[];
-};
-
-type Title = {
-  text: string;
-  emoji: string;
 };
 
 export type TodoState = Record<string, Todo[]>;
@@ -77,7 +72,6 @@ const todoSlice = createSlice({
       );
       const height = structure.length;
 
-      console.log(width, height);
       if (height > width) {
         y = width + 1;
         x = height;

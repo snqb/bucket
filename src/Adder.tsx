@@ -1,19 +1,36 @@
 import { ChangeEventHandler, forwardRef, useState } from "react";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as R from "ramda";
+import { pb } from "./App";
 import { Input } from "./components/ui/input";
-import { getRandomEmoji } from "./emojis";
-import { TodoState, addTask, useAppDispatch, type Todo } from "./store";
+import { TodoState } from "./store";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
   where: keyof TodoState;
+  collectionId: string;
 }
 
 const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
-  const dispatch = useAppDispatch();
-
+  const client = useQueryClient();
   const [text, setText] = useState("");
+
+  const add = useMutation({
+    mutationFn: async (text: string) => {
+      const task = await pb.collection("tasks").create({
+        title: text,
+        screen: props.collectionId,
+        author: [pb.authStore.model!.id],
+      });
+      return task;
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ["task", where],
+      });
+    },
+  });
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
@@ -24,23 +41,8 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
     e.preventDefault();
     if (!text) return;
 
-    const task: Todo = {
-      id: window.crypto.randomUUID(),
-      title: {
-        text: text,
-        emoji: getRandomEmoji(text),
-      },
-      createdAt: new Date(),
-      progress: 0,
-    };
-
     try {
-      dispatch(
-        addTask({
-          key: where,
-          task,
-        }),
-      );
+      add.mutate(text);
     } catch (e) {
       console.error(e);
       alert("dev is stupid, text him t.me/snqba");
