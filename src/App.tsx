@@ -87,6 +87,7 @@ const Widest = () => {
           return (
             <Screen
               id={item.id}
+              key={item.id}
               className="min-h-[40vh] p-4 max-md:w-full md:min-h-[40ch]"
               x={0}
               y={0}

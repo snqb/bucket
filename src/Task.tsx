@@ -1,32 +1,23 @@
-import { useLongPress } from "@uidotdev/usehooks";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useDebounce, useLongPress } from "@uidotdev/usehooks";
 import {
   AnimationPlaybackControls,
   HTMLMotionProps,
   animate,
   motion,
 } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "./components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogPortal,
-  DialogTrigger,
-} from "./components/ui/dialog";
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { pb } from "./App";
+import { Dialog, DialogTrigger } from "./components/ui/dialog";
 import { Progress } from "./components/ui/progress";
-import { Textarea } from "./components/ui/textarea";
-import { getRandomEmoji } from "./emojis";
-import {
-  Todo,
-  TodoState,
-  moveTask,
-  removeTask,
-  updateDescription,
-  updateProgress,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
+import { Todo, TodoState } from "./store";
+import * as R from "ramda";
 
 type Props = HTMLMotionProps<"div"> & {
   task: Todo;
@@ -38,59 +29,60 @@ const MotionProgress = motion(Progress);
 export const Task = (props: Props) => {
   const { task, where } = props;
   const ref = useRef<any>();
+  const client = useQueryClient();
+
   let timeoutRef = useRef<AnimationPlaybackControls>();
 
   const [progress, setProgress] = useState(task.progress);
-  const deleteTask = useCallback(() => {
-    // dispatch(
-    //   removeTask({
-    //     key: where,
-    //     id: task.id,
-    //   }),
-    // );
-  }, [updateProgress, progress]);
+  const debouncedProgress = useDebounce(progress, 1000);
 
-  const updateTaskDescription = (text: string) => {
-    // dispatch(
-    //   updateDescription({
-    //     key: where,
-    //     id: task.id,
-    //     text,
-    //   }),
-    // );
-  };
+
+  const updateProgress = useMutation({
+    mutationKey: ["updateProgress", debouncedProgress],
+    mutationFn: async () => {
+      return pb.collection("tasks").update(task.id, {
+        progress,
+      });
+    },
+  });
 
   useEffect(() => {
+    updateProgress.mutate();
+    console.log(debouncedProgress)
     if (progress > 100) {
-      deleteTask();
+      remove.mutate();
     }
-  }, [progress]);
+  }, [debouncedProgress]);
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      return pb.collection("tasks").delete(task.id);
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ["task", where],
+      });
+    },
+  });
 
   const longPressProps = useLongPress(
     () => {
-      {
-        const next = progress + 7;
-        animate(progress, next, {
-          duration: 0,
-          onUpdate: (it) => setProgress(Math.round(it)),
-        });
-        // dispatch(
-        //   updateProgress({
-        //     key: where,
-        //     id: task.id,
-        //     progress: next,
-        //   }),
-        // );
-      }
+      return {
+        onFinish: () => {
+          console.log("finish at", progress);
+        },
+      };
     },
     {
       onStart: () => {
         const next = 100;
         timeoutRef.current = animate(progress, next, {
-          duration: 2.8,
-          onUpdate: (it) => setProgress(Math.round(it)),
+          duration: -(progress - 100) / 10,
+          onUpdate: (it) => {
+            return setProgress(Math.round(it));
+          },
           onComplete: () => {
-            deleteTask();
+            remove.mutate();
           },
           damping: 66,
           bounce: 10,
@@ -144,50 +136,6 @@ export const Task = (props: Props) => {
 
         <div />
       </div>
-      {/* <DialogPortal>
-        <DialogContent className="bg-black">
-          <DialogHeader>{task.title}</DialogHeader>
-          <div
-            data-task={task.id}
-            className="flex flex-col items-stretch gap-4"
-          >
-            <h4 className="text-md  text-left">Move to: </h4>
-            <div className="grid grid-flow-row gap-1">
-              {structure.map((row, index) => (
-                <div key={"ss" + index} className="flex flex-row gap-2">
-                  {row.map((screen, index) => (
-                    <Button
-                      tabIndex={-1}
-                      key={screen + index}
-                      variant="ghost"
-                      className="border border-gray-800 px-2 text-white"
-                      onClick={() => {
-                        dispatch(
-                          moveTask({
-                            from: where,
-                            to: screen,
-                            id: task.id,
-                          }),
-                        );
-                      }}
-                    >
-                      {getRandomEmoji(screen)}
-                      {screen}
-                    </Button>
-                  ))}
-                </div>
-              ))}
-            </div>
-            <Textarea
-              className="border-0 bg-gray-800 text-white"
-              defaultValue={task.description}
-              onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-              rows={10}
-              placeholder="Longer text"
-            />
-          </div>
-        </DialogContent>
-      </DialogPortal> */}
     </Dialog>
   );
 };

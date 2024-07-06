@@ -7,11 +7,12 @@ import {
 } from "@tanstack/react-query";
 import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { pb } from "./App";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
+import { useDebounce } from "@uidotdev/usehooks";
 
 type Props = HTMLMotionProps<"div"> & {
   name: string;
@@ -30,15 +31,15 @@ const getBg = (name: string, alpha = 0.07) => {
   });
 };
 
-const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
+const Screen = ({ name: where, x, y, collectionId, ...divProps }: Props) => {
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const client = useQueryClient();
   const { data: todos } = useSuspenseQuery({
-    queryKey: ["task", name],
+    queryKey: ["task", where],
     queryFn: async () => {
       const task = await pb
         .collection("tasks")
-        .getFullList({ filter: `screen.title = "${name}"` });
+        .getFullList({ filter: `screen.title = "${where}"` });
       return task;
     },
   });
@@ -54,7 +55,11 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
     },
   });
 
-  const bg = useMemo(() => getBg(name, 0.1), [name]);
+  useEffect(() => {
+    console.log("ashdjksa");
+  }, [todos]);
+
+  const bg = useMemo(() => getBg(where, 0.1), [where]);
 
   if (todos === undefined) return null;
 
@@ -76,11 +81,11 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className={`flex saturate-0`} id={`screen-${name}`}>
+      <div className={`flex saturate-0`} id={`screen-${where}`}>
         <div className="">
           <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-            {getRandomEmoji(name)}
-            {name}
+            {getRandomEmoji(where)}
+            {where}
           </h2>
         </div>
         <Button
@@ -89,7 +94,7 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
           className="ml-auto"
           onClick={(e) => {
             e.stopPropagation();
-            const confirm = window.confirm(`Delete ${name}?`);
+            const confirm = window.confirm(`Delete ${where}?`);
             if (confirm) {
               remove.mutate();
             }
@@ -103,7 +108,7 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
           onClick={(e) => {
             e.stopPropagation();
 
-            const newName = prompt(`${name} -> to what?`);
+            const newName = prompt(`${where} -> to what?`);
             // if (newName && !tasks[newName]) {
             //   dispatch(renameScreen({ coords: [y, x], newName }));
             // }
@@ -116,8 +121,8 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-        <Adder collectionId={collectionId} where={name} />
-        <AnimatePresence initial={false} mode="popLayout">
+        <Adder collectionId={collectionId} where={where} />
+        <AnimatePresence initial={false} mode="sync">
           {todos.map((task, index) => (
             <Task
               initial={{ transform: "translateY(-100%)" }}
@@ -135,7 +140,7 @@ const Screen = ({ name, x, y, collectionId, ...divProps }: Props) => {
               }}
               key={index}
               task={task}
-              where={name}
+              where={where}
             />
           ))}
         </AnimatePresence>
