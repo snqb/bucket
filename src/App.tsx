@@ -18,6 +18,7 @@ const queryClient = new QueryClient();
 import PocketBase from "pocketbase";
 
 export const pb = new PocketBase(import.meta.env.VITE_POCKETBASE_URL);
+
 pb.collection("users").authWithPassword("gg@gg.com", "TQVD9V4kwYhSoUN");
 
 function App() {
