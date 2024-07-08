@@ -36,7 +36,6 @@ export const Task = (props: Props) => {
   const [progress, setProgress] = useState(task.progress);
   const debouncedProgress = useDebounce(progress, 1000);
 
-
   const updateProgress = useMutation({
     mutationKey: ["updateProgress", debouncedProgress],
     mutationFn: async () => {
@@ -48,7 +47,7 @@ export const Task = (props: Props) => {
 
   useEffect(() => {
     updateProgress.mutate();
-    console.log(debouncedProgress)
+    console.log(debouncedProgress);
     if (progress > 100) {
       remove.mutate();
     }
@@ -77,7 +76,7 @@ export const Task = (props: Props) => {
       onStart: () => {
         const next = 100;
         timeoutRef.current = animate(progress, next, {
-          duration: -(progress - 100) / 10,
+          duration: (200 - progress) / 100,
           onUpdate: (it) => {
             return setProgress(Math.round(it));
           },
