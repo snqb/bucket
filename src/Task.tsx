@@ -38,22 +38,27 @@ export const Task = (props: Props) => {
 
   const updateProgress = useMutation({
     mutationKey: ["updateProgress", debouncedProgress],
-    mutationFn: async () => {
+    mutationFn: async (value: number) => {
       return pb.collection("tasks").update(task.id, {
-        progress,
+        progress: value,
+      });
+    },
+    onSuccess: () => {
+      client.invalidateQueries({
+        queryKey: ["task", where],
       });
     },
   });
 
   useEffect(() => {
-    updateProgress.mutate();
-    console.log(debouncedProgress);
+    updateProgress.mutate(debouncedProgress);
     if (progress > 100) {
       remove.mutate();
     }
   }, [debouncedProgress]);
 
   const remove = useMutation({
+    mutationKey: ["remove", task.id],
     mutationFn: async () => {
       return pb.collection("tasks").delete(task.id);
     },
@@ -76,14 +81,15 @@ export const Task = (props: Props) => {
       onStart: () => {
         const next = 100;
         timeoutRef.current = animate(progress, next, {
-          duration: (200 - progress) / 100,
+          duration: (100 - progress) / 100 + 0.5,
           onUpdate: (it) => {
+            console.log(it);
             return setProgress(Math.round(it));
           },
           onComplete: () => {
             remove.mutate();
           },
-          damping: 66,
+          damping: 20,
           bounce: 10,
           bounceDamping: 100,
         });

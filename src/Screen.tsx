@@ -138,7 +138,7 @@ const Screen = ({ name: where, x, y, collectionId, ...divProps }: Props) => {
                 stiffness: 200,
                 duration: 0.8,
               }}
-              key={index}
+              key={task.id}
               task={task}
               where={where}
             />
