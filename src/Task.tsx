@@ -4,9 +4,7 @@ import {
   animate,
   motion,
 } from "framer-motion";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, PressableProps } from "react-zoomable-ui";
-import { Button } from "./components/ui/button";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,51 +14,31 @@ import {
 } from "./components/ui/dialog";
 import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
-import { getRandomEmoji } from "./emojis";
-import {
-  Todo,
-  TodoState,
-  moveTask,
-  removeTask,
-  updateDescription,
-  updateProgress,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
+
 import { useLongPress } from "@uidotdev/usehooks";
+import { TodoItem, bucketDB } from "./store";
 
 type Props = HTMLMotionProps<"div"> & {
-  task: Todo;
-  where: keyof TodoState;
+  task: TodoItem;
 };
 
 const MotionProgress = motion(Progress);
 
 export const Task = (props: Props) => {
-  const { task, where } = props;
-  const dispatch = useAppDispatch();
-  const { structure } = useAppSelector((state) => state.todo);
+  const { task } = props;
+
   const ref = useRef<any>();
   let timeoutRef = useRef<AnimationPlaybackControls>();
 
   const [progress, setProgress] = useState(task.progress);
   const deleteTask = useCallback(() => {
-    dispatch(
-      removeTask({
-        key: where,
-        id: task.id,
-      }),
-    );
-  }, [dispatch, updateProgress, progress]);
+    bucketDB.todoItems.delete(task.id!);
+  }, [progress]);
 
   const updateTaskDescription = (text: string) => {
-    dispatch(
-      updateDescription({
-        key: where,
-        id: task.id,
-        text,
-      }),
-    );
+    bucketDB.todoItems.update(task.id!, {
+      description: text,
+    });
   };
 
   useEffect(() => {
@@ -77,20 +55,16 @@ export const Task = (props: Props) => {
           duration: 0,
           onUpdate: (it) => setProgress(Math.round(it)),
         });
-        dispatch(
-          updateProgress({
-            key: where,
-            id: task.id,
-            progress: next,
-          }),
-        );
+        bucketDB.todoItems.update(task.id!, {
+          progress: next,
+        });
       }
     },
     {
       onStart: () => {
         const next = 100;
         timeoutRef.current = animate(progress, next, {
-          duration: 2.8,
+          duration: progress > 90 ? 0.5 : 1.5,
           onUpdate: (it) => setProgress(Math.round(it)),
           onComplete: () => {
             deleteTask();
@@ -128,7 +102,7 @@ export const Task = (props: Props) => {
                 value={progress}
               />
             </DialogTrigger>
-            <p className="max-w-[21ch] break-all text-lg">{task.title.text}</p>
+            <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
           </motion.div>
           <span
             className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
@@ -149,38 +123,12 @@ export const Task = (props: Props) => {
       </div>
       <DialogPortal>
         <DialogContent className="bg-black">
-          <DialogHeader>{task.title.text}</DialogHeader>
+          <DialogHeader>{task.title}</DialogHeader>
           <div
             data-task={task.id}
             className="flex flex-col items-stretch gap-4"
           >
             <h4 className="text-md  text-left">Move to: </h4>
-            <div className="grid grid-flow-row gap-1">
-              {structure.map((row, index) => (
-                <div key={"ss" + index} className="flex flex-row gap-2">
-                  {row.map((screen, index) => (
-                    <Button
-                      tabIndex={-1}
-                      key={screen + index}
-                      variant="ghost"
-                      className="border border-gray-800 px-2 text-white"
-                      onClick={() => {
-                        dispatch(
-                          moveTask({
-                            from: where,
-                            to: screen,
-                            id: task.id,
-                          }),
-                        );
-                      }}
-                    >
-                      {getRandomEmoji(screen)}
-                      {screen}
-                    </Button>
-                  ))}
-                </div>
-              ))}
-            </div>
             <Textarea
               className="border-0 bg-gray-800 text-white"
               defaultValue={task.description}

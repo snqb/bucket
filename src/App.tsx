@@ -1,114 +1,63 @@
 import ReloadPrompt from "./ReloadPrompt";
 
-import { enableReactTracking } from "@legendapp/state/config/enableReactTracking";
-import { observer } from "@legendapp/state/react";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
-import { Provider } from "react-redux";
-import { Space } from "react-zoomable-ui";
-import { PersistGate } from "redux-persist/integration/react";
 import Screen from "./Screen";
-import {
-  addScreen,
-  persistor,
-  store,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
 import { Button } from "./components/ui/button";
-
-enableReactTracking({
-  auto: true,
-});
+import { bucketDB, db } from "./store";
+import MagicGrid from "magic-grid";
+import { useEffect, useRef } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 
 function App() {
-  const spaceRef = useRef<Space | null>(null);
-
   return (
-    <Provider store={store}>
-      <PersistGate persistor={persistor}>
-        <Widest />
-        <ReloadPrompt />
-      </PersistGate>
-    </Provider>
+    <>
+      <Bucket />
+      <ReloadPrompt />
+    </>
   );
 }
 
-const Widestt = () => {
-  const structure = useAppSelector((state) => state.todo.structure);
-  const dispatch = useAppDispatch();
-
-  const observer = useRef(
-    new IntersectionObserver(
-      (entries) => {
-        // if (entries.length === 1) {
-        //   entries.at(0)?.target.scrollIntoView();
-        // }
-      },
-      { threshold: 1 },
-    ),
-  );
+const Bucket = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const lists = useLiveQuery(() => bucketDB.todoLists.toArray());
 
   useEffect(() => {
-    observer.current.observe(document.querySelector("[data-screen]")!);
-    return () => {
-      observer.current.disconnect();
-    };
-  }, [observer.current]);
+    if (lists) {
+      const magicGrid = new MagicGrid({
+        container: "#bucket-app", // Required. Can be a class, id, or an HTMLElement.
+        items: lists?.length, // For a grid with 20 items. Required for dynamic content.
+        animate: true, // Optional.
+        useMin: true,
+        useTransform: true,
+        maxColumns: 4,
+      });
+
+      magicGrid.listen();
+      magicGrid.positionItems();
+    }
+  }, [lists?.length]);
 
   return (
-    <div className="flex h-max min-h-screen flex-col">
+    <div ref={containerRef} className="w-screen">
       <Button
         onClick={() => {
-          dispatch(
-            addScreen({
-              title: "New Screen",
-            }),
-          );
+          const name = prompt("Enter the name of the new todo list");
+          if (name) {
+            bucketDB.todoLists.add({ title: name });
+          }
         }}
         className=""
       >
         +
       </Button>
-      <motion.div
-        className={`flex h-max w-max snap-both snap-mandatory flex-col gap-4 overflow-auto`}
-      >
-        {structure.map((row, y) => {
-          return (
-            <div
-              className="flex snap-start snap-always items-stretch gap-4"
-              key={y}
-            >
-              {row.map((name, x) => {
-                const id = `screen-${name}`;
-                return (
-                  <div
-                    key={id}
-                    data-screen={name}
-                    className="max-w-screen flex min-w-[40ch] flex-col md:max-w-[70ch]"
-                  >
-                    <Screen
-                      id={id}
-                      className="min-h-[40vh] p-4 md:min-h-[40ch]"
-                      x={x}
-                      y={y}
-                      name={name}
-                      drag={false}
-                      onClick={(e) =>
-                        e.currentTarget.scrollIntoView({
-                          block: "center",
-                          inline: "center",
-                          behavior: "smooth",
-                        })
-                      }
-                    />
-                  </div>
-                );
-              })}
-              <></>
-            </div>
-          );
-        })}
+      <motion.div id="bucket-app">
+        {lists?.map((it) => (
+          <Screen
+            className="min-h-48 min-w-[42ch] border border-gray-800 p-2 max-md:w-full"
+            key={it.id}
+            list={it}
+          />
+        ))}
         <Button
           variant="ghost"
           size="lg"
@@ -121,5 +70,4 @@ const Widestt = () => {
   );
 };
 
-const Widest = observer(Widestt);
 export default App;

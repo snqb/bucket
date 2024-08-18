@@ -2,16 +2,14 @@ import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
 import { Input } from "./components/ui/input";
-import { getRandomEmoji } from "./emojis";
-import { TodoState, addTask, useAppDispatch, type Todo } from "./store";
+import { TodoItem, TodoList, bucketDB } from "./store";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
-  where: keyof TodoState;
+  where: TodoList;
 }
 
 const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
-  const dispatch = useAppDispatch();
 
   const [text, setText] = useState("");
 
@@ -24,23 +22,14 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
     e.preventDefault();
     if (!text) return;
 
-    const task: Todo = {
-      id: window.crypto.randomUUID(),
-      title: {
-        text: text,
-        emoji: getRandomEmoji(text),
-      },
-      createdAt: new Date(),
+    const task: TodoItem = {
+      title: text,
       progress: 0,
+      todoListId: where.id!,
     };
 
     try {
-      dispatch(
-        addTask({
-          key: where,
-          task,
-        }),
-      );
+      bucketDB.todoItems.put(task);
     } catch (e) {
       console.error(e);
       alert("dev is stupid, text him t.me/snqba");

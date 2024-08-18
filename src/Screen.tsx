@@ -1,37 +1,15 @@
 import { Task } from "./Task";
-
-import { observable } from "@legendapp/state";
-import {
-  AnimatePresence,
-  HTMLMotionProps,
-  motion,
-  useInView,
-  useScroll,
-} from "framer-motion";
+import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-} from "react";
-import { Pressable, SpaceContext } from "react-zoomable-ui";
+import { memo, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
 import { getRandomEmoji } from "./emojis";
-import {
-  removeScreen,
-  renameScreen,
-  useAppDispatch,
-  useAppSelector,
-} from "./store";
+import { TodoList, bucketDB } from "./store";
+import { useLiveQuery } from "dexie-react-hooks";
 
 type Props = HTMLMotionProps<"div"> & {
-  name: string;
-  x: number;
-  y: number;
+  list: TodoList;
 };
 
 const getBg = (name: string, alpha = 0.07) => {
@@ -44,32 +22,20 @@ const getBg = (name: string, alpha = 0.07) => {
   });
 };
 
-export const preventDrag$ = observable(false);
+const Screen = ({ list, ...divProps }: Props) => {
+  const todos = useLiveQuery(
+    () => bucketDB.todoItems.where({ todoListId: list.id }).toArray(),
+    [list.id],
+  );
 
-const Screen = ({ name, x, y, ...divProps }: Props) => {
-  const tasks = useAppSelector((state) => state.todo.values);
-  const dispatch = useAppDispatch();
   const ref = useRef<Element>(document.querySelector("#screens")!);
-  // const { viewPort } = useContext(SpaceContext);
-
-  const inView = useInView(ref, { amount: 0.95 });
-  const todos = tasks[name] ?? [];
-
-  const bg = useMemo(() => getBg(name, 0.1), [name]);
-
-  // const centerCamera = useCallback(() => {
-  //   if (viewPort) {
-  //     viewPort?.camera.centerFitElementIntoView(ref.current as any, undefined, {
-  //       durationMilliseconds: 400,
-  //     });
-  //   }
-  // }, [viewPort]);
+  const bg = useMemo(() => getBg(list.title, 0.1), [list.title]);
 
   if (todos === undefined) return null;
 
   return (
     <motion.div
-      className={`m-2 flex h-full flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6`}
+      className={`m-2 flex  flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6`}
       style={{
         background: bg,
       }}
@@ -85,11 +51,11 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className={`flex saturate-0`} id={`screen-${name}`}>
+      <div className={`flex saturate-0`} id={`screen-${list.id}`}>
         <div className="">
           <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-            {getRandomEmoji(name)}
-            {name}
+            {getRandomEmoji(list.title)}
+            {list.title}
           </h2>
         </div>
         <Button
@@ -98,9 +64,9 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
           className="ml-auto"
           onClick={(e) => {
             e.stopPropagation();
-            const confirm = window.confirm(`Delete ${name}?`);
+            const confirm = window.confirm(`Delete ${list.title}?`);
             if (confirm) {
-              dispatch(removeScreen({ coords: [y, x] }));
+              bucketDB.todoLists.delete(list.id!);
             }
           }}
         >
@@ -113,8 +79,8 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
             e.stopPropagation();
 
             const newName = prompt(`${name} -> to what?`);
-            if (newName && !tasks[newName]) {
-              dispatch(renameScreen({ coords: [y, x], newName }));
+            if (newName) {
+              bucketDB.todoLists.update(list.id!, { title: newName });
             }
           }}
         >
@@ -125,7 +91,7 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-        <Adder where={name} />
+        <Adder where={list} />
         <AnimatePresence initial={false} mode="popLayout">
           {todos.map((task, index) => (
             <Task
@@ -144,7 +110,6 @@ const Screen = ({ name, x, y, ...divProps }: Props) => {
               }}
               key={index}
               task={task}
-              where={name}
             />
           ))}
         </AnimatePresence>
