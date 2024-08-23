@@ -7,6 +7,7 @@ import { bucketDB, db } from "./store";
 import MagicGrid from "magic-grid";
 import { useEffect, useRef } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useMagicGrid } from 'use-magic-grid';
 
 function App() {
   return (
@@ -20,22 +21,13 @@ function App() {
 const Bucket = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lists = useLiveQuery(() => bucketDB.todoLists.toArray());
-
-  useEffect(() => {
-    if (lists) {
-      const magicGrid = new MagicGrid({
-        container: "#bucket-app", // Required. Can be a class, id, or an HTMLElement.
-        items: lists?.length, // For a grid with 20 items. Required for dynamic content.
-        animate: true, // Optional.
-        useMin: true,
-        useTransform: true,
-        maxColumns: 4,
-      });
-
-      magicGrid.listen();
-      magicGrid.positionItems();
-    }
-  }, [lists?.length]);
+  const magicGrid = useMagicGrid({
+    container: "#bucket-app", // Required. Can be a class, id, or an HTMLElement.
+    // static: true,
+    animate: true, // Optional.
+    useMin: true,
+    maxColumns: 4,
+  });
 
   return (
     <div ref={containerRef} className="w-screen">
@@ -46,7 +38,7 @@ const Bucket = () => {
             bucketDB.todoLists.add({ title: name });
           }
         }}
-        className=""
+        className="fixed bottom-0 right-0 size-8 bg-red-500 p-4 text-xs text-white"
       >
         +
       </Button>
@@ -58,13 +50,6 @@ const Bucket = () => {
             list={it}
           />
         ))}
-        <Button
-          variant="ghost"
-          size="lg"
-          className="fixed bottom-0 right-0 p-4 text-xs text-white"
-        >
-          🏠
-        </Button>
       </motion.div>
     </div>
   );
