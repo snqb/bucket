@@ -63,6 +63,7 @@ export const Task = (props: Props) => {
     {
       onStart: () => {
         const next = 100;
+        const duration = (100 - progress) * 1.8 + 0.5;
         timeoutRef.current = animate(progress, next, {
           duration: progress > 90 ? 0.5 : 1.5,
           onUpdate: (it) => setProgress(Math.round(it)),

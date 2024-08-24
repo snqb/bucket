@@ -108,7 +108,7 @@ const Screen = ({ list, ...divProps }: Props) => {
                 stiffness: 200,
                 duration: 0.8,
               }}
-              key={index}
+              key={task.id}
               task={task}
             />
           ))}
