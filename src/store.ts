@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie";
-export const db = new Dexie("bucket-1");
+import dexieCloud from "dexie-cloud-addon";
 
 export interface TodoList {
   id?: number;
@@ -14,14 +14,15 @@ export interface TodoItem {
   todoListId: number;
 }
 
+
 export class TodoDB extends Dexie {
   todoLists!: Table<TodoList, number>;
   todoItems!: Table<TodoItem, number>;
   constructor() {
-    super("TodoDB");
+    super("TodoDB", { addons: [dexieCloud] });
     this.version(1).stores({
-      todoLists: "++id",
-      todoItems: "++id, todoListId",
+      todoLists: "@id",
+      todoItems: "@id, todoListId",
     });
   }
 
@@ -32,5 +33,10 @@ export class TodoDB extends Dexie {
     });
   }
 }
-
 export const bucketDB = new TodoDB();
+
+bucketDB.cloud.configure({
+  databaseUrl: "https://zrse37s6n.dexie.cloud",
+  requireAuth: true
+});
+

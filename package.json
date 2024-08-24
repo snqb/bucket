@@ -20,6 +20,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dexie": "^4.0.8",
+    "dexie-cloud-addon": "^4.0.8",
     "dexie-react-hooks": "^1.1.7",
     "framer-motion": "^11.3.30",
     "magic-grid": "^3.4.7",

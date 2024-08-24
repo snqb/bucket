@@ -41,6 +41,9 @@ importers:
       dexie:
         specifier: ^4.0.8
         version: 4.0.8
+      dexie-cloud-addon:
+        specifier: ^4.0.8
+        version: 4.0.8(dexie@4.0.8)
       dexie-react-hooks:
         specifier: ^1.1.7
         version: 1.1.7(@types/react@18.3.4)(dexie@4.0.8)(react@18.3.1)
@@ -1534,6 +1537,15 @@ packages:
   detect-node-es@1.1.0:
     resolution: {integrity: sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==}
 
+  dexie-cloud-addon@4.0.8:
+    resolution: {integrity: sha512-wD+eObGcqiL+PjQ6t3bLsXLnuJhPUw+WpMh1fvbMUPRSq7ODZjjXOz1zSzIw/fK6VDgrGbYS7B0BFWBfQNz5UQ==}
+    engines: {node: '>=14'}
+    peerDependencies:
+      dexie: ^4.0.1-alpha.5
+
+  dexie-cloud-common@1.0.36:
+    resolution: {integrity: sha512-kwk67RkSh1++16U7bLS/Sd9CIoW1P+upGgA+VKStKfoM/z0gbt7bR6gy4pJxlzo5fPMW+qgm92WHPMA1ygcHXQ==}
+
   dexie-react-hooks@1.1.7:
     resolution: {integrity: sha512-Lwv5W0Hk+uOW3kGnsU9GZoR1er1B7WQ5DSdonoNG+focTNeJbHW6vi6nBoX534VKI3/uwHebYzSw1fwY6a7mTw==}
     peerDependencies:
@@ -2297,6 +2309,9 @@ packages:
 
   run-parallel@1.2.0:
     resolution: {integrity: sha512-5l4VyZR86LZ/lDxZTR6jqL8AFE2S0IFLMP26AbjsLVADxHdhB/c0GUsH+y39UfCi3dzz8OlQuPmnaJOMoDHQBA==}
+
+  rxjs@7.8.1:
+    resolution: {integrity: sha512-AA3TVj+0A2iuIoQkWEK/tqFjBq2j+6PO6Y0zJcvzLAFhEFIO3HL0vls9hWLncZbAAbK0mar7oZ4V079I/qPMxg==}
 
   safe-array-concat@1.1.2:
     resolution: {integrity: sha512-vj6RsCsWBCf19jIeHEfkRMw8DPiBb+DMXklQ/1SGDHOMlHdPUkZXFQ2YdplS23zESTijAcurb1aSgJA3AgMu1Q==}
@@ -4183,6 +4198,14 @@ snapshots:
 
   detect-node-es@1.1.0: {}
 
+  dexie-cloud-addon@4.0.8(dexie@4.0.8):
+    dependencies:
+      dexie: 4.0.8
+      dexie-cloud-common: 1.0.36
+      rxjs: 7.8.1
+
+  dexie-cloud-common@1.0.36: {}
+
   dexie-react-hooks@1.1.7(@types/react@18.3.4)(dexie@4.0.8)(react@18.3.1):
     dependencies:
       '@types/react': 18.3.4
@@ -4906,6 +4929,10 @@ snapshots:
   run-parallel@1.2.0:
     dependencies:
       queue-microtask: 1.2.3
+
+  rxjs@7.8.1:
+    dependencies:
+      tslib: 2.7.0
 
   safe-array-concat@1.1.2:
     dependencies:
