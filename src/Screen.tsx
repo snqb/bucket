@@ -92,7 +92,7 @@ const Screen = ({ list, ...divProps }: Props) => {
 
       <div className="flex flex-col items-stretch gap-2">
         <Adder where={list} />
-        <AnimatePresence initial={false} mode="popLayout">
+        <AnimatePresence initial={false}>
           {todos.map((task, index) => (
             <Task
               initial={{ transform: "translateY(-100%)" }}

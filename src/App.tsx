@@ -5,7 +5,7 @@ import Screen from "./Screen";
 import { Button } from "./components/ui/button";
 import { bucketDB, db } from "./store";
 import MagicGrid from "magic-grid";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMagicGrid } from 'use-magic-grid';
 
@@ -21,9 +21,20 @@ function App() {
 const Bucket = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const lists = useLiveQuery(() => bucketDB.todoLists.toArray());
+  const todos = useLiveQuery(() => bucketDB.todoItems.toArray());
+
+  useEffect(() => {
+    if (todos?.length ) {
+      magicGrid.ready() && magicGrid.positionItems();
+    }
+  }, [todos?.length])
+
+
   const magicGrid = useMagicGrid({
     container: "#bucket-app", // Required. Can be a class, id, or an HTMLElement.
     // static: true,
+    items: lists?.length,
+    useTransform: true,
     animate: true, // Optional.
     useMin: true,
     maxColumns: 4,
@@ -36,6 +47,7 @@ const Bucket = () => {
           const name = prompt("Enter the name of the new todo list");
           if (name) {
             bucketDB.todoLists.add({ title: name });
+            magicGrid.positionItems();
           }
         }}
         className="fixed bottom-0 right-0 size-8 bg-red-500 p-4 text-xs text-white"
