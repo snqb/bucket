@@ -15,8 +15,9 @@ import {
 import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
-import { useLongPress } from "@uidotdev/usehooks";
+import { useLongPress } from '@uidotdev/usehooks';
 import { TodoItem, bucketDB } from "./store";
+import { time } from "console";
 
 type Props = HTMLMotionProps<"div"> & {
   task: TodoItem;
@@ -32,7 +33,7 @@ export const Task = (props: Props) => {
 
   const [progress, setProgress] = useState(task.progress);
   const deleteTask = useCallback(() => {
-    bucketDB.todoItems.delete(task.id!);
+    bucketDB.deleteTodo(task)
   }, [progress]);
 
   const updateTaskDescription = (text: string) => {
@@ -47,34 +48,41 @@ export const Task = (props: Props) => {
     }
   }, [progress]);
 
+  useEffect(() => {
+    return () => {
+      timeoutRef.current?.stop();
+    }
+  }, [])
+
   const longPressProps = useLongPress(
     () => {
-      {
-        const next = progress + 7;
-        animate(progress, next, {
-          duration: 0,
-          onUpdate: (it) => setProgress(Math.round(it)),
-        });
-        bucketDB.todoItems.update(task.id!, {
-          progress: next,
+      const setTimer = (to: number) => {
+        timeoutRef.current?.stop();
+
+        timeoutRef.current = animate(progress, to, {
+          duration: 0.08,
+
+          // onUpdate: now => console.log(`from ${progress} to ${to} and now is ${now}`),
+          onComplete: () => {
+            if (to >= 100) {
+              deleteTask();
+            } else {
+              setProgress(to);
+
+              const left = (100 - to) * 0.0228;
+
+              setTimer(to + 5 - left)
+            }
+          },
+
+          type: "spring"
         });
       }
+
+      setTimer(progress + 10);
     },
     {
-      onStart: () => {
-        const next = 100;
-        const duration = (100 - progress) * 1.8 + 0.5;
-        timeoutRef.current = animate(progress, next, {
-          duration: progress > 90 ? 0.5 : 1.5,
-          onUpdate: (it) => setProgress(Math.round(it)),
-          onComplete: () => {
-            deleteTask();
-          },
-          damping: 66,
-          bounce: 10,
-          bounceDamping: 100,
-        });
-      },
+      threshold: 10,
       onFinish: () => {
         timeoutRef.current?.stop();
       },
@@ -99,23 +107,26 @@ export const Task = (props: Props) => {
           >
             <DialogTrigger asChild>
               <MotionProgress
-                className="box-border h-3 w-[5ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
+                className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
                 value={progress}
               />
             </DialogTrigger>
             <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
           </motion.div>
           <span
-            className="font-bold group peer relative h-6 w-12 rounded-lg px-1 text-white lg:w-12"
+            className="font-bold group peer relative h-6 w-12 px-1 text-white lg:w-12 rounded-xl "
             {...longPressProps}
+            onCanPlay={() => setProgress(it => it + 10)}
           >
             <button
               // {...sharedPressableProps}
-              className="ease absolute inset-0 h-full w-full -translate-x-[4px] -translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+
+              className="ease absolute rounded-xl border inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
             <button
               // {...sharedPressableProps}
-              className="ease absolute inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+
+              className="ease absolute inset-0 border rounded-full h-full w-full -translate-x-[4px] -translate-y-[-8px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
           </span>
         </div>

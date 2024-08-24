@@ -14,15 +14,25 @@ export interface TodoItem {
   todoListId: number;
 }
 
-
 export class TodoDB extends Dexie {
   todoLists!: Table<TodoList, number>;
   todoItems!: Table<TodoItem, number>;
+  cemetery!: Table<TodoItem, number>;
+
   constructor() {
     super("TodoDB", { addons: [dexieCloud] });
-    this.version(1).stores({
+    this.version(2).stores({
       todoLists: "@id",
       todoItems: "@id, todoListId",
+      cemetery: "@id",
+    });
+  }
+
+  deleteTodo(todo: TodoItem) {
+    return this.transaction("rw", this.todoItems, this.todoLists, () => {
+      // this.cemetery.add(todo);
+      // const 
+      this.todoItems.delete(todo.id);
     });
   }
 
@@ -37,6 +47,5 @@ export const bucketDB = new TodoDB();
 
 bucketDB.cloud.configure({
   databaseUrl: "https://zrse37s6n.dexie.cloud",
-  requireAuth: true
+  requireAuth: true,
 });
-

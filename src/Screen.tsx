@@ -93,8 +93,9 @@ const Screen = ({ list, ...divProps }: Props) => {
       <div className="flex flex-col items-stretch gap-2">
         <Adder where={list} />
         <AnimatePresence initial={false}>
-          {todos.map((task, index) => (
+          {todos.map((task) => (
             <Task
+              key={task.id}
               initial={{ transform: "translateY(-100%)" }}
               animate={{
                 transform: "translateY(0)",
@@ -108,7 +109,6 @@ const Screen = ({ list, ...divProps }: Props) => {
                 stiffness: 200,
                 duration: 0.8,
               }}
-              key={task.id}
               task={task}
             />
           ))}
