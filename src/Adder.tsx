@@ -3,6 +3,7 @@ import { ChangeEventHandler, forwardRef, useState } from "react";
 import * as R from "ramda";
 import { Input } from "./components/ui/input";
 import { TodoItem, TodoList, bucketDB } from "./store";
+import { cn } from "./lib/utils";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
   where: TodoList;
@@ -40,7 +41,7 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
 
   return (
     <Input
-      className="w-full border-gray-700 bg-gray-900 bg-opacity-80"
+      className={cn(["w-full border-gray-700 bg-gray-900 bg-opacity-80", props.className])}
       enterKeyHint="done"
       type="text"
       autoComplete="off"

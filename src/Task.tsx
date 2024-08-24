@@ -15,7 +15,7 @@ import {
 import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
-import { useLongPress } from '@uidotdev/usehooks';
+import { useLongPress } from "@uidotdev/usehooks";
 import { TodoItem, bucketDB } from "./store";
 import { time } from "console";
 
@@ -33,7 +33,7 @@ export const Task = (props: Props) => {
 
   const [progress, setProgress] = useState(task.progress);
   const deleteTask = useCallback(() => {
-    bucketDB.deleteTodo(task)
+    bucketDB.deleteTodo(task);
   }, [progress]);
 
   const updateTaskDescription = (text: string) => {
@@ -51,8 +51,8 @@ export const Task = (props: Props) => {
   useEffect(() => {
     return () => {
       timeoutRef.current?.stop();
-    }
-  }, [])
+    };
+  }, []);
 
   const longPressProps = useLongPress(
     () => {
@@ -71,13 +71,13 @@ export const Task = (props: Props) => {
 
               const left = (100 - to) * 0.0228;
 
-              setTimer(to + 5 - left)
+              setTimer(to + 5 - left);
             }
           },
 
-          type: "spring"
+          type: "spring",
         });
-      }
+      };
 
       setTimer(progress + 10);
     },
@@ -105,28 +105,30 @@ export const Task = (props: Props) => {
               opacity: 1 - progress / 150,
             }}
           >
-            <DialogTrigger asChild>
-              <MotionProgress
-                className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
-                value={progress}
-              />
+            <DialogTrigger>
+              <div className="flex items-baseline gap-2">
+                <MotionProgress
+                  className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
+                  value={progress}
+                />
+                <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
+              </div>
             </DialogTrigger>
-            <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
           </motion.div>
           <span
-            className="font-bold group peer relative h-6 w-12 px-1 text-white lg:w-12 rounded-xl "
+            className="font-bold group peer relative h-7 w-12 px-1 text-white lg:w-12 rounded-xl "
             {...longPressProps}
-            onCanPlay={() => setProgress(it => it + 10)}
+            onCanPlay={() => setProgress((it) => it + 10)}
           >
             <button
               // {...sharedPressableProps}
 
-              className="ease absolute rounded-xl border inset-0 h-full w-full translate-x-[4px] translate-y-[4px] transform bg-blue-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+              className="ease absolute inset-0 h-full w-full -translate-x-[0px] translate-y-[4px] transform rounded-full border bg-orange-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
             <button
               // {...sharedPressableProps}
 
-              className="ease absolute inset-0 border rounded-full h-full w-full -translate-x-[4px] -translate-y-[-8px] transform bg-pink-900 opacity-80 mix-blend-screen transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
+              className="ease absolute inset-0 h-full w-full -translate-y-[3px] translate-x-[3px] transform rounded-xl border bg-indigo-900 opacity-80 transition duration-300 group-hover:translate-x-0 group-hover:translate-y-0"
             />
           </span>
         </div>

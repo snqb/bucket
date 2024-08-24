@@ -50,9 +50,9 @@ const Bucket = () => {
             magicGrid.positionItems();
           }
         }}
-        className="fixed bottom-0 right-0 size-8 bg-red-500 p-4 text-xs text-white"
+        className="fixed bottom-0 font-bold right-0 size-8 bg-blue-500 bg-opacity-50 p-4 text-lg text-white"
       >
-        +
+        
       </Button>
       <motion.div id="bucket-app">
         {lists?.map((it) => (

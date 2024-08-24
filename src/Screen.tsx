@@ -91,7 +91,8 @@ const Screen = ({ list, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-        <Adder where={list} />
+
+        <Adder where={list} className="mb-2" />
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
