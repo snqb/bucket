@@ -1,5 +1,6 @@
 import Dexie, { Table } from "dexie";
 import dexieCloud from "dexie-cloud-addon";
+import * as R from "ramda";
 
 export interface TodoList {
   id?: number;
@@ -24,13 +25,14 @@ export class TodoDB extends Dexie {
     this.version(2).stores({
       todoLists: "@id",
       todoItems: "@id, todoListId",
-      cemetery: "@id",
+      cemetery: "@cemeteryId",
     });
   }
 
   deleteTodo(todo: TodoItem) {
-    return this.transaction("rw", this.todoItems, this.todoLists, () => {
-      // this.cemetery.add(todo);
+    return this.transaction("rw", this.todoItems, this.todoLists, this.cemetery, () => {
+      const clone = R.clone(R.omit(["id"], todo));
+      this.cemetery.put(clone);
       // const 
       this.todoItems.delete(todo.id);
     });
