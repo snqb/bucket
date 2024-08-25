@@ -1,12 +1,13 @@
 import { Task } from "./Task";
 import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useMemo, useRef } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
-import { getRandomEmoji } from "./emojis";
+import { seededEmoji } from "./emojis";
 import { TodoList, bucketDB } from "./store";
 import { useLiveQuery } from "dexie-react-hooks";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 
 type Props = HTMLMotionProps<"div"> & {
   list: TodoList;
@@ -30,6 +31,8 @@ const Screen = ({ list, ...divProps }: Props) => {
 
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const bg = useMemo(() => getBg(list.title, 0.1), [list.title]);
+  const [emoji, setEmoji] = useState(list.emoji ?? seededEmoji(list.title));
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   if (todos === undefined) return null;
 
@@ -51,10 +54,23 @@ const Screen = ({ list, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className={`flex saturate-0`} id={`screen-${list.id}`}>
+      <div className={`flex`} id={`screen-${list.id}`}>
         <div className="">
-          <h2 className="font-bold mb-2 whitespace-nowrap text-2xl">
-            {getRandomEmoji(list.title)}
+          <h2 className="font-bold mb-2 flex gap-1 whitespace-nowrap text-2xl saturate-50">
+            <div onClick={() => setShowEmojiPicker(true)}>{emoji}</div>
+            <EmojiPicker
+              theme={Theme.DARK}
+              previewConfig={{
+                showPreview: false,
+              }}
+              className="z-50"
+              open={showEmojiPicker}
+              onEmojiClick={(e) => {
+                setEmoji(e.emoji);
+                setShowEmojiPicker(false);
+                bucketDB.todoLists.update(list.id!, { emoji: e.emoji });
+              }}
+            />
             {list.title}
           </h2>
         </div>
@@ -91,7 +107,6 @@ const Screen = ({ list, ...divProps }: Props) => {
       <hr className="border-gray-500" />
 
       <div className="flex flex-col items-stretch gap-2">
-
         <Adder where={list} className="mb-2" />
         <AnimatePresence initial={false}>
           {todos.map((task) => (

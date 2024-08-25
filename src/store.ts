@@ -5,6 +5,7 @@ import * as R from "ramda";
 export interface TodoList {
   id?: number;
   title: string;
+  emoji?: string;
 }
 
 export interface TodoItem {

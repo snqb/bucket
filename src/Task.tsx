@@ -17,7 +17,7 @@ import { Textarea } from "./components/ui/textarea";
 
 import { useLongPress } from "@uidotdev/usehooks";
 import { TodoItem, bucketDB } from "./store";
-import { time } from "console";
+import EmojiPicker from 'emoji-picker-react';
 
 type Props = HTMLMotionProps<"div"> & {
   task: TodoItem;

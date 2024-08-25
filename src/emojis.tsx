@@ -723,7 +723,7 @@ export const emojis = [
   "🔸",
   "🔹",
 ];
-export function getRandomEmoji(seed = "") {
+export function seededEmoji(seed = "") {
   const seededRandom = new Rand(seed);
   return emojis[Math.floor(seededRandom.next() * emojis.length)];
 }
