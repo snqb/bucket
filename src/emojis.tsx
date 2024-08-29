@@ -625,12 +625,6 @@ export const emojis = [
   "🆗",
   "🔀",
   "🔁",
-  "🔂",
-  "🆙",
-  "🆖",
-  "📶",
-  "🎦",
-  "🈁",
   "🈯",
   "🈳",
   "🈵",
@@ -679,35 +673,11 @@ export const emojis = [
   "🆎",
   "🅾",
   "💠",
-  "➿",
-  "♈",
-  "♉",
-  "♊",
-  "♋",
-  "♌",
-  "♍",
-  "♎",
-  "♏",
-  "♐",
-  "♑",
-  "♒",
-  "♓",
-  "⛎",
-  "🔯",
+
   "🏧",
   "💹",
-  "🔝",
-  "🔚",
-  "🔙",
-  "🔛",
-  "🔜",
-  "❌",
-  "⭕",
-  "❗",
-  "❓",
   "❕",
   "❔",
-  "🔃",
   "🕦",
   "💮",
   "💯",
@@ -715,15 +685,16 @@ export const emojis = [
   "🔗",
   "➰",
   "🔱",
-  "🔲",
-  "🔺",
-  "🔻",
-  "🔶",
-  "🔷",
   "🔸",
-  "🔹",
 ];
-export function seededEmoji(seed = "") {
+export function randomEmoji({ seed } = { seed: "" }) {
+  if (seed === "") {
+    const randomIndex = Math.floor(Math.random() * emojis.length);
+    return emojis[randomIndex];
+  }
+
   const seededRandom = new Rand(seed);
-  return emojis[Math.floor(seededRandom.next() * emojis.length)];
+  const random = seededRandom.next();
+  const randomElementIndex = Math.floor(random * emojis.length);
+  return emojis[randomElementIndex];
 }

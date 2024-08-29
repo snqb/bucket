@@ -47,9 +47,6 @@ importers:
       dexie-react-hooks:
         specifier: ^1.1.7
         version: 1.1.7(@types/react@18.3.4)(dexie@4.0.8)(react@18.3.1)
-      emoji-picker-react:
-        specifier: ^4.11.1
-        version: 4.11.1(react@18.3.1)
       framer-motion:
         specifier: ^11.3.30
         version: 11.3.30(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1579,12 +1576,6 @@ packages:
   electron-to-chromium@1.5.13:
     resolution: {integrity: sha512-lbBcvtIJ4J6sS4tb5TLp1b4LyfCdMkwStzXPyAgVgTRAsep4bvrAGaBOP7ZJtQMNJpSQ9SqG4brWOroNaQtm7Q==}
 
-  emoji-picker-react@4.11.1:
-    resolution: {integrity: sha512-e3vhGcZyyNu7GqJaXzgoVxtASXs97duAP/vh7aL88dHJcW72DjuwYMjipzNBCjPFxXwUiQas483SKCAxPwwaUQ==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      react: '>=16'
-
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
@@ -1660,9 +1651,6 @@ packages:
   fill-range@7.1.1:
     resolution: {integrity: sha512-YsGpe3WHLK8ZYi4tWDg2Jy3ebRz2rXowDxnld4bkQB00cc/1Zw9AWnC0i9ztDJitivtQvaI9KaLyKrc+hBW0yg==}
     engines: {node: '>=8'}
-
-  flairup@1.0.0:
-    resolution: {integrity: sha512-IKlE+pNvL2R+kVL1kEhUYqRxVqeFnjiIvHWDMLFXNaqyUdFXQM2wte44EfMYJNHkW16X991t2Zg8apKkhv7OBA==}
 
   for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -4258,11 +4246,6 @@ snapshots:
 
   electron-to-chromium@1.5.13: {}
 
-  emoji-picker-react@4.11.1(react@18.3.1):
-    dependencies:
-      flairup: 1.0.0
-      react: 18.3.1
-
   emoji-regex@8.0.0: {}
 
   emoji-regex@9.2.2: {}
@@ -4399,8 +4382,6 @@ snapshots:
   fill-range@7.1.1:
     dependencies:
       to-regex-range: 5.0.1
-
-  flairup@1.0.0: {}
 
   for-each@0.3.3:
     dependencies:
