@@ -26,7 +26,7 @@ export class TodoDB extends Dexie {
     this.version(2).stores({
       todoLists: "@id",
       todoItems: "@id, todoListId",
-      cemetery: "@cemeteryId",
+      cemetery: "@id",
     });
   }
 
