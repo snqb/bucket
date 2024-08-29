@@ -111,7 +111,7 @@ export const Task = (props: Props) => {
                   className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
                   value={progress}
                 />
-                <p className="max-w-[21ch] break-all text-lg">{task.title}</p>
+                <p className="max-w-[21ch] break-words text-lg text-left">{task.title}</p>
               </div>
             </DialogTrigger>
           </motion.div>
