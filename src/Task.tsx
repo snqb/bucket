@@ -4,7 +4,7 @@ import {
   animate,
   motion,
 } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,9 +15,9 @@ import {
 import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
-import { useLongPress } from "@uidotdev/usehooks";
+import { useDebounce, useLongPress } from "@uidotdev/usehooks";
 import { TodoItem, bucketDB } from "./store";
-import EmojiPicker from 'emoji-picker-react';
+
 
 type Props = HTMLMotionProps<"div"> & {
   task: TodoItem;
@@ -32,6 +32,9 @@ export const Task = (props: Props) => {
   let timeoutRef = useRef<AnimationPlaybackControls>();
 
   const [progress, setProgress] = useState(task.progress);
+
+  const deferredProgress = useDebounce(progress, 350);
+
   const deleteTask = useCallback(() => {
     bucketDB.deleteTodo(task);
   }, [progress]);
@@ -46,7 +49,11 @@ export const Task = (props: Props) => {
     if (progress > 100) {
       deleteTask();
     }
-  }, [progress]);
+
+    bucketDB.todoItems.update(task.id!, {
+      progress,
+    });
+  }, [deferredProgress]);
 
   useEffect(() => {
     return () => {
