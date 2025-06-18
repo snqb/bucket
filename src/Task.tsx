@@ -4,7 +4,13 @@ import {
   animate,
   motion,
 } from "framer-motion";
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useDeferredValue,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +22,9 @@ import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
 import { useDebounce, useLongPress } from "@uidotdev/usehooks";
-import { TodoItem, bucketDB } from "./store";
-
+import { TodoItem } from "./store";
+import { useGoatActions } from "./goat-store";
+import { useItem, useDB } from "@goatdb/goatdb/react";
 
 type Props = HTMLMotionProps<"div"> & {
   task: TodoItem;
@@ -30,19 +37,32 @@ export const Task = (props: Props) => {
 
   const ref = useRef<any>();
   let timeoutRef = useRef<AnimationPlaybackControls>();
+  const actions = useGoatActions();
+
+  // Use useItem to get the task item for direct updates
+  const db = useDB();
+  const userRepoPath = db.currentUser
+    ? `/data/${db.currentUser.key}`
+    : "/data/anonymous";
+  const taskItem = useItem(`${userRepoPath}/${task.id}`);
 
   const [progress, setProgress] = useState(task.progress);
 
   const deferredProgress = useDebounce(progress, 350);
 
   const deleteTask = useCallback(() => {
-    bucketDB.deleteTodo(task);
-  }, [progress]);
+    if (taskItem) {
+      // Move to cemetery first
+      actions.deleteTodo(task);
+      // Then mark as deleted
+      taskItem.isDeleted = true;
+    }
+  }, [task, actions, taskItem]);
 
   const updateTaskDescription = (text: string) => {
-    bucketDB.todoItems.update(task.id!, {
-      description: text,
-    });
+    if (taskItem) {
+      taskItem.set("description", text);
+    }
   };
 
   useEffect(() => {
@@ -50,10 +70,10 @@ export const Task = (props: Props) => {
       deleteTask();
     }
 
-    bucketDB.todoItems.update(task.id!, {
-      progress,
-    });
-  }, [deferredProgress]);
+    if (taskItem) {
+      taskItem.set("progress", progress);
+    }
+  }, [deferredProgress, taskItem, deleteTask]);
 
   useEffect(() => {
     return () => {
@@ -118,12 +138,14 @@ export const Task = (props: Props) => {
                   className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
                   value={progress}
                 />
-                <p className="max-w-[21ch] break-words text-lg text-left">{task.title}</p>
+                <p className="max-w-[21ch] break-words text-left text-lg">
+                  {task.title}
+                </p>
               </div>
             </DialogTrigger>
           </motion.div>
           <span
-            className="font-bold group peer relative h-7 w-12 px-1 text-white lg:w-12 rounded-xl "
+            className="font-bold group peer relative h-7 w-12 rounded-xl px-1 text-white lg:w-12 "
             {...longPressProps}
             onCanPlay={() => setProgress((it) => it + 10)}
           >

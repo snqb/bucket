@@ -2,7 +2,8 @@ import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
 import { Input } from "./components/ui/input";
-import { TodoItem, TodoList, bucketDB } from "./store";
+import { TodoItem, TodoList } from "./store";
+import { useGoatActions } from "./goat-store";
 import { cn } from "./lib/utils";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
@@ -13,6 +14,7 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
 
   const [text, setText] = useState("");
+  const actions = useGoatActions();
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
@@ -23,14 +25,8 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
     e.preventDefault();
     if (!text) return;
 
-    const task: TodoItem = {
-      title: text,
-      progress: 0,
-      todoListId: where.id!,
-    };
-
     try {
-      bucketDB.todoItems.put(task);
+      actions.addTodoItem(text, where.id!);
     } catch (e) {
       console.error(e);
       alert("dev is stupid, text him t.me/snqba");
@@ -41,7 +37,10 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
 
   return (
     <Input
-      className={cn(["w-full border-gray-700 bg-gray-900 bg-opacity-80", props.className])}
+      className={cn([
+        "w-full border-gray-700 bg-gray-900 bg-opacity-80",
+        props.className,
+      ])}
       enterKeyHint="done"
       type="text"
       autoComplete="off"

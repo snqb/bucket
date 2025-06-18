@@ -1,11 +1,12 @@
-import { useLiveQuery } from "dexie-react-hooks";
 import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
 import { randomEmoji } from "./emojis";
-import { TodoList, bucketDB } from "./store";
+import { TodoList } from "./store";
+import { useGoatTodoItemsWhere, useGoatActions } from "./goat-store";
+import { useItem, useDB } from "@goatdb/goatdb/react";
 import { Task } from "./Task";
 
 type Props = HTMLMotionProps<"div"> & {
@@ -23,15 +24,40 @@ const getBg = (name: string, alpha = 0.07) => {
 };
 
 const Screen = ({ list, ...divProps }: Props) => {
-  const todos = useLiveQuery(
-    () => bucketDB.todoItems.where({ todoListId: list.id }).toArray(),
-    [list.id],
-  );
+  const todos = useGoatTodoItemsWhere({ todoListId: list.id! });
+  const actions = useGoatActions();
+
+  // Use useItem to get the list item for direct updates
+  const db = useDB();
+  const userRepoPath = db.currentUser
+    ? `/data/${db.currentUser.key}`
+    : "/data/anonymous";
+  const listItem = useItem(`${userRepoPath}/${list.id}`);
 
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const bg = useMemo(() => getBg(list.title, 0.1), [list.title]);
 
-  if (todos === undefined) return null;
+  if (!todos) return null;
+
+  const handleUpdateEmoji = () => {
+    if (listItem) {
+      listItem.set("emoji", randomEmoji());
+    }
+  };
+
+  const handleUpdateTitle = () => {
+    const newName = prompt(`${list.title} -> to what?`);
+    if (newName && listItem) {
+      listItem.set("title", newName);
+    }
+  };
+
+  const handleDeleteList = () => {
+    const confirm = window.confirm(`Delete ${list.title}?`);
+    if (confirm && listItem) {
+      listItem.isDeleted = true;
+    }
+  };
 
   return (
     <motion.div
@@ -54,9 +80,9 @@ const Screen = ({ list, ...divProps }: Props) => {
       <div className={`flex`} id={`screen-${list.id}`}>
         <div className="">
           <h2 className="font-bold mb-2 flex gap-1 whitespace-nowrap text-2xl saturate-50">
-            <div onClick={() => {
-              bucketDB.todoLists.update(list.id!, { emoji: randomEmoji() });
-            }}>{list.emoji ?? randomEmoji({ seed: list.title })}</div>
+            <div onClick={handleUpdateEmoji} className="cursor-pointer">
+              {list.emoji ?? randomEmoji({ seed: list.title })}
+            </div>
             {list.title}
           </h2>
         </div>
@@ -66,10 +92,7 @@ const Screen = ({ list, ...divProps }: Props) => {
           className="ml-auto"
           onClick={(e) => {
             e.stopPropagation();
-            const confirm = window.confirm(`Delete ${list.title}?`);
-            if (confirm) {
-              bucketDB.todoLists.delete(list.id!);
-            }
+            handleDeleteList();
           }}
         >
           🗑️
@@ -79,11 +102,7 @@ const Screen = ({ list, ...divProps }: Props) => {
           variant="ghost"
           onClick={(e) => {
             e.stopPropagation();
-
-            const newName = prompt(`${name} -> to what?`);
-            if (newName) {
-              bucketDB.todoLists.update(list.id!, { title: newName });
-            }
+            handleUpdateTitle();
           }}
         >
           ✏️

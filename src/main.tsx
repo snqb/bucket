@@ -5,6 +5,9 @@ import App from "./App";
 // Supports weights 100-900
 import "@fontsource-variable/noto-sans-mono";
 import "./index.css";
+import { registerSchemas } from "./goat-schemas";
+
+registerSchemas();
 
 const container = document.getElementById("root");
 if (container) {

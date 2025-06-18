@@ -1,16 +1,25 @@
 import ReloadPrompt from "./ReloadPrompt";
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { motion } from "framer-motion";
 import { useEffect, useRef } from "react";
 import { useMagicGrid } from "use-magic-grid";
 import Screen from "./Screen";
 import { Button } from "./components/ui/button";
-import { bucketDB } from "./store";
+import {
+  useGoatTodoLists,
+  useGoatTodoItems,
+  useGoatCemeteryItems,
+  useGoatActions,
+} from "./goat-store";
 import { Link, Route, Switch } from "wouter";
 import { usePathname } from "wouter/use-browser-location";
+import { useDB, useDBReady } from "@goatdb/goatdb/react";
 
 function App() {
+  const dbStatus = useDBReady();
+
+  console.log("Db status:", dbStatus);
+
   return (
     <>
       <Switch>
@@ -25,8 +34,11 @@ function App() {
 
 const Bucket = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const lists = useLiveQuery(() => bucketDB.todoLists.toArray());
-  const todos = useLiveQuery(() => bucketDB.todoItems.toArray());
+  const db = useDB();
+  console.log(db);
+  const lists = useGoatTodoLists();
+  const todos = useGoatTodoItems();
+  const actions = useGoatActions();
   const path = usePathname();
 
   console.log(path);
@@ -68,7 +80,7 @@ const Bucket = () => {
           onClick={() => {
             const name = prompt("Enter the name of the new todo list");
             if (name) {
-              bucketDB.todoLists.add({ title: name });
+              actions.addTodoList(name);
               magicGrid.positionItems();
             }
           }}
@@ -81,15 +93,15 @@ const Bucket = () => {
 };
 
 const Cemetery = () => {
-  const cemetery = useLiveQuery(() => bucketDB.cemetery.toArray());
+  const cemetery = useGoatCemeteryItems();
 
-  if (!cemetery) return <>Empty</>;
+  if (!cemetery || cemetery.length === 0) return <>Empty</>;
   console.log(cemetery);
 
   return (
     <div>
       {cemetery.map((it) => (
-        <div>{it.title}</div>
+        <div key={it.id}>{it.title}</div>
       ))}
       <Link to="/" className="fixed bottom-0 right-0 size-8">
         🪣
