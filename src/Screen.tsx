@@ -4,9 +4,8 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import Adder from "./Adder";
 import { Button } from "./components/ui/button";
 import { randomEmoji } from "./emojis";
-import { TodoList } from "./store";
-import { useGoatTodoItemsWhere, useGoatActions } from "./goat-store";
-import { useItem, useDB } from "@goatdb/goatdb/react";
+import { TodoList } from "./jazz-schemas";
+import { useJazzTodoItemsWhere, useJazzActions } from "./jazz-store";
 import { Task } from "./Task";
 
 type Props = HTMLMotionProps<"div"> & {
@@ -24,15 +23,8 @@ const getBg = (name: string, alpha = 0.07) => {
 };
 
 const Screen = ({ list, ...divProps }: Props) => {
-  const todos = useGoatTodoItemsWhere({ todoListId: list.id! });
-  const actions = useGoatActions();
-
-  // Use useItem to get the list item for direct updates
-  const db = useDB();
-  const userRepoPath = db.currentUser
-    ? `/data/${db.currentUser.key}`
-    : "/data/anonymous";
-  const listItem = useItem(`${userRepoPath}/${list.id}`);
+  const todos = useJazzTodoItemsWhere({ todoListId: list.id! });
+  const actions = useJazzActions();
 
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const bg = useMemo(() => getBg(list.title, 0.1), [list.title]);
@@ -40,22 +32,21 @@ const Screen = ({ list, ...divProps }: Props) => {
   if (!todos) return null;
 
   const handleUpdateEmoji = () => {
-    if (listItem) {
-      listItem.set("emoji", randomEmoji());
-    }
+    const newEmoji = randomEmoji();
+    actions.updateTodoList(list.id!, { emoji: newEmoji });
   };
 
   const handleUpdateTitle = () => {
     const newName = prompt(`${list.title} -> to what?`);
-    if (newName && listItem) {
-      listItem.set("title", newName);
+    if (newName) {
+      actions.updateTodoList(list.id!, { title: newName });
     }
   };
 
   const handleDeleteList = () => {
     const confirm = window.confirm(`Delete ${list.title}?`);
-    if (confirm && listItem) {
-      listItem.isDeleted = true;
+    if (confirm) {
+      actions.deleteList(list.id!);
     }
   };
 

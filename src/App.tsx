@@ -6,20 +6,15 @@ import { useMagicGrid } from "use-magic-grid";
 import Screen from "./Screen";
 import { Button } from "./components/ui/button";
 import {
-  useGoatTodoLists,
-  useGoatTodoItems,
-  useGoatCemeteryItems,
-  useGoatActions,
-} from "./goat-store";
+  useJazzTodoLists,
+  useJazzTodoItems,
+  useJazzCemeteryItems,
+  useJazzActions,
+} from "./jazz-store";
 import { Link, Route, Switch } from "wouter";
 import { usePathname } from "wouter/use-browser-location";
-import { useDB, useDBReady } from "@goatdb/goatdb/react";
 
 function App() {
-  const dbStatus = useDBReady();
-
-  console.log("Db status:", dbStatus);
-
   return (
     <>
       <Switch>
@@ -34,32 +29,14 @@ function App() {
 
 const Bucket = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const db = useDB();
-  console.log(db);
-  const lists = useGoatTodoLists();
-  const todos = useGoatTodoItems();
-  const actions = useGoatActions();
-  const path = usePathname();
+  const lists = useJazzTodoLists();
+  const actions = useJazzActions();
 
-  console.log(path);
-  useEffect(() => {
-    if (todos?.length) {
-      magicGrid.ready() && magicGrid.positionItems();
-    }
-  }, [todos?.length]);
-
-  const magicGrid = useMagicGrid({
-    container: "#bucket-app",
-    items: lists?.length,
-    useTransform: true,
-    animate: true,
-    useMin: true,
-    maxColumns: 4,
-  });
+  console.log("LISTS", lists);
 
   return (
-    <div ref={containerRef} className="w-screen">
-      <motion.div id="bucket-app">
+    <div className="w-screen">
+      <motion.div ref={containerRef}>
         {lists?.map((it) => (
           <Screen
             className="min-h-48 min-w-[42ch] border border-gray-800 p-2 max-md:w-full"
@@ -76,16 +53,16 @@ const Bucket = () => {
           🪦
         </Link>
         <Button
-          className="size-8 bg-blue-500 bg-opacity-50 p-4 text-lg text-white"
+          className="size-12 bg-blue-500 bg-opacity-50 p-3 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
           onClick={() => {
             const name = prompt("Enter the name of the new todo list");
             if (name) {
               actions.addTodoList(name);
-              magicGrid.positionItems();
+              // magicGrid.positionItems();
             }
           }}
         >
-          A
+          ➕
         </Button>
       </div>
     </div>
@@ -93,7 +70,7 @@ const Bucket = () => {
 };
 
 const Cemetery = () => {
-  const cemetery = useGoatCemeteryItems();
+  const cemetery = useJazzCemeteryItems();
 
   if (!cemetery || cemetery.length === 0) return <>Empty</>;
   console.log(cemetery);

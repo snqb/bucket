@@ -2,8 +2,8 @@ import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
 import { Input } from "./components/ui/input";
-import { TodoItem, TodoList } from "./store";
-import { useGoatActions } from "./goat-store";
+import { TodoList } from "./jazz-schemas";
+import { useJazzActions } from "./jazz-store";
 import { cn } from "./lib/utils";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
@@ -14,7 +14,7 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
 
   const [text, setText] = useState("");
-  const actions = useGoatActions();
+  const actions = useJazzActions();
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,

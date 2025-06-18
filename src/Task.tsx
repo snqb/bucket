@@ -22,9 +22,8 @@ import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
 import { useDebounce, useLongPress } from "@uidotdev/usehooks";
-import { TodoItem } from "./store";
-import { useGoatActions } from "./goat-store";
-import { useItem, useDB } from "@goatdb/goatdb/react";
+import { TodoItem } from "./jazz-schemas";
+import { useJazzActions } from "./jazz-store";
 
 type Props = HTMLMotionProps<"div"> & {
   task: TodoItem;
@@ -37,43 +36,35 @@ export const Task = (props: Props) => {
 
   const ref = useRef<any>();
   let timeoutRef = useRef<AnimationPlaybackControls>();
-  const actions = useGoatActions();
+  const actions = useJazzActions();
 
-  // Use useItem to get the task item for direct updates
-  const db = useDB();
-  const userRepoPath = db.currentUser
-    ? `/data/${db.currentUser.key}`
-    : "/data/anonymous";
-  const taskItem = useItem(`${userRepoPath}/${task.id}`);
+  const [localProgress, setLocalProgress] = useState(task.progress);
 
-  const [progress, setProgress] = useState(task.progress);
-
-  const deferredProgress = useDebounce(progress, 350);
+  const deferredProgress = useDebounce(localProgress, 350);
 
   const deleteTask = useCallback(() => {
-    if (taskItem) {
-      // Move to cemetery first
-      actions.deleteTodo(task);
-      // Then mark as deleted
-      taskItem.isDeleted = true;
-    }
-  }, [task, actions, taskItem]);
+    actions.deleteTodo(task);
+  }, [task, actions]);
 
   const updateTaskDescription = (text: string) => {
-    if (taskItem) {
-      taskItem.set("description", text);
-    }
+    actions.updateTodoItem(task.id!, { description: text });
   };
 
+  // Update database when debounced progress changes
   useEffect(() => {
-    if (progress > 100) {
-      deleteTask();
+    if (deferredProgress !== task.progress) {
+      if (deferredProgress > 100) {
+        deleteTask();
+      } else {
+        actions.updateTodoItem(task.id!, { progress: deferredProgress });
+      }
     }
+  }, [deferredProgress, task.progress, actions, task.id, deleteTask]);
 
-    if (taskItem) {
-      taskItem.set("progress", progress);
-    }
-  }, [deferredProgress, taskItem, deleteTask]);
+  // Sync local state when task progress changes from outside
+  useEffect(() => {
+    setLocalProgress(task.progress);
+  }, [task.progress]);
 
   useEffect(() => {
     return () => {
@@ -86,7 +77,7 @@ export const Task = (props: Props) => {
       const setTimer = (to: number) => {
         timeoutRef.current?.stop();
 
-        timeoutRef.current = animate(progress, to, {
+        timeoutRef.current = animate(localProgress, to, {
           duration: 0.08,
 
           // onUpdate: now => console.log(`from ${progress} to ${to} and now is ${now}`),
@@ -94,7 +85,7 @@ export const Task = (props: Props) => {
             if (to >= 100) {
               deleteTask();
             } else {
-              setProgress(to);
+              setLocalProgress(to);
 
               const left = (100 - to) * 0.0228;
 
@@ -106,7 +97,7 @@ export const Task = (props: Props) => {
         });
       };
 
-      setTimer(progress + 10);
+      setTimer(localProgress + 10);
     },
     {
       threshold: 10,
@@ -129,14 +120,14 @@ export const Task = (props: Props) => {
           <motion.div
             className="flex w-full items-baseline gap-2 "
             style={{
-              opacity: 1 - progress / 150,
+              opacity: 1 - localProgress / 150,
             }}
           >
             <DialogTrigger>
               <div className="flex items-baseline gap-2">
                 <MotionProgress
                   className="box-border h-3 w-[6ch] rounded-br-sm rounded-tl-sm border border-gray-700 p-0 text-center text-xs"
-                  value={progress}
+                  value={localProgress}
                 />
                 <p className="max-w-[21ch] break-words text-left text-lg">
                   {task.title}
@@ -147,7 +138,7 @@ export const Task = (props: Props) => {
           <span
             className="font-bold group peer relative h-7 w-12 rounded-xl px-1 text-white lg:w-12 "
             {...longPressProps}
-            onCanPlay={() => setProgress((it) => it + 10)}
+            onClick={() => setLocalProgress((it) => Math.min(100, it + 10))}
           >
             <button
               // {...sharedPressableProps}
