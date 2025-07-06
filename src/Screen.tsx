@@ -1,15 +1,12 @@
 import { AnimatePresence, HTMLMotionProps, motion } from "framer-motion";
 import randomColor from "randomcolor";
-import { memo, useEffect, useMemo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import Adder from "./Adder";
-import { Button } from "./components/ui/button";
-import { randomEmoji } from "./emojis";
-import { TodoList } from "./jazz-schemas";
-import { useJazzTodoItemsWhere, useJazzActions } from "./jazz-store";
+import { useListTasks } from "./tinybase-hooks";
 import { Task } from "./Task";
 
 type Props = HTMLMotionProps<"div"> & {
-  list: TodoList;
+  list: any;
 };
 
 const getBg = (name: string, alpha = 0.07) => {
@@ -23,32 +20,12 @@ const getBg = (name: string, alpha = 0.07) => {
 };
 
 const Screen = ({ list, ...divProps }: Props) => {
-  const todos = useJazzTodoItemsWhere({ todoListId: list.id! });
-  const actions = useJazzActions();
+  const todos = useListTasks(String(list.id));
 
   const ref = useRef<Element>(document.querySelector("#screens")!);
   const bg = useMemo(() => getBg(list.title, 0.1), [list.title]);
 
   if (!todos) return null;
-
-  const handleUpdateEmoji = () => {
-    const newEmoji = randomEmoji();
-    actions.updateTodoList(list.id!, { emoji: newEmoji });
-  };
-
-  const handleUpdateTitle = () => {
-    const newName = prompt(`${list.title} -> to what?`);
-    if (newName) {
-      actions.updateTodoList(list.id!, { title: newName });
-    }
-  };
-
-  const handleDeleteList = () => {
-    const confirm = window.confirm(`Delete ${list.title}?`);
-    if (confirm) {
-      actions.deleteList(list.id!);
-    }
-  };
 
   return (
     <motion.div
@@ -68,46 +45,12 @@ const Screen = ({ list, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className={`flex`} id={`screen-${list.id}`}>
-        <div className="">
-          <h2 className="font-bold mb-2 flex gap-1 whitespace-nowrap text-2xl saturate-50">
-            <div onClick={handleUpdateEmoji} className="cursor-pointer">
-              {list.emoji ?? randomEmoji({ seed: list.title })}
-            </div>
-            {list.title}
-          </h2>
-        </div>
-        <Button
-          size="sm"
-          variant="ghost"
-          className="ml-auto"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleDeleteList();
-          }}
-        >
-          🗑️
-        </Button>
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleUpdateTitle();
-          }}
-        >
-          ✏️
-        </Button>
-      </div>
-
-      <hr className="border-gray-500" />
-
       <div className="flex flex-col items-stretch gap-2">
         <Adder where={list} className="mb-2" />
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
-              key={task.id}
+              key={String(task.id)}
               initial={{ transform: "translateY(-100%)" }}
               animate={{
                 transform: "translateY(0)",

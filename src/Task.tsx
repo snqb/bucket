@@ -4,13 +4,7 @@ import {
   animate,
   motion,
 } from "framer-motion";
-import {
-  useCallback,
-  useDeferredValue,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,12 +15,11 @@ import {
 import { Progress } from "./components/ui/progress";
 import { Textarea } from "./components/ui/textarea";
 
-import { useDebounce, useLongPress } from "@uidotdev/usehooks";
-import { TodoItem } from "./jazz-schemas";
-import { useJazzActions } from "./jazz-store";
+import { useLongPress } from "@uidotdev/usehooks";
+import { useActions } from "./tinybase-hooks";
 
 type Props = HTMLMotionProps<"div"> & {
-  task: TodoItem;
+  task: any;
 };
 
 const MotionProgress = motion(Progress);
@@ -34,41 +27,61 @@ const MotionProgress = motion(Progress);
 export const Task = (props: Props) => {
   const { task } = props;
 
-  const ref = useRef<any>();
-  let timeoutRef = useRef<AnimationPlaybackControls>();
-  const actions = useJazzActions();
+  const ref = useRef<any>(null);
+  let timeoutRef = useRef<AnimationPlaybackControls | undefined>(undefined);
+  const actions = useActions();
 
   const [localProgress, setLocalProgress] = useState(task.progress);
-
-  const deferredProgress = useDebounce(localProgress, 350);
+  const commitTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const deleteTask = useCallback(() => {
-    actions.deleteTodo(task);
+    actions.deleteTask(task.id);
   }, [task, actions]);
 
   const updateTaskDescription = (text: string) => {
-    actions.updateTodoItem(task.id!, { description: text });
+    actions.updateTask(task.id, { description: text });
   };
 
-  // Update database when debounced progress changes
-  useEffect(() => {
-    if (deferredProgress !== task.progress) {
-      if (deferredProgress > 100) {
-        deleteTask();
-      } else {
-        actions.updateTodoItem(task.id!, { progress: deferredProgress });
+  // Throttled commit to tinybase
+  const commitProgress = useCallback(
+    (progress: number) => {
+      if (commitTimeoutRef.current) {
+        clearTimeout(commitTimeoutRef.current);
       }
-    }
-  }, [deferredProgress, task.progress, actions, task.id, deleteTask]);
+
+      commitTimeoutRef.current = setTimeout(() => {
+        if (progress >= 100) {
+          deleteTask();
+        } else {
+          actions.updateTask(task.id, { progress });
+        }
+      }, 350);
+    },
+    [actions, task.id, deleteTask],
+  );
+
+  // Update local state and schedule commit
+  const updateProgress = useCallback(
+    (newProgress: number) => {
+      setLocalProgress(newProgress);
+      commitProgress(newProgress);
+    },
+    [commitProgress],
+  );
 
   // Sync local state when task progress changes from outside
   useEffect(() => {
-    setLocalProgress(task.progress);
-  }, [task.progress]);
+    if (Math.abs(task.progress - localProgress) > 1) {
+      setLocalProgress(task.progress);
+    }
+  }, [task.progress, localProgress]);
 
   useEffect(() => {
     return () => {
       timeoutRef.current?.stop();
+      if (commitTimeoutRef.current) {
+        clearTimeout(commitTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -80,15 +93,16 @@ export const Task = (props: Props) => {
         timeoutRef.current = animate(localProgress, to, {
           duration: 0.08,
 
-          // onUpdate: now => console.log(`from ${progress} to ${to} and now is ${now}`),
+          onUpdate: (now) => {
+            setLocalProgress(now);
+            commitProgress(now);
+          },
+
           onComplete: () => {
             if (to >= 100) {
               deleteTask();
             } else {
-              setLocalProgress(to);
-
               const left = (100 - to) * 0.0228;
-
               setTimer(to + 5 - left);
             }
           },
@@ -138,7 +152,7 @@ export const Task = (props: Props) => {
           <span
             className="font-bold group peer relative h-7 w-12 rounded-xl px-1 text-white lg:w-12 "
             {...longPressProps}
-            onClick={() => setLocalProgress((it) => Math.min(100, it + 10))}
+            onClick={() => updateProgress(Math.min(100, localProgress + 10))}
           >
             <button
               // {...sharedPressableProps}

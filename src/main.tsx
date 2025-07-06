@@ -5,16 +5,16 @@ import App from "./App";
 // Supports weights 100-900
 import "@fontsource-variable/noto-sans-mono";
 import "./index.css";
-import { JazzProvider } from "./JazzProvider";
+import { TinyBaseProvider } from "./TinyBaseProvider";
 
 const container = document.getElementById("root");
 if (container) {
   const root = createRoot(container);
   root.render(
     <React.StrictMode>
-      <JazzProvider>
+      <TinyBaseProvider>
         <App />
-      </JazzProvider>
+      </TinyBaseProvider>
     </React.StrictMode>,
   );
 }

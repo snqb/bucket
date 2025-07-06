@@ -2,19 +2,18 @@ import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import * as R from "ramda";
 import { Input } from "./components/ui/input";
-import { TodoList } from "./jazz-schemas";
-import { useJazzActions } from "./jazz-store";
+import { useActions } from "./tinybase-hooks";
 import { cn } from "./lib/utils";
 export interface Props extends Partial<HTMLInputElement> {
   initialEmoji?: string;
-  where: TodoList;
+  where: any;
 }
 
 const Adder = forwardRef<"div", Props>((props, ref) => {
   const { placeholder, initialEmoji = "+", where, ...inputGroupProps } = props;
 
   const [text, setText] = useState("");
-  const actions = useJazzActions();
+  const actions = useActions();
 
   const handleChange: ChangeEventHandler<HTMLInputElement> = R.pipe(
     (e) => e.target.value,
@@ -26,7 +25,7 @@ const Adder = forwardRef<"div", Props>((props, ref) => {
     if (!text) return;
 
     try {
-      actions.addTodoItem(text, where.id!);
+      actions.createTask(where.id, text);
     } catch (e) {
       console.error(e);
       alert("dev is stupid, text him t.me/snqba");
