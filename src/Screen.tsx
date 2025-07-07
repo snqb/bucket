@@ -46,7 +46,6 @@ const Screen = ({ list, ...divProps }: Props) => {
       {...divProps}
     >
       <div className="flex flex-col items-stretch gap-2">
-        <Adder where={list} className="mb-2" />
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
@@ -68,6 +67,7 @@ const Screen = ({ list, ...divProps }: Props) => {
             />
           ))}
         </AnimatePresence>
+        <Adder where={list} className="mb-2" />
       </div>
     </motion.div>
   );

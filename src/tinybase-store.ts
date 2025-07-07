@@ -1,8 +1,14 @@
-import { createStore, createIndexes, createRelationships } from "tinybase";
+import {
+  createMergeableStore,
+  createIndexes,
+  createRelationships,
+} from "tinybase";
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
+import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-client";
+import { generateMnemonic, mnemonicToSeedSync } from "bip39";
 
-// Create the main store
-export const store = createStore()
+// Create the main store as MergeableStore for sync support
+export const store = createMergeableStore()
   .setTablesSchema({
     lists: {
       id: { type: "string" },
@@ -33,6 +39,8 @@ export const store = createStore()
   .setValuesSchema({
     lastSync: { type: "number", default: 0 },
     deviceId: { type: "string", default: "" },
+    userId: { type: "string", default: "" },
+    passphrase: { type: "string", default: "" },
   });
 
 // Create indexes for better performance
@@ -53,6 +61,149 @@ relationships.setRelationshipDefinition(
 export const persister = createLocalPersister(store, "bucket-app");
 persister.startAutoLoad();
 persister.startAutoSave();
+
+// User authentication with BIP-style passphrases
+let currentUserId: string | null = null;
+let currentPassphrase: string | null = null;
+
+// Generate a new passphrase
+export const generatePassphrase = (): string => {
+  return generateMnemonic(128); // 12 words
+};
+
+// Derive user ID from passphrase using Web Crypto API
+export const deriveUserId = async (passphrase: string): Promise<string> => {
+  const seed = mnemonicToSeedSync(passphrase);
+  const hashBuffer = await crypto.subtle.digest("SHA-256", seed);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return hashHex.substring(0, 16);
+};
+
+// Set user from passphrase
+export const setUser = async (passphrase: string) => {
+  currentPassphrase = passphrase;
+  currentUserId = await deriveUserId(passphrase);
+
+  // Update store values
+  store.setValue("userId", currentUserId);
+  store.setValue("passphrase", passphrase);
+
+  console.log(`🔐 User set: ${currentUserId}`);
+
+  // Start sync after user is set
+  setTimeout(() => {
+    startSync().catch(console.error);
+  }, 100);
+
+  return currentUserId;
+};
+
+// Get current user
+export const getCurrentUser = () => {
+  return {
+    userId: currentUserId,
+    passphrase: currentPassphrase,
+  };
+};
+
+// Logout user
+export const logout = async () => {
+  // Stop sync first
+  await stopSync();
+
+  // Clear in-memory state
+  currentUserId = null;
+  currentPassphrase = null;
+
+  // Clear store values
+  store.setValue("userId", "");
+  store.setValue("passphrase", "");
+
+  // Clear all data from store
+  store.delTables();
+  store.delValues();
+
+  // Clear localStorage
+  localStorage.removeItem("bucket-app");
+
+  console.log("🔐 User logged out");
+};
+
+// Generate QR code data for passphrase
+export const generateQRData = (passphrase: string): string => {
+  return `bucket-app:${passphrase}`;
+};
+
+// Parse QR code data
+export const parseQRData = (qrData: string): string | null => {
+  if (qrData.startsWith("bucket-app:")) {
+    return qrData.substring(11);
+  }
+  return null;
+};
+
+// Sync configuration
+let synchronizer: any = null;
+export const WS_SERVER_URL = "ws://localhost:8040";
+
+// Start sync with user isolation
+export const startSync = async (wsUrl = WS_SERVER_URL) => {
+  if (!currentUserId) {
+    console.log("❌ No user set for sync");
+    return null;
+  }
+
+  if (synchronizer) {
+    await synchronizer.destroy();
+  }
+
+  try {
+    // Use userId as the path for user isolation
+    const ws = new WebSocket(`${wsUrl}/${currentUserId}`);
+    console.log(`🔄 Attempting to connect to: ${wsUrl}/${currentUserId}`);
+
+    // Wait for connection
+    await new Promise((resolve, reject) => {
+      ws.onopen = () => {
+        console.log(`🔄 WebSocket connected for user: ${currentUserId}`);
+        resolve(void 0);
+      };
+      ws.onerror = (error) => {
+        console.log(`❌ WebSocket error:`, error);
+        reject(error);
+      };
+      ws.onclose = (event) => {
+        console.log(`🔄 WebSocket closed:`, event.code, event.reason);
+      };
+      setTimeout(() => reject(new Error("Connection timeout")), 5000);
+    });
+
+    synchronizer = await createWsSynchronizer(store, ws);
+    await synchronizer.startSync();
+    console.log(`🔄 Sync started for user: ${currentUserId}`);
+    return synchronizer;
+  } catch (error) {
+    console.log("📱 Running in local-only mode (no sync server)", error);
+    return null;
+  }
+};
+
+// Stop sync
+export const stopSync = async () => {
+  if (synchronizer) {
+    await synchronizer.destroy();
+    synchronizer = null;
+    console.log("🔄 Sync stopped");
+  }
+};
+
+// Get sync status
+export const getSyncStatus = () => {
+  return synchronizer ? "connected" : "disconnected";
+};
 
 // Helper functions
 export const generateId = () =>
@@ -147,10 +298,23 @@ export const getListTasks = (listId: string) => {
 };
 
 export const getCompletedTasks = () => {
-  return indexes.getSliceRowIds("completedTasks", true);
+  return indexes.getSliceRowIds("completedTasks", "true");
 };
 
 // Initialize device ID if not set
 if (!store.getValue("deviceId")) {
   store.setValue("deviceId", generateId());
 }
+
+// Initialize user after persister loads data
+persister.startAutoLoad().then(async () => {
+  const storedPassphrase = store.getValue("passphrase");
+  if (
+    storedPassphrase &&
+    typeof storedPassphrase === "string" &&
+    storedPassphrase.trim() !== ""
+  ) {
+    await setUser(storedPassphrase);
+    // Sync will be started by setUser
+  }
+});

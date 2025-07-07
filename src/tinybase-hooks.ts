@@ -6,6 +6,7 @@ import {
   useSliceRowIds,
   useTable,
 } from "tinybase/ui-react";
+import { useCallback, useEffect, useState, useMemo } from "react";
 import {
   store,
   indexes,
@@ -15,6 +16,12 @@ import {
   deleteTask,
   deleteList,
   getListTasks,
+  startSync,
+  stopSync,
+  getSyncStatus,
+  getCurrentUser,
+  setUser,
+  logout as storeLogout,
 } from "./tinybase-store";
 
 // Hook to get all lists
@@ -111,5 +118,94 @@ export const useActions = () => {
       const cemeteryIds = store.getRowIds("cemetery");
       cemeteryIds.forEach((id) => store.delRow("cemetery", id));
     },
+  };
+};
+
+// Hook to manage sync state
+export const useSync = (wsUrl?: string) => {
+  const [syncStatus, setSyncStatus] = useState<
+    "connected" | "disconnected" | "connecting"
+  >("disconnected");
+  const [error, setError] = useState<string | null>(null);
+  const [user, setUserState] = useState(getCurrentUser());
+
+  const connect = useCallback(async () => {
+    if (syncStatus === "connecting") return;
+
+    const currentUser = getCurrentUser();
+    if (!currentUser.userId) {
+      setError("No user authenticated");
+      return;
+    }
+
+    setSyncStatus("connecting");
+    setError(null);
+
+    try {
+      const synchronizer = await startSync(wsUrl);
+      setSyncStatus(synchronizer ? "connected" : "disconnected");
+      if (!synchronizer) {
+        setError("Failed to connect to sync server");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to connect");
+      setSyncStatus("disconnected");
+    }
+  }, [wsUrl, syncStatus]);
+
+  const disconnect = useCallback(async () => {
+    try {
+      await stopSync();
+      setSyncStatus("disconnected");
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to disconnect");
+    }
+  }, []);
+
+  // Update status on component mount
+  useEffect(() => {
+    setSyncStatus(getSyncStatus());
+    setUserState(getCurrentUser());
+  }, []);
+
+  return {
+    syncStatus,
+    error,
+    connect,
+    disconnect,
+    isConnected: syncStatus === "connected",
+    isConnecting: syncStatus === "connecting",
+    user,
+    hasUser: !!user.userId,
+  };
+};
+
+// Hook to manage user authentication
+export const useAuth = () => {
+  const userId = useValue("userId", store);
+  const passphrase = useValue("passphrase", store);
+
+  const user = useMemo(() => {
+    return {
+      userId: userId || getCurrentUser().userId,
+      passphrase: passphrase || getCurrentUser().passphrase,
+    };
+  }, [userId, passphrase]);
+
+  const authenticate = useCallback(async (passphrase: string) => {
+    const userId = await setUser(passphrase);
+    return userId;
+  }, []);
+
+  const logout = useCallback(() => {
+    storeLogout();
+  }, []);
+
+  return {
+    user,
+    authenticate,
+    logout,
+    isAuthenticated: !!user.userId,
   };
 };

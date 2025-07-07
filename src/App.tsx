@@ -1,14 +1,28 @@
 import ReloadPrompt from "./ReloadPrompt";
+import { SyncStatus } from "./SyncStatus";
+import { UserAuth } from "./UserAuth";
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import Screen from "./Screen";
 import { Button } from "./components/ui/button";
-import { useLists, useCemeteryItems, useActions } from "./tinybase-hooks";
+import {
+  useLists,
+  useCemeteryItems,
+  useActions,
+  useAuth,
+} from "./tinybase-hooks";
 import { randomEmoji } from "./emojis";
 import { Link, Route, Switch } from "wouter";
 
 function App() {
+  const { isAuthenticated } = useAuth();
+  const [userId, setUserId] = useState<string | null>(null);
+
+  if (!isAuthenticated) {
+    return <UserAuth onAuthenticated={setUserId} />;
+  }
+
   return (
     <>
       <Switch>
@@ -43,6 +57,9 @@ const Bucket = () => {
         <div className="text-center">
           <div className="mb-4 text-6xl">📋</div>
           <div className="mb-8 text-xl text-gray-300">No lists yet</div>
+          <div className="mb-4">
+            <SyncStatus />
+          </div>
           <Button
             className="bg-blue-500 bg-opacity-50 p-4 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
             onClick={() => {
@@ -106,30 +123,33 @@ const Bucket = () => {
         <div className="border-b border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-2xl text-white">All Lists</h1>
-            <div className="flex gap-2">
-              <Link
-                to="/cemetery"
-                className="flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-              >
-                🪦
-              </Link>
-              <Button
-                className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                onClick={() => {
-                  const name = prompt("Enter the name of the new todo list");
-                  if (name) {
-                    actions.createList(name);
-                  }
-                }}
-              >
-                ➕
-              </Button>
-              <Button
-                className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                onClick={handleMapClick}
-              >
-                ❌
-              </Button>
+            <div className="flex items-center gap-4">
+              <SyncStatus />
+              <div className="flex gap-2">
+                <Link
+                  to="/cemetery"
+                  className="flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                >
+                  🪦
+                </Link>
+                <Button
+                  className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                  onClick={() => {
+                    const name = prompt("Enter the name of the new todo list");
+                    if (name) {
+                      actions.createList(name);
+                    }
+                  }}
+                >
+                  ➕
+                </Button>
+                <Button
+                  className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                  onClick={handleMapClick}
+                >
+                  ❌
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -225,12 +245,15 @@ const Bucket = () => {
               </div>
             )}
           </div>
-          <Button
-            className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-            onClick={handleMapClick}
-          >
-            🗺️
-          </Button>
+          <div className="flex items-center gap-4">
+            <SyncStatus />
+            <Button
+              className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+              onClick={handleMapClick}
+            >
+              🗺️
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -257,12 +280,15 @@ const Cemetery = () => {
       <div className="border-b border-gray-700 p-4">
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-2xl text-white">Cemetery</h1>
-          <Link
-            to="/"
-            className="flex size-8 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-          >
-            🪣
-          </Link>
+          <div className="flex items-center gap-4">
+            <SyncStatus />
+            <Link
+              to="/"
+              className="flex size-8 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+            >
+              🪣
+            </Link>
+          </div>
         </div>
       </div>
 
