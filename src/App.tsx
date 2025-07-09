@@ -48,34 +48,6 @@ const Bucket = () => {
     }
   }, [lists, currentScreenIndex]);
 
-  const currentScreen = lists?.[currentScreenIndex];
-
-  // Handle case when no lists exist
-  if (!lists || lists.length === 0) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="mb-4 text-6xl">📋</div>
-          <div className="mb-8 text-xl text-gray-300">No lists yet</div>
-          <div className="mb-4">
-            <SyncStatus />
-          </div>
-          <Button
-            className="bg-blue-500 bg-opacity-50 p-4 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
-            onClick={() => {
-              const name = prompt("Enter the name of your first todo list");
-              if (name) {
-                actions.createList(name);
-              }
-            }}
-          >
-            Create your first list
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   const handleMapClick = () => {
     setShowMap(!showMap);
   };
@@ -115,6 +87,34 @@ const Bucket = () => {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [lists]);
+
+  const currentScreen = lists?.[currentScreenIndex];
+
+  // Handle case when no lists exist
+  if (!lists || lists.length === 0) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="mb-4 text-6xl">📋</div>
+          <div className="mb-8 text-xl text-gray-300">No lists yet</div>
+          <div className="mb-4">
+            <SyncStatus />
+          </div>
+          <Button
+            className="bg-blue-500 bg-opacity-50 p-4 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
+            onClick={() => {
+              const name = prompt("Enter the name of your first todo list");
+              if (name) {
+                actions.createList(name);
+              }
+            }}
+          >
+            Create your first list
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (showMap) {
     return (

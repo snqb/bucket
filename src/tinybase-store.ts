@@ -147,7 +147,9 @@ export const parseQRData = (qrData: string): string | null => {
 
 // Sync configuration
 let synchronizer: any = null;
-export const WS_SERVER_URL = "ws://localhost:8040";
+export const WS_SERVER_URL = process.env.NODE_ENV === 'production'
+  ? "wss://bucket-sync-production.up.railway.app"
+  : "ws://localhost:8040";
 
 // Start sync with user isolation
 export const startSync = async (wsUrl = WS_SERVER_URL) => {
