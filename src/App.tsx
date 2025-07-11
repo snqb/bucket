@@ -160,7 +160,7 @@ const Bucket = () => {
           </div>
         </div>
 
-        <div className="grid flex-1 grid-cols-3 gap-4 overflow-auto p-4">
+        <div className="grid flex-1 grid-cols-3 gap-6 overflow-auto p-6">
           {lists?.map((list) => (
             <Screen
               key={String(list.id)}

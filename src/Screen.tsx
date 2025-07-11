@@ -45,8 +45,8 @@ const Screen = ({ list, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      {/* Header with title and emoji */}
-      <div className="mb-4 flex items-center gap-2 border-b border-gray-500 pb-2">
+      {/* Header with title and emoji - only on desktop */}
+      <div className="mb-4 hidden items-center gap-2 border-b border-gray-500 pb-2 md:flex">
         <span className="text-2xl">{list.emoji}</span>
         <h2 className="font-semibold truncate text-lg text-white">
           {list.title}
