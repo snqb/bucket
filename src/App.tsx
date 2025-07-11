@@ -128,10 +128,10 @@ const Bucket = () => {
     );
   }
 
-  if (showMap) {
-    return (
-      <div className="flex h-screen w-screen flex-col bg-black">
-        {/* Header */}
+  return (
+    <div className="flex h-screen w-screen flex-col bg-black">
+      {/* Desktop Grid View - Always visible on desktop */}
+      <div className="hidden md:flex md:h-screen md:w-screen md:flex-col md:bg-black">
         <div className="border-b border-gray-700 p-4">
           <div className="flex items-center justify-between">
             <h1 className="font-bold text-2xl text-white">All Lists</h1>
@@ -155,133 +155,179 @@ const Bucket = () => {
                 >
                   ➕
                 </Button>
-                <Button
-                  className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                  onClick={handleMapClick}
-                >
-                  ❌
-                </Button>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Grid */}
-        <div className="grid flex-1 grid-cols-4 gap-4 overflow-auto p-4">
-          {lists?.map((list, index) => (
-            <motion.div
+        <div className="grid flex-1 grid-cols-3 gap-4 overflow-auto p-4">
+          {lists?.map((list) => (
+            <Screen
               key={String(list.id)}
-              className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors hover:bg-opacity-70"
-              onClick={() => handleScreenSelect(index)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <div
-                className="mb-2 cursor-pointer text-2xl transition-transform hover:scale-110"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const newEmoji = randomEmoji();
-                  actions.updateListEmoji(String(list.id), newEmoji);
-                }}
-              >
-                {list.emoji}
-              </div>
-              <div className="font-medium truncate text-sm">{list.title}</div>
-
-              {/* Edit/Delete buttons - only show on hover */}
-              <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newName = prompt(`${list.title} -> to what?`);
-                    if (newName) {
-                      actions.updateListTitle(String(list.id), newName);
-                    }
-                  }}
-                >
-                  ✏️
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const confirm = window.confirm(`Delete ${list.title}?`);
-                    if (confirm) {
-                      actions.deleteList(String(list.id));
-                    }
-                  }}
-                >
-                  🗑️
-                </Button>
-              </div>
-            </motion.div>
+              className="h-full max-h-96"
+              list={list}
+            />
           ))}
         </div>
 
-        {/* User Controls at bottom */}
         <div className="border-t border-gray-700 p-4">
           <UserControls />
         </div>
       </div>
-    );
-  }
 
-  return (
-    <div className="flex h-screen w-screen flex-col bg-black">
-      {/* Header */}
-      <div className="border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <Button
-                className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                onClick={handlePreviousScreen}
-                disabled={!lists || lists.length <= 1}
-              >
-                ←
-              </Button>
-              <Button
-                className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                onClick={handleNextScreen}
-                disabled={!lists || lists.length <= 1}
-              >
-                →
-              </Button>
-            </div>
-            {currentScreen && (
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{currentScreen.emoji}</span>
-                <h1 className="font-bold text-2xl text-white">
-                  {currentScreen.title}
-                </h1>
+      {/* Mobile Views - Toggle between single screen and grid */}
+      <div className="md:hidden">
+        {showMap ? (
+          <div className="flex h-screen w-screen flex-col bg-black">
+            <div className="border-b border-gray-700 p-4">
+              <div className="flex items-center justify-between">
+                <h1 className="font-bold text-2xl text-white">All Lists</h1>
+                <div className="flex items-center gap-4">
+                  <SyncStatus />
+                  <div className="flex gap-2">
+                    <Link
+                      to="/cemetery"
+                      className="flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                    >
+                      🪦
+                    </Link>
+                    <Button
+                      className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      onClick={() => {
+                        const name = prompt(
+                          "Enter the name of the new todo list",
+                        );
+                        if (name) {
+                          actions.createList(name);
+                        }
+                      }}
+                    >
+                      ➕
+                    </Button>
+                    <Button
+                      className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      onClick={handleMapClick}
+                    >
+                      ❌
+                    </Button>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="flex items-center gap-4">
-            <SyncStatus />
-            <Button
-              className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-              onClick={handleMapClick}
-            >
-              🗺️
-            </Button>
-          </div>
-        </div>
-      </div>
+            </div>
 
-      {/* Screen Content */}
-      <div className="flex-1 overflow-hidden">
-        {currentScreen && (
-          <Screen
-            className="h-full w-full border-0 p-8"
-            key={String(currentScreen.id)}
-            list={currentScreen}
-          />
+            <div className="grid flex-1 grid-cols-2 gap-4 overflow-auto p-4">
+              {lists?.map((list, index) => (
+                <motion.div
+                  key={String(list.id)}
+                  className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors hover:bg-opacity-70"
+                  onClick={() => handleScreenSelect(index)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <div
+                    className="mb-2 cursor-pointer text-2xl transition-transform hover:scale-110"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const newEmoji = randomEmoji();
+                      actions.updateListEmoji(String(list.id), newEmoji);
+                    }}
+                  >
+                    {list.emoji}
+                  </div>
+                  <div className="font-medium truncate text-sm">
+                    {list.title}
+                  </div>
+
+                  <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newName = prompt(`${list.title} -> to what?`);
+                        if (newName) {
+                          actions.updateListTitle(String(list.id), newName);
+                        }
+                      }}
+                    >
+                      ✏️
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const confirm = window.confirm(`Delete ${list.title}?`);
+                        if (confirm) {
+                          actions.deleteList(String(list.id));
+                        }
+                      }}
+                    >
+                      🗑️
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="border-t border-gray-700 p-4">
+              <UserControls />
+            </div>
+          </div>
+        ) : (
+          <div className="flex h-screen w-screen flex-col bg-black">
+            <div className="border-b border-gray-700 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-2">
+                    <Button
+                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      onClick={handlePreviousScreen}
+                      disabled={!lists || lists.length <= 1}
+                    >
+                      ←
+                    </Button>
+                    <Button
+                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      onClick={handleNextScreen}
+                      disabled={!lists || lists.length <= 1}
+                    >
+                      →
+                    </Button>
+                  </div>
+                  {currentScreen && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-2xl">{currentScreen.emoji}</span>
+                      <h1 className="font-bold text-2xl text-white">
+                        {currentScreen.title}
+                      </h1>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-4">
+                  <SyncStatus />
+                  <Button
+                    className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                    onClick={handleMapClick}
+                  >
+                    🗺️
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              {currentScreen && (
+                <Screen
+                  className="h-full w-full border-0 p-8"
+                  key={String(currentScreen.id)}
+                  list={currentScreen}
+                />
+              )}
+            </div>
+          </div>
         )}
       </div>
     </div>

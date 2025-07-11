@@ -29,7 +29,7 @@ const Screen = ({ list, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`m-2 flex  flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6`}
+      className={`m-2 flex flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6 md:h-full md:max-h-96`}
       style={{
         background: bg,
       }}
@@ -45,7 +45,15 @@ const Screen = ({ list, ...divProps }: Props) => {
       }}
       {...divProps}
     >
-      <div className="flex flex-col items-stretch gap-2">
+      {/* Header with title and emoji */}
+      <div className="mb-4 flex items-center gap-2 border-b border-gray-500 pb-2">
+        <span className="text-2xl">{list.emoji}</span>
+        <h2 className="font-semibold truncate text-lg text-white">
+          {list.title}
+        </h2>
+      </div>
+
+      <div className="flex flex-col items-stretch gap-2 overflow-y-auto">
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
