@@ -22,6 +22,7 @@ import {
   getCurrentUser,
   setUser,
   logout as storeLogout,
+  waitForAuth,
 } from "./tinybase-store";
 
 // Hook to get all lists
@@ -185,12 +186,49 @@ export const useSync = (wsUrl?: string) => {
 export const useAuth = () => {
   const userId = useValue("userId", store);
   const passphrase = useValue("passphrase", store);
+  const [isLoading, setIsLoading] = useState(true);
 
   const user = useMemo(() => {
     return {
-      userId: userId || getCurrentUser().userId,
-      passphrase: passphrase || getCurrentUser().passphrase,
+      userId: (typeof userId === "string" && userId) || "",
+      passphrase: (typeof passphrase === "string" && passphrase) || "",
     };
+  }, [userId, passphrase]);
+
+  // Wait for store to be ready and auth values to be loaded
+  useEffect(() => {
+    const checkAuth = async () => {
+      // Wait a bit for persister to load data
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
+      // Check if we have auth data in store
+      const storedUserId = store.getValue("userId");
+      const storedPassphrase = store.getValue("passphrase");
+
+      if (
+        storedUserId &&
+        storedPassphrase &&
+        typeof storedUserId === "string" &&
+        typeof storedPassphrase === "string" &&
+        storedUserId.trim() &&
+        storedPassphrase.trim()
+      ) {
+        // Auth data is available, we're ready
+        setIsLoading(false);
+      } else {
+        // No auth data, also ready (will show login)
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // Also check when userId or passphrase values change
+  useEffect(() => {
+    if (userId || passphrase) {
+      setIsLoading(false);
+    }
   }, [userId, passphrase]);
 
   const authenticate = useCallback(async (passphrase: string) => {
@@ -206,6 +244,7 @@ export const useAuth = () => {
     user,
     authenticate,
     logout,
-    isAuthenticated: !!user.userId,
+    isAuthenticated: !!user.userId && !!user.passphrase,
+    isLoading,
   };
 };

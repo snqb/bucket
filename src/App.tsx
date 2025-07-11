@@ -1,6 +1,7 @@
 import ReloadPrompt from "./ReloadPrompt";
 import { SyncStatus } from "./SyncStatus";
 import { UserAuth } from "./UserAuth";
+import { UserControls } from "./UserControls";
 
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
@@ -16,8 +17,19 @@ import { randomEmoji } from "./emojis";
 import { Link, Route, Switch } from "wouter";
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [userId, setUserId] = useState<string | null>(null);
+
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="mb-4 text-6xl">⏳</div>
+          <div className="text-xl text-gray-300">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <UserAuth onAuthenticated={setUserId} />;
@@ -69,24 +81,24 @@ const Bucket = () => {
     }
   };
 
-  // Keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        handlePreviousScreen();
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        handleNextScreen();
-      } else if (e.key === "m" || e.key === "M") {
-        e.preventDefault();
-        handleMapClick();
-      }
-    };
+  // Keyboard navigation - disabled
+  // useEffect(() => {
+  //   const handleKeyDown = (e: KeyboardEvent) => {
+  //     if (e.key === "ArrowLeft") {
+  //       e.preventDefault();
+  //       handlePreviousScreen();
+  //     } else if (e.key === "ArrowRight") {
+  //       e.preventDefault();
+  //       handleNextScreen();
+  //     } else if (e.key === "m" || e.key === "M") {
+  //       e.preventDefault();
+  //       handleMapClick();
+  //     }
+  //   };
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [lists]);
+  //   window.addEventListener("keydown", handleKeyDown);
+  //   return () => window.removeEventListener("keydown", handleKeyDown);
+  // }, [lists]);
 
   const currentScreen = lists?.[currentScreenIndex];
 
@@ -209,6 +221,11 @@ const Bucket = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* User Controls at bottom */}
+        <div className="border-t border-gray-700 p-4">
+          <UserControls />
         </div>
       </div>
     );

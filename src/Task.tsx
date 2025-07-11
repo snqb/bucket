@@ -84,6 +84,11 @@ export const Task = (props: Props) => {
             opacity: 1 - localProgress / 150,
           }}
         >
+          <DialogTrigger asChild>
+            <p className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400">
+              {task.title}
+            </p>
+          </DialogTrigger>
           <Slider
             value={[localProgress]}
             onValueChange={handleSliderChange}
@@ -92,17 +97,12 @@ export const Task = (props: Props) => {
             step={1}
             className="flex-1"
           />
-          <DialogTrigger asChild>
-            <p className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400">
-              {task.title}
-            </p>
-          </DialogTrigger>
         </motion.div>
       </div>
 
       <DialogPortal>
         <DialogContent className="bg-black">
-          <DialogHeader>{task.title}</DialogHeader>
+          <DialogHeader className="text-left">{task.title}</DialogHeader>
           <div
             data-task={task.id}
             className="flex flex-col items-stretch gap-4"

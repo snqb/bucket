@@ -59,8 +59,6 @@ relationships.setRelationshipDefinition(
 
 // Set up persistence to localStorage
 export const persister = createLocalPersister(store, "bucket-app");
-persister.startAutoLoad();
-persister.startAutoSave();
 
 // User authentication with BIP-style passphrases
 let currentUserId: string | null = null;
@@ -84,52 +82,70 @@ export const deriveUserId = async (passphrase: string): Promise<string> => {
 
 // Set user from passphrase
 export const setUser = async (passphrase: string) => {
-  currentPassphrase = passphrase;
-  currentUserId = await deriveUserId(passphrase);
+  console.log("🔐 Setting user with passphrase...");
 
-  // Update store values
-  store.setValue("userId", currentUserId);
-  store.setValue("passphrase", passphrase);
+  try {
+    currentPassphrase = passphrase;
+    currentUserId = await deriveUserId(passphrase);
 
-  console.log(`🔐 User set: ${currentUserId}`);
+    // Update store values and force save
+    store.setValue("userId", currentUserId);
+    store.setValue("passphrase", passphrase);
 
-  // Start sync after user is set
-  setTimeout(() => {
-    startSync().catch(console.error);
-  }, 100);
+    // Force immediate save
+    await persister.save();
 
-  return currentUserId;
+    console.log(`🔐 User set successfully: ${currentUserId}`);
+
+    // Start sync after user is set
+    setTimeout(() => {
+      startSync().catch(console.error);
+    }, 100);
+
+    return currentUserId;
+  } catch (error) {
+    console.error("🔐 Error setting user:", error);
+    throw error;
+  }
 };
 
 // Get current user
 export const getCurrentUser = () => {
+  const storeUserId = store.getValue("userId");
+  const storePassphrase = store.getValue("passphrase");
+
   return {
-    userId: currentUserId,
-    passphrase: currentPassphrase,
+    userId:
+      currentUserId || (typeof storeUserId === "string" ? storeUserId : ""),
+    passphrase:
+      currentPassphrase ||
+      (typeof storePassphrase === "string" ? storePassphrase : ""),
   };
 };
 
 // Logout user
 export const logout = async () => {
-  // Stop sync first
-  await stopSync();
+  console.log("🔐 Starting logout...");
 
-  // Clear in-memory state
-  currentUserId = null;
-  currentPassphrase = null;
+  try {
+    // Stop sync first
+    await stopSync();
 
-  // Clear store values
-  store.setValue("userId", "");
-  store.setValue("passphrase", "");
+    // Clear in-memory state
+    currentUserId = null;
+    currentPassphrase = null;
 
-  // Clear all data from store
-  store.delTables();
-  store.delValues();
+    // Clear only auth values from store, keep user data
+    store.setValue("userId", "");
+    store.setValue("passphrase", "");
 
-  // Clear localStorage
-  localStorage.removeItem("bucket-app");
+    // Force save to persist the cleared auth state
+    await persister.save();
 
-  console.log("🔐 User logged out");
+    console.log("🔐 User logged out successfully");
+  } catch (error) {
+    console.error("🔐 Error during logout:", error);
+  }
 };
 
 // Generate QR code data for passphrase
@@ -147,9 +163,10 @@ export const parseQRData = (qrData: string): string | null => {
 
 // Sync configuration
 let synchronizer: any = null;
-export const WS_SERVER_URL = process.env.NODE_ENV === 'production'
-  ? "wss://bucket-sync-production.up.railway.app"
-  : "ws://localhost:8040";
+export const WS_SERVER_URL =
+  process.env.NODE_ENV === "production"
+    ? "wss://bucket-sync-production.up.railway.app"
+    : "ws://localhost:8040";
 
 // Start sync with user isolation
 export const startSync = async (wsUrl = WS_SERVER_URL) => {
@@ -159,6 +176,7 @@ export const startSync = async (wsUrl = WS_SERVER_URL) => {
   }
 
   if (synchronizer) {
+    console.log("🔄 Destroying existing synchronizer...");
     await synchronizer.destroy();
   }
 
@@ -179,13 +197,28 @@ export const startSync = async (wsUrl = WS_SERVER_URL) => {
       };
       ws.onclose = (event) => {
         console.log(`🔄 WebSocket closed:`, event.code, event.reason);
+        if (event.code !== 1000) {
+          console.log(`⚠️ Unexpected close code: ${event.code}`);
+        }
       };
       setTimeout(() => reject(new Error("Connection timeout")), 5000);
     });
 
     synchronizer = await createWsSynchronizer(store, ws);
+
+    // Add sync event listeners for debugging
+    synchronizer.addStatusListener((status) => {
+      console.log(`🔄 Sync status changed: ${status}`);
+    });
+
     await synchronizer.startSync();
     console.log(`🔄 Sync started for user: ${currentUserId}`);
+
+    // Log initial data state
+    const listsCount = store.getRowIds("lists").length;
+    const tasksCount = store.getRowIds("tasks").length;
+    console.log(`📊 Initial data: ${listsCount} lists, ${tasksCount} tasks`);
+
     return synchronizer;
   } catch (error) {
     console.log("📱 Running in local-only mode (no sync server)", error);
@@ -196,15 +229,18 @@ export const startSync = async (wsUrl = WS_SERVER_URL) => {
 // Stop sync
 export const stopSync = async () => {
   if (synchronizer) {
+    console.log("🔄 Stopping sync...");
     await synchronizer.destroy();
     synchronizer = null;
-    console.log("🔄 Sync stopped");
+    console.log("🔄 Sync stopped successfully");
   }
 };
 
 // Get sync status
 export const getSyncStatus = () => {
-  return synchronizer ? "connected" : "disconnected";
+  const status = synchronizer ? "connected" : "disconnected";
+  console.log(`🔄 Sync status requested: ${status}`);
+  return status;
 };
 
 // Helper functions
@@ -303,20 +339,83 @@ export const getCompletedTasks = () => {
   return indexes.getSliceRowIds("completedTasks", "true");
 };
 
-// Initialize device ID if not set
-if (!store.getValue("deviceId")) {
-  store.setValue("deviceId", generateId());
-}
+// Simple initialization
+const initializeStore = async () => {
+  try {
+    // Start persistence
+    await persister.startAutoLoad();
+    persister.startAutoSave();
 
-// Initialize user after persister loads data
-persister.startAutoLoad().then(async () => {
-  const storedPassphrase = store.getValue("passphrase");
-  if (
-    storedPassphrase &&
-    typeof storedPassphrase === "string" &&
-    storedPassphrase.trim() !== ""
-  ) {
-    await setUser(storedPassphrase);
-    // Sync will be started by setUser
+    // Initialize device ID if not set
+    if (!store.getValue("deviceId")) {
+      store.setValue("deviceId", generateId());
+    }
+
+    // Check for existing user after persister loads
+    const storedUserId = store.getValue("userId");
+    const storedPassphrase = store.getValue("passphrase");
+
+    if (
+      storedUserId &&
+      storedPassphrase &&
+      typeof storedUserId === "string" &&
+      typeof storedPassphrase === "string" &&
+      storedUserId.trim() &&
+      storedPassphrase.trim()
+    ) {
+      currentPassphrase = storedPassphrase;
+      currentUserId = storedUserId;
+      console.log("🔐 User restored:", currentUserId);
+
+      // Start sync
+      setTimeout(() => {
+        startSync().catch(console.error);
+      }, 100);
+    }
+  } catch (error) {
+    console.error("Failed to initialize store:", error);
   }
-});
+};
+
+// Initialize immediately
+initializeStore();
+
+// Export function to wait for initialization
+export const waitForAuth = () => Promise.resolve();
+
+// Health check and recovery mechanisms
+const runHealthCheck = () => {
+  const user = getCurrentUser();
+  if (!user.userId || !user.passphrase) {
+    console.warn("🔐 Health check: No user data found");
+    return false;
+  }
+
+  // Check if store has basic structure
+  const lists = store.getRowIds("lists");
+  const tasks = store.getRowIds("tasks");
+
+  console.log(`🔍 Health check: ${lists.length} lists, ${tasks.length} tasks`);
+
+  // Check for data consistency
+  let orphanedTasks = 0;
+  tasks.forEach((taskId) => {
+    const task = store.getRow("tasks", taskId);
+    if (task && !lists.includes(task.listId)) {
+      orphanedTasks++;
+    }
+  });
+
+  if (orphanedTasks > 0) {
+    console.warn(`🔍 Health check: Found ${orphanedTasks} orphaned tasks`);
+  }
+
+  return true;
+};
+
+// Start periodic health checks after initialization
+setTimeout(() => {
+  runHealthCheck();
+  // Run health check every 30 seconds
+  setInterval(runHealthCheck, 30000);
+}, 5000);
