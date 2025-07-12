@@ -1,4 +1,9 @@
-import { HTMLMotionProps, motion } from "framer-motion";
+import {
+  HTMLMotionProps,
+  motion,
+  useMotionValue,
+  animate,
+} from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -21,7 +26,9 @@ export const Task = (props: Props) => {
   const actions = useActions();
 
   const [localProgress, setLocalProgress] = useState(task.progress);
+  const [isInteracting, setIsInteracting] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const scale = useMotionValue(1);
 
   const deleteTask = useCallback(() => {
     actions.deleteTask(task.id);
@@ -50,16 +57,25 @@ export const Task = (props: Props) => {
   );
 
   // Handle slider drag
-  const handleSliderChange = useCallback((value: number[]) => {
-    setLocalProgress(value[0]);
-  }, []);
+  const handleSliderChange = useCallback(
+    (value: number[]) => {
+      setLocalProgress(value[0]);
+      if (!isInteracting) {
+        setIsInteracting(true);
+        animate(scale, 1.2, { type: "spring", stiffness: 400 });
+      }
+    },
+    [isInteracting, scale],
+  );
 
   // Handle slider release - save to backend
   const handleSliderRelease = useCallback(
     (value: number[]) => {
       saveProgress(value[0]);
+      setIsInteracting(false);
+      animate(scale, 1, { type: "spring", stiffness: 400 });
     },
-    [saveProgress],
+    [saveProgress, scale],
   );
 
   // Sync local state when task progress changes from outside
@@ -89,14 +105,16 @@ export const Task = (props: Props) => {
               {task.title}
             </p>
           </DialogTrigger>
-          <Slider
-            value={[localProgress]}
-            onValueChange={handleSliderChange}
-            onValueCommit={handleSliderRelease}
-            max={100}
-            step={1}
-            className="flex-1"
-          />
+          <motion.div style={{ scale }} className="flex-1">
+            <Slider
+              value={[localProgress]}
+              onValueChange={handleSliderChange}
+              onValueCommit={handleSliderRelease}
+              max={100}
+              step={1}
+              className="flex-1"
+            />
+          </motion.div>
         </motion.div>
       </div>
 
