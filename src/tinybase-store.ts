@@ -88,13 +88,13 @@ export const setUser = async (passphrase: string) => {
     currentPassphrase = passphrase;
     currentUserId = await deriveUserId(passphrase);
 
-    // Save directly to localStorage for reliability
+    // Save to localStorage for persistence (separate from store)
     localStorage.setItem("bucket-auth-userId", currentUserId);
     localStorage.setItem("bucket-auth-passphrase", passphrase);
 
-    // Also update store values
-    store.setValue("userId", currentUserId);
-    store.setValue("passphrase", passphrase);
+    // DON'T save auth to store - keep it separate to avoid sync conflicts
+    // store.setValue("userId", currentUserId);
+    // store.setValue("passphrase", passphrase);
 
     console.log("🔐 User set:", currentUserId);
 
@@ -112,7 +112,6 @@ export const setUser = async (passphrase: string) => {
 
 // Get current user
 export const getCurrentUser = () => {
-  // Try localStorage first, then store, then memory
   const lsUserId = localStorage.getItem("bucket-auth-userId");
   const lsPassphrase = localStorage.getItem("bucket-auth-passphrase");
   const storeUserId = store.getValue("userId");
@@ -146,9 +145,7 @@ export const logout = async () => {
     localStorage.removeItem("bucket-auth-userId");
     localStorage.removeItem("bucket-auth-passphrase");
 
-    // Clear store values
-    store.setValue("userId", "");
-    store.setValue("passphrase", "");
+    // No need to clear store values since we don't save auth there
 
     console.log("🔐 User logged out successfully");
   } catch (error) {
@@ -359,14 +356,9 @@ const initializeStore = async () => {
       store.setValue("deviceId", generateId());
     }
 
-    // Check for existing user - try localStorage first
-    const lsUserId = localStorage.getItem("bucket-auth-userId");
-    const lsPassphrase = localStorage.getItem("bucket-auth-passphrase");
-    const storedUserId = store.getValue("userId");
-    const storedPassphrase = store.getValue("passphrase");
-
-    const userId = lsUserId || storedUserId;
-    const passphrase = lsPassphrase || storedPassphrase;
+    // Check for existing user in localStorage only
+    const userId = localStorage.getItem("bucket-auth-userId");
+    const passphrase = localStorage.getItem("bucket-auth-passphrase");
 
     if (
       userId &&
@@ -378,15 +370,6 @@ const initializeStore = async () => {
     ) {
       currentPassphrase = passphrase;
       currentUserId = userId;
-
-      // Sync localStorage and store
-      if (lsUserId && lsPassphrase) {
-        store.setValue("userId", userId);
-        store.setValue("passphrase", passphrase);
-      } else if (storedUserId && storedPassphrase) {
-        localStorage.setItem("bucket-auth-userId", userId);
-        localStorage.setItem("bucket-auth-passphrase", passphrase);
-      }
 
       console.log("🔐 User restored:", currentUserId);
 
@@ -424,7 +407,7 @@ const runHealthCheck = () => {
   let orphanedTasks = 0;
   tasks.forEach((taskId) => {
     const task = store.getRow("tasks", taskId);
-    if (task && !lists.includes(task.listId)) {
+    if (task && !lists.includes(String(task.listId))) {
       orphanedTasks++;
     }
   });

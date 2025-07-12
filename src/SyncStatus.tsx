@@ -20,9 +20,7 @@ export const SyncStatus = () => {
 
   return (
     <div className="flex items-center">
-      <span className={`${getStatusColor()} text-lg`}>
-        {getStatusDot()}
-      </span>
+      <span className={`${getStatusColor()} text-lg`}>{getStatusDot()}</span>
     </div>
   );
 };

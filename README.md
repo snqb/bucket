@@ -1,42 +1,73 @@
-# 🚀 Yai 💬 - AI powered terminal assistant
+# 🪣 Bucket - Simple Todo Lists
 
-[![build](https://github.com/ekkinox/yai/actions/workflows/build.yml/badge.svg)](https://github.com/ekkinox/yai/actions/workflows/build.yml)
-[![release](https://github.com/ekkinox/yai/actions/workflows/release.yml/badge.svg)](https://github.com/ekkinox/yai/actions/workflows/release.yml)
-[![doc](https://github.com/ekkinox/yai/actions/workflows/doc.yml/badge.svg)](https://github.com/ekkinox/yai/actions/workflows/doc.yml)
+A minimalist todo app that syncs across devices with passphrase-based authentication.
 
-> Unleash the power of artificial intelligence to streamline your command line experience.
+## Features
 
-![Intro](docs/_assets/intro.gif)
+- **Multiple Lists**: Create and manage multiple todo lists with custom emojis
+- **Real-time Sync**: Changes sync instantly across all your devices
+- **Passphrase Auth**: Simple, secure authentication using memorable passphrases
+- **Responsive Design**: Full-screen experience on mobile, grid layout on desktop
+- **Cemetery**: Deleted items are preserved in a cemetery view
+- **Offline Support**: Works offline with automatic sync when reconnected
 
-## What is Yai ?
+## Quick Start
 
-`Yai` (your AI) is an assistant for your terminal, using [OpenAI ChatGPT](https://chat.openai.com/) to build and run commands for you. You just need to describe them in your everyday language, it will take care or the rest. 
+1. **Clone and install**:
+   ```bash
+   git clone <repo-url>
+   cd bucket
+   pnpm install
+   ```
 
-You have any questions on random topics in mind? You can also ask `Yai`, and get the power of AI without leaving `/home`.
+2. **Start the sync server**:
+   ```bash
+   pnpm run server
+   ```
 
-It is already aware of your:
-- operating system & distribution
-- username, shell & home directory
-- preferred editor
+3. **Start the app**:
+   ```bash
+   pnpm run dev
+   ```
 
-And you can also give any supplementary preferences to fine tune your experience.
+4. **Create your first list**: Enter a passphrase to get started
 
-## Documentation
+## How it works
 
-A complete documentation is available at [https://ekkinox.github.io/yai/](https://ekkinox.github.io/yai/).
+- **Lists**: Each list has a title, emoji, and collection of todos
+- **Sync**: Your data syncs across devices using the same passphrase
+- **Mobile**: Single list view with navigation arrows and grid toggle
+- **Desktop**: Grid view showing all lists simultaneously
+- **Storage**: Data persists locally and syncs via WebSocket server
 
-## Quick start
+## Tech Stack
 
-To install `Yai`, simply run:
+- **Frontend**: React + TypeScript + Tailwind CSS
+- **State**: TinyBase (reactive data store)
+- **Sync**: WebSocket-based real-time synchronization
+- **Auth**: BIP39 mnemonic passphrases
+- **Animation**: Framer Motion
 
-```shell
-curl -sS https://raw.githubusercontent.com/ekkinox/yai/main/install.sh | bash
+## Project Structure
+
+```
+src/
+├── App.tsx           # Main app component with routing
+├── Screen.tsx        # Individual todo list component
+├── Task.tsx          # Single todo item component
+├── Adder.tsx         # Add new todo component
+├── UserAuth.tsx      # Authentication component
+├── tinybase-store.ts # Data store and sync logic
+└── tinybase-hooks.ts # React hooks for data access
 ```
 
-At first run, it will ask you for an [OpenAI API key](https://platform.openai.com/account/api-keys), and use it to create the configuration file in `~/.config/yai.json`.
+## Development
 
-See [documentation](https://ekkinox.github.io/yai/getting-started/#configuration) for more information.
+- `pnpm run dev` - Start development server
+- `pnpm run build` - Build for production
+- `pnpm run server` - Start sync server
+- `pnpm run preview` - Preview production build
 
-## Thanks
+## License
 
-Thanks to [@K-arch27](https://github.com/K-arch27) for the `yai` name idea!
+MIT

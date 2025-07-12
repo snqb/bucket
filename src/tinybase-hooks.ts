@@ -184,60 +184,58 @@ export const useSync = (wsUrl?: string) => {
 
 // Hook to manage user authentication
 export const useAuth = () => {
-  const userId = useValue("userId", store);
-  const passphrase = useValue("passphrase", store);
+  const [authState, setAuthState] = useState(() => ({
+    userId: localStorage.getItem("bucket-auth-userId") || "",
+    passphrase: localStorage.getItem("bucket-auth-passphrase") || "",
+  }));
   const [isLoading, setIsLoading] = useState(true);
 
   const user = useMemo(() => {
     return {
-      userId: (typeof userId === "string" && userId) || "",
-      passphrase: (typeof passphrase === "string" && passphrase) || "",
+      userId: authState.userId,
+      passphrase: authState.passphrase,
     };
-  }, [userId, passphrase]);
+  }, [authState]);
 
-  // Wait for store to be ready and auth values to be loaded
+  // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
-      // Wait a bit for persister to load data
+      // Wait a bit for any initialization
       await new Promise((resolve) => setTimeout(resolve, 100));
-
-      // Check if we have auth data in store
-      const storedUserId = store.getValue("userId");
-      const storedPassphrase = store.getValue("passphrase");
-
-      if (
-        storedUserId &&
-        storedPassphrase &&
-        typeof storedUserId === "string" &&
-        typeof storedPassphrase === "string" &&
-        storedUserId.trim() &&
-        storedPassphrase.trim()
-      ) {
-        // Auth data is available, we're ready
-        setIsLoading(false);
-      } else {
-        // No auth data, also ready (will show login)
-        setIsLoading(false);
-      }
+      setIsLoading(false);
     };
 
     checkAuth();
-  }, []);
 
-  // Also check when userId or passphrase values change
-  useEffect(() => {
-    if (userId || passphrase) {
-      setIsLoading(false);
-    }
-  }, [userId, passphrase]);
+    // Listen for storage changes (logout from other tabs)
+    const handleStorageChange = () => {
+      setAuthState({
+        userId: localStorage.getItem("bucket-auth-userId") || "",
+        passphrase: localStorage.getItem("bucket-auth-passphrase") || "",
+      });
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
 
   const authenticate = useCallback(async (passphrase: string) => {
     const userId = await setUser(passphrase);
+    // Update local state to reflect the auth change
+    setAuthState({
+      userId: userId,
+      passphrase: passphrase,
+    });
     return userId;
   }, []);
 
   const logout = useCallback(() => {
     storeLogout();
+    // Update local state to reflect logout
+    setAuthState({
+      userId: "",
+      passphrase: "",
+    });
   }, []);
 
   return {
