@@ -6,6 +6,12 @@ import {
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
 import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-client";
 import { generateMnemonic, mnemonicToSeedSync } from "bip39";
+import { Buffer } from "buffer";
+
+// Ensure Buffer is available globally for bip39
+if (typeof globalThis !== "undefined" && !globalThis.Buffer) {
+  globalThis.Buffer = Buffer;
+}
 
 // Create the main store as MergeableStore for sync support
 export const store = createMergeableStore()
@@ -57,12 +63,13 @@ relationships.setRelationshipDefinition(
   "listId",
 );
 
-// Set up persistence to localStorage
-export const persister = createLocalPersister(store, "bucket-app");
-
 // User authentication with BIP-style passphrases
 let currentUserId: string | null = null;
 let currentPassphrase: string | null = null;
+let currentPersister: any = null;
+
+// Export for testing
+export const getCurrentPersister = () => currentPersister;
 
 // Generate a new passphrase
 export const generatePassphrase = (): string => {
@@ -85,23 +92,75 @@ export const setUser = async (passphrase: string) => {
   console.log("🔐 Setting user with passphrase...");
 
   try {
+    // Stop existing persister if any
+    if (currentPersister) {
+      await currentPersister.stopAutoLoad();
+      await currentPersister.stopAutoSave();
+    }
+
+    // Clear store data when switching users
+    store.delTables();
+
     currentPassphrase = passphrase;
     currentUserId = await deriveUserId(passphrase);
 
-    // Save to localStorage for persistence (separate from store)
+    // Save auth to localStorage first
     localStorage.setItem("bucket-auth-userId", currentUserId);
     localStorage.setItem("bucket-auth-passphrase", passphrase);
 
-    // DON'T save auth to store - keep it separate to avoid sync conflicts
-    // store.setValue("userId", currentUserId);
-    // store.setValue("passphrase", passphrase);
-
     console.log("🔐 User set:", currentUserId);
 
-    // Start sync after user is set
-    setTimeout(() => {
-      startSync().catch(console.error);
-    }, 100);
+    // FIRST: Try to load from server via sync
+    console.log("🔄 Attempting to load data from server...");
+    let serverDataLoaded = false;
+
+    try {
+      const syncStarted = await startSync();
+      if (syncStarted) {
+        // Wait for initial sync data
+        console.log("⏳ Waiting for server data...");
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+
+        const listsFromServer = store.getRowIds("lists").length;
+        const tasksFromServer = store.getRowIds("tasks").length;
+
+        if (listsFromServer > 0 || tasksFromServer > 0) {
+          serverDataLoaded = true;
+          console.log(
+            `✅ Server data loaded: ${listsFromServer} lists, ${tasksFromServer} tasks`,
+          );
+        } else {
+          console.log("📭 No data on server (new user or empty)");
+        }
+      }
+    } catch (syncError) {
+      console.log(
+        "📱 Sync failed, falling back to local-only mode:",
+        syncError.message,
+      );
+    }
+
+    // SECOND: Set up localStorage persister
+    const userStorageKey = `bucket-app-${currentUserId}`;
+    currentPersister = createLocalPersister(store, userStorageKey);
+
+    if (!serverDataLoaded) {
+      // Only load from localStorage if no server data
+      console.log("📱 Loading from localStorage...");
+      await currentPersister.startAutoLoad();
+    } else {
+      console.log("🔄 Skipping localStorage load - using server data");
+    }
+
+    // Always start auto-save for future changes
+    currentPersister.startAutoSave();
+
+    console.log("🔐 Using storage key:", userStorageKey);
+
+    // Log final data state
+    const listsCount = store.getRowIds("lists").length;
+    const tasksCount = store.getRowIds("tasks").length;
+    console.log(`📊 Final data: ${listsCount} lists, ${tasksCount} tasks`);
 
     return currentUserId;
   } catch (error) {
@@ -137,6 +196,16 @@ export const logout = async () => {
     // Stop sync first
     await stopSync();
 
+    // Stop current persister
+    if (currentPersister) {
+      await currentPersister.stopAutoLoad();
+      await currentPersister.stopAutoSave();
+      currentPersister = null;
+    }
+
+    // Clear store data
+    store.delTables();
+
     // Clear in-memory state
     currentUserId = null;
     currentPassphrase = null;
@@ -144,8 +213,6 @@ export const logout = async () => {
     // Clear localStorage
     localStorage.removeItem("bucket-auth-userId");
     localStorage.removeItem("bucket-auth-passphrase");
-
-    // No need to clear store values since we don't save auth there
 
     console.log("🔐 User logged out successfully");
   } catch (error) {
@@ -171,7 +238,7 @@ let synchronizer: any = null;
 export const WS_SERVER_URL =
   process.env.NODE_ENV === "production"
     ? "wss://bucket-sync-production.up.railway.app"
-    : "ws://localhost:8040";
+    : "ws://localhost:8040"; // Force production for testing
 
 // Start sync with user isolation
 export const startSync = async (wsUrl = WS_SERVER_URL) => {
@@ -347,10 +414,6 @@ export const getCompletedTasks = () => {
 // Simple initialization
 const initializeStore = async () => {
   try {
-    // Start persistence
-    await persister.startAutoLoad();
-    persister.startAutoSave();
-
     // Initialize device ID if not set
     if (!store.getValue("deviceId")) {
       store.setValue("deviceId", generateId());
@@ -368,15 +431,8 @@ const initializeStore = async () => {
       userId.trim() &&
       passphrase.trim()
     ) {
-      currentPassphrase = passphrase;
-      currentUserId = userId;
-
-      console.log("🔐 User restored:", currentUserId);
-
-      // Start sync
-      setTimeout(() => {
-        startSync().catch(console.error);
-      }, 100);
+      // Restore user session with proper persistence
+      await setUser(passphrase);
     }
   } catch (error) {
     console.error("Failed to initialize store:", error);

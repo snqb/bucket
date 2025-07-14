@@ -10,7 +10,10 @@
     "sync-server": "node sync-db/server.js",
     "dev:sync": "concurrently \"pnpm run sync-server\" \"pnpm run dev\"",
     "start": "node sync-db/server.js",
-    "deploy": "pnpm build && pnpm start"
+    "deploy": "pnpm build && pnpm start",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-mono": "^5.2.7",
@@ -47,13 +50,17 @@
     "wouter": "^3.7.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^20.19.1",
     "@types/qrcode": "^1.5.5",
     "@types/ramda": "^0.29.12",
     "@types/randomcolor": "^0.5.9",
     "@types/ws": "^8.5.14",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.21",
     "concurrently": "^8.2.2",
+    "jsdom": "^26.1.0",
     "postcss": "^8.5.6",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.5.14",
@@ -61,6 +68,7 @@
     "typescript": "^5.8.3",
     "vite": "^5.4.19",
     "vite-plugin-pwa": "^0.17.5",
+    "vitest": "^3.2.4",
     "workbox-build": "^7.3.0",
     "workbox-core": "^7.3.0",
     "workbox-precaching": "^7.3.0",

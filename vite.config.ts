@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import * as path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
@@ -79,21 +80,27 @@ export default defineConfig({
       },
     }),
   ],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
   define: {
     global: "globalThis",
   },
   optimizeDeps: {
     include: ["buffer"],
   },
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      buffer: "buffer",
+    },
+  },
   build: {
     target: "safari11",
   },
   server: {
     port: 4000,
+  },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["./src/test/setup.ts"],
+    globals: true,
   },
 });
