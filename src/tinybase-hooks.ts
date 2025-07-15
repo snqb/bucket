@@ -224,14 +224,33 @@ export const useAuth = () => {
     // Listen for storage changes (logout from other tabs)
     const handleStorageChange = () => {
       setAuthState({
-        userId: localStorage.getItem("bucket-auth-userId") || "",
-        passphrase: localStorage.getItem("bucket-auth-passphrase") || "",
+        userId: localStorage.getItem("bucket-userId") || "",
+        passphrase: localStorage.getItem("bucket-passphrase") || "",
       });
     };
 
+    // Check for auth changes every 100ms to catch same-tab changes
+    const authCheckInterval = setInterval(() => {
+      const currentUserId = localStorage.getItem("bucket-userId") || "";
+      const currentPassphrase = localStorage.getItem("bucket-passphrase") || "";
+
+      if (
+        currentUserId !== authState.userId ||
+        currentPassphrase !== authState.passphrase
+      ) {
+        setAuthState({
+          userId: currentUserId,
+          passphrase: currentPassphrase,
+        });
+      }
+    }, 100);
+
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      clearInterval(authCheckInterval);
+    };
+  }, [authState.userId, authState.passphrase]);
 
   const authenticate = useCallback(async (passphrase: string) => {
     const userId = await setUser(passphrase);

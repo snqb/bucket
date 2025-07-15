@@ -21,7 +21,6 @@ import { Link, Route, Switch } from "wouter";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
-  const [userId, setUserId] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -35,7 +34,7 @@ function App() {
   }
 
   if (!isAuthenticated) {
-    return <UserAuth onAuthenticated={setUserId} />;
+    return <UserAuth onAuthenticated={() => {}} />;
   }
 
   return (

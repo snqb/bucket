@@ -38,3 +38,6 @@ dist-ssr
 **/huemoe.**
 .aider*
 dexie*
+
+sync-db/storage.db
+llm/
