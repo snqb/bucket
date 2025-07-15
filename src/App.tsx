@@ -26,8 +26,8 @@ function App() {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
-          <div className="mb-4 text-6xl">⏳</div>
-          <div className="text-xl text-gray-300">Loading...</div>
+          <div className="mb-4 text-4xl">⏳</div>
+          <div className="text-sm text-gray-400">Loading...</div>
         </div>
       </div>
     );
@@ -59,8 +59,18 @@ function App() {
 const Bucket = () => {
   const lists = useLists();
   const actions = useActions();
+  const { isLoading } = useAuth();
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [showMap, setShowMap] = useState(false);
+  const [editingListId, setEditingListId] = useState<string | null>(null);
+  const [editingListTitle, setEditingListTitle] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
+
+  // Add small delay to prevent flash of empty state
+  useEffect(() => {
+    const timer = setTimeout(() => setIsInitializing(false), 1000);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Reset current screen index if it's out of bounds
   useEffect(() => {
@@ -111,6 +121,18 @@ const Bucket = () => {
 
   const currentScreen = lists?.[currentScreenIndex];
 
+  // Show loading spinner while auth or data is loading
+  if (isLoading || isInitializing) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <div className="text-center">
+          <div className="mb-4 text-4xl">⏳</div>
+          <div className="text-sm text-gray-400">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   // Handle case when no lists exist
   if (!lists || lists.length === 0) {
     return (
@@ -136,6 +158,24 @@ const Bucket = () => {
       </div>
     );
   }
+
+  const handleEditList = (listId: string, currentTitle: string) => {
+    setEditingListId(listId);
+    setEditingListTitle(currentTitle);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingListId && editingListTitle.trim()) {
+      actions.updateListTitle(editingListId, editingListTitle.trim());
+    }
+    setEditingListId(null);
+    setEditingListTitle("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingListId(null);
+    setEditingListTitle("");
+  };
 
   return (
     <div className="flex h-screen w-screen flex-col bg-black">
@@ -171,11 +211,63 @@ const Bucket = () => {
 
         <div className="grid flex-1 grid-cols-3 gap-6 overflow-auto p-6">
           {lists?.map((list) => (
-            <Screen
-              key={String(list.id)}
-              className="h-full max-h-96"
-              list={list}
-            />
+            <div key={String(list.id)} className="group relative">
+              <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
+                <Button
+                  size="sm"
+                  className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                  onClick={() =>
+                    handleEditList(String(list.id), String(list.title))
+                  }
+                >
+                  ✏️
+                </Button>
+                <Button
+                  size="sm"
+                  className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                  onClick={() => {
+                    if (confirm(`Delete ${list.title}?`)) {
+                      actions.deleteList(String(list.id));
+                    }
+                  }}
+                >
+                  🗑️
+                </Button>
+              </div>
+              {editingListId === String(list.id) ? (
+                <div className="h-full max-h-96 rounded-lg border border-blue-500 bg-gray-800 bg-opacity-50 p-4">
+                  <input
+                    type="text"
+                    value={editingListTitle}
+                    onChange={(e) => setEditingListTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleSaveEdit();
+                      if (e.key === "Escape") handleCancelEdit();
+                    }}
+                    className="mb-2 w-full rounded bg-gray-700 p-2 text-sm text-white"
+                    autoFocus
+                  />
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      className="bg-green-600 text-white"
+                    >
+                      ✓
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleCancelEdit}
+                      className="bg-red-600 text-white"
+                    >
+                      ✕
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Screen className="h-full max-h-96" list={list} />
+              )}
+            </div>
           ))}
         </div>
 
@@ -226,58 +318,19 @@ const Bucket = () => {
 
             <div className="grid flex-1 grid-cols-2 gap-4 overflow-auto p-4">
               {lists?.map((list, index) => (
-                <motion.div
+                <MobileListCard
                   key={String(list.id)}
-                  className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors hover:bg-opacity-70"
-                  onClick={() => handleScreenSelect(index)}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <div
-                    className="mb-2 cursor-pointer text-2xl transition-transform hover:scale-110"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const newEmoji = randomEmoji();
-                      actions.updateListEmoji(String(list.id), newEmoji);
-                    }}
-                  >
-                    {list.emoji}
-                  </div>
-                  <div className="font-medium truncate text-sm">
-                    {list.title}
-                  </div>
-
-                  <div className="absolute right-2 top-2 hidden gap-1 group-hover:flex">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const newName = prompt(`${list.title} -> to what?`);
-                        if (newName) {
-                          actions.updateListTitle(String(list.id), newName);
-                        }
-                      }}
-                    >
-                      ✏️
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 bg-black bg-opacity-50 p-0 text-xs"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const confirm = window.confirm(`Delete ${list.title}?`);
-                        if (confirm) {
-                          actions.deleteList(String(list.id));
-                        }
-                      }}
-                    >
-                      🗑️
-                    </Button>
-                  </div>
-                </motion.div>
+                  list={list}
+                  index={index}
+                  onSelect={() => handleScreenSelect(index)}
+                  onEdit={(newTitle) =>
+                    actions.updateListTitle(String(list.id), newTitle)
+                  }
+                  onDelete={() => actions.deleteList(String(list.id))}
+                  onEmojiChange={(emoji) =>
+                    actions.updateListEmoji(String(list.id), emoji)
+                  }
+                />
               ))}
             </div>
 
@@ -390,6 +443,156 @@ const Cemetery = () => {
         )}
       </div>
     </div>
+  );
+};
+
+const MobileListCard = ({
+  list,
+  index,
+  onSelect,
+  onEdit,
+  onDelete,
+  onEmojiChange,
+}: {
+  list: any;
+  index: number;
+  onSelect: () => void;
+  onEdit: (newTitle: string) => void;
+  onDelete: () => void;
+  onEmojiChange: (emoji: string) => void;
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(list.title);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
+
+  const handleTouchStart = () => {
+    const timer = setTimeout(() => {
+      setIsExpanded(true);
+    }, 500); // 500ms long press
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+    if (!isExpanded) {
+      onSelect();
+    }
+  };
+
+  const handleSave = () => {
+    if (editTitle.trim()) {
+      onEdit(editTitle.trim());
+    }
+    setIsEditing(false);
+    setIsExpanded(false);
+  };
+
+  const handleCancel = () => {
+    setEditTitle(list.title);
+    setIsEditing(false);
+    setIsExpanded(false);
+  };
+
+  return (
+    <motion.div
+      className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      onClick={isExpanded ? undefined : onSelect}
+      whileHover={{ scale: 1.02 }}
+      whileTap={{ scale: 0.98 }}
+      animate={{
+        scale: isExpanded ? 1.05 : 1,
+        zIndex: isExpanded ? 10 : 1,
+        backgroundColor: isExpanded
+          ? "rgba(59, 130, 246, 0.2)"
+          : "rgba(31, 41, 55, 0.5)",
+      }}
+      transition={{ duration: 0.2 }}
+    >
+      <div
+        className="mb-2 text-2xl transition-transform"
+        onClick={(e) => {
+          e.stopPropagation();
+          if (isExpanded) {
+            const newEmoji = randomEmoji();
+            onEmojiChange(newEmoji);
+          }
+        }}
+      >
+        {list.emoji}
+      </div>
+
+      {isEditing ? (
+        <div className="space-y-2">
+          <input
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            className="w-full rounded bg-gray-700 p-1 text-sm text-white"
+            autoFocus
+          />
+          <div className="flex gap-1">
+            <Button
+              size="sm"
+              onClick={handleSave}
+              className="bg-green-600 text-xs text-white"
+            >
+              ✓
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleCancel}
+              className="bg-red-600 text-xs text-white"
+            >
+              ✕
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="font-medium truncate text-sm">{list.title}</div>
+      )}
+
+      {isExpanded && !isEditing && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="absolute inset-0 flex flex-col items-center justify-center space-y-3 rounded bg-gray-800 bg-opacity-90 p-4"
+        >
+          <Button
+            size="sm"
+            onClick={() => setIsEditing(true)}
+            className="w-full bg-blue-600 text-white"
+          >
+            ✏️ Edit
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => {
+              if (confirm(`Delete ${list.title}?`)) {
+                onDelete();
+              }
+            }}
+            className="w-full bg-red-600 text-white"
+          >
+            🗑️ Delete
+          </Button>
+          <Button
+            size="sm"
+            onClick={() => setIsExpanded(false)}
+            className="w-full bg-gray-600 text-white"
+          >
+            ✕ Close
+          </Button>
+        </motion.div>
+      )}
+    </motion.div>
   );
 };
 

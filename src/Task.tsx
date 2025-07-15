@@ -14,6 +14,7 @@ import {
 } from "./components/ui/dialog";
 import { Slider } from "./components/ui/slider";
 import { Textarea } from "./components/ui/textarea";
+import { Button } from "./components/ui/button";
 
 import { useActions } from "./tinybase-hooks";
 
@@ -27,6 +28,11 @@ export const Task = (props: Props) => {
 
   const [localProgress, setLocalProgress] = useState(task.progress);
   const [isInteracting, setIsInteracting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(task.title);
+  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
+    null,
+  );
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const scale = useMotionValue(1);
 
@@ -83,13 +89,42 @@ export const Task = (props: Props) => {
     setLocalProgress(task.progress);
   }, [task.progress]);
 
+  const handleEditSave = () => {
+    if (editTitle.trim()) {
+      actions.updateTask(task.id, { title: editTitle.trim() });
+    }
+    setIsEditing(false);
+  };
+
+  const handleEditCancel = () => {
+    setEditTitle(task.title);
+    setIsEditing(false);
+  };
+
+  const handleTouchStart = () => {
+    const timer = setTimeout(() => {
+      setIsEditing(true);
+    }, 500);
+    setLongPressTimer(timer);
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      setLongPressTimer(null);
+    }
+  };
+
   useEffect(() => {
     return () => {
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+      }
     };
-  }, []);
+  }, [longPressTimer]);
 
   return (
     <Dialog modal={false}>
@@ -100,21 +135,59 @@ export const Task = (props: Props) => {
             opacity: 1 - localProgress / 150,
           }}
         >
-          <DialogTrigger asChild>
-            <p className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400">
-              {task.title}
-            </p>
-          </DialogTrigger>
-          <motion.div style={{ scale }} className="flex-1">
-            <Slider
-              value={[localProgress]}
-              onValueChange={handleSliderChange}
-              onValueCommit={handleSliderRelease}
-              max={100}
-              step={1}
-              className="flex-1"
-            />
-          </motion.div>
+          {isEditing ? (
+            <div className="flex flex-1 items-center gap-2">
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleEditSave();
+                  if (e.key === "Escape") handleEditCancel();
+                }}
+                className="flex-1 rounded bg-gray-700 p-1 text-sm text-white"
+                autoFocus
+              />
+              <Button
+                size="sm"
+                onClick={handleEditSave}
+                className="h-6 w-6 bg-green-600 p-0 text-xs text-white"
+              >
+                ✓
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleEditCancel}
+                className="h-6 w-6 bg-red-600 p-0 text-xs text-white"
+              >
+                ✕
+              </Button>
+            </div>
+          ) : (
+            <>
+              <DialogTrigger asChild>
+                <p
+                  className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400 md:rounded md:px-1 md:hover:bg-gray-700 md:hover:bg-opacity-50"
+                  onDoubleClick={() => setIsEditing(true)}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                  title="Double-click to edit (desktop) or long-press (mobile)"
+                >
+                  {task.title}
+                </p>
+              </DialogTrigger>
+              <motion.div style={{ scale }} className="flex-1">
+                <Slider
+                  value={[localProgress]}
+                  onValueChange={handleSliderChange}
+                  onValueCommit={handleSliderRelease}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                />
+              </motion.div>
+            </>
+          )}
         </motion.div>
       </div>
 
