@@ -7,6 +7,7 @@ import App from "./App";
 import "@fontsource-variable/noto-sans-mono";
 import "./index.css";
 import { TinyBaseProvider } from "./TinyBaseProvider";
+import "./debug-storage";
 
 // Make Buffer available globally
 globalThis.Buffer = Buffer;

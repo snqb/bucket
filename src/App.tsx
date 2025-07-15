@@ -16,6 +16,7 @@ import {
   useActions,
   useAuth,
 } from "./tinybase-hooks";
+import { hasLocalData } from "./tinybase-store";
 import { randomEmoji } from "./emojis";
 import { Link, Route, Switch } from "wouter";
 
@@ -66,10 +67,36 @@ const Bucket = () => {
   const [editingListTitle, setEditingListTitle] = useState("");
   const [isInitializing, setIsInitializing] = useState(true);
 
-  // Add small delay to prevent flash of empty state
+  // Better loading logic to prevent premature empty state
   useEffect(() => {
-    const timer = setTimeout(() => setIsInitializing(false), 1000);
-    return () => clearTimeout(timer);
+    const checkInitialization = async () => {
+      const hasData = hasLocalData();
+      const hasStoredUser = !!(
+        localStorage.getItem("bucket-userId") &&
+        localStorage.getItem("bucket-passphrase")
+      );
+
+      if (hasData) {
+        // Have data, show immediately
+        setIsInitializing(false);
+      } else if (hasStoredUser) {
+        // User exists but no data yet, wait longer for potential sync
+        console.log(
+          "🔄 User exists but no data, waiting for potential sync...",
+        );
+        const timer = setTimeout(() => {
+          console.log("⏰ Done waiting, showing UI");
+          setIsInitializing(false);
+        }, 2500);
+        return () => clearTimeout(timer);
+      } else {
+        // First-time user, shorter delay
+        const timer = setTimeout(() => setIsInitializing(false), 500);
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkInitialization();
   }, []);
 
   // Reset current screen index if it's out of bounds
@@ -121,28 +148,62 @@ const Bucket = () => {
 
   const currentScreen = lists?.[currentScreenIndex];
 
-  // Show loading spinner while auth or data is loading
-  if (isLoading || isInitializing) {
+  // More intelligent loading state
+  const shouldShowLoading = () => {
+    const hasData = hasLocalData();
+    const hasStoredUser = !!(
+      localStorage.getItem("bucket-userId") &&
+      localStorage.getItem("bucket-passphrase")
+    );
+
+    // Show loading if:
+    // 1. Auth is still loading AND no local data exists
+    // 2. Still initializing AND (no data OR expecting data but don't have it)
+    return (
+      (isLoading && !hasData) || (isInitializing && (!hasData || hasStoredUser))
+    );
+  };
+
+  if (shouldShowLoading()) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
           <div className="mb-4 text-4xl">⏳</div>
-          <div className="text-sm text-gray-400">Loading...</div>
+          <div className="text-sm text-gray-400">
+            {hasLocalData() ? "Syncing..." : "Loading..."}
+          </div>
         </div>
       </div>
     );
   }
 
-  // Handle case when no lists exist
+  // Handle case when no lists exist - with additional safety check
   if (!lists || lists.length === 0) {
+    const hasStoredUser = !!(
+      localStorage.getItem("bucket-userId") &&
+      localStorage.getItem("bucket-passphrase")
+    );
+
+    // If user exists but no lists, show warning
+    if (hasStoredUser && !isInitializing) {
+      console.warn("⚠️ User has credentials but no lists found");
+    }
+
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
           <div className="mb-4 text-6xl">📋</div>
-          <div className="mb-8 text-xl text-gray-300">No lists yet</div>
+          <div className="mb-8 text-xl text-gray-300">
+            {hasStoredUser ? "No lists synced yet" : "No lists yet"}
+          </div>
           <div className="mb-4">
             <SyncStatus />
           </div>
+          {hasStoredUser && (
+            <div className="mb-4 text-sm text-yellow-400">
+              💡 Try syncing manually or check your connection
+            </div>
+          )}
           <Button
             className="bg-blue-500 bg-opacity-50 p-4 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
             onClick={() => {

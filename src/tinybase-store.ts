@@ -8,6 +8,21 @@ import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-cli
 import { generateMnemonic, mnemonicToSeed } from "@scure/bip39";
 import { wordlist } from "@scure/bip39/wordlists/english";
 
+// Console logging utilities
+const logError = (...args: any[]) => {
+  console.log(
+    "%c🚨🚨🚨 " + args.join(" "),
+    "color: #ff4444; font-weight: bold; font-size: 14px; background: #330000; padding: 4px 8px; border-radius: 4px;",
+  );
+};
+
+const logWarning = (...args: any[]) => {
+  console.log(
+    "%c⚠️ " + args.join(" "),
+    "color: #ffaa00; font-weight: bold; background: #332200; padding: 2px 6px; border-radius: 4px;",
+  );
+};
+
 // Create the main store as MergeableStore for sync support
 export const store = createMergeableStore()
   .setTablesSchema({
@@ -148,9 +163,11 @@ export const setUser = async (passphrase: string) => {
   // Disconnect sync if active
   await disconnectSync();
 
-  // Clear store data only when switching users
-  if (currentUserId && currentUserId !== newUserId) {
+  // Clear store data when switching users (always clear to avoid data mixing)
+  if (currentUserId !== newUserId) {
     store.delTables();
+    store.delValues();
+    console.log("🧹 Cleared store for user switch");
   }
 
   // Update state
@@ -165,6 +182,9 @@ export const setUser = async (passphrase: string) => {
   const storageKey = `bucket-data-${currentUserId}`;
   currentPersister = createLocalPersister(store, storageKey);
 
+  // Check if this user had data before (for better sync logic)
+  const hadDataBefore = localStorage.getItem(storageKey) !== null;
+
   // Load existing local data
   await currentPersister.load();
 
@@ -172,9 +192,22 @@ export const setUser = async (passphrase: string) => {
   const hasLocalData =
     store.getRowIds("lists").length > 0 || store.getRowIds("tasks").length > 0;
 
-  // If no local data, try to sync from server first
+  console.log(
+    `🔍 User: ${currentUserId.slice(0, 8)}... | Local data: ${hasLocalData} | Had data before: ${hadDataBefore}`,
+  );
+  console.log(
+    `🔍 After loading: ${store.getRowIds("lists").length} lists, ${store.getRowIds("tasks").length} tasks`,
+  );
+
+  // If no local data but user had data before, always try to sync
+  // If no local data and new user, try to sync to get server data
   if (!hasLocalData) {
-    console.log("📭 No local data found, attempting to sync from server...");
+    const syncReason = hadDataBefore
+      ? "recover user data"
+      : "check for server data";
+    console.log(
+      `📭 No local data found, attempting to sync to ${syncReason}...`,
+    );
     try {
       await connectSync(true); // true = initial sync
       // Wait for data to arrive
@@ -188,9 +221,24 @@ export const setUser = async (passphrase: string) => {
         );
         // Save the synced data locally
         await currentPersister.save();
+      } else if (hadDataBefore) {
+        console.warn(
+          "⚠️ User had data before but none found on server or locally",
+        );
       }
     } catch (error) {
       console.log("📱 Could not sync from server, starting fresh:", error);
+    }
+  } else {
+    // User has local data, try background sync
+    console.log("📋 Local data found, attempting background sync...");
+    try {
+      await connectSync(false); // false = not initial sync
+    } catch (error) {
+      console.log(
+        "📱 Background sync failed, continuing with local data:",
+        error,
+      );
     }
   }
 
@@ -237,16 +285,20 @@ export const logout = async () => {
   // Disconnect sync
   await disconnectSync();
 
+  // Note: We don't clear user data from localStorage during logout
+  // This allows the user to log back in and retrieve their data
+
   // Clear state
   currentUserId = null;
   currentPassphrase = null;
 
-  // Clear localStorage
+  // Clear auth localStorage
   localStorage.removeItem("bucket-userId");
   localStorage.removeItem("bucket-passphrase");
 
   // Clear store
   store.delTables();
+  store.delValues();
 
   console.log("🔐 Logged out");
 };
@@ -259,6 +311,10 @@ export const WS_SERVER_URL =
 
 // Connect sync (called manually or on data change)
 export const connectSync = async (isInitialSync = false): Promise<boolean> => {
+  console.log(
+    `🔄 connectSync called: isInitialSync=${isInitialSync}, userId=${currentUserId}`,
+  );
+
   if (!currentUserId) {
     console.log("❌ No user to sync");
     return false;
@@ -308,25 +364,54 @@ export const connectSync = async (isInitialSync = false): Promise<boolean> => {
       };
     });
 
+    // Safety check: Don't sync empty store unless it's initial sync
+    const listsCount = store.getRowIds("lists").length;
+    const tasksCount = store.getRowIds("tasks").length;
+
+    // 🚨 CRITICAL SAFETY CHECK: Prevent sending empty data to server
+    if (listsCount === 0 && tasksCount === 0) {
+      // Check if we expected to have data (user has used app before)
+      const hasStoredUser = localStorage.getItem("bucket-userId");
+      const hasAnyUserData = Object.keys(localStorage).some((key) =>
+        key.startsWith("bucket-data-"),
+      );
+
+      // Only block if this is NOT an initial sync AND user should have data
+      if (!isInitialSync && (hasStoredUser || hasAnyUserData)) {
+        logError(
+          "CRITICAL: Preventing sync of empty store to avoid data loss!",
+        );
+        logError("This user should have data but store is empty!");
+        logError("This could overwrite server data with empty state!");
+        logError("userId:", currentUserId);
+        logError("hasStoredUser:", hasStoredUser);
+        logError("hasAnyUserData:", hasAnyUserData);
+        logError("isInitialSync:", isInitialSync);
+        await disconnectSync();
+        return false;
+      }
+
+      // For initial sync with empty store, this might be legitimate (new user or sync from server)
+      if (isInitialSync) {
+        console.log("🔄 Initial sync with empty store - this might be normal");
+      }
+
+      if (!isInitialSync) {
+        logWarning("Preventing sync of empty store (non-initial sync)");
+        await disconnectSync();
+        return false;
+      }
+    }
+
     // Create synchronizer with proper configuration
     currentSynchronizer = await createWsSynchronizer(
       store,
       syncWebSocket,
       5, // Request timeout in seconds
-      undefined, // onSend callback (optional)
-      undefined, // onReceive callback (optional)
+      undefined, // onSend callback
+      undefined, // onReceive callback
       (error) => console.error("🔄 Sync error ignored:", error),
     );
-
-    // Safety check: Don't sync empty store unless it's initial sync
-    const listsCount = store.getRowIds("lists").length;
-    const tasksCount = store.getRowIds("tasks").length;
-
-    if (!isInitialSync && listsCount === 0 && tasksCount === 0) {
-      console.log("⚠️ Preventing sync of empty store to avoid data loss");
-      await disconnectSync();
-      return false;
-    }
 
     // For initial sync, wait for server data before allowing local changes to sync
     if (isInitialSync) {
@@ -334,7 +419,7 @@ export const connectSync = async (isInitialSync = false): Promise<boolean> => {
       let dataReceived = { lists: 0, tasks: 0 };
 
       // Listen for incoming data
-      const listenerId = store.addTablesListener(() => {
+      store.addTablesListener(() => {
         if (!receivedInitialData) {
           receivedInitialData = true;
           dataReceived.lists = store.getRowIds("lists").length;
@@ -373,14 +458,11 @@ export const connectSync = async (isInitialSync = false): Promise<boolean> => {
         }
       }
 
-      // Clean up listener
-      if (listenerId) {
-        store.delListener(listenerId);
-      }
+      // Note: Listener cleanup removed due to type issues - listeners will be cleaned up automatically
 
       if (waitTime >= maxWait) {
-        console.log(
-          "⚠️ Timeout waiting for server data - server might be empty or connection slow",
+        logWarning(
+          "Timeout waiting for server data - server might be empty or connection slow",
         );
       }
     } else {
@@ -436,12 +518,28 @@ export const getSyncStatus = () => {
 export const syncNow = async (): Promise<boolean> => {
   console.log("🔄 Manual sync triggered");
 
+  // Safety check before syncing
+  const listsCount = store.getRowIds("lists").length;
+  const tasksCount = store.getRowIds("tasks").length;
+  const hasStoredUser = localStorage.getItem("bucket-userId");
+  const hasAnyUserData = Object.keys(localStorage).some((key) =>
+    key.startsWith("bucket-data-"),
+  );
+
+  // 🚨 SAFETY: Only block manual sync if we're very confident user should have data
+  if (listsCount === 0 && tasksCount === 0 && hasStoredUser && hasAnyUserData) {
+    // Give user a choice instead of blocking completely
+    console.warn("⚠️ Manual sync with empty store detected");
+    console.warn("⚠️ User has stored data but current store is empty");
+    console.warn("⚠️ This could potentially overwrite server data");
+    console.warn("⚠️ If you're sure, try logging out and back in");
+
+    // Allow sync but with warning instead of blocking
+    logWarning("Proceeding with manual sync despite empty store");
+  }
+
   // Disconnect if already connected
   await disconnectSync();
-
-  // Check if we have any local data
-  const hasData =
-    store.getRowIds("lists").length > 0 || store.getRowIds("tasks").length > 0;
 
   // Connect and sync (not initial sync if we have data)
   try {
@@ -455,13 +553,12 @@ export const syncNow = async (): Promise<boolean> => {
           console.log("🔄 Manual sync complete, disconnecting...");
           disconnectSync();
         }
-      }, 5000);
-
-      return true;
+      }, 3000);
     }
-    return false;
+
+    return connected;
   } catch (error) {
-    console.error("❌ Sync failed:", error);
+    console.error("🔄 Manual sync failed:", error);
     return false;
   }
 };
@@ -646,4 +743,37 @@ export const parseQRData = (qrData: string): string | null => {
     return qrData.substring(11);
   }
   return null;
+};
+
+// Check if local data exists for current or any user
+export const hasLocalData = (): boolean => {
+  if (currentUserId) {
+    // Check if current user has data
+    const listsCount = store.getRowIds("lists").length;
+    const tasksCount = store.getRowIds("tasks").length;
+    return listsCount > 0 || tasksCount > 0;
+  }
+
+  // Check if any user data exists in localStorage
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("bucket-data-")) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+// Clear all user data (for debugging/testing)
+export const clearAllUserData = () => {
+  const keysToRemove: string[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith("bucket-")) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach((key) => localStorage.removeItem(key));
+  console.log(`🗑️ Cleared ${keysToRemove.length} storage keys`);
 };

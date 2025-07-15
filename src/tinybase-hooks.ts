@@ -202,7 +202,14 @@ export const useAuth = () => {
     userId: localStorage.getItem("bucket-userId") || "",
     passphrase: localStorage.getItem("bucket-passphrase") || "",
   }));
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => {
+    // Only show loading if no user is stored
+    const hasStoredUser = !!(
+      localStorage.getItem("bucket-userId") &&
+      localStorage.getItem("bucket-passphrase")
+    );
+    return !hasStoredUser;
+  });
 
   const user = useMemo(() => {
     return {
@@ -214,7 +221,13 @@ export const useAuth = () => {
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
-      // Wait a bit for any initialization
+      // If we have stored credentials, stop loading immediately
+      if (authState.userId && authState.passphrase) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Wait a bit for any initialization only if no stored auth
       await new Promise((resolve) => setTimeout(resolve, 100));
       setIsLoading(false);
     };
