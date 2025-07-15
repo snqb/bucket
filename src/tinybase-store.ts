@@ -5,13 +5,8 @@ import {
 } from "tinybase";
 import { createLocalPersister } from "tinybase/persisters/persister-browser";
 import { createWsSynchronizer } from "tinybase/synchronizers/synchronizer-ws-client";
-import { generateMnemonic, mnemonicToSeedSync } from "bip39";
-import { Buffer } from "buffer";
-
-// Ensure Buffer is available globally for bip39
-if (typeof globalThis !== "undefined" && !globalThis.Buffer) {
-  globalThis.Buffer = Buffer;
-}
+import { generateMnemonic, mnemonicToSeed } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english";
 
 // Create the main store as MergeableStore for sync support
 export const store = createMergeableStore()
@@ -63,257 +58,464 @@ relationships.setRelationshipDefinition(
   "listId",
 );
 
-// User authentication with BIP-style passphrases
+// Local state
 let currentUserId: string | null = null;
 let currentPassphrase: string | null = null;
 let currentPersister: any = null;
-
-// Export for testing
-export const getCurrentPersister = () => currentPersister;
+let currentSynchronizer: any = null;
+let syncWebSocket: WebSocket | null = null;
 
 // Generate a new passphrase
 export const generatePassphrase = (): string => {
-  return generateMnemonic(128); // 12 words
-};
-
-// Derive user ID from passphrase using Web Crypto API
-export const deriveUserId = async (passphrase: string): Promise<string> => {
-  const seed = mnemonicToSeedSync(passphrase);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", seed);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return hashHex.substring(0, 16);
-};
-
-// Set user from passphrase
-export const setUser = async (passphrase: string) => {
-  console.log("🔐 Setting user with passphrase...");
-
   try {
-    // Stop existing persister if any
-    if (currentPersister) {
-      await currentPersister.stopAutoLoad();
-      await currentPersister.stopAutoSave();
+    const mnemonic = generateMnemonic(wordlist, 128); // 12 words
+    console.log("🎲 Generated passphrase:", mnemonic);
+
+    if (!mnemonic) {
+      throw new Error("Failed to generate mnemonic");
     }
 
-    // Clear store data when switching users
-    store.delTables();
-
-    currentPassphrase = passphrase;
-    currentUserId = await deriveUserId(passphrase);
-
-    // Save auth to localStorage first
-    localStorage.setItem("bucket-auth-userId", currentUserId);
-    localStorage.setItem("bucket-auth-passphrase", passphrase);
-
-    console.log("🔐 User set:", currentUserId);
-
-    // FIRST: Try to load from server via sync
-    console.log("🔄 Attempting to load data from server...");
-    let serverDataLoaded = false;
-
-    try {
-      const syncStarted = await startSync();
-      if (syncStarted) {
-        // Wait for initial sync data
-        console.log("⏳ Waiting for server data...");
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-
-        const listsFromServer = store.getRowIds("lists").length;
-        const tasksFromServer = store.getRowIds("tasks").length;
-
-        if (listsFromServer > 0 || tasksFromServer > 0) {
-          serverDataLoaded = true;
-          console.log(
-            `✅ Server data loaded: ${listsFromServer} lists, ${tasksFromServer} tasks`,
-          );
-        } else {
-          console.log("📭 No data on server (new user or empty)");
-        }
-      }
-    } catch (syncError) {
-      console.log(
-        "📱 Sync failed, falling back to local-only mode:",
-        syncError.message,
+    // Validate it has 12 words
+    const words = mnemonic.split(" ");
+    if (words.length !== 12) {
+      throw new Error(
+        `Generated mnemonic has ${words.length} words, expected 12`,
       );
     }
 
-    // SECOND: Set up localStorage persister
-    const userStorageKey = `bucket-app-${currentUserId}`;
-    currentPersister = createLocalPersister(store, userStorageKey);
-
-    if (!serverDataLoaded) {
-      // Only load from localStorage if no server data
-      console.log("📱 Loading from localStorage...");
-      await currentPersister.startAutoLoad();
-    } else {
-      console.log("🔄 Skipping localStorage load - using server data");
-    }
-
-    // Always start auto-save for future changes
-    currentPersister.startAutoSave();
-
-    console.log("🔐 Using storage key:", userStorageKey);
-
-    // Log final data state
-    const listsCount = store.getRowIds("lists").length;
-    const tasksCount = store.getRowIds("tasks").length;
-    console.log(`📊 Final data: ${listsCount} lists, ${tasksCount} tasks`);
-
-    return currentUserId;
+    return mnemonic;
   } catch (error) {
-    console.error("🔐 Error setting user:", error);
+    console.error("🔴 Passphrase generation error:", error);
     throw error;
   }
 };
 
+// Derive user ID from passphrase
+export const deriveUserId = async (passphrase: string): Promise<string> => {
+  try {
+    if (!passphrase) {
+      throw new Error("Cannot derive user ID from empty passphrase");
+    }
+
+    // mnemonicToSeed returns a Promise<Uint8Array>
+    const seed = await mnemonicToSeed(passphrase);
+
+    // crypto.subtle.digest accepts Uint8Array
+    const hashBuffer = await crypto.subtle.digest("SHA-256", seed);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    const userId = hashHex.substring(0, 16);
+
+    console.log("🔑 Derived user ID:", userId);
+    return userId;
+  } catch (error) {
+    console.error("🔴 User ID derivation error:", error);
+    throw error;
+  }
+};
+
+// Initialize or switch user - LOCAL FIRST
+export const setUser = async (passphrase: string) => {
+  console.log("🔐 Setting user with passphrase...");
+
+  if (!passphrase || typeof passphrase !== "string") {
+    throw new Error("Invalid passphrase: must be a non-empty string");
+  }
+
+  const trimmed = passphrase.trim();
+  if (!trimmed) {
+    throw new Error("Invalid passphrase: cannot be empty");
+  }
+
+  console.log("🔐 Passphrase word count:", trimmed.split(/\s+/).length);
+
+  const newUserId = await deriveUserId(trimmed);
+
+  // If same user, just ensure persister is running
+  if (currentUserId === newUserId && currentPersister) {
+    console.log("🔐 Same user, ensuring persistence...");
+    return currentUserId;
+  }
+
+  // Stop current persister and sync if switching users
+  if (currentPersister) {
+    await currentPersister.stopAutoLoad();
+    await currentPersister.stopAutoSave();
+  }
+
+  // Disconnect sync if active
+  await disconnectSync();
+
+  // Clear store data only when switching users
+  if (currentUserId && currentUserId !== newUserId) {
+    store.delTables();
+  }
+
+  // Update state
+  currentUserId = newUserId;
+  currentPassphrase = passphrase;
+
+  // Save to localStorage for persistence
+  localStorage.setItem("bucket-userId", currentUserId);
+  localStorage.setItem("bucket-passphrase", passphrase);
+
+  // Create local persister - this is our source of truth
+  const storageKey = `bucket-data-${currentUserId}`;
+  currentPersister = createLocalPersister(store, storageKey);
+
+  // Load existing local data
+  await currentPersister.load();
+
+  // Check if we have local data
+  const hasLocalData =
+    store.getRowIds("lists").length > 0 || store.getRowIds("tasks").length > 0;
+
+  // If no local data, try to sync from server first
+  if (!hasLocalData) {
+    console.log("📭 No local data found, attempting to sync from server...");
+    try {
+      await connectSync(true); // true = initial sync
+      // Wait for data to arrive
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      const syncedLists = store.getRowIds("lists").length;
+      const syncedTasks = store.getRowIds("tasks").length;
+      if (syncedLists > 0 || syncedTasks > 0) {
+        console.log(
+          `✅ Synced ${syncedLists} lists and ${syncedTasks} tasks from server`,
+        );
+        // Save the synced data locally
+        await currentPersister.save();
+      }
+    } catch (error) {
+      console.log("📱 Could not sync from server, starting fresh:", error);
+    }
+  }
+
+  // Start auto-save
+  await currentPersister.startAutoSave();
+
+  // Update store values
+  store.setValue("userId", currentUserId);
+  store.setValue("passphrase", passphrase);
+
+  if (!store.getValue("deviceId")) {
+    store.setValue("deviceId", generateId());
+  }
+
+  const listsCount = store.getRowIds("lists").length;
+  const tasksCount = store.getRowIds("tasks").length;
+  console.log(
+    `🔐 User set: ${currentUserId} (${listsCount} lists, ${tasksCount} tasks)`,
+  );
+
+  return currentUserId;
+};
+
 // Get current user
 export const getCurrentUser = () => {
-  const lsUserId = localStorage.getItem("bucket-auth-userId");
-  const lsPassphrase = localStorage.getItem("bucket-auth-passphrase");
-  const storeUserId = store.getValue("userId");
-  const storePassphrase = store.getValue("passphrase");
-
   return {
-    userId:
-      currentUserId ||
-      lsUserId ||
-      (typeof storeUserId === "string" ? storeUserId : ""),
+    userId: currentUserId || localStorage.getItem("bucket-userId") || "",
     passphrase:
-      currentPassphrase ||
-      lsPassphrase ||
-      (typeof storePassphrase === "string" ? storePassphrase : ""),
+      currentPassphrase || localStorage.getItem("bucket-passphrase") || "",
   };
 };
 
-// Logout user
+// Logout
 export const logout = async () => {
-  console.log("🔐 Starting logout...");
+  console.log("🔐 Logging out...");
 
-  try {
-    // Stop sync first
-    await stopSync();
-
-    // Stop current persister
-    if (currentPersister) {
-      await currentPersister.stopAutoLoad();
-      await currentPersister.stopAutoSave();
-      currentPersister = null;
-    }
-
-    // Clear store data
-    store.delTables();
-
-    // Clear in-memory state
-    currentUserId = null;
-    currentPassphrase = null;
-
-    // Clear localStorage
-    localStorage.removeItem("bucket-auth-userId");
-    localStorage.removeItem("bucket-auth-passphrase");
-
-    console.log("🔐 User logged out successfully");
-  } catch (error) {
-    console.error("🔐 Error during logout:", error);
+  // Stop persister
+  if (currentPersister) {
+    await currentPersister.stopAutoLoad();
+    await currentPersister.stopAutoSave();
+    currentPersister = null;
   }
-};
 
-// Generate QR code data for passphrase
-export const generateQRData = (passphrase: string): string => {
-  return `bucket-app:${passphrase}`;
-};
+  // Disconnect sync
+  await disconnectSync();
 
-// Parse QR code data
-export const parseQRData = (qrData: string): string | null => {
-  if (qrData.startsWith("bucket-app:")) {
-    return qrData.substring(11);
-  }
-  return null;
+  // Clear state
+  currentUserId = null;
+  currentPassphrase = null;
+
+  // Clear localStorage
+  localStorage.removeItem("bucket-userId");
+  localStorage.removeItem("bucket-passphrase");
+
+  // Clear store
+  store.delTables();
+
+  console.log("🔐 Logged out");
 };
 
 // Sync configuration
-let synchronizer: any = null;
 export const WS_SERVER_URL =
   process.env.NODE_ENV === "production"
     ? "wss://bucket-sync-production.up.railway.app"
-    : "ws://localhost:8040"; // Force production for testing
+    : "ws://localhost:8040";
 
-// Start sync with user isolation
-export const startSync = async (wsUrl = WS_SERVER_URL) => {
+// Connect sync (called manually or on data change)
+export const connectSync = async (isInitialSync = false): Promise<boolean> => {
   if (!currentUserId) {
-    console.log("❌ No user set for sync");
-    return null;
+    console.log("❌ No user to sync");
+    return false;
   }
 
-  if (synchronizer) {
-    console.log("🔄 Destroying existing synchronizer...");
-    await synchronizer.destroy();
+  if (currentSynchronizer) {
+    console.log("🔄 Sync already connected");
+    return true;
   }
 
   try {
-    // Use userId as the path for user isolation
-    const ws = new WebSocket(`${wsUrl}/${currentUserId}`);
-    console.log(`🔄 Attempting to connect to: ${wsUrl}/${currentUserId}`);
+    // Create WebSocket with user path
+    syncWebSocket = new WebSocket(`${WS_SERVER_URL}/${currentUserId}`);
+
+    // Expose WebSocket for debugging
+    // @ts-ignore
+    window.__syncWebSocket = syncWebSocket;
 
     // Wait for connection
-    await new Promise((resolve, reject) => {
-      ws.onopen = () => {
-        console.log(`🔄 WebSocket connected for user: ${currentUserId}`);
-        resolve(void 0);
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(
+        () => reject(new Error("Connection timeout")),
+        5000,
+      );
+
+      syncWebSocket!.onopen = () => {
+        clearTimeout(timeout);
+        console.log("🔄 Sync connected");
+        resolve();
       };
-      ws.onerror = (error) => {
-        console.log(`❌ WebSocket error:`, error);
-        reject(error);
+
+      syncWebSocket!.onerror = (error) => {
+        clearTimeout(timeout);
+        console.error("🔄 WebSocket error:", error);
+        reject(new Error("WebSocket connection failed"));
       };
-      ws.onclose = (event) => {
-        console.log(`🔄 WebSocket closed:`, event.code, event.reason);
-        if (event.code !== 1000) {
-          console.log(`⚠️ Unexpected close code: ${event.code}`);
+
+      syncWebSocket!.onclose = (event) => {
+        clearTimeout(timeout);
+        if (!event.wasClean) {
+          console.error(
+            "🔄 WebSocket closed unexpectedly:",
+            event.code,
+            event.reason,
+          );
         }
       };
-      setTimeout(() => reject(new Error("Connection timeout")), 5000);
     });
 
-    synchronizer = await createWsSynchronizer(store, ws);
+    // Create synchronizer with proper configuration
+    currentSynchronizer = await createWsSynchronizer(
+      store,
+      syncWebSocket,
+      5, // Request timeout in seconds
+      undefined, // onSend callback (optional)
+      undefined, // onReceive callback (optional)
+      (error) => console.error("🔄 Sync error ignored:", error),
+    );
 
-    // Add sync event listeners for debugging
-    synchronizer.addStatusListener((status) => {
-      console.log(`🔄 Sync status changed: ${status}`);
-    });
-
-    await synchronizer.startSync();
-    console.log(`🔄 Sync started for user: ${currentUserId}`);
-
-    // Log initial data state
+    // Safety check: Don't sync empty store unless it's initial sync
     const listsCount = store.getRowIds("lists").length;
     const tasksCount = store.getRowIds("tasks").length;
-    console.log(`📊 Initial data: ${listsCount} lists, ${tasksCount} tasks`);
 
-    return synchronizer;
+    if (!isInitialSync && listsCount === 0 && tasksCount === 0) {
+      console.log("⚠️ Preventing sync of empty store to avoid data loss");
+      await disconnectSync();
+      return false;
+    }
+
+    // For initial sync, wait for server data before allowing local changes to sync
+    if (isInitialSync) {
+      let receivedInitialData = false;
+      let dataReceived = { lists: 0, tasks: 0 };
+
+      // Listen for incoming data
+      const listenerId = store.addTablesListener(() => {
+        if (!receivedInitialData) {
+          receivedInitialData = true;
+          dataReceived.lists = store.getRowIds("lists").length;
+          dataReceived.tasks = store.getRowIds("tasks").length;
+          console.log(
+            `🔄 Received initial sync data: ${dataReceived.lists} lists, ${dataReceived.tasks} tasks`,
+          );
+        }
+      });
+
+      // Start sync - this should request full state from server
+      console.log("🔄 Starting initial sync, requesting server data...");
+      await currentSynchronizer.startSync();
+
+      // Wait longer for initial data to arrive
+      let waitTime = 0;
+      const maxWait = 10000; // 10 seconds max
+      const checkInterval = 500; // Check every 500ms
+
+      while (waitTime < maxWait) {
+        await new Promise((resolve) => setTimeout(resolve, checkInterval));
+        waitTime += checkInterval;
+
+        const currentLists = store.getRowIds("lists").length;
+        const currentTasks = store.getRowIds("tasks").length;
+
+        if (currentLists > 0 || currentTasks > 0) {
+          console.log(
+            `✅ Sync data received after ${waitTime}ms: ${currentLists} lists, ${currentTasks} tasks`,
+          );
+          break;
+        }
+
+        if (waitTime % 2000 === 0) {
+          console.log(`⏳ Waiting for server data... ${waitTime / 1000}s`);
+        }
+      }
+
+      // Clean up listener
+      if (listenerId) {
+        store.delListener(listenerId);
+      }
+
+      if (waitTime >= maxWait) {
+        console.log(
+          "⚠️ Timeout waiting for server data - server might be empty or connection slow",
+        );
+      }
+    } else {
+      await currentSynchronizer.startSync();
+    }
+
+    // Update last sync time
+    store.setValue("lastSync", Date.now());
+
+    return true;
   } catch (error) {
-    console.log("📱 Running in local-only mode (no sync server)", error);
-    return null;
+    console.error("🔄 Sync connection failed:", error);
+    // Clean up on error
+    if (syncWebSocket) {
+      try {
+        syncWebSocket.close();
+      } catch (e) {
+        // Ignore close errors
+      }
+      syncWebSocket = null;
+    }
+    currentSynchronizer = null;
+    throw error;
   }
 };
 
-// Stop sync
-export const stopSync = async () => {
-  if (synchronizer) {
-    console.log("🔄 Stopping sync...");
-    await synchronizer.destroy();
-    synchronizer = null;
-    console.log("🔄 Sync stopped successfully");
+// Disconnect sync
+export const disconnectSync = async () => {
+  if (currentSynchronizer) {
+    await currentSynchronizer.destroy();
+    currentSynchronizer = null;
   }
+
+  if (syncWebSocket) {
+    syncWebSocket.close();
+    syncWebSocket = null;
+    // @ts-ignore
+    window.__syncWebSocket = null;
+  }
+
+  console.log("🔄 Sync disconnected");
 };
 
 // Get sync status
 export const getSyncStatus = () => {
-  const status = synchronizer ? "connected" : "disconnected";
-  console.log(`🔄 Sync status requested: ${status}`);
-  return status;
+  return {
+    connected: !!currentSynchronizer,
+    lastSync: (store.getValue("lastSync") as number) || 0,
+  };
 };
+
+// Manual sync trigger
+export const syncNow = async (): Promise<boolean> => {
+  console.log("🔄 Manual sync triggered");
+
+  // Disconnect if already connected
+  await disconnectSync();
+
+  // Check if we have any local data
+  const hasData =
+    store.getRowIds("lists").length > 0 || store.getRowIds("tasks").length > 0;
+
+  // Connect and sync (not initial sync if we have data)
+  try {
+    // Always do initial sync when manually syncing to ensure we get latest server data
+    const connected = await connectSync(true);
+
+    if (connected) {
+      // Keep connection open for a bit longer to ensure full sync
+      setTimeout(() => {
+        if (!autoSyncEnabled) {
+          console.log("🔄 Manual sync complete, disconnecting...");
+          disconnectSync();
+        }
+      }, 5000);
+
+      return true;
+    }
+    return false;
+  } catch (error) {
+    console.error("❌ Sync failed:", error);
+    return false;
+  }
+};
+
+// Auto-sync on changes
+let autoSyncEnabled = true;
+let syncDebounceTimer: NodeJS.Timeout | null = null;
+
+export const setAutoSync = (enabled: boolean) => {
+  autoSyncEnabled = enabled;
+  if (!enabled) {
+    disconnectSync();
+  }
+};
+
+// Sync on data change (debounced)
+const syncOnChange = () => {
+  if (!autoSyncEnabled || !currentUserId) return;
+
+  // Clear existing timer
+  if (syncDebounceTimer) {
+    clearTimeout(syncDebounceTimer);
+  }
+
+  // Debounce sync to avoid too many connections
+  syncDebounceTimer = setTimeout(async () => {
+    // Safety check: Don't auto-sync if store is empty
+    const hasData =
+      store.getRowIds("lists").length > 0 ||
+      store.getRowIds("tasks").length > 0;
+
+    if (!hasData) {
+      console.log("⚠️ Skipping auto-sync of empty store");
+      return;
+    }
+
+    try {
+      await connectSync();
+    } catch (error) {
+      console.error("🔄 Auto-sync failed:", error);
+    }
+  }, 1000);
+};
+
+// Listen for store changes
+let isInitialized = false;
+store.addTablesListener(() => {
+  // Don't sync on the very first change (might be initial load)
+  if (!isInitialized) {
+    isInitialized = true;
+    return;
+  }
+  syncOnChange();
+});
 
 // Helper functions
 export const generateId = () =>
@@ -411,73 +613,37 @@ export const getCompletedTasks = () => {
   return indexes.getSliceRowIds("completedTasks", "true");
 };
 
-// Simple initialization
-const initializeStore = async () => {
-  try {
-    // Initialize device ID if not set
-    if (!store.getValue("deviceId")) {
-      store.setValue("deviceId", generateId());
-    }
+// Initialize on import
+const initialize = async () => {
+  // Check for existing auth
+  const savedUserId = localStorage.getItem("bucket-userId");
+  const savedPassphrase = localStorage.getItem("bucket-passphrase");
 
-    // Check for existing user in localStorage only
-    const userId = localStorage.getItem("bucket-auth-userId");
-    const passphrase = localStorage.getItem("bucket-auth-passphrase");
-
-    if (
-      userId &&
-      passphrase &&
-      typeof userId === "string" &&
-      typeof passphrase === "string" &&
-      userId.trim() &&
-      passphrase.trim()
-    ) {
-      // Restore user session with proper persistence
-      await setUser(passphrase);
+  if (savedUserId && savedPassphrase) {
+    try {
+      await setUser(savedPassphrase);
+      console.log("🔐 Restored user session");
+    } catch (error) {
+      console.error("🔐 Failed to restore session:", error);
     }
-  } catch (error) {
-    console.error("Failed to initialize store:", error);
   }
 };
 
-// Initialize immediately
-initializeStore();
+// Initialize
+initialize();
 
-// Export function to wait for initialization
+// Export for testing
+export const getCurrentPersister = () => currentPersister;
 export const waitForAuth = () => Promise.resolve();
 
-// Health check and recovery mechanisms
-const runHealthCheck = () => {
-  const user = getCurrentUser();
-  if (!user.userId || !user.passphrase) {
-    console.warn("🔐 Health check: No user data found");
-    return false;
-  }
-
-  // Check if store has basic structure
-  const lists = store.getRowIds("lists");
-  const tasks = store.getRowIds("tasks");
-
-  console.log(`🔍 Health check: ${lists.length} lists, ${tasks.length} tasks`);
-
-  // Check for data consistency
-  let orphanedTasks = 0;
-  tasks.forEach((taskId) => {
-    const task = store.getRow("tasks", taskId);
-    if (task && !lists.includes(String(task.listId))) {
-      orphanedTasks++;
-    }
-  });
-
-  if (orphanedTasks > 0) {
-    console.warn(`🔍 Health check: Found ${orphanedTasks} orphaned tasks`);
-  }
-
-  return true;
+// QR code helpers
+export const generateQRData = (passphrase: string): string => {
+  return `bucket-app:${passphrase}`;
 };
 
-// Start periodic health checks after initialization
-setTimeout(() => {
-  runHealthCheck();
-  // Run health check every 30 seconds
-  setInterval(runHealthCheck, 30000);
-}, 5000);
+export const parseQRData = (qrData: string): string | null => {
+  if (qrData.startsWith("bucket-app:")) {
+    return qrData.substring(11);
+  }
+  return null;
+};

@@ -1,5 +1,9 @@
 import "@testing-library/jest-dom";
 import { vi } from "vitest";
+import { setAutoSync } from "../tinybase-store";
+
+// Disable auto-sync in tests
+setAutoSync(false);
 
 // Mock crypto.subtle for testing
 Object.defineProperty(global, "crypto", {
@@ -40,13 +44,41 @@ Object.defineProperty(global, "crypto", {
 
 // Mock WebSocket for sync tests
 global.WebSocket = vi.fn().mockImplementation((url: string) => {
+  const listeners = new Map<string, Array<(event: Event) => void>>();
+
   const ws = {
     url,
     readyState: 1, // OPEN
     send: vi.fn(),
     close: vi.fn(),
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
+    addEventListener: vi.fn(
+      (type: string, listener: (event: Event) => void) => {
+        if (!listeners.has(type)) {
+          listeners.set(type, []);
+        }
+        listeners.get(type)!.push(listener);
+      },
+    ),
+    removeEventListener: vi.fn(
+      (type: string, listener: (event: Event) => void) => {
+        const typeListeners = listeners.get(type);
+        if (typeListeners) {
+          const index = typeListeners.indexOf(listener);
+          if (index > -1) {
+            typeListeners.splice(index, 1);
+          }
+        }
+      },
+    ),
+    dispatchEvent: vi.fn((event: Event) => {
+      const typeListeners = listeners.get(event.type);
+      if (typeListeners) {
+        typeListeners.forEach((listener) => listener(event));
+      }
+      // Also trigger the on* handlers
+      const handler = ws[`on${event.type}`];
+      if (handler) handler(event);
+    }),
     onopen: null,
     onclose: null,
     onerror: null,
@@ -55,7 +87,8 @@ global.WebSocket = vi.fn().mockImplementation((url: string) => {
 
   // Simulate connection after a tick
   setTimeout(() => {
-    if (ws.onopen) ws.onopen(new Event("open"));
+    const openEvent = new Event("open");
+    ws.dispatchEvent(openEvent);
   }, 0);
 
   return ws;

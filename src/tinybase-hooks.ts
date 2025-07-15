@@ -16,9 +16,11 @@ import {
   deleteTask,
   deleteList,
   getListTasks,
-  startSync,
-  stopSync,
+  connectSync,
+  disconnectSync,
   getSyncStatus,
+  syncNow,
+  setAutoSync,
   getCurrentUser,
   setUser,
   logout as storeLogout,
@@ -123,14 +125,22 @@ export const useActions = () => {
 };
 
 // Hook to manage sync state
-export const useSync = (wsUrl?: string) => {
+export const useSync = () => {
   const [syncStatus, setSyncStatus] = useState<
     "connected" | "disconnected" | "connecting"
   >("disconnected");
   const [error, setError] = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<number>(0);
+  const [autoSync, setAutoSyncState] = useState(true);
   const [user, setUserState] = useState(getCurrentUser());
 
-  const connect = useCallback(async () => {
+  const updateStatus = useCallback(() => {
+    const status = getSyncStatus();
+    setSyncStatus(status.connected ? "connected" : "disconnected");
+    setLastSync(status.lastSync);
+  }, []);
+
+  const manualSync = useCallback(async () => {
     if (syncStatus === "connecting") return;
 
     const currentUser = getCurrentUser();
@@ -143,40 +153,44 @@ export const useSync = (wsUrl?: string) => {
     setError(null);
 
     try {
-      const synchronizer = await startSync(wsUrl);
-      setSyncStatus(synchronizer ? "connected" : "disconnected");
-      if (!synchronizer) {
-        setError("Failed to connect to sync server");
+      const success = await syncNow();
+      setSyncStatus(success ? "connected" : "disconnected");
+      if (!success) {
+        setError("Failed to sync");
       }
+      updateStatus();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect");
+      setError(err instanceof Error ? err.message : "Failed to sync");
       setSyncStatus("disconnected");
     }
-  }, [wsUrl, syncStatus]);
+  }, [syncStatus, updateStatus]);
 
-  const disconnect = useCallback(async () => {
-    try {
-      await stopSync();
-      setSyncStatus("disconnected");
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to disconnect");
-    }
+  const toggleAutoSync = useCallback((enabled: boolean) => {
+    setAutoSync(enabled);
+    setAutoSyncState(enabled);
   }, []);
 
-  // Update status on component mount
+  // Update status periodically
   useEffect(() => {
-    setSyncStatus(getSyncStatus());
+    updateStatus();
+    const interval = setInterval(updateStatus, 5000);
+    return () => clearInterval(interval);
+  }, [updateStatus]);
+
+  // Update user state on mount
+  useEffect(() => {
     setUserState(getCurrentUser());
   }, []);
 
   return {
     syncStatus,
     error,
-    connect,
-    disconnect,
+    syncNow: manualSync,
     isConnected: syncStatus === "connected",
     isConnecting: syncStatus === "connecting",
+    lastSync,
+    autoSync,
+    setAutoSync: toggleAutoSync,
     user,
     hasUser: !!user.userId,
   };
@@ -185,8 +199,8 @@ export const useSync = (wsUrl?: string) => {
 // Hook to manage user authentication
 export const useAuth = () => {
   const [authState, setAuthState] = useState(() => ({
-    userId: localStorage.getItem("bucket-auth-userId") || "",
-    passphrase: localStorage.getItem("bucket-auth-passphrase") || "",
+    userId: localStorage.getItem("bucket-userId") || "",
+    passphrase: localStorage.getItem("bucket-passphrase") || "",
   }));
   const [isLoading, setIsLoading] = useState(true);
 

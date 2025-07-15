@@ -1,5 +1,8 @@
 import ReloadPrompt from "./ReloadPrompt";
 import { SyncStatus } from "./SyncStatus";
+import { SyncButton } from "./SyncButton";
+import { DataRecovery } from "./DataRecovery";
+import { SyncDebugger } from "./SyncDebugger";
 import { UserAuth } from "./UserAuth";
 import { UserControls } from "./UserControls";
 
@@ -37,6 +40,13 @@ function App() {
 
   return (
     <>
+      <div className="fixed right-4 top-4 z-50">
+        <SyncButton />
+      </div>
+
+      <DataRecovery />
+      <SyncDebugger />
+
       <Switch>
         <Route path="/" component={Bucket} />
         <Route path="/cemetery" component={Cemetery} />

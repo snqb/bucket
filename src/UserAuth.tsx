@@ -26,7 +26,25 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
 
     try {
       const newPassphrase = generatePassphrase();
+
+      if (!newPassphrase) {
+        setError("Failed to generate passphrase - please try again");
+        setIsCreating(false);
+        return;
+      }
+
+      // Validate the generated passphrase
+      const words = newPassphrase.split(" ");
+      if (words.length !== 12) {
+        setError(
+          `Invalid passphrase generated: ${words.length} words instead of 12`,
+        );
+        setIsCreating(false);
+        return;
+      }
+
       setPassphrase(newPassphrase);
+      setError(""); // Clear any previous errors
 
       // Generate QR code
       const qrData = generateQRData(newPassphrase);
@@ -34,8 +52,20 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
       setQrDataUrl(qrUrl);
       setShowQR(true);
     } catch (err) {
-      setError("Failed to create passphrase");
-      console.error(err);
+      console.error("Create passphrase error:", err);
+      if (err instanceof Error) {
+        if (err.message.includes("crypto")) {
+          setError(
+            "Browser crypto API not available - please use a modern browser",
+          );
+        } else if (err.message.includes("QR")) {
+          setError("Failed to generate QR code - passphrase still valid");
+        } else {
+          setError(`Error: ${err.message}`);
+        }
+      } else {
+        setError("Unexpected error creating passphrase");
+      }
     } finally {
       setIsCreating(false);
     }
@@ -48,44 +78,128 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
     }
 
     try {
-      const userId = await setUser(passphrase.trim());
+      const trimmedPassphrase = passphrase.trim();
+
+      // Basic validation
+      if (!trimmedPassphrase) {
+        setError("Please enter a passphrase");
+        return;
+      }
+
+      // For BIP39, validate it has 12 words (or allow other valid lengths)
+      const words = trimmedPassphrase.split(/\s+/);
+      if (
+        words.length !== 12 &&
+        words.length !== 15 &&
+        words.length !== 18 &&
+        words.length !== 21 &&
+        words.length !== 24
+      ) {
+        setError("Passphrase must be 12, 15, 18, 21, or 24 words");
+        return;
+      }
+
+      const userId = await setUser(trimmedPassphrase);
+      if (!userId) {
+        setError("Failed to create user");
+        return;
+      }
+
       onAuthenticated(userId);
     } catch (err) {
-      setError("Invalid passphrase");
-      console.error(err);
+      console.error("Auth error:", err);
+      if (err instanceof Error) {
+        if (err.message.includes("crypto")) {
+          setError(
+            "Browser crypto API not available - please use a modern browser",
+          );
+        } else if (err.message.includes("localStorage")) {
+          setError("Unable to save data - please check browser settings");
+        } else if (err.message.includes("Invalid passphrase")) {
+          setError("Invalid passphrase format - please check and try again");
+        } else {
+          setError(`Authentication failed: ${err.message}`);
+        }
+      } else {
+        setError("Unexpected authentication error");
+      }
     }
   };
 
   const handlePasteFromClipboard = async () => {
     try {
       const text = await navigator.clipboard.readText();
+      if (!text) {
+        setError("Clipboard is empty");
+        return;
+      }
+
       const parsed = parseQRData(text);
       if (parsed) {
         setPassphrase(parsed);
+        setError(""); // Clear error on success
       } else {
         setPassphrase(text);
+        setError(""); // Clear error on success
       }
     } catch (err) {
-      setError("Failed to read from clipboard");
+      console.error("Clipboard error:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setError("Clipboard access denied - please allow permissions");
+      } else {
+        setError("Unable to read from clipboard - try pasting manually");
+      }
     }
   };
 
   const copyToClipboard = async () => {
     try {
+      if (!passphrase) {
+        setError("No passphrase to copy");
+        return;
+      }
       await navigator.clipboard.writeText(passphrase);
-      // Could add a toast notification here
+      // Show success feedback
+      const prevError = error;
+      setError("✅ Copied to clipboard!");
+      setTimeout(() => {
+        if (error === "✅ Copied to clipboard!") {
+          setError(prevError || "");
+        }
+      }, 2000);
     } catch (err) {
-      setError("Failed to copy to clipboard");
+      console.error("Copy error:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setError("Clipboard access denied - please allow permissions");
+      } else {
+        setError("Unable to copy - try selecting and copying manually");
+      }
     }
   };
 
   const copyQRDataToClipboard = async () => {
     try {
+      if (!passphrase) {
+        setError("No passphrase to copy");
+        return;
+      }
       const qrData = generateQRData(passphrase);
       await navigator.clipboard.writeText(qrData);
-      // Could add a toast notification here
+      // Show success feedback
+      const prevError = error;
+      setError("✅ QR data copied!");
+      setTimeout(() => {
+        if (error === "✅ QR data copied!") {
+          setError(prevError || "");
+        }
+      }, 2000);
     } catch (err) {
-      setError("Failed to copy QR data to clipboard");
+      console.error("Copy QR error:", err);
+      if (err instanceof Error && err.name === "NotAllowedError") {
+        setError("Clipboard access denied - please allow permissions");
+      } else {
+        setError("Unable to copy QR data");
+      }
     }
   };
 
