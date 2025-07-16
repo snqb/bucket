@@ -27,7 +27,7 @@ function App() {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
-          <div className="mb-4 text-4xl">⏳</div>
+          <div className="font-bold mb-4 text-4xl">...</div>
           <div className="text-sm text-gray-400">Loading...</div>
         </div>
       </div>
@@ -40,7 +40,7 @@ function App() {
 
   return (
     <>
-      <div className="fixed right-4 top-4 z-50">
+      <div className="fixed left-4 top-4 z-50">
         <SyncButton />
       </div>
 
@@ -168,7 +168,7 @@ const Bucket = () => {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
-          <div className="mb-4 text-4xl">⏳</div>
+          <div className="font-bold mb-4 text-4xl">...</div>
           <div className="text-sm text-gray-400">
             {hasLocalData() ? "Syncing..." : "Loading..."}
           </div>
@@ -192,7 +192,7 @@ const Bucket = () => {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
-          <div className="mb-4 text-6xl">📋</div>
+          <div className="font-bold mb-4 text-6xl">□</div>
           <div className="mb-8 text-xl text-gray-300">
             {hasStoredUser ? "No lists synced yet" : "No lists yet"}
           </div>
@@ -250,9 +250,9 @@ const Bucket = () => {
               <div className="flex gap-2">
                 <Link
                   to="/cemetery"
-                  className="flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                  className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                 >
-                  🪦
+                  ⌫
                 </Link>
                 <Button
                   className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
@@ -263,7 +263,7 @@ const Bucket = () => {
                     }
                   }}
                 >
-                  ➕
+                  +
                 </Button>
               </div>
             </div>
@@ -281,7 +281,7 @@ const Bucket = () => {
                     handleEditList(String(list.id), String(list.title))
                   }
                 >
-                  ✏️
+                  ✎
                 </Button>
                 <Button
                   size="sm"
@@ -292,7 +292,7 @@ const Bucket = () => {
                     }
                   }}
                 >
-                  🗑️
+                  ×
                 </Button>
               </div>
               {editingListId === String(list.id) ? (
@@ -349,9 +349,9 @@ const Bucket = () => {
                   <div className="flex gap-2">
                     <Link
                       to="/cemetery"
-                      className="flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                     >
-                      🪦
+                      ⌫
                     </Link>
                     <Button
                       className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
@@ -364,13 +364,13 @@ const Bucket = () => {
                         }
                       }}
                     >
-                      ➕
+                      +
                     </Button>
                     <Button
                       className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                       onClick={handleMapClick}
                     >
-                      ❌
+                      ×
                     </Button>
                   </div>
                 </div>
@@ -410,14 +410,14 @@ const Bucket = () => {
                       onClick={handlePreviousScreen}
                       disabled={!lists || lists.length <= 1}
                     >
-                      ←
+                      ‹
                     </Button>
                     <Button
                       className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                       onClick={handleNextScreen}
                       disabled={!lists || lists.length <= 1}
                     >
-                      →
+                      ›
                     </Button>
                   </div>
                   {currentScreen && (
@@ -435,7 +435,7 @@ const Bucket = () => {
                     className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                     onClick={handleMapClick}
                   >
-                    🗺️
+                    ≡
                   </Button>
                 </div>
               </div>
@@ -483,7 +483,7 @@ const Cemetery = () => {
         {!cemetery || cemetery.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <div className="text-center">
-              <div className="mb-4 text-6xl">🪦</div>
+              <div className="font-bold mb-4 text-6xl">⌫</div>
               <div className="text-xl text-gray-300">No deleted items</div>
             </div>
           </div>
@@ -631,7 +631,7 @@ const MobileListCard = ({
             onClick={() => setIsEditing(true)}
             className="w-full bg-blue-600 text-white"
           >
-            ✏️ Edit
+            ✎ Edit
           </Button>
           <Button
             size="sm"
@@ -642,7 +642,7 @@ const MobileListCard = ({
             }}
             className="w-full bg-red-600 text-white"
           >
-            🗑️ Delete
+            × Delete
           </Button>
           <Button
             size="sm"

@@ -16,9 +16,9 @@ export function SyncButton() {
   const [showMenu, setShowMenu] = useState(false);
 
   const getStatusIcon = () => {
-    if (isConnecting) return "⏳";
-    if (syncStatus === "connected") return "✅";
-    return "🔄";
+    if (isConnecting) return "↻";
+    if (syncStatus === "connected") return "●";
+    return "○";
   };
 
   const getLastSyncText = () => {
@@ -42,38 +42,36 @@ export function SyncButton() {
         variant="ghost"
         size="sm"
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 border border-gray-600 bg-gray-800 hover:bg-gray-700"
       >
-        <span>{getStatusIcon()}</span>
-        <span className="text-xs">Sync</span>
+        <span className="font-bold text-sm">{getStatusIcon()}</span>
+        <span className="font-medium text-xs">Sync</span>
       </Button>
 
       {showMenu && (
-        <div className="absolute right-0 top-full mt-1 w-48 rounded-md bg-gray-900 p-2 shadow-lg border border-gray-800 z-50">
-          <div className="text-xs text-gray-400 mb-2">
+        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border border-gray-800 bg-gray-900 p-2 shadow-lg">
+          <div className="mb-2 text-xs text-gray-400">
             Last sync: {getLastSyncText()}
           </div>
 
-          {error && (
-            <div className="text-xs text-red-400 mb-2">{error}</div>
-          )}
+          {error && <div className="mb-2 text-xs text-red-400">{error}</div>}
 
           <Button
             variant="ghost"
             size="sm"
             onClick={syncNow}
             disabled={isConnecting}
-            className="w-full justify-start mb-1"
+            className="mb-1 w-full justify-start"
           >
             {isConnecting ? "Syncing..." : "Sync Now"}
           </Button>
 
-          <label className="flex items-center gap-2 p-2 text-sm cursor-pointer hover:bg-gray-800 rounded">
+          <label className="flex cursor-pointer items-center gap-2 rounded p-2 text-sm hover:bg-gray-800">
             <input
               type="checkbox"
               checked={autoSync}
               onChange={(e) => setAutoSync(e.target.checked)}
-              className="w-4 h-4"
+              className="h-4 w-4"
             />
             <span>Auto-sync on changes</span>
           </label>
