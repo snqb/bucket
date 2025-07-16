@@ -83,13 +83,10 @@ export default defineConfig({
   define: {
     global: "globalThis",
   },
-  optimizeDeps: {
-    include: ["buffer"],
-  },
+  optimizeDeps: {},
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      buffer: "buffer",
     },
   },
   build: {
