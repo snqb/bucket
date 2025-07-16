@@ -1,9 +1,4 @@
-import {
-  HTMLMotionProps,
-  motion,
-  useMotionValue,
-  animate,
-} from "framer-motion";
+import { HTMLMotionProps, motion } from "framer-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Dialog,
@@ -16,7 +11,7 @@ import { Slider } from "./components/ui/slider";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
 
-import { useActions } from "./tinybase-hooks";
+import { useActions, useLists } from "./tinybase-hooks";
 
 type Props = HTMLMotionProps<"div"> & {
   task: any;
@@ -25,16 +20,15 @@ type Props = HTMLMotionProps<"div"> & {
 export const Task = (props: Props) => {
   const { task } = props;
   const actions = useActions();
+  const lists = useLists();
 
   const [localProgress, setLocalProgress] = useState(task.progress);
-  const [isInteracting, setIsInteracting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(task.title);
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
-  const scale = useMotionValue(1);
 
   const deleteTask = useCallback(() => {
     actions.deleteTask(task.id);
@@ -60,28 +54,6 @@ export const Task = (props: Props) => {
       }, 300);
     },
     [actions, task.id, deleteTask],
-  );
-
-  // Handle slider drag
-  const handleSliderChange = useCallback(
-    (value: number[]) => {
-      setLocalProgress(value[0]);
-      if (!isInteracting) {
-        setIsInteracting(true);
-        animate(scale, 1.2, { type: "spring", stiffness: 400 });
-      }
-    },
-    [isInteracting, scale],
-  );
-
-  // Handle slider release - save to backend
-  const handleSliderRelease = useCallback(
-    (value: number[]) => {
-      saveProgress(value[0]);
-      setIsInteracting(false);
-      animate(scale, 1, { type: "spring", stiffness: 400 });
-    },
-    [saveProgress, scale],
   );
 
   // Sync local state when task progress changes from outside
@@ -126,6 +98,11 @@ export const Task = (props: Props) => {
     };
   }, [longPressTimer]);
 
+  const lastDescriptionLine = task.description
+    ?.split("\n")
+    .filter(Boolean)
+    .pop();
+
   return (
     <Dialog modal={false}>
       <div className="flex w-full select-none items-center gap-3 py-2">
@@ -165,27 +142,38 @@ export const Task = (props: Props) => {
             </div>
           ) : (
             <>
-              <DialogTrigger asChild>
-                <p
-                  className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400 md:rounded md:px-1 md:hover:bg-gray-700 md:hover:bg-opacity-50"
-                  onDoubleClick={() => setIsEditing(true)}
-                  onTouchStart={handleTouchStart}
-                  onTouchEnd={handleTouchEnd}
-                  title="Double-click to edit (desktop) or long-press (mobile)"
-                >
-                  {task.title}
-                </p>
-              </DialogTrigger>
-              <motion.div style={{ scale }} className="flex-1">
-                <Slider
-                  value={[localProgress]}
-                  onValueChange={handleSliderChange}
-                  onValueCommit={handleSliderRelease}
-                  max={100}
-                  step={1}
-                  className="flex-1"
-                />
-              </motion.div>
+              <div className="flex flex-1 flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <DialogTrigger asChild>
+                    <p
+                      className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400 md:rounded md:px-1 md:hover:bg-gray-700 md:hover:bg-opacity-50"
+                      onDoubleClick={() => setIsEditing(true)}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={handleTouchEnd}
+                      title="Double-click to edit (desktop) or long-press (mobile)"
+                    >
+                      {task.title}
+                    </p>
+                  </DialogTrigger>
+                  <div className="flex-1">
+                    <Slider
+                      value={[localProgress]}
+                      onValueChange={(value) => {
+                        setLocalProgress(value[0]);
+                        saveProgress(value[0]);
+                      }}
+                      max={100}
+                      step={1}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                {lastDescriptionLine && (
+                  <p className="max-w-[30ch] truncate text-xs text-gray-400 opacity-75">
+                    {lastDescriptionLine}
+                  </p>
+                )}
+              </div>
             </>
           )}
         </motion.div>
@@ -198,14 +186,42 @@ export const Task = (props: Props) => {
             data-task={task.id}
             className="flex flex-col items-stretch gap-4"
           >
-            <h4 className="text-md text-left">Move to: </h4>
-            <Textarea
-              className="border-0 bg-gray-800 text-white"
-              defaultValue={task.description}
-              onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
-              rows={10}
-              placeholder="Longer text"
-            />
+            <div>
+              <h4 className="text-md mb-2 text-left">Move to: </h4>
+              <div className="flex flex-wrap gap-2">
+                {lists
+                  ?.filter((list) => list.id !== task.listId)
+                  .map((list) => (
+                    <Button
+                      key={String(list.id)}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        actions.deleteTask(task.id);
+                        actions.createTask(
+                          String(list.id),
+                          task.title,
+                          task.description,
+                        );
+                      }}
+                      className="flex items-center gap-2 border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
+                    >
+                      <span>{list.emoji}</span>
+                      <span>{list.title}</span>
+                    </Button>
+                  ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-md mb-2 text-left">Description:</h4>
+              <Textarea
+                className="border-0 bg-gray-800 text-white"
+                defaultValue={task.description}
+                onBlur={(e) => updateTaskDescription(e.currentTarget.value)}
+                rows={10}
+                placeholder="Longer text"
+              />
+            </div>
           </div>
         </DialogContent>
       </DialogPortal>
