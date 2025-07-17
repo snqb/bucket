@@ -8,6 +8,7 @@ export function SyncButton() {
     error,
     syncNow,
     isConnecting,
+    isSyncing,
     lastSync,
     autoSync,
     setAutoSync,
@@ -16,6 +17,7 @@ export function SyncButton() {
   const [showMenu, setShowMenu] = useState(false);
 
   const getStatusIcon = () => {
+    if (isSyncing) return "↻";
     if (isConnecting) return "↻";
     if (syncStatus === "connected") return "●";
     return "○";
@@ -63,7 +65,7 @@ export function SyncButton() {
             disabled={isConnecting}
             className="mb-1 w-full justify-start"
           >
-            {isConnecting ? "Syncing..." : "Sync Now"}
+            {isConnecting || isSyncing ? "Syncing..." : "Sync Now"}
           </Button>
 
           <label className="flex cursor-pointer items-center gap-2 rounded p-2 text-sm hover:bg-gray-800">

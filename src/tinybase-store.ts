@@ -210,21 +210,40 @@ export const setUser = async (passphrase: string) => {
     );
     try {
       await connectSync(true); // true = initial sync
-      // Wait for data to arrive
-      await new Promise((resolve) => setTimeout(resolve, 2000));
 
-      const syncedLists = store.getRowIds("lists").length;
-      const syncedTasks = store.getRowIds("tasks").length;
-      if (syncedLists > 0 || syncedTasks > 0) {
-        console.log(
-          `✅ Synced ${syncedLists} lists and ${syncedTasks} tasks from server`,
-        );
-        // Save the synced data locally
-        await currentPersister.save();
-      } else if (hadDataBefore) {
-        console.warn(
-          "⚠️ User had data before but none found on server or locally",
-        );
+      // Wait for sync to complete with proper timeout
+      let attempts = 0;
+      const maxAttempts = 10; // 5 seconds total
+
+      while (attempts < maxAttempts) {
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        const syncedLists = store.getRowIds("lists").length;
+        const syncedTasks = store.getRowIds("tasks").length;
+
+        if (syncedLists > 0 || syncedTasks > 0) {
+          console.log(
+            `✅ Synced ${syncedLists} lists and ${syncedTasks} tasks from server`,
+          );
+          // Save the synced data locally
+          await currentPersister.save();
+          break;
+        }
+
+        attempts++;
+      }
+
+      if (attempts >= maxAttempts) {
+        const syncedLists = store.getRowIds("lists").length;
+        const syncedTasks = store.getRowIds("tasks").length;
+
+        if (hadDataBefore && syncedLists === 0 && syncedTasks === 0) {
+          console.warn(
+            "⚠️ User had data before but none found on server or locally after waiting",
+          );
+        } else {
+          console.log("📭 No server data found after initial sync timeout");
+        }
       }
     } catch (error) {
       console.log("📱 Could not sync from server, starting fresh:", error);
@@ -332,6 +351,10 @@ export const connectSync = async (isInitialSync = false): Promise<boolean> => {
     // Expose WebSocket for debugging
     // @ts-ignore
     window.__syncWebSocket = syncWebSocket;
+
+    // Track sync completion
+    let syncCompleted = false;
+    let syncStartTime = Date.now();
 
     // Wait for connection
     await new Promise<void>((resolve, reject) => {
@@ -508,9 +531,14 @@ export const disconnectSync = async () => {
 
 // Get sync status
 export const getSyncStatus = () => {
+  // @ts-ignore
+  const syncStatus = window.__syncStatus || { completed: false, startTime: 0 };
+
   return {
     connected: !!currentSynchronizer,
     lastSync: (store.getValue("lastSync") as number) || 0,
+    syncInProgress: !!currentSynchronizer && !syncStatus.completed,
+    syncStartTime: syncStatus.startTime,
   };
 };
 
@@ -547,13 +575,33 @@ export const syncNow = async (): Promise<boolean> => {
     const connected = await connectSync(true);
 
     if (connected) {
-      // Keep connection open for a bit longer to ensure full sync
-      setTimeout(() => {
+      // Wait for sync to complete before deciding to disconnect
+      let attempts = 0;
+      const maxAttempts = 6; // 3 seconds total
+
+      const checkSyncComplete = async () => {
+        while (attempts < maxAttempts) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+
+          // Check if we received any data
+          const currentLists = store.getRowIds("lists").length;
+          const currentTasks = store.getRowIds("tasks").length;
+
+          if (currentLists > 0 || currentTasks > 0) {
+            console.log("🔄 Manual sync received data, keeping connection");
+            break;
+          }
+
+          attempts++;
+        }
+
         if (!autoSyncEnabled) {
           console.log("🔄 Manual sync complete, disconnecting...");
           disconnectSync();
         }
-      }, 3000);
+      };
+
+      checkSyncComplete();
     }
 
     return connected;

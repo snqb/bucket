@@ -127,21 +127,31 @@ export const useActions = () => {
 // Hook to manage sync state
 export const useSync = () => {
   const [syncStatus, setSyncStatus] = useState<
-    "connected" | "disconnected" | "connecting"
+    "connected" | "disconnected" | "connecting" | "syncing"
   >("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<number>(0);
   const [autoSync, setAutoSyncState] = useState(true);
   const [user, setUserState] = useState(getCurrentUser());
+  const [syncInProgress, setSyncInProgress] = useState(false);
 
   const updateStatus = useCallback(() => {
     const status = getSyncStatus();
-    setSyncStatus(status.connected ? "connected" : "disconnected");
+    const isConnected = status.connected;
+    const inProgress = status.syncInProgress || false;
+
+    if (inProgress) {
+      setSyncStatus("syncing");
+    } else {
+      setSyncStatus(isConnected ? "connected" : "disconnected");
+    }
+
     setLastSync(status.lastSync);
+    setSyncInProgress(inProgress);
   }, []);
 
   const manualSync = useCallback(async () => {
-    if (syncStatus === "connecting") return;
+    if (syncStatus === "connecting" || syncStatus === "syncing") return;
 
     const currentUser = getCurrentUser();
     if (!currentUser.userId) {
@@ -154,8 +164,11 @@ export const useSync = () => {
 
     try {
       const success = await syncNow();
-      setSyncStatus(success ? "connected" : "disconnected");
-      if (!success) {
+      if (success) {
+        setSyncStatus("syncing");
+        // Status will update to "connected" when sync completes
+      } else {
+        setSyncStatus("disconnected");
         setError("Failed to sync");
       }
       updateStatus();
@@ -170,12 +183,12 @@ export const useSync = () => {
     setAutoSyncState(enabled);
   }, []);
 
-  // Update status periodically
+  // Update status periodically - more frequent during sync
   useEffect(() => {
     updateStatus();
-    const interval = setInterval(updateStatus, 5000);
+    const interval = setInterval(updateStatus, syncInProgress ? 1000 : 5000);
     return () => clearInterval(interval);
-  }, [updateStatus]);
+  }, [updateStatus, syncInProgress]);
 
   // Update user state on mount
   useEffect(() => {
@@ -187,7 +200,8 @@ export const useSync = () => {
     error,
     syncNow: manualSync,
     isConnected: syncStatus === "connected",
-    isConnecting: syncStatus === "connecting",
+    isConnecting: syncStatus === "connecting" || syncStatus === "syncing",
+    isSyncing: syncStatus === "syncing",
     lastSync,
     autoSync,
     setAutoSync: toggleAutoSync,
