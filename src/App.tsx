@@ -270,66 +270,68 @@ const Bucket = () => {
           </div>
         </div>
 
-        <div className="grid flex-1 grid-cols-3 gap-6 overflow-auto p-6">
-          {lists?.map((list) => (
-            <div key={String(list.id)} className="group relative">
-              <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
-                <Button
-                  size="sm"
-                  className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
-                  onClick={() =>
-                    handleEditList(String(list.id), String(list.title))
-                  }
-                >
-                  ✎
-                </Button>
-                <Button
-                  size="sm"
-                  className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
-                  onClick={() => {
-                    if (confirm(`Delete ${list.title}?`)) {
-                      actions.deleteList(String(list.id));
+        <div className="flex-1 overflow-auto p-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  xl:grid-cols-4">
+            {lists?.map((list) => (
+              <div key={String(list.id)} className="group relative">
+                <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
+                  <Button
+                    size="sm"
+                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                    onClick={() =>
+                      handleEditList(String(list.id), String(list.title))
                     }
-                  }}
-                >
-                  ×
-                </Button>
-              </div>
-              {editingListId === String(list.id) ? (
-                <div className="h-full max-h-96 rounded-lg border border-blue-500 bg-gray-800 bg-opacity-50 p-4">
-                  <input
-                    type="text"
-                    value={editingListTitle}
-                    onChange={(e) => setEditingListTitle(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleSaveEdit();
-                      if (e.key === "Escape") handleCancelEdit();
+                  >
+                    ✎
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                    onClick={() => {
+                      if (confirm(`Delete ${list.title}?`)) {
+                        actions.deleteList(String(list.id));
+                      }
                     }}
-                    className="mb-2 w-full rounded bg-gray-700 p-2 text-sm text-white"
-                    autoFocus
-                  />
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleSaveEdit}
-                      className="bg-green-600 text-white"
-                    >
-                      ✓
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={handleCancelEdit}
-                      className="bg-red-600 text-white"
-                    >
-                      ✕
-                    </Button>
-                  </div>
+                  >
+                    ×
+                  </Button>
                 </div>
-              ) : (
-                <Screen className="h-full max-h-96" list={list} />
-              )}
-            </div>
-          ))}
+                {editingListId === String(list.id) ? (
+                  <div className="min-h-[200px] rounded-lg border border-blue-500 bg-gray-800 bg-opacity-50 p-4">
+                    <input
+                      type="text"
+                      value={editingListTitle}
+                      onChange={(e) => setEditingListTitle(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveEdit();
+                        if (e.key === "Escape") handleCancelEdit();
+                      }}
+                      className="mb-2 w-full rounded bg-gray-700 p-2 text-sm text-white"
+                      autoFocus
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={handleSaveEdit}
+                        className="bg-green-600 text-white"
+                      >
+                        ✓
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleCancelEdit}
+                        className="bg-red-600 text-white"
+                      >
+                        ✕
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <Screen className="w-full" list={list} actions={actions} />
+                )}
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="border-t border-gray-700 p-4">
@@ -423,7 +425,26 @@ const Bucket = () => {
                   {currentScreen && (
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{currentScreen.emoji}</span>
-                      <h1 className="font-bold text-2xl text-white">
+                      <h1
+                        contentEditable
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          const newTitle = e.currentTarget.textContent?.trim();
+                          if (newTitle && newTitle !== currentScreen.title) {
+                            actions.updateListTitle(
+                              String(currentScreen.id),
+                              newTitle,
+                            );
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            e.currentTarget.blur();
+                          }
+                        }}
+                        className="font-bold cursor-text rounded px-1 text-2xl text-white hover:bg-gray-700"
+                      >
                         {currentScreen.title}
                       </h1>
                     </div>
@@ -447,6 +468,7 @@ const Bucket = () => {
                   className="h-full w-full border-0 p-8"
                   key={String(currentScreen.id)}
                   list={currentScreen}
+                  actions={actions}
                 />
               )}
             </div>

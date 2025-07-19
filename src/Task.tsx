@@ -169,9 +169,11 @@ export const Task = (props: Props) => {
                   </div>
                 </div>
                 {lastDescriptionLine && (
-                  <p className="max-w-[30ch] truncate text-xs text-gray-400 opacity-75">
-                    {lastDescriptionLine}
-                  </p>
+                  <DialogTrigger asChild>
+                    <p className="max-w-[30ch] cursor-pointer truncate text-xs text-gray-400 opacity-75 hover:text-blue-400">
+                      {lastDescriptionLine}
+                    </p>
+                  </DialogTrigger>
                 )}
               </div>
             </>
@@ -181,7 +183,27 @@ export const Task = (props: Props) => {
 
       <DialogPortal>
         <DialogContent className="bg-black">
-          <DialogHeader className="text-left">{task.title}</DialogHeader>
+          <DialogHeader className="text-left">
+            <div
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={(e) => {
+                const newTitle = e.currentTarget.textContent?.trim();
+                if (newTitle && newTitle !== task.title) {
+                  actions.updateTask(task.id, { title: newTitle });
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  e.currentTarget.blur();
+                }
+              }}
+              className="cursor-text rounded px-1 hover:bg-gray-800"
+            >
+              {task.title}
+            </div>
+          </DialogHeader>
           <div
             data-task={task.id}
             className="flex flex-col items-stretch gap-4"

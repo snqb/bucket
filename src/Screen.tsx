@@ -7,6 +7,7 @@ import { Task } from "./Task";
 
 type Props = HTMLMotionProps<"div"> & {
   list: any;
+  actions?: any;
 };
 
 const getBg = (name: string, alpha = 0.07) => {
@@ -19,7 +20,7 @@ const getBg = (name: string, alpha = 0.07) => {
   });
 };
 
-const Screen = ({ list, ...divProps }: Props) => {
+const Screen = ({ list, actions, ...divProps }: Props) => {
   const todos = useListTasks(String(list.id));
 
   const ref = useRef<Element>(document.querySelector("#screens")!);
@@ -29,7 +30,7 @@ const Screen = ({ list, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`m-2 flex flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6 md:h-full md:max-h-96 md:px-8`}
+      className={`m-2 flex flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6 md:px-8`}
       style={{
         background: bg,
       }}
@@ -48,12 +49,28 @@ const Screen = ({ list, ...divProps }: Props) => {
       {/* Header with title and emoji - only on desktop */}
       <div className="mb-4 hidden items-center gap-2 border-b border-gray-500 pb-2 md:flex">
         <span className="text-2xl">{list.emoji}</span>
-        <h2 className="font-semibold truncate text-lg text-white">
+        <h2
+          contentEditable
+          suppressContentEditableWarning
+          onBlur={(e) => {
+            const newTitle = e.currentTarget.textContent?.trim();
+            if (newTitle && newTitle !== list.title && actions) {
+              actions.updateListTitle(String(list.id), newTitle);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              e.currentTarget.blur();
+            }
+          }}
+          className="font-semibold cursor-text truncate rounded px-1 text-lg text-white hover:bg-gray-700"
+        >
           {list.title}
         </h2>
       </div>
 
-      <div className="flex flex-col items-stretch gap-2 overflow-y-auto">
+      <div className="flex flex-col items-stretch gap-2">
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
