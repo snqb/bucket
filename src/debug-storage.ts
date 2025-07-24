@@ -18,10 +18,10 @@ export const debugStorage = () => {
   }
 
   console.log("📦 Bucket keys:");
-  bucketKeys.forEach(key => {
+  bucketKeys.forEach((key) => {
     const value = localStorage.getItem(key);
     if (key.includes("data")) {
-      console.log(`  ${key}: ${value ? `${value.length} chars` : 'null'}`);
+      console.log(`  ${key}: ${value ? `${value.length} chars` : "null"}`);
     } else {
       console.log(`  ${key}: ${value}`);
     }
@@ -29,7 +29,9 @@ export const debugStorage = () => {
 
   console.log(`\n🔧 Other keys: ${otherKeys.length} items`);
 
-  console.log(`\n📊 Total localStorage usage: ${JSON.stringify(localStorage).length} chars`);
+  console.log(
+    `\n📊 Total localStorage usage: ${JSON.stringify(localStorage).length} chars`,
+  );
   console.log("=".repeat(50));
 };
 
@@ -50,6 +52,26 @@ export const testLogout = async () => {
   // Log storage after logout
   console.log("\n📸 After logout:");
   debugStorage();
+};
+
+// Test passphrase derivation
+export const testPassphraseDerivation = async (passphrases: string[]) => {
+  console.log("🧪 Testing passphrase derivation...");
+  console.log("=".repeat(50));
+
+  const { deriveUserId } = await import("./tinybase-store");
+
+  for (const passphrase of passphrases) {
+    try {
+      const userId = await deriveUserId(passphrase);
+      console.log(`Passphrase: "${passphrase}"`);
+      console.log(`User ID: ${userId}`);
+      console.log(`Storage key: bucket-data-${userId}`);
+      console.log("-".repeat(30));
+    } catch (error) {
+      console.error(`Error with passphrase "${passphrase}":`, error);
+    }
+  }
 };
 
 // Test user switching
@@ -77,4 +99,5 @@ if (typeof window !== "undefined") {
   (window as any).debugStorage = debugStorage;
   (window as any).testLogout = testLogout;
   (window as any).testUserSwitch = testUserSwitch;
+  (window as any).testPassphraseDerivation = testPassphraseDerivation;
 }

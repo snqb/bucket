@@ -65,10 +65,11 @@ const server = createWsServer(
     console.log(`📁 Creating persister for user: ${pathId}`);
     const store = createMergeableStore();
 
-    // Use SQLite with user-specific table prefix
+    // Use SQLite with user-specific table prefix for proper isolation
     const db = new sqlite3.Database(DB_FILE);
     const persister = createSqlite3Persister(store, db, {
       mode: "json",
+      storeTableName: `tinybase_${pathId}`, // User-specific table name
       autoLoadIntervalSeconds: 1,
     });
 
