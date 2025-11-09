@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { useAuth } from "./tinybase-hooks";
+import { useAuth, useLists } from "./tinybase-hooks";
 import { Button } from "./components/ui/button";
-import { generateQRData } from "./tinybase-store";
+import { generateQRData, store } from "./tinybase-store";
 import * as QRCode from "qrcode";
+import { Download } from "lucide-react";
 
 export const UserControls = () => {
   const { user, logout } = useAuth();
@@ -30,24 +31,60 @@ export const UserControls = () => {
     }
   };
 
+  const exportData = () => {
+    try {
+      const data = {
+        lists: store.getTables().lists || {},
+        tasks: store.getTables().tasks || {},
+        cemetery: store.getTables().cemetery || {},
+        exportedAt: new Date().toISOString(),
+        version: "1.0"
+      };
+
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `bucket-backup-${Date.now()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Failed to export data:", error);
+      alert("Failed to export data. Please try again.");
+    }
+  };
+
   return (
     <>
       <div className="flex items-center justify-center gap-2">
+        <Button
+          onClick={exportData}
+          variant="outline"
+          className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
+          title="Export all data"
+          size="sm"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
         <Button
           onClick={showPassphraseModal}
           variant="outline"
           className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
           title="Show passphrase"
+          size="sm"
         >
-          🔑 Passphrase
+          🔑
         </Button>
         <Button
           onClick={logout}
           variant="outline"
           className="border-gray-600 bg-gray-800 text-white hover:bg-gray-700"
           title="Logout"
+          size="sm"
         >
-          🚪 Logout
+          🚪
         </Button>
       </div>
 

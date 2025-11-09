@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Button } from "./components/ui/button";
+import { Loader2 } from "lucide-react";
 import {
   generatePassphrase,
   setUser,
@@ -18,7 +19,30 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
   const [qrDataUrl, setQrDataUrl] = useState<string>("");
   const [showQR, setShowQR] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
   const [error, setError] = useState<string>("");
+
+  const handleSkipAuth = async () => {
+    setIsSkipping(true);
+    setError("");
+
+    try {
+      // Create a temporary anonymous passphrase
+      const tempPassphrase = generatePassphrase();
+      const userId = await setUser(tempPassphrase);
+      if (!userId) {
+        setError("Failed to create temporary session");
+        setIsSkipping(false);
+        return;
+      }
+      onAuthenticated(userId);
+    } catch (err) {
+      console.error("Skip auth error:", err);
+      setError("Failed to create temporary session");
+      setIsSkipping(false);
+    }
+  };
 
   const handleCreateNew = async () => {
     setIsCreating(true);
@@ -77,12 +101,16 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
       return;
     }
 
+    setIsAuthenticating(true);
+    setError("");
+
     try {
       const trimmedPassphrase = passphrase.trim();
 
       // Basic validation
       if (!trimmedPassphrase) {
         setError("Please enter a passphrase");
+        setIsAuthenticating(false);
         return;
       }
 
@@ -96,12 +124,14 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
         words.length !== 24
       ) {
         setError("Passphrase must be 12, 15, 18, 21, or 24 words");
+        setIsAuthenticating(false);
         return;
       }
 
       const userId = await setUser(trimmedPassphrase);
       if (!userId) {
         setError("Failed to create user");
+        setIsAuthenticating(false);
         return;
       }
 
@@ -123,6 +153,7 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
       } else {
         setError("Unexpected authentication error");
       }
+      setIsAuthenticating(false);
     }
   };
 
@@ -251,17 +282,60 @@ export const UserAuth = ({ onAuthenticated }: UserAuthProps) => {
                   disabled={isCreating}
                   className="flex-1 bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  {isCreating ? "⏳ Creating..." : "🎲 Create New"}
+                  {isCreating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    "🎲 Create New"
+                  )}
                 </Button>
               </div>
 
               <Button
                 onClick={handleUsePassphrase}
-                disabled={!passphrase.trim()}
+                disabled={!passphrase.trim() || isAuthenticating}
                 className="w-full bg-green-600 text-white hover:bg-green-700"
               >
-                🚀 Enter Space
+                {isAuthenticating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Authenticating...
+                  </>
+                ) : (
+                  "🚀 Enter Space"
+                )}
               </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-gray-900 px-2 text-gray-400">or</span>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleSkipAuth}
+                disabled={isSkipping}
+                variant="outline"
+                className="w-full border-gray-600 bg-transparent text-gray-300 hover:bg-gray-800"
+              >
+                {isSkipping ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating session...
+                  </>
+                ) : (
+                  "⚡ Skip for now (anonymous session)"
+                )}
+              </Button>
+
+              <p className="text-center text-xs text-gray-500">
+                Anonymous sessions are temporary and won't sync across devices
+              </p>
             </>
           ) : (
             <div className="space-y-4 text-center">

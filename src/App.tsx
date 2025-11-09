@@ -2,12 +2,13 @@ import ReloadPrompt from "./ReloadPrompt";
 import { SyncStatus } from "./SyncStatus";
 import { SyncButton } from "./SyncButton";
 import { DataRecovery } from "./DataRecovery";
-import { SyncDebugger } from "./SyncDebugger";
 import { UserAuth } from "./UserAuth";
 import { UserControls } from "./UserControls";
+import { AddListDialog } from "./components/AddListDialog";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Screen from "./Screen";
 import { Button } from "./components/ui/button";
 import {
@@ -18,7 +19,8 @@ import {
 } from "./tinybase-hooks";
 import { hasLocalData } from "./tinybase-store";
 import { randomEmoji } from "./emojis";
-import { Link, Route, Switch } from "wouter";
+import { Link, Route, Switch, useLocation } from "wouter";
+import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -45,7 +47,6 @@ function App() {
       </div>
 
       <DataRecovery />
-      <SyncDebugger />
 
       <Switch>
         <Route path="/" component={Bucket} />
@@ -66,6 +67,10 @@ const Bucket = () => {
   const [editingListId, setEditingListId] = useState<string | null>(null);
   const [editingListTitle, setEditingListTitle] = useState("");
   const [isInitializing, setIsInitializing] = useState(true);
+  const [editingMobileTitle, setEditingMobileTitle] = useState(false);
+  const [mobileTitle, setMobileTitle] = useState("");
+  const [showAddListDialog, setShowAddListDialog] = useState(false);
+  const [, setLocation] = useLocation();
 
   // Better loading logic to prevent premature empty state
   useEffect(() => {
@@ -127,24 +132,45 @@ const Bucket = () => {
     }
   };
 
-  // Keyboard navigation - disabled
-  // useEffect(() => {
-  //   const handleKeyDown = (e: KeyboardEvent) => {
-  //     if (e.key === "ArrowLeft") {
-  //       e.preventDefault();
-  //       handlePreviousScreen();
-  //     } else if (e.key === "ArrowRight") {
-  //       e.preventDefault();
-  //       handleNextScreen();
-  //     } else if (e.key === "m" || e.key === "M") {
-  //       e.preventDefault();
-  //       handleMapClick();
-  //     }
-  //   };
-
-  //   window.addEventListener("keydown", handleKeyDown);
-  //   return () => window.removeEventListener("keydown", handleKeyDown);
-  // }, [lists]);
+  // Keyboard shortcuts
+  useKeyboardShortcuts(
+    [
+      {
+        key: "n",
+        handler: () => setShowAddListDialog(true),
+        description: "Create new list",
+      },
+      {
+        key: "c",
+        handler: () => setLocation("/cemetery"),
+        description: "Open cemetery",
+      },
+      {
+        key: "m",
+        handler: () => setShowMap(!showMap),
+        description: "Toggle map view",
+      },
+      {
+        key: "ArrowLeft",
+        handler: () => handlePreviousScreen(),
+        description: "Previous list",
+      },
+      {
+        key: "ArrowRight",
+        handler: () => handleNextScreen(),
+        description: "Next list",
+      },
+      {
+        key: "Escape",
+        handler: () => {
+          setShowMap(false);
+          setShowAddListDialog(false);
+        },
+        description: "Close dialogs",
+      },
+    ],
+    !!lists && lists.length > 0
+  );
 
   const currentScreen = lists?.[currentScreenIndex];
 
@@ -191,30 +217,54 @@ const Bucket = () => {
 
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="font-bold mb-4 text-6xl">□</div>
-          <div className="mb-8 text-xl text-gray-300">
-            {hasStoredUser ? "No lists synced yet" : "No lists yet"}
-          </div>
-          <div className="mb-4">
+        <div className="w-full max-w-md text-center px-6">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", duration: 0.5 }}
+          >
+            <div className="font-bold mb-6 text-8xl">🪣</div>
+          </motion.div>
+          <h2 className="font-bold mb-3 text-3xl text-white">
+            Welcome to Bucket!
+          </h2>
+          <p className="mb-8 text-gray-400 leading-relaxed">
+            {hasStoredUser ? (
+              <>
+                Your lists will appear here once synced.
+                <br />
+                Check your connection or try syncing manually.
+              </>
+            ) : (
+              <>
+                Track progress with 0-100% bars instead of checkboxes.
+                <br />
+                Create your first list to get started!
+              </>
+            )}
+          </p>
+
+          <div className="mb-6">
             <SyncStatus />
           </div>
-          {hasStoredUser && (
-            <div className="mb-4 text-sm text-yellow-400">
-              💡 Try syncing manually or check your connection
+
+          <AddListDialog
+            onAdd={(name) => actions.createList(name)}
+            variant="button"
+            className="p-6 text-lg shadow-lg"
+          />
+
+          {!hasStoredUser && (
+            <div className="mt-8 space-y-2 text-left rounded-lg border border-gray-700 bg-gray-900 bg-opacity-50 p-4">
+              <p className="text-sm text-gray-400">💡 Quick tips:</p>
+              <ul className="text-xs text-gray-500 space-y-1">
+                <li>• Tasks use progress bars (0-100%), not checkboxes</li>
+                <li>• Reach 100% to auto-complete with confetti 🎊</li>
+                <li>• Deleted tasks go to cemetery for recovery</li>
+                <li>• Everything syncs across your devices</li>
+              </ul>
             </div>
           )}
-          <Button
-            className="bg-blue-500 bg-opacity-50 p-4 text-xl text-white hover:bg-blue-600 hover:bg-opacity-70"
-            onClick={() => {
-              const name = prompt("Enter the name of your first todo list");
-              if (name) {
-                actions.createList(name);
-              }
-            }}
-          >
-            Create your first list
-          </Button>
         </div>
       </div>
     );
@@ -251,20 +301,15 @@ const Bucket = () => {
                 <Link
                   to="/cemetery"
                   className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                  aria-label="View cemetery"
                 >
-                  ⌫
+                  <Trash2 className="h-5 w-5" />
                 </Link>
-                <Button
-                  className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                  onClick={() => {
-                    const name = prompt("Enter the name of the new todo list");
-                    if (name) {
-                      actions.createList(name);
-                    }
-                  }}
-                >
-                  +
-                </Button>
+                <AddListDialog
+                  onAdd={(name) => actions.createList(name)}
+                  open={showAddListDialog}
+                  onOpenChange={setShowAddListDialog}
+                />
               </div>
             </div>
           </div>
@@ -277,23 +322,25 @@ const Bucket = () => {
                 <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
                   <Button
                     size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
                     onClick={() =>
                       handleEditList(String(list.id), String(list.title))
                     }
+                    aria-label="Edit list"
                   >
-                    ✎
+                    <Edit2 className="h-3 w-3" />
                   </Button>
                   <Button
                     size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-xs text-white"
+                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
                     onClick={() => {
                       if (confirm(`Delete ${list.title}?`)) {
                         actions.deleteList(String(list.id));
                       }
                     }}
+                    aria-label="Delete list"
                   >
-                    ×
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
                 {editingListId === String(list.id) ? (
@@ -327,7 +374,7 @@ const Bucket = () => {
                     </div>
                   </div>
                 ) : (
-                  <Screen className="w-full" list={list} actions={actions} />
+                  <Screen className="w-full" list={list as any} actions={actions} />
                 )}
               </div>
             ))}
@@ -352,27 +399,17 @@ const Bucket = () => {
                     <Link
                       to="/cemetery"
                       className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
+                      aria-label="View cemetery"
                     >
-                      ⌫
+                      <Trash2 className="h-5 w-5" />
                     </Link>
-                    <Button
-                      className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={() => {
-                        const name = prompt(
-                          "Enter the name of the new todo list",
-                        );
-                        if (name) {
-                          actions.createList(name);
-                        }
-                      }}
-                    >
-                      +
-                    </Button>
+                    <AddListDialog onAdd={(name) => actions.createList(name)} />
                     <Button
                       className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                       onClick={handleMapClick}
+                      aria-label="Close map view"
                     >
-                      ×
+                      <X className="h-5 w-5" />
                     </Button>
                   </div>
                 </div>
@@ -411,42 +448,73 @@ const Bucket = () => {
                       className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                       onClick={handlePreviousScreen}
                       disabled={!lists || lists.length <= 1}
+                      aria-label="Previous list"
                     >
-                      ‹
+                      <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
                       className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                       onClick={handleNextScreen}
                       disabled={!lists || lists.length <= 1}
+                      aria-label="Next list"
                     >
-                      ›
+                      <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>
                   {currentScreen && (
                     <div className="flex items-center gap-2">
                       <span className="text-2xl">{currentScreen.emoji}</span>
-                      <h1
-                        contentEditable
-                        suppressContentEditableWarning
-                        onBlur={(e) => {
-                          const newTitle = e.currentTarget.textContent?.trim();
-                          if (newTitle && newTitle !== currentScreen.title) {
-                            actions.updateListTitle(
-                              String(currentScreen.id),
-                              newTitle,
-                            );
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            e.preventDefault();
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        className="font-bold cursor-text rounded px-1 text-2xl text-white hover:bg-gray-700"
-                      >
-                        {currentScreen.title}
-                      </h1>
+                      {editingMobileTitle ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={mobileTitle}
+                            onChange={(e) => setMobileTitle(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                if (mobileTitle.trim()) {
+                                  actions.updateListTitle(
+                                    String(currentScreen.id),
+                                    mobileTitle.trim()
+                                  );
+                                }
+                                setEditingMobileTitle(false);
+                              }
+                              if (e.key === "Escape") {
+                                setMobileTitle(String(currentScreen.title));
+                                setEditingMobileTitle(false);
+                              }
+                            }}
+                            className="font-bold rounded px-2 py-1 text-xl text-white bg-gray-700 border border-gray-600"
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            onClick={() => {
+                              if (mobileTitle.trim()) {
+                                actions.updateListTitle(
+                                  String(currentScreen.id),
+                                  mobileTitle.trim()
+                                );
+                              }
+                              setEditingMobileTitle(false);
+                            }}
+                            className="h-6 w-6 bg-green-600 p-0 text-white"
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <h1
+                          onClick={() => {
+                            setMobileTitle(String(currentScreen.title));
+                            setEditingMobileTitle(true);
+                          }}
+                          className="font-bold cursor-pointer rounded px-1 text-2xl text-white hover:bg-gray-700"
+                        >
+                          {currentScreen.title}
+                        </h1>
+                      )}
                     </div>
                   )}
                 </div>
@@ -455,8 +523,9 @@ const Bucket = () => {
                   <Button
                     className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
                     onClick={handleMapClick}
+                    aria-label="Show all lists"
                   >
-                    ≡
+                    <Menu className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -467,7 +536,7 @@ const Bucket = () => {
                 <Screen
                   className="h-full w-full border-0 p-8"
                   key={String(currentScreen.id)}
-                  list={currentScreen}
+                  list={currentScreen as any}
                   actions={actions}
                 />
               )}
@@ -481,6 +550,16 @@ const Bucket = () => {
 
 const Cemetery = () => {
   const cemetery = useCemeteryItems();
+  const lists = useLists();
+  const actions = useActions();
+  const [restoreToList, setRestoreToList] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<string | null>(null);
+
+  const handleRestore = (itemId: string, listId: string) => {
+    actions.restoreFromCemetery(itemId, listId);
+    setRestoreToList(null);
+    setSelectedItem(null);
+  };
 
   return (
     <div className="flex h-screen w-screen flex-col bg-black">
@@ -511,15 +590,79 @@ const Cemetery = () => {
           </div>
         ) : (
           <div className="space-y-2">
-            {cemetery.map((it) => (
+            {cemetery.map((item) => (
               <div
-                key={String(it.id)}
+                key={String(item.id)}
                 className="rounded border border-gray-700 bg-gray-800 bg-opacity-50 p-3"
               >
-                <div className="font-medium text-white">{it.originalTitle}</div>
-                <div className="text-sm text-gray-400">
-                  Deleted {new Date(Number(it.deletedAt)).toLocaleString()}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="font-medium text-white">{item.originalTitle}</div>
+                    {item.originalDescription && (
+                      <div className="text-sm text-gray-500">{item.originalDescription}</div>
+                    )}
+                    <div className="mt-1 text-xs text-gray-400">
+                      Progress: {item.originalProgress}% • {item.deletionReason}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Deleted {new Date(Number(item.deletedAt)).toLocaleString()}
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedItem(String(item.id));
+                        setRestoreToList(String(item.id));
+                      }}
+                      className="bg-green-600 text-white hover:bg-green-700"
+                    >
+                      ↺ Restore
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (confirm('Permanently delete this item?')) {
+                          actions.permanentlyDelete(String(item.id));
+                        }
+                      }}
+                      variant="outline"
+                      className="border-red-600 text-red-400 hover:bg-red-900 hover:bg-opacity-20"
+                    >
+                      × Delete
+                    </Button>
+                  </div>
                 </div>
+
+                {/* Restore to list selector */}
+                {restoreToList === String(item.id) && (
+                  <div className="mt-3 border-t border-gray-700 pt-3">
+                    <p className="mb-2 text-sm text-gray-300">Restore to which list?</p>
+                    <div className="flex flex-wrap gap-2">
+                      {lists?.map((list) => (
+                        <Button
+                          key={String(list.id)}
+                          size="sm"
+                          onClick={() => handleRestore(String(item.id), String(list.id))}
+                          className="bg-blue-600 text-white hover:bg-blue-700"
+                        >
+                          {list.emoji} {list.title}
+                        </Button>
+                      ))}
+                      <Button
+                        size="sm"
+                        onClick={() => {
+                          setRestoreToList(null);
+                          setSelectedItem(null);
+                        }}
+                        variant="outline"
+                        className="border-gray-600"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -651,9 +794,10 @@ const MobileListCard = ({
           <Button
             size="sm"
             onClick={() => setIsEditing(true)}
-            className="w-full bg-blue-600 text-white"
+            className="w-full bg-blue-600 text-white hover:bg-blue-700"
           >
-            ✎ Edit
+            <Edit2 className="h-4 w-4 mr-2" />
+            Edit
           </Button>
           <Button
             size="sm"
@@ -662,16 +806,18 @@ const MobileListCard = ({
                 onDelete();
               }
             }}
-            className="w-full bg-red-600 text-white"
+            className="w-full bg-red-600 text-white hover:bg-red-700"
           >
-            × Delete
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
           </Button>
           <Button
             size="sm"
             onClick={() => setIsExpanded(false)}
-            className="w-full bg-gray-600 text-white"
+            className="w-full bg-gray-600 text-white hover:bg-gray-700"
           >
-            ✕ Close
+            <X className="h-4 w-4 mr-2" />
+            Close
           </Button>
         </motion.div>
       )}

@@ -2,7 +2,6 @@
 import * as path from "path";
 import { defineConfig } from "vite";
 import { VitePWA } from "vite-plugin-pwa";
-import million from "million/compiler";
 
 const PWA = VitePWA({
   strategies: "injectManifest",
@@ -71,15 +70,7 @@ export default defineConfig({
   css: {
     postcss: "./postcss.config.js",
   },
-  plugins: [
-    PWA,
-    million.vite({
-      auto: {
-        threshold: 0.05,
-        skip: ["useBadHook", /badVariable/g],
-      },
-    }),
-  ],
+  plugins: [PWA],
   define: {
     global: "globalThis",
   },

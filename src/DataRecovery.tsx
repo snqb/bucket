@@ -4,11 +4,10 @@ import {
   store,
   getCurrentUser,
   syncNow,
-  connectSync,
-  disconnectSync,
   createList,
   createTask,
 } from "./tinybase-store";
+import { syncManager } from "./lib/sync";
 
 export function DataRecovery() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +34,7 @@ export function DataRecovery() {
         setImportStatus("✅ Data exported and copied to clipboard!");
       });
     } catch (error) {
-      setImportStatus("❌ Export failed: " + error.message);
+      setImportStatus("❌ Export failed: " + (error instanceof Error ? error.message : String(error)));
     }
   };
 
@@ -77,8 +76,8 @@ export function DataRecovery() {
       setImportStatus(
         `✅ Imported ${listsCount} lists and ${tasksCount} tasks successfully!`,
       );
-    } catch (error) {
-      setImportStatus("❌ Import failed: " + error.message);
+    } catch (error: unknown) {
+      setImportStatus("❌ Import failed: " + (error instanceof Error ? error.message : String(error)));
     }
   };
 
@@ -86,23 +85,28 @@ export function DataRecovery() {
     try {
       setSyncStatus("🔄 Checking server data...");
 
-      // First disconnect any existing sync
-      await disconnectSync();
-
       // Get current local data count
       const localLists = store.getRowIds("lists").length;
       const localTasks = store.getRowIds("tasks").length;
 
       setSyncStatus(`📊 Local data: ${localLists} lists, ${localTasks} tasks`);
 
-      // Connect with initial sync flag to pull first
+      // Reconnect to sync server
+      const currentUser = getCurrentUser();
+      if (!currentUser.userId) {
+        setSyncStatus("❌ No user authenticated");
+        return;
+      }
+
       let connected = false;
       try {
-        connected = await connectSync(true);
-      } catch (connectError) {
+        syncManager.disconnect();
+        await syncManager.connect(store, currentUser.userId);
+        connected = true;
+      } catch (connectError: unknown) {
         console.error("Connect error:", connectError);
         setSyncStatus(
-          "❌ Could not connect to sync server: " + connectError.message,
+          "❌ Could not connect to sync server: " + (connectError instanceof Error ? connectError.message : String(connectError)),
         );
         return;
       }
@@ -150,9 +154,9 @@ export function DataRecovery() {
       } else {
         setSyncStatus("❌ Could not establish sync connection");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Sync error:", error);
-      setSyncStatus("❌ Sync error: " + (error.message || "Unknown error"));
+      setSyncStatus("❌ Sync error: " + (error instanceof Error ? error.message : "Unknown error"));
     }
   };
 
@@ -162,7 +166,7 @@ export function DataRecovery() {
       createTask(listId, "Test Task 1", "This is a test task");
       createTask(listId, "Test Task 2", "Another test task");
       setImportStatus("✅ Created test data");
-    } catch (error) {
+    } catch (error: unknown) {
       setImportStatus("❌ Failed to create test data");
     }
   };

@@ -16,16 +16,16 @@ import {
   deleteTask,
   deleteList,
   getListTasks,
-  connectSync,
-  disconnectSync,
   getSyncStatus,
   syncNow,
-  setAutoSync,
   getCurrentUser,
   setUser,
   logout as storeLogout,
   waitForAuth,
+  restoreFromCemetery,
+  permanentlyDelete,
 } from "./tinybase-store";
+import { syncManager } from "./lib/sync";
 
 // Hook to get all lists
 export const useLists = () => {
@@ -79,6 +79,8 @@ export const useActions = () => {
     updateTask,
     deleteTask,
     deleteList,
+    restoreFromCemetery,
+    permanentlyDelete,
 
     // Additional convenience methods
     toggleTaskCompleted: (taskId: string) => {
@@ -131,23 +133,25 @@ export const useSync = () => {
   >("disconnected");
   const [error, setError] = useState<string | null>(null);
   const [lastSync, setLastSync] = useState<number>(0);
-  const [autoSync, setAutoSyncState] = useState(true);
   const [user, setUserState] = useState(getCurrentUser());
   const [syncInProgress, setSyncInProgress] = useState(false);
 
   const updateStatus = useCallback(() => {
-    const status = getSyncStatus();
-    const isConnected = status.connected;
-    const inProgress = status.syncInProgress || false;
+    const { status, lastSync: lastSyncTime } = getSyncStatus();
 
-    if (inProgress) {
-      setSyncStatus("syncing");
+    // Map syncManager status to UI status
+    if (status === 'connecting') {
+      setSyncStatus('connecting');
+    } else if (status === 'connected') {
+      setSyncStatus('connected');
+    } else if (status === 'error') {
+      setSyncStatus('disconnected');
     } else {
-      setSyncStatus(isConnected ? "connected" : "disconnected");
+      setSyncStatus('disconnected');
     }
 
-    setLastSync(status.lastSync);
-    setSyncInProgress(inProgress);
+    setLastSync(lastSyncTime);
+    setSyncInProgress(status === 'connecting');
   }, []);
 
   const manualSync = useCallback(async () => {
@@ -178,11 +182,6 @@ export const useSync = () => {
     }
   }, [syncStatus, updateStatus]);
 
-  const toggleAutoSync = useCallback((enabled: boolean) => {
-    setAutoSync(enabled);
-    setAutoSyncState(enabled);
-  }, []);
-
   // Update status periodically - more frequent during sync
   useEffect(() => {
     updateStatus();
@@ -203,8 +202,6 @@ export const useSync = () => {
     isConnecting: syncStatus === "connecting" || syncStatus === "syncing",
     isSyncing: syncStatus === "syncing",
     lastSync,
-    autoSync,
-    setAutoSync: toggleAutoSync,
     user,
     hasUser: !!user.userId,
   };

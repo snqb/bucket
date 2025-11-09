@@ -1,5 +1,5 @@
-import { HTMLMotionProps, motion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { HTMLMotionProps, motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,14 @@ import {
 import { Slider } from "./components/ui/slider";
 import { Textarea } from "./components/ui/textarea";
 import { Button } from "./components/ui/button";
+import { Minus, Plus, Check } from "lucide-react";
+import Confetti from "react-confetti";
 
 import { useActions, useLists } from "./tinybase-hooks";
+import type { Task as TaskType } from "./types";
 
 type Props = HTMLMotionProps<"div"> & {
-  task: any;
+  task: TaskType;
 };
 
 export const Task = (props: Props) => {
@@ -28,7 +31,13 @@ export const Task = (props: Props) => {
   const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
     null,
   );
+  const [editingDialogTitle, setEditingDialogTitle] = useState(false);
+  const [dialogTitleValue, setDialogTitleValue] = useState(task.title);
+  const [showCelebration, setShowCelebration] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+
+  // Memoize opacity calculation for performance
+  const opacity = useMemo(() => 1 - localProgress / 150, [localProgress]);
 
   const deleteTask = useCallback(() => {
     actions.deleteTask(task.id);
@@ -47,7 +56,12 @@ export const Task = (props: Props) => {
 
       saveTimeoutRef.current = setTimeout(() => {
         if (progress >= 100) {
-          deleteTask();
+          // Show celebration before deleting
+          setShowCelebration(true);
+          setTimeout(() => {
+            setShowCelebration(false);
+            deleteTask();
+          }, 2000); // 2 seconds of confetti
         } else {
           actions.updateTask(task.id, { progress });
         }
@@ -76,7 +90,7 @@ export const Task = (props: Props) => {
   const handleTouchStart = () => {
     const timer = setTimeout(() => {
       setIsEditing(true);
-    }, 500);
+    }, 300); // Reduced from 500ms to 300ms for better responsiveness
     setLongPressTimer(timer);
   };
 
@@ -104,13 +118,22 @@ export const Task = (props: Props) => {
     .pop();
 
   return (
-    <Dialog modal={false}>
-      <div className="flex w-full select-none items-center gap-3 py-2">
+    <>
+      {showCelebration && (
+        <div className="fixed inset-0 z-50 pointer-events-none">
+          <Confetti
+            width={window.innerWidth}
+            height={window.innerHeight}
+            recycle={false}
+            numberOfPieces={200}
+          />
+        </div>
+      )}
+      <Dialog modal={false}>
+        <div className="flex w-full select-none items-center gap-3 py-2">
         <motion.div
           className="flex flex-1 items-center gap-3"
-          style={{
-            opacity: 1 - localProgress / 150,
-          }}
+          style={{ opacity }}
         >
           {isEditing ? (
             <div className="flex flex-1 items-center gap-2">
@@ -155,17 +178,47 @@ export const Task = (props: Props) => {
                       {task.title}
                     </p>
                   </DialogTrigger>
-                  <div className="flex-1">
-                    <Slider
-                      value={[localProgress]}
-                      onValueChange={(value) => {
-                        setLocalProgress(value[0]);
-                        saveProgress(value[0]);
+                  <div className="flex flex-1 items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const newProgress = Math.max(0, localProgress - 10);
+                        setLocalProgress(newProgress);
+                        saveProgress(newProgress);
                       }}
-                      max={100}
-                      step={1}
-                      className="flex-1"
-                    />
+                      className="h-6 w-6 bg-gray-700 p-0 text-white hover:bg-gray-600"
+                      aria-label="Decrease progress"
+                    >
+                      <Minus className="h-3 w-3" />
+                    </Button>
+                    <div className="flex-1">
+                      <Slider
+                        value={[localProgress]}
+                        onValueChange={(value) => {
+                          setLocalProgress(value[0]);
+                          saveProgress(value[0]);
+                        }}
+                        max={100}
+                        step={1}
+                        className="flex-1"
+                        aria-label={`Progress: ${localProgress}%`}
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        const newProgress = Math.min(100, localProgress + 10);
+                        setLocalProgress(newProgress);
+                        saveProgress(newProgress);
+                      }}
+                      className="h-6 w-6 bg-gray-700 p-0 text-white hover:bg-gray-600"
+                      aria-label="Increase progress"
+                    >
+                      <Plus className="h-3 w-3" />
+                    </Button>
+                    <span className="w-10 text-right text-xs text-gray-400">
+                      {localProgress}%
+                    </span>
                   </div>
                 </div>
                 {lastDescriptionLine && (
@@ -184,25 +237,51 @@ export const Task = (props: Props) => {
       <DialogPortal>
         <DialogContent className="bg-black">
           <DialogHeader className="text-left">
-            <div
-              contentEditable
-              suppressContentEditableWarning
-              onBlur={(e) => {
-                const newTitle = e.currentTarget.textContent?.trim();
-                if (newTitle && newTitle !== task.title) {
-                  actions.updateTask(task.id, { title: newTitle });
-                }
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  e.currentTarget.blur();
-                }
-              }}
-              className="cursor-text rounded px-1 hover:bg-gray-800"
-            >
-              {task.title}
-            </div>
+            {editingDialogTitle ? (
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={dialogTitleValue}
+                  onChange={(e) => setDialogTitleValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      if (dialogTitleValue.trim()) {
+                        actions.updateTask(task.id, { title: dialogTitleValue.trim() });
+                      }
+                      setEditingDialogTitle(false);
+                    }
+                    if (e.key === "Escape") {
+                      setDialogTitleValue(task.title);
+                      setEditingDialogTitle(false);
+                    }
+                  }}
+                  className="flex-1 rounded px-2 py-1 text-white bg-gray-800 border border-gray-600"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (dialogTitleValue.trim()) {
+                      actions.updateTask(task.id, { title: dialogTitleValue.trim() });
+                    }
+                    setEditingDialogTitle(false);
+                  }}
+                  className="h-6 w-6 bg-green-600 p-0 text-white"
+                >
+                  <Check className="h-3 w-3" />
+                </Button>
+              </div>
+            ) : (
+              <div
+                onClick={() => {
+                  setDialogTitleValue(task.title);
+                  setEditingDialogTitle(true);
+                }}
+                className="cursor-pointer rounded px-1 hover:bg-gray-800"
+              >
+                {task.title}
+              </div>
+            )}
           </DialogHeader>
           <div
             data-task={task.id}
@@ -248,5 +327,6 @@ export const Task = (props: Props) => {
         </DialogContent>
       </DialogPortal>
     </Dialog>
+    </>
   );
 };

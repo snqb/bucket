@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSync } from "./tinybase-hooks";
 import { Button } from "./components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export function SyncButton() {
   const {
@@ -10,15 +11,14 @@ export function SyncButton() {
     isConnecting,
     isSyncing,
     lastSync,
-    autoSync,
-    setAutoSync,
   } = useSync();
 
   const [showMenu, setShowMenu] = useState(false);
 
   const getStatusIcon = () => {
-    if (isSyncing) return "↻";
-    if (isConnecting) return "↻";
+    if (isSyncing || isConnecting) {
+      return <Loader2 className="h-3 w-3 animate-spin" />;
+    }
     if (syncStatus === "connected") return "●";
     return "○";
   };
@@ -46,7 +46,9 @@ export function SyncButton() {
         onClick={() => setShowMenu(!showMenu)}
         className="flex items-center gap-2 border border-gray-600 bg-gray-800 hover:bg-gray-700"
       >
-        <span className="font-bold text-sm">{getStatusIcon()}</span>
+        <span className="flex items-center justify-center font-bold text-sm">
+          {getStatusIcon()}
+        </span>
         <span className="font-medium text-xs">Sync</span>
       </Button>
 
@@ -63,20 +65,17 @@ export function SyncButton() {
             size="sm"
             onClick={syncNow}
             disabled={isConnecting}
-            className="mb-1 w-full justify-start"
+            className="w-full justify-start"
           >
-            {isConnecting || isSyncing ? "Syncing..." : "Sync Now"}
+            {isConnecting || isSyncing ? (
+              <>
+                <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                Syncing...
+              </>
+            ) : (
+              "Sync Now"
+            )}
           </Button>
-
-          <label className="flex cursor-pointer items-center gap-2 rounded p-2 text-sm hover:bg-gray-800">
-            <input
-              type="checkbox"
-              checked={autoSync}
-              onChange={(e) => setAutoSync(e.target.checked)}
-              className="h-4 w-4"
-            />
-            <span>Auto-sync on changes</span>
-          </label>
         </div>
       )}
 

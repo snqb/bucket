@@ -6,8 +6,6 @@ import App from "./App";
 import "@fontsource-variable/noto-sans-mono";
 import "./index.css";
 import { TinyBaseProvider } from "./TinyBaseProvider";
-import "./debug-storage";
-import "./debug-passphrase";
 
 const container = document.getElementById("root");
 if (container) {
