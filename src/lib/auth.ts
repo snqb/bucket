@@ -45,7 +45,6 @@ class Auth {
       // Use first 16 chars as user ID
       const userId = hashHex.substring(0, 16);
 
-      console.log('🔑 Derived user ID:', userId);
       return userId;
     } catch (error) {
       console.error('🔴 User ID derivation error:', error);
@@ -59,7 +58,6 @@ class Auth {
   generatePassphrase(): string {
     try {
       const mnemonic = generateMnemonic(wordlist, 128); // 128 bits = 12 words
-      console.log('🎲 Generated passphrase:', mnemonic);
 
       if (!mnemonic) {
         throw new Error('Failed to generate mnemonic');
@@ -92,9 +90,6 @@ class Auth {
       throw new Error('Invalid passphrase: cannot be empty');
     }
 
-    console.log('🔐 Setting user with passphrase...');
-    console.log('🔐 Passphrase word count:', trimmed.split(/\s+/).length);
-
     const userId = await this.deriveUserId(trimmed);
 
     this.currentUserId = userId;
@@ -104,7 +99,6 @@ class Auth {
     storage.set('bucket-userId', userId);
     storage.set('bucket-passphrase', trimmed);
 
-    console.log('🔐 User set:', userId);
     return userId;
   }
 
@@ -142,15 +136,11 @@ class Auth {
    * Clears in-memory state and storage
    */
   logout(): void {
-    console.log('🔐 Logging out...');
-
     this.currentUserId = null;
     this.currentPassphrase = null;
 
     storage.remove('bucket-userId');
     storage.remove('bucket-passphrase');
-
-    console.log('🔐 Logged out');
   }
 
   /**
@@ -165,12 +155,9 @@ class Auth {
       return false;
     }
 
-    console.log('🔐 Restoring user session...');
-
     this.currentUserId = userId;
     this.currentPassphrase = passphrase;
 
-    console.log('🔐 Session restored:', userId);
     return true;
   }
 
