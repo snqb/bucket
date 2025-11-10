@@ -23,9 +23,29 @@ import { Link, Route, Switch, useLocation } from "wouter";
 import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
 
 function App() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, authenticate } = useAuth();
+  const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false);
 
-  if (isLoading) {
+  // Auto-authenticate on first visit
+  useEffect(() => {
+    const autoAuth = async () => {
+      if (!isLoading && !isAuthenticated && !isAutoAuthenticating) {
+        setIsAutoAuthenticating(true);
+        try {
+          // Generate anonymous passphrase and auto-login
+          const { generatePassphrase } = await import('./tinybase-store');
+          const tempPassphrase = generatePassphrase();
+          await authenticate(tempPassphrase);
+        } catch (error) {
+          console.error('Auto-auth failed:', error);
+          setIsAutoAuthenticating(false);
+        }
+      }
+    };
+    autoAuth();
+  }, [isLoading, isAuthenticated, isAutoAuthenticating, authenticate]);
+
+  if (isLoading || isAutoAuthenticating) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
@@ -34,10 +54,6 @@ function App() {
         </div>
       </div>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <UserAuth onAuthenticated={() => {}} />;
   }
 
   return (
