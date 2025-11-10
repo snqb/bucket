@@ -50,35 +50,30 @@ class SyncManager {
     try {
       // Create WebSocket connection
       const wsUrl = `${WS_SERVER_URL}/${userId}`;
-      console.log('🔌 Connecting to sync server:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
 
       // Wait for WebSocket to open
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => {
-          reject(new Error('WebSocket connection timeout'));
-        }, 5000);
+          reject(new Error('Sync server unavailable (offline mode)'));
+        }, 3000); // Faster timeout for better UX
 
         this.ws!.onopen = () => {
-          console.log('✅ WebSocket connected');
           clearTimeout(timeout);
           resolve();
         };
 
         this.ws!.onerror = (error) => {
-          console.error('🔴 WebSocket error:', error);
           clearTimeout(timeout);
-          reject(error);
+          reject(new Error('Sync server unavailable (offline mode)'));
         };
       });
 
       // Create TinyBase synchronizer
-      console.log('🔄 Creating TinyBase synchronizer...');
       this.synchronizer = await createWsSynchronizer(store, this.ws, 5);
       await this.synchronizer.startSync();
 
-      console.log('✅ Sync started successfully');
       this.setStatus('connected');
       this.scheduleReconnect();
 
@@ -137,18 +132,17 @@ class SyncManager {
     if (!this.ws) return;
 
     this.ws.onclose = () => {
-      console.log('🔌 WebSocket closed, reconnecting in 2s...');
+      // WebSocket closed, schedule reconnect
       this.setStatus('disconnected');
       this.cleanup();
 
       this.reconnectTimer = setTimeout(() => {
         if (this.currentStore && this.currentUserId) {
-          console.log('🔄 Attempting to reconnect...');
-          this.connect(this.currentStore, this.currentUserId).catch(err => {
-            console.error('🔴 Reconnect failed:', err);
+          this.connect(this.currentStore, this.currentUserId).catch(() => {
+            // Silently fail, user can manually retry via sync button
           });
         }
-      }, 2000);
+      }, 5000); // Longer delay for less noise
     };
   }
 

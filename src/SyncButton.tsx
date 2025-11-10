@@ -38,13 +38,20 @@ export function SyncButton() {
     return `${Math.floor(hours / 24)}d ago`;
   };
 
+  const getStatusColor = () => {
+    if (syncStatus === "connected") return "text-green-400";
+    if (error || syncStatus === "error") return "text-red-400";
+    if (isConnecting) return "text-yellow-400";
+    return "text-gray-400";
+  };
+
   return (
     <div className="relative">
       <Button
         variant="ghost"
         size="sm"
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center gap-2 border border-gray-600 bg-gray-800 hover:bg-gray-700"
+        className={`flex items-center gap-2 border border-gray-600 bg-gray-900/90 backdrop-blur hover:bg-gray-800 ${getStatusColor()}`}
       >
         <span className="flex items-center justify-center font-bold text-sm">
           {getStatusIcon()}
