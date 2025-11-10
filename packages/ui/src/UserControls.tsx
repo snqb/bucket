@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useAuth, useLists } from "./tinybase-hooks";
+import { useAuth, useLists } from "@bucket/core";
 import { Button } from "./components/ui/button";
-import { generateQRData, store } from "./tinybase-store";
+import { generateQRData, store } from "@bucket/core";
 import * as QRCode from "qrcode";
 import { Download } from "lucide-react";
 

@@ -1,4 +1,4 @@
-import { useSync } from "./tinybase-hooks";
+import { useSync } from "@bucket/core";
 
 export const SyncStatus = () => {
   const { syncStatus } = useSync();

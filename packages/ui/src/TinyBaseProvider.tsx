@@ -1,5 +1,5 @@
 import { Provider } from "tinybase/ui-react";
-import { store } from "./tinybase-store";
+import { store } from "@bucket/core";
 
 interface TinyBaseProviderProps {
   children: React.ReactNode;

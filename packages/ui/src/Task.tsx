@@ -13,7 +13,7 @@ import { Button } from "./components/ui/button";
 import { Minus, Plus, Check } from "lucide-react";
 import Confetti from "react-confetti";
 
-import { useActions, useLists } from "./tinybase-hooks";
+import { useActions, useLists } from "@bucket/core";
 import type { Task as TaskType } from "./types";
 
 type Props = HTMLMotionProps<"div"> & {

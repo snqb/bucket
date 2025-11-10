@@ -1,7 +1,7 @@
 import { ChangeEventHandler, forwardRef, useState } from "react";
 
 import { Input } from "./components/ui/input";
-import { useActions } from "./tinybase-hooks";
+import { useActions } from "@bucket/core";
 import { cn } from "./lib/utils";
 import type { List } from "./types";
 

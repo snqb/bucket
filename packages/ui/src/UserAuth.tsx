@@ -7,7 +7,7 @@ import {
   getCurrentUser,
   generateQRData,
   parseQRData,
-} from "./tinybase-store";
+} from "@bucket/core";
 import * as QRCode from "qrcode";
 
 interface UserAuthProps {

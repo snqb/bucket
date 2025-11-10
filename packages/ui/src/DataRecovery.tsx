@@ -6,7 +6,7 @@ import {
   syncNow,
   createList,
   createTask,
-} from "./tinybase-store";
+} from "@bucket/core";
 import { syncManager } from "./lib/sync";
 
 export function DataRecovery() {

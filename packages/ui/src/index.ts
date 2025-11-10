@@ -10,8 +10,9 @@ export { DataRecovery } from './DataRecovery';
 export { default as ReloadPrompt } from './ReloadPrompt';
 export { TinyBaseProvider } from './TinyBaseProvider';
 
-// Export components
-export * from './components';
+// Export specific components
+export { AddListDialog } from './components/AddListDialog';
+export { Button } from './components/ui/button';
 
 // Export hooks
 export * from './hooks/useKeyboardShortcuts';
