@@ -1,6 +1,5 @@
 // UI Components from @bucket/ui
 import {
-  ReloadPrompt,
   SyncStatus,
   SyncButton,
   DataRecovery,
@@ -11,6 +10,9 @@ import {
   AddListDialog,
   Button,
 } from "@bucket/ui";
+
+// PWA-specific component (not in shared package)
+import ReloadPrompt from "../../packages/ui/src/ReloadPrompt";
 
 // Core logic from @bucket/core
 import {

@@ -7,7 +7,7 @@ import {
   createList,
   createTask,
 } from "@bucket/core";
-import { syncManager } from "./lib/sync";
+import { syncManager } from "@bucket/core";
 
 export function DataRecovery() {
   const [isOpen, setIsOpen] = useState(false);

@@ -7,7 +7,8 @@ export { UserControls } from './UserControls';
 export { SyncButton } from './SyncButton';
 export { SyncStatus } from './SyncStatus';
 export { DataRecovery } from './DataRecovery';
-export { default as ReloadPrompt } from './ReloadPrompt';
+// PWA-only component - not used in desktop app
+// export { default as ReloadPrompt } from './ReloadPrompt';
 export { TinyBaseProvider } from './TinyBaseProvider';
 
 // Export specific components
