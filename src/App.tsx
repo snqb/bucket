@@ -23,30 +23,43 @@ import { Link, Route, Switch, useLocation } from "wouter";
 import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
 
 function App() {
+  console.log("🚨 App function called");
   const { isAuthenticated, isLoading, authenticate } = useAuth();
+  console.log(`🔍 useAuth returned: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}`);
   const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false);
+  const hasAttemptedAuth = useRef(false);
 
-  // Auto-authenticate on first visit
+  // Auto-authenticate on first visit - run only once
   useEffect(() => {
+    console.log(`🔐 Auth state: isLoading=${isLoading}, isAuthenticated=${isAuthenticated}, isAutoAuthenticating=${isAutoAuthenticating}, hasAttemptedAuth=${hasAttemptedAuth.current}`);
+
     const autoAuth = async () => {
-      if (!isLoading && !isAuthenticated && !isAutoAuthenticating) {
+      // Only attempt auth once and only if not already authenticated
+      if (!hasAttemptedAuth.current && !isLoading && !isAuthenticated) {
+        console.log("🔑 Starting auto-authentication...");
+        hasAttemptedAuth.current = true;
         setIsAutoAuthenticating(true);
         try {
           // Generate anonymous passphrase and auto-login
           const { generatePassphrase } = await import('./tinybase-store');
           const tempPassphrase = generatePassphrase();
           await authenticate(tempPassphrase);
-          setIsAutoAuthenticating(false);
+          console.log('✅ Auto-authentication successful');
         } catch (error) {
-          console.error('Auto-auth failed:', error);
+          console.error('❌ Auto-auth failed:', error);
+        } finally {
           setIsAutoAuthenticating(false);
+          console.log('🏁 Auto-authentication complete, isAutoAuthenticating now false');
         }
       }
     };
     autoAuth();
-  }, [isLoading, isAuthenticated, isAutoAuthenticating, authenticate]);
+  }, [isLoading, isAuthenticated, authenticate]);
+
+  console.log(`🎯 Render check: isLoading=${isLoading}, isAutoAuthenticating=${isAutoAuthenticating}`);
 
   if (isLoading || isAutoAuthenticating) {
+    console.log(`⏳ Showing loading screen: isLoading=${isLoading}, isAutoAuthenticating=${isAutoAuthenticating}`);
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
@@ -56,6 +69,8 @@ function App() {
       </div>
     );
   }
+
+  console.log("🎉 Past loading screen, rendering main app");
 
   return (
     <>
@@ -92,14 +107,18 @@ const Bucket = () => {
   // Better loading logic to prevent premature empty state
   useEffect(() => {
     const checkInitialization = async () => {
+      console.log("🚀 Starting initialization check...");
       const hasData = hasLocalData();
       const hasStoredUser = !!(
         localStorage.getItem("bucket-userId") &&
         localStorage.getItem("bucket-passphrase")
       );
 
+      console.log(`📊 hasData: ${hasData}, hasStoredUser: ${hasStoredUser}`);
+
       if (hasData) {
         // Have data, show immediately
+        console.log("✅ Has data, showing UI immediately");
         setIsInitializing(false);
       } else if (hasStoredUser) {
         // User exists but no data yet, wait longer for potential sync
@@ -115,8 +134,10 @@ const Bucket = () => {
         );
       } else {
         // First-time user, shorter delay
+        console.log("👋 First-time user, short delay");
         await new Promise((resolve) =>
           setTimeout(() => {
+            console.log("⏰ Short delay done, showing UI");
             setIsInitializing(false);
             resolve(undefined);
           }, 500)
