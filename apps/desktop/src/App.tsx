@@ -90,28 +90,31 @@ const Bucket = () => {
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    const checkInitialization = async () => {
-      const hasData = hasLocalData();
-      const hasStoredUser = !!(
-        localStorage.getItem("bucket-userId") &&
-        localStorage.getItem("bucket-passphrase")
-      );
+    const hasData = hasLocalData();
+    const hasStoredUser = !!(
+      localStorage.getItem("bucket-userId") &&
+      localStorage.getItem("bucket-passphrase")
+    );
 
-      if (hasData) {
+    console.log("🔍 Init check:", { hasData, hasStoredUser, isLoading });
+
+    if (hasData) {
+      console.log("✅ Has data, hiding loading immediately");
+      setIsInitializing(false);
+      return;
+    } else if (hasStoredUser) {
+      console.log("⏳ Has stored user, waiting 2.5s for sync...");
+      const timer = setTimeout(() => {
+        console.log("⏰ Timeout complete, hiding loading screen");
         setIsInitializing(false);
-      } else if (hasStoredUser) {
-        const timer = setTimeout(() => {
-          setIsInitializing(false);
-        }, 2500);
-        return () => clearTimeout(timer);
-      } else {
-        const timer = setTimeout(() => setIsInitializing(false), 500);
-        return () => clearTimeout(timer);
-      }
-    };
-
-    checkInitialization();
-  }, []);
+      }, 2500);
+      return () => clearTimeout(timer);
+    } else {
+      console.log("🆕 New user, quick timeout");
+      const timer = setTimeout(() => setIsInitializing(false), 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isLoading]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -156,11 +159,15 @@ const Bucket = () => {
 
   // Empty state
   if (isInitializing || isLoading) {
+    console.log("🔄 Showing loading screen:", { isInitializing, isLoading });
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
         <div className="text-center">
           <div className="font-bold mb-4 text-4xl">...</div>
           <div className="text-sm text-gray-400">Loading...</div>
+          <div className="text-xs text-gray-600 mt-2">
+            isInitializing: {isInitializing.toString()}, isLoading: {isLoading.toString()}
+          </div>
         </div>
       </div>
     );

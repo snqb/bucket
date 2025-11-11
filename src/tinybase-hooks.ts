@@ -258,15 +258,11 @@ export const useAuth = () => {
       const currentUserId = localStorage.getItem("bucket-userId") || "";
       const currentPassphrase = localStorage.getItem("bucket-passphrase") || "";
 
-      if (
-        currentUserId !== authState.userId ||
-        currentPassphrase !== authState.passphrase
-      ) {
-        setAuthState({
-          userId: currentUserId,
-          passphrase: currentPassphrase,
-        });
-      }
+      // Always sync with localStorage to ensure we pick up auth changes
+      setAuthState({
+        userId: currentUserId,
+        passphrase: currentPassphrase,
+      });
     }, 100);
 
     window.addEventListener("storage", handleStorageChange);
@@ -274,7 +270,7 @@ export const useAuth = () => {
       window.removeEventListener("storage", handleStorageChange);
       clearInterval(authCheckInterval);
     };
-  }, [authState.userId, authState.passphrase]);
+  }, []);
 
   const authenticate = useCallback(async (passphrase: string) => {
     const userId = await setUser(passphrase);

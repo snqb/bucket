@@ -1,7 +1,7 @@
 // Re-export all UI components
 export { default as Screen } from './Screen';
 export { Task } from './Task';
-export { Adder } from './Adder';
+export { default as Adder } from './Adder';
 export { UserAuth } from './UserAuth';
 export { UserControls } from './UserControls';
 export { SyncButton } from './SyncButton';

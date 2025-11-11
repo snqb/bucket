@@ -14,7 +14,7 @@ import { Minus, Plus, Check } from "lucide-react";
 import Confetti from "react-confetti";
 
 import { useActions, useLists } from "@bucket/core";
-import type { Task as TaskType } from "./types";
+import type { Task as TaskType } from "@bucket/core";
 
 type Props = HTMLMotionProps<"div"> & {
   task: TaskType;

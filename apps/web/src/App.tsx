@@ -11,9 +11,6 @@ import {
   Button,
 } from "@bucket/ui";
 
-// PWA-specific component (not in shared package)
-import ReloadPrompt from "../../packages/ui/src/ReloadPrompt";
-
 // Core logic from @bucket/core
 import {
   useLists,
@@ -76,8 +73,6 @@ function App() {
         <Route path="/" component={Bucket} />
         <Route path="/cemetery" component={Cemetery} />
       </Switch>
-
-      <ReloadPrompt />
     </>
   );
 }

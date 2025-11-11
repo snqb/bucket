@@ -6,7 +6,7 @@ import { useListTasks } from "@bucket/core";
 import { Task } from "./Task";
 import { Button } from "./components/ui/button";
 import { X } from "lucide-react";
-import type { List, BucketActions } from "./types";
+import type { List, BucketActions } from "@bucket/core";
 
 type Props = HTMLMotionProps<"div"> & {
   list: List;

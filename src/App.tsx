@@ -36,6 +36,7 @@ function App() {
           const { generatePassphrase } = await import('./tinybase-store');
           const tempPassphrase = generatePassphrase();
           await authenticate(tempPassphrase);
+          setIsAutoAuthenticating(false);
         } catch (error) {
           console.error('Auto-auth failed:', error);
           setIsAutoAuthenticating(false);
@@ -105,15 +106,21 @@ const Bucket = () => {
         console.log(
           "🔄 User exists but no data, waiting for potential sync...",
         );
-        const timer = setTimeout(() => {
-          console.log("⏰ Done waiting, showing UI");
-          setIsInitializing(false);
-        }, 2500);
-        return () => clearTimeout(timer);
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            console.log("⏰ Done waiting, showing UI");
+            setIsInitializing(false);
+            resolve(undefined);
+          }, 2500)
+        );
       } else {
         // First-time user, shorter delay
-        const timer = setTimeout(() => setIsInitializing(false), 500);
-        return () => clearTimeout(timer);
+        await new Promise((resolve) =>
+          setTimeout(() => {
+            setIsInitializing(false);
+            resolve(undefined);
+          }, 500)
+        );
       }
     };
 
