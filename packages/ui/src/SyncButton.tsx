@@ -60,7 +60,7 @@ export function SyncButton() {
       </Button>
 
       {showMenu && (
-        <div className="absolute right-0 top-full z-50 mt-1 w-48 rounded-md border border-gray-800 bg-gray-900 p-2 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-1 w-48 rounded-md border border-gray-800 bg-gray-900 p-2 shadow-lg">
           <div className="mb-2 text-xs text-gray-400">
             Last sync: {getLastSyncText()}
           </div>

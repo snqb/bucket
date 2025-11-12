@@ -1,6 +1,7 @@
 // UI Components from @bucket/ui
 import {
   SyncStatus,
+  SyncImport,
   SyncButton,
   DataRecovery,
   UserAuth,
@@ -263,8 +264,11 @@ const Bucket = () => {
             )}
           </p>
 
-          <div className="mb-6">
-            <SyncStatus />
+          <div className="mb-6 space-y-3">
+            <SyncImport />
+            <div className="text-center">
+              <SyncStatus />
+            </div>
           </div>
 
           <AddListDialog
@@ -311,11 +315,9 @@ const Bucket = () => {
     <div className="flex h-screen w-screen flex-col bg-black">
       {/* Desktop Grid View - Always visible on desktop */}
       <div className="hidden md:flex md:h-screen md:w-screen md:flex-col md:bg-black">
-        <div className="border-b border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <h1 className="font-bold text-2xl text-white">All Lists</h1>
-            <div className="flex items-center gap-4">
-              <SyncStatus />
+        <div className="p-6 pb-4">
+          <div className="flex items-center justify-end">
+            <div className="flex items-center gap-3">
               <div className="flex gap-2">
                 <Link
                   to="/cemetery"

@@ -1,34 +1,23 @@
-// Desktop app - uses same components as web!
-import {
-  SyncStatus,
-  SyncButton,
-  DataRecovery,
-  UserAuth,
-  UserControls,
-  Screen,
-  useKeyboardShortcuts,
-  AddListDialog,
-  Button,
-} from "@bucket/ui";
-
-import {
-  useLists,
-  useCemeteryItems,
-  useActions,
-  useAuth,
-  hasLocalData,
-  randomEmoji,
-  generatePassphrase,
-} from "@bucket/core";
-
-import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
-import { Link, Route, Switch, useLocation } from "wouter";
-import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
+import { TinyBaseProvider, Screen } from "@bucket/ui";
+import { useAuth, generatePassphrase, useLists, createList } from "@bucket/core";
+import { useEffect, useState } from "react";
+import { Button } from "@bucket/ui";
+import { Plus, ArrowLeft, Copy, Check, Download, Upload, X } from "lucide-react";
 
 function App() {
   const { isAuthenticated, isLoading, authenticate } = useAuth();
   const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false);
+  const [selectedListId, setSelectedListId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newListTitle, setNewListTitle] = useState("");
+  const [showSync, setShowSync] = useState(false);
+  const [syncPassphrase, setSyncPassphrase] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const lists = useLists();
+  const selectedList = lists.find((l) => l.id === selectedListId);
+
+  const currentPassphrase = localStorage.getItem('bucket-passphrase') || '';
 
   // Auto-authenticate on first visit
   useEffect(() => {
@@ -39,13 +28,40 @@ function App() {
           const tempPassphrase = generatePassphrase();
           await authenticate(tempPassphrase);
         } catch (error) {
-          console.error('Auto-auth failed:', error);
+          console.error("Auto-auth failed:", error);
           setIsAutoAuthenticating(false);
         }
       }
     };
     autoAuth();
   }, [isLoading, isAuthenticated, isAutoAuthenticating, authenticate]);
+
+  const handleCreateList = () => {
+    if (newListTitle.trim()) {
+      const newList = createList(newListTitle.trim(), "📝");
+      setNewListTitle("");
+      setIsCreating(false);
+      setSelectedListId(newList.id);
+    }
+  };
+
+  const handleCopyPassphrase = () => {
+    navigator.clipboard.writeText(currentPassphrase);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleSyncPassphrase = async () => {
+    if (syncPassphrase.trim()) {
+      try {
+        await authenticate(syncPassphrase.trim());
+        setShowSync(false);
+        setSyncPassphrase("");
+      } catch (error) {
+        console.error("Sync failed:", error);
+      }
+    }
+  };
 
   if (isLoading || isAutoAuthenticating) {
     return (
@@ -58,285 +74,236 @@ function App() {
     );
   }
 
-  return (
-    <>
-      <div className="fixed left-4 top-4 z-50">
-        <SyncButton />
+  if (!isAuthenticated) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-black">
+        <div className="text-sm text-gray-400">Not authenticated</div>
       </div>
+    );
+  }
 
-      <DataRecovery />
+  // Show screen picker
+  if (!selectedListId || !selectedList) {
+    return (
+      <div className="flex h-screen w-full flex-col bg-gradient-to-br from-gray-950 to-black p-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-white mb-1">Bucket</h1>
+          <p className="text-sm text-gray-400">Your quick-access todo lists</p>
+        </div>
 
-      <Switch>
-        <Route path="/" component={Bucket} />
-        <Route path="/cemetery" component={Cemetery} />
-      </Switch>
-    </>
+        {/* Sync Section */}
+        {!showSync ? (
+          <div className="mb-6">
+            <Button
+              onClick={() => setShowSync(true)}
+              variant="outline"
+              size="sm"
+              className="w-full border-gray-700 bg-gray-900/50 text-gray-300 hover:bg-gray-800 hover:text-white"
+            >
+              <Download className="mr-2 h-3.5 w-3.5" />
+              Sync with another device
+            </Button>
+          </div>
+        ) : (
+          <div className="mb-6 rounded-xl border border-gray-700 bg-gray-900/80 p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-sm font-semibold text-white">Sync Settings</h3>
+              <Button
+                onClick={() => setShowSync(false)}
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 text-gray-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Export passphrase */}
+            <div className="mb-4">
+              <label className="mb-2 block text-xs font-medium text-gray-300">
+                Share this key with your other devices
+              </label>
+              <div className="flex gap-2">
+                <input
+                  readOnly
+                  value={currentPassphrase}
+                  className="flex-1 rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-xs text-white font-mono"
+                />
+                <Button
+                  onClick={handleCopyPassphrase}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="mr-1.5 h-3.5 w-3.5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="mr-1.5 h-3.5 w-3.5" />
+                      Copy
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Divider */}
+            <div className="relative my-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-700"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-gray-900 px-2 text-gray-500">or</span>
+              </div>
+            </div>
+
+            {/* Import passphrase */}
+            <div>
+              <label className="mb-2 block text-xs font-medium text-gray-300">
+                Import data from another device
+              </label>
+              <div className="flex gap-2">
+                <input
+                  autoFocus
+                  type="text"
+                  value={syncPassphrase}
+                  onChange={(e) => setSyncPassphrase(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSyncPassphrase()}
+                  placeholder="Paste your sync key here..."
+                  className="flex-1 rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-xs text-white font-mono outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                />
+                <Button
+                  onClick={handleSyncPassphrase}
+                  size="sm"
+                  disabled={!syncPassphrase.trim()}
+                  className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
+                >
+                  <Upload className="mr-1.5 h-3.5 w-3.5" />
+                  Import
+                </Button>
+              </div>
+              <p className="mt-2 text-xs text-gray-500">
+                Your lists and todos will sync automatically
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Lists Section */}
+        <div className="flex-1 overflow-auto">
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            Your Lists
+          </h2>
+          <div className="flex flex-col gap-2">
+            {lists.length === 0 && !isCreating && (
+              <div className="rounded-lg border border-dashed border-gray-700 p-6 text-center">
+                <p className="text-sm text-gray-400 mb-3">No lists yet</p>
+                <Button
+                  onClick={() => setIsCreating(true)}
+                  size="sm"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="mr-1.5 h-3.5 w-3.5" />
+                  Create your first list
+                </Button>
+              </div>
+            )}
+
+            {lists.map((list) => (
+              <Button
+                key={list.id}
+                onClick={() => setSelectedListId(list.id)}
+                variant="outline"
+                className="h-auto justify-start border-gray-700 bg-gray-900/50 py-3 text-left hover:bg-gray-800 hover:border-gray-600"
+              >
+                <span className="mr-3 text-2xl">{list.emoji}</span>
+                <span className="text-sm font-medium text-white">{list.title}</span>
+              </Button>
+            ))}
+
+            {isCreating ? (
+              <div className="flex gap-2 rounded-lg border border-gray-700 bg-gray-900/50 p-3">
+                <input
+                  autoFocus
+                  type="text"
+                  value={newListTitle}
+                  onChange={(e) => setNewListTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleCreateList();
+                    if (e.key === "Escape") setIsCreating(false);
+                  }}
+                  placeholder="List name..."
+                  className="flex-1 rounded border-0 bg-gray-800 px-3 py-2 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  onClick={handleCreateList}
+                  size="sm"
+                  disabled={!newListTitle.trim()}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Create
+                </Button>
+                <Button
+                  onClick={() => setIsCreating(false)}
+                  size="sm"
+                  variant="ghost"
+                  className="text-gray-400 hover:text-white"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : lists.length > 0 && (
+              <Button
+                onClick={() => setIsCreating(true)}
+                variant="ghost"
+                className="justify-start border border-dashed border-gray-700 bg-transparent py-3 text-gray-400 hover:border-gray-600 hover:bg-gray-900/50 hover:text-white"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                New List
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show selected screen
+  return (
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-gradient-to-br from-gray-950 to-black">
+      {/* Header */}
+      <div className="flex items-center justify-between border-b border-gray-700 px-6 py-4">
+        <div className="flex items-center gap-3">
+          <span className="text-3xl">{selectedList.emoji}</span>
+          <h1 className="text-xl font-semibold text-white">{selectedList.title}</h1>
+        </div>
+        <Button
+          onClick={() => setSelectedListId(null)}
+          variant="ghost"
+          size="sm"
+          className="text-gray-400 hover:text-white"
+        >
+          <ArrowLeft className="mr-1.5 h-4 w-4" />
+          Back
+        </Button>
+      </div>
+      {/* Content */}
+      <div className="flex-1 overflow-auto">
+        <Screen list={selectedList} />
+      </div>
+    </div>
   );
 }
 
-// Same Bucket component as web app
-const Bucket = () => {
-  const lists = useLists();
-  const actions = useActions();
-  const { isLoading } = useAuth();
-  const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
-  const [showMap, setShowMap] = useState(false);
-  const [editingListId, setEditingListId] = useState<string | null>(null);
-  const [editingListTitle, setEditingListTitle] = useState("");
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [editingMobileTitle, setEditingMobileTitle] = useState(false);
-  const [mobileTitle, setMobileTitle] = useState("");
-  const [showAddListDialog, setShowAddListDialog] = useState(false);
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    const hasData = hasLocalData();
-    const hasStoredUser = !!(
-      localStorage.getItem("bucket-userId") &&
-      localStorage.getItem("bucket-passphrase")
-    );
-
-    if (hasData) {
-      setIsInitializing(false);
-      return;
-    } else if (hasStoredUser) {
-      const timer = setTimeout(() => {
-        setIsInitializing(false);
-      }, 2500);
-      return () => clearTimeout(timer);
-    } else {
-      const timer = setTimeout(() => setIsInitializing(false), 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isLoading]);
-
-  // Keyboard shortcuts
-  useKeyboardShortcuts([
-    {
-      key: "n",
-      handler: () => setShowAddListDialog(true),
-      description: "New list",
-    },
-    {
-      key: "c",
-      handler: () => setLocation("/cemetery"),
-      description: "Cemetery",
-    },
-    {
-      key: "m",
-      handler: () => setShowMap(!showMap),
-      description: "Toggle map",
-    },
-    {
-      key: "ArrowLeft",
-      handler: () =>
-        setCurrentScreenIndex((prev) => (prev > 0 ? prev - 1 : prev)),
-      description: "Previous list",
-    },
-    {
-      key: "ArrowRight",
-      handler: () =>
-        setCurrentScreenIndex((prev) =>
-          prev < lists.length - 1 ? prev + 1 : prev
-        ),
-      description: "Next list",
-    },
-    {
-      key: "Escape",
-      handler: () => {
-        setShowAddListDialog(false);
-        setEditingListId(null);
-      },
-      description: "Close dialogs",
-    },
-  ]);
-
-  // Empty state
-  if (isInitializing || isLoading) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="font-bold mb-4 text-4xl">...</div>
-          <div className="text-sm text-gray-400">Loading...</div>
-        </div>
-      </div>
-    );
-  }
-
-  if (lists.length === 0) {
-    return (
-      <div className="flex h-screen w-screen flex-col items-center justify-center bg-black">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", duration: 0.5 }}
-          className="mb-8 text-8xl"
-        >
-          🪣
-        </motion.div>
-        <h1 className="font-bold mb-2 text-2xl text-white">Welcome to Bucket</h1>
-        <p className="mb-8 text-gray-400">Start by creating your first list</p>
-        <Button
-          onClick={() => setShowAddListDialog(true)}
-          className="bg-blue-600 text-white hover:bg-blue-700"
-        >
-          + Create List
-        </Button>
-
-        <AddListDialog
-          isOpen={showAddListDialog}
-          onClose={() => setShowAddListDialog(false)}
-          onAdd={(title, emoji, color) => {
-            actions.addList(title, emoji, color);
-            setShowAddListDialog(false);
-          }}
-        />
-
-        <UserControls className="fixed bottom-4 right-4" />
-      </div>
-    );
-  }
-
-  const currentList = lists[currentScreenIndex];
-
+function AppWithProvider() {
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black">
-      <div className="fixed right-4 top-4 z-50">
-        <UserControls />
-      </div>
-
-      {/* Desktop view */}
-      <div className="hidden h-full w-full md:block">
-        <Screen key={currentList.id} list={currentList} />
-      </div>
-
-      {/* Add List Dialog */}
-      <AddListDialog
-        isOpen={showAddListDialog}
-        onClose={() => setShowAddListDialog(false)}
-        onAdd={(title, emoji, color) => {
-          actions.addList(title, emoji, color);
-          setShowAddListDialog(false);
-        }}
-      />
-    </div>
+    <TinyBaseProvider>
+      <App />
+    </TinyBaseProvider>
   );
-};
+}
 
-const Cemetery = () => {
-  const items = useCemeteryItems();
-  const actions = useActions();
-  const lists = useLists();
-  const [, setLocation] = useLocation();
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [showRestoreDialog, setShowRestoreDialog] = useState(false);
-
-  return (
-    <div className="flex h-screen w-screen flex-col bg-black p-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="font-bold mb-2 text-3xl text-white">🪦 Cemetery</h1>
-          <p className="text-gray-400">
-            {items.length} deleted {items.length === 1 ? "item" : "items"}
-          </p>
-        </div>
-        <Button
-          onClick={() => setLocation("/")}
-          variant="outline"
-          className="border-gray-600 text-white hover:bg-gray-800"
-        >
-          ← Back
-        </Button>
-      </div>
-
-      {items.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <div className="mb-4 text-6xl">✨</div>
-            <p className="text-gray-400">No deleted items</p>
-          </div>
-        </div>
-      ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="rounded-lg border border-gray-700 bg-gray-900 p-4"
-            >
-              <h3 className="font-medium mb-2 text-white">
-                {item.originalTitle}
-              </h3>
-              {item.originalDescription && (
-                <p className="mb-2 text-sm text-gray-400">
-                  {item.originalDescription}
-                </p>
-              )}
-              <div className="mb-4 text-sm text-gray-500">
-                Progress: {item.originalProgress}%
-              </div>
-              <div className="flex gap-2">
-                <Button
-                  onClick={() => {
-                    setSelectedItemId(item.id);
-                    setShowRestoreDialog(true);
-                  }}
-                  size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
-                >
-                  ↺ Restore
-                </Button>
-                <Button
-                  onClick={() => actions.permanentlyDelete(item.id)}
-                  size="sm"
-                  variant="outline"
-                  className="border-red-600 text-red-400 hover:bg-red-900"
-                >
-                  × Delete
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Restore dialog */}
-      {showRestoreDialog && selectedItemId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-          <div className="w-full max-w-md rounded-lg border border-gray-700 bg-gray-900 p-6">
-            <h2 className="font-bold mb-4 text-xl text-white">
-              Restore to which list?
-            </h2>
-            <div className="space-y-2">
-              {lists.map((list) => (
-                <Button
-                  key={list.id}
-                  onClick={() => {
-                    actions.restoreFromCemetery(selectedItemId, list.id);
-                    setShowRestoreDialog(false);
-                    setSelectedItemId(null);
-                  }}
-                  variant="outline"
-                  className="w-full justify-start border-gray-600 text-white hover:bg-gray-800"
-                >
-                  {list.emoji} {list.title}
-                </Button>
-              ))}
-            </div>
-            <Button
-              onClick={() => {
-                setShowRestoreDialog(false);
-                setSelectedItemId(null);
-              }}
-              variant="outline"
-              className="mt-4 w-full border-gray-600 text-gray-400 hover:bg-gray-800"
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default App;
+export default AppWithProvider;

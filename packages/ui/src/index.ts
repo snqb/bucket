@@ -6,6 +6,7 @@ export { UserAuth } from './UserAuth';
 export { UserControls } from './UserControls';
 export { SyncButton } from './SyncButton';
 export { SyncStatus } from './SyncStatus';
+export { SyncImport } from './SyncImport';
 export { DataRecovery } from './DataRecovery';
 // PWA-only component - not used in desktop app
 // export { default as ReloadPrompt } from './ReloadPrompt';

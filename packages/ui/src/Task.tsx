@@ -130,13 +130,12 @@ export const Task = (props: Props) => {
         </div>
       )}
       <Dialog modal={false}>
-        <div className="flex w-full select-none items-center gap-3 py-2">
         <motion.div
-          className="flex flex-1 items-center gap-3"
+          className="w-full select-none rounded-lg border border-gray-700 bg-gray-900/50 p-4 hover:border-gray-600 transition-colors"
           style={{ opacity }}
         >
           {isEditing ? (
-            <div className="flex flex-1 items-center gap-2">
+            <div className="flex items-center gap-2">
               <input
                 type="text"
                 value={editTitle}
@@ -145,94 +144,97 @@ export const Task = (props: Props) => {
                   if (e.key === "Enter") handleEditSave();
                   if (e.key === "Escape") handleEditCancel();
                 }}
-                className="flex-1 rounded bg-gray-700 p-1 text-sm text-white"
+                className="flex-1 rounded-lg border border-gray-600 bg-gray-800 px-3 py-2 text-base text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 autoFocus
               />
               <Button
                 size="sm"
                 onClick={handleEditSave}
-                className="h-6 w-6 bg-green-600 p-0 text-xs text-white"
+                className="h-8 w-8 bg-green-600 p-0 hover:bg-green-700"
               >
-                ✓
+                <Check className="h-4 w-4" />
               </Button>
               <Button
                 size="sm"
                 onClick={handleEditCancel}
-                className="h-6 w-6 bg-red-600 p-0 text-xs text-white"
+                className="h-8 w-8 bg-red-600 p-0 hover:bg-red-700"
               >
                 ✕
               </Button>
             </div>
           ) : (
-            <>
-              <div className="flex flex-1 flex-col gap-1">
-                <div className="flex items-center gap-3">
-                  <DialogTrigger asChild>
-                    <p
-                      className="max-w-[21ch] cursor-pointer break-words text-left text-lg hover:text-blue-400 md:rounded md:px-1 md:hover:bg-gray-700 md:hover:bg-opacity-50"
-                      onDoubleClick={() => setIsEditing(true)}
-                      onTouchStart={handleTouchStart}
-                      onTouchEnd={handleTouchEnd}
-                      title="Double-click to edit (desktop) or long-press (mobile)"
-                    >
-                      {task.title}
-                    </p>
-                  </DialogTrigger>
-                  <div className="flex flex-1 items-center gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        const newProgress = Math.max(0, localProgress - 10);
-                        setLocalProgress(newProgress);
-                        saveProgress(newProgress);
-                      }}
-                      className="h-6 w-6 bg-gray-700 p-0 text-white hover:bg-gray-600"
-                      aria-label="Decrease progress"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </Button>
-                    <div className="flex-1">
-                      <Slider
-                        value={[localProgress]}
-                        onValueChange={(value) => {
-                          setLocalProgress(value[0]);
-                          saveProgress(value[0]);
-                        }}
-                        max={100}
-                        step={1}
-                        className="flex-1"
-                        aria-label={`Progress: ${localProgress}%`}
-                      />
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        const newProgress = Math.min(100, localProgress + 10);
-                        setLocalProgress(newProgress);
-                        saveProgress(newProgress);
-                      }}
-                      className="h-6 w-6 bg-gray-700 p-0 text-white hover:bg-gray-600"
-                      aria-label="Increase progress"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                    <span className="w-10 text-right text-xs text-gray-400">
-                      {localProgress}%
-                    </span>
-                  </div>
-                </div>
+            <div className="flex flex-col gap-3">
+              {/* Title and description */}
+              <div className="flex flex-col gap-1.5">
+                <DialogTrigger asChild>
+                  <p
+                    className="cursor-pointer text-base font-medium text-white hover:text-blue-400 transition-colors"
+                    onDoubleClick={() => setIsEditing(true)}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    title="Double-click to edit (desktop) or long-press (mobile)"
+                  >
+                    {task.title}
+                  </p>
+                </DialogTrigger>
                 {lastDescriptionLine && (
                   <DialogTrigger asChild>
-                    <p className="max-w-[30ch] cursor-pointer truncate text-xs text-gray-400 opacity-75 hover:text-blue-400">
+                    <p className="cursor-pointer truncate text-sm text-gray-400 hover:text-blue-400 transition-colors">
                       {lastDescriptionLine}
                     </p>
                   </DialogTrigger>
                 )}
               </div>
-            </>
+
+              {/* Progress bar - much larger and more visible */}
+              <div className="flex items-center gap-3">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const newProgress = Math.max(0, localProgress - 10);
+                    setLocalProgress(newProgress);
+                    saveProgress(newProgress);
+                  }}
+                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
+                  aria-label="Decrease progress"
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+
+                <div className="flex-1">
+                  <Slider
+                    value={[localProgress]}
+                    onValueChange={(value) => {
+                      setLocalProgress(value[0]);
+                      saveProgress(value[0]);
+                    }}
+                    max={100}
+                    step={1}
+                    className="flex-1"
+                    aria-label={`Progress: ${localProgress}%`}
+                  />
+                </div>
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const newProgress = Math.min(100, localProgress + 10);
+                    setLocalProgress(newProgress);
+                    saveProgress(newProgress);
+                  }}
+                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
+                  aria-label="Increase progress"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+
+                <span className="w-12 text-right text-sm font-medium text-gray-300">
+                  {localProgress}%
+                </span>
+              </div>
+            </div>
           )}
         </motion.div>
-      </div>
 
       <DialogPortal>
         <DialogContent className="bg-black">

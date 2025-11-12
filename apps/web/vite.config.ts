@@ -84,7 +84,7 @@ export default defineConfig({
     target: "safari11",
   },
   server: {
-    port: 4000,
+    port: 4999,
   },
   test: {
     environment: "jsdom",

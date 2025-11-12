@@ -35,7 +35,7 @@ const Screen = ({ list, actions, ...divProps }: Props) => {
 
   return (
     <motion.div
-      className={`m-2 flex flex-col items-stretch gap-3 overflow-hidden border border-gray-600 bg-opacity-15 px-5 pb-9 pt-6 md:px-8`}
+      className={`flex flex-col items-stretch gap-4 overflow-hidden bg-opacity-15 p-6`}
       style={{
         background: bg,
       }}
@@ -48,7 +48,7 @@ const Screen = ({ list, actions, ...divProps }: Props) => {
       {...divProps}
     >
       {/* Header with title and emoji - only on desktop */}
-      <div className="mb-4 hidden items-center gap-2 border-b border-gray-500 pb-2 md:flex">
+      <div className="mb-2 hidden items-center gap-2 border-b border-gray-500 pb-3 md:flex">
         <span className="text-2xl">{list.emoji}</span>
         {isEditingTitle ? (
           <div className="flex items-center gap-2 flex-1">
@@ -97,7 +97,7 @@ const Screen = ({ list, actions, ...divProps }: Props) => {
         )}
       </div>
 
-      <div className="flex flex-col items-stretch gap-2">
+      <div className="flex flex-col items-stretch gap-3">
         <AnimatePresence initial={false}>
           {todos.map((task) => (
             <Task
@@ -119,7 +119,7 @@ const Screen = ({ list, actions, ...divProps }: Props) => {
             />
           ))}
         </AnimatePresence>
-        <Adder where={list} className="mb-2" />
+        <Adder where={list} className="mt-1" />
       </div>
     </motion.div>
   );
