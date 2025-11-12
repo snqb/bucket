@@ -1,4 +1,11 @@
-import { TinyBaseProvider, Screen } from "@bucket/ui";
+import {
+  TinyBaseProvider,
+  Screen,
+  CommandPalette,
+  KeyboardHints,
+  useKeyboardShortcuts,
+  type Command,
+} from "@bucket/ui";
 import { useAuth, generatePassphrase, useLists, createList } from "@bucket/core";
 import { useEffect, useState } from "react";
 import { Button } from "@bucket/ui";
@@ -13,6 +20,8 @@ function App() {
   const [showSync, setShowSync] = useState(false);
   const [syncPassphrase, setSyncPassphrase] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showKeyboardHints, setShowKeyboardHints] = useState(false);
 
   const lists = useLists();
   const selectedList = lists.find((l) => l.id === selectedListId);
@@ -63,6 +72,89 @@ function App() {
     }
   };
 
+  // Define commands for command palette
+  const commands: Command[] = [
+    {
+      id: "new-list",
+      label: "Create New List",
+      description: "Add a new list to your bucket",
+      icon: "📝",
+      shortcut: "N",
+      action: () => setIsCreating(true),
+      category: "Actions",
+    },
+    {
+      id: "toggle-sync",
+      label: "Toggle Sync Panel",
+      description: "Show/hide sync with other devices",
+      icon: "🔄",
+      shortcut: "S",
+      action: () => setShowSync(!showSync),
+      category: "Actions",
+    },
+    {
+      id: "back-to-lists",
+      label: "Back to Lists",
+      description: "Return to list picker",
+      icon: "←",
+      shortcut: "Esc",
+      action: () => setSelectedListId(null),
+      category: "Navigation",
+    },
+    {
+      id: "keyboard-shortcuts",
+      label: "Show Keyboard Shortcuts",
+      description: "View all available shortcuts",
+      icon: "⌨️",
+      shortcut: "?",
+      action: () => setShowKeyboardHints(true),
+      category: "Help",
+    },
+  ];
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts(
+    [
+      {
+        key: "k",
+        meta: true,
+        handler: () => setShowCommandPalette(true),
+        description: "Open command palette",
+      },
+      {
+        key: "?",
+        shift: true,
+        handler: () => setShowKeyboardHints(!showKeyboardHints),
+        description: "Toggle keyboard shortcuts",
+      },
+      {
+        key: "n",
+        handler: () => setIsCreating(true),
+        description: "Create new list",
+      },
+      {
+        key: "s",
+        handler: () => setShowSync(!showSync),
+        description: "Toggle sync panel",
+      },
+      {
+        key: "Escape",
+        handler: () => {
+          if (selectedListId) {
+            setSelectedListId(null);
+          } else {
+            setShowCommandPalette(false);
+            setShowKeyboardHints(false);
+            setShowSync(false);
+            setIsCreating(false);
+          }
+        },
+        description: "Close dialogs or go back",
+      },
+    ],
+    true
+  );
+
   if (isLoading || isAutoAuthenticating) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-black">
@@ -86,10 +178,33 @@ function App() {
   if (!selectedListId || !selectedList) {
     return (
       <div className="flex h-screen w-full flex-col bg-gradient-to-br from-gray-950 to-black p-6">
+        {/* Command Palette */}
+        <CommandPalette
+          isOpen={showCommandPalette}
+          onClose={() => setShowCommandPalette(false)}
+          commands={commands}
+        />
+
+        {/* Keyboard Hints */}
+        <KeyboardHints
+          isOpen={showKeyboardHints}
+          onClose={() => setShowKeyboardHints(false)}
+        />
+
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-white mb-1">Bucket</h1>
-          <p className="text-sm text-gray-400">Your quick-access todo lists</p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-white mb-1">Bucket</h1>
+            <p className="text-sm text-gray-400">Your quick-access todo lists</p>
+          </div>
+          <button
+            onClick={() => setShowKeyboardHints(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-700 bg-gray-900/50 text-gray-400 hover:text-white hover:border-gray-600 hover:bg-gray-800 transition-all text-xs"
+            title="Keyboard shortcuts (press ?)"
+          >
+            <span className="text-sm">⌨️</span>
+            <kbd className="px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-[10px]">?</kbd>
+          </button>
         </div>
 
         {/* Sync Section */}
@@ -274,21 +389,44 @@ function App() {
   // Show selected screen
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-gradient-to-br from-gray-950 to-black">
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        commands={commands}
+      />
+
+      {/* Keyboard Hints */}
+      <KeyboardHints
+        isOpen={showKeyboardHints}
+        onClose={() => setShowKeyboardHints(false)}
+      />
+
       {/* Header */}
       <div className="flex items-center justify-between border-b border-gray-700 px-6 py-4">
         <div className="flex items-center gap-3">
           <span className="text-3xl">{selectedList.emoji}</span>
           <h1 className="text-xl font-semibold text-white">{selectedList.title}</h1>
         </div>
-        <Button
-          onClick={() => setSelectedListId(null)}
-          variant="ghost"
-          size="sm"
-          className="text-gray-400 hover:text-white"
-        >
-          <ArrowLeft className="mr-1.5 h-4 w-4" />
-          Back
-        </Button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowKeyboardHints(true)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-gray-700 bg-gray-900/50 text-gray-400 hover:text-white hover:border-gray-600 hover:bg-gray-800 transition-all text-xs"
+            title="Keyboard shortcuts (press ?)"
+          >
+            <span className="text-sm">⌨️</span>
+            <kbd className="px-1 py-0.5 bg-gray-800 border border-gray-700 rounded text-[10px]">?</kbd>
+          </button>
+          <Button
+            onClick={() => setSelectedListId(null)}
+            variant="ghost"
+            size="sm"
+            className="text-gray-400 hover:text-white"
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Back
+          </Button>
+        </div>
       </div>
       {/* Content */}
       <div className="flex-1 overflow-auto">
