@@ -131,9 +131,20 @@ export const Task = (props: Props) => {
       )}
       <Dialog modal={false}>
         <motion.div
-          className="w-full select-none rounded-lg border border-gray-700 bg-gray-900/50 p-4 hover:border-gray-600 transition-colors"
+          className="relative w-full select-none rounded-lg border border-gray-700 overflow-hidden hover:border-gray-600 transition-all"
           style={{ opacity }}
         >
+          {/* Progress background fill */}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-blue-500/15 to-transparent transition-all duration-300"
+            style={{
+              width: `${localProgress}%`,
+              opacity: localProgress > 0 ? 1 : 0,
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative p-4">
           {isEditing ? (
             <div className="flex items-center gap-2">
               <input
@@ -186,54 +197,80 @@ export const Task = (props: Props) => {
                 )}
               </div>
 
-              {/* Progress bar - much larger and more visible */}
-              <div className="flex items-center gap-3">
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    const newProgress = Math.max(0, localProgress - 10);
-                    setLocalProgress(newProgress);
-                    saveProgress(newProgress);
-                  }}
-                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
-                  aria-label="Decrease progress"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-
-                <div className="flex-1">
-                  <Slider
-                    value={[localProgress]}
-                    onValueChange={(value) => {
-                      setLocalProgress(value[0]);
-                      saveProgress(value[0]);
-                    }}
-                    max={100}
-                    step={1}
-                    className="flex-1"
-                    aria-label={`Progress: ${localProgress}%`}
-                  />
+              {/* Progress controls - compact and fluid */}
+              <div className="flex items-center justify-between gap-4">
+                {/* Left: Progress percentage with icon */}
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <div className="text-3xl font-bold text-white">
+                      {localProgress}
+                      <span className="text-base font-normal text-gray-400">%</span>
+                    </div>
+                    {localProgress === 100 && (
+                      <div className="absolute -top-1 -right-1 text-xl">🎯</div>
+                    )}
+                  </div>
                 </div>
 
-                <Button
-                  size="sm"
-                  onClick={() => {
-                    const newProgress = Math.min(100, localProgress + 10);
-                    setLocalProgress(newProgress);
-                    saveProgress(newProgress);
-                  }}
-                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
-                  aria-label="Increase progress"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                {/* Right: Quick actions */}
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const newProgress = Math.max(0, localProgress - 10);
+                      setLocalProgress(newProgress);
+                      saveProgress(newProgress);
+                    }}
+                    className="h-9 w-9 rounded-full bg-gray-800/80 p-0 hover:bg-gray-700 transition-all hover:scale-110"
+                    aria-label="Decrease progress"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
 
-                <span className="w-12 text-right text-sm font-medium text-gray-300">
-                  {localProgress}%
-                </span>
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      setLocalProgress(50);
+                      saveProgress(50);
+                    }}
+                    className="h-9 px-3 rounded-full bg-gray-800/80 text-xs hover:bg-gray-700 transition-all hover:scale-105"
+                    aria-label="Set to 50%"
+                  >
+                    50%
+                  </Button>
+
+                  <Button
+                    size="sm"
+                    onClick={() => {
+                      const newProgress = Math.min(100, localProgress + 10);
+                      setLocalProgress(newProgress);
+                      saveProgress(newProgress);
+                    }}
+                    className="h-9 w-9 rounded-full bg-gray-800/80 p-0 hover:bg-gray-700 transition-all hover:scale-110"
+                    aria-label="Increase progress"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Slider - cleaner and more prominent */}
+              <div className="mt-2">
+                <Slider
+                  value={[localProgress]}
+                  onValueChange={(value) => {
+                    setLocalProgress(value[0]);
+                    saveProgress(value[0]);
+                  }}
+                  max={100}
+                  step={1}
+                  className="w-full"
+                  aria-label={`Progress: ${localProgress}%`}
+                />
               </div>
             </div>
           )}
+          </div>
         </motion.div>
 
       <DialogPortal>
