@@ -8,6 +8,9 @@ export { SyncButton } from './SyncButton';
 export { SyncStatus } from './SyncStatus';
 export { SyncImport } from './SyncImport';
 export { DataRecovery } from './DataRecovery';
+export { CommandPalette } from './CommandPalette';
+export { KeyboardHints } from './KeyboardHints';
+export type { Command } from './CommandPalette';
 // PWA-only component - not used in desktop app
 // export { default as ReloadPrompt } from './ReloadPrompt';
 export { TinyBaseProvider } from './TinyBaseProvider';
