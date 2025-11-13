@@ -258,6 +258,7 @@ const Bucket = ({ onNavigateToCemetery }: { onNavigateToCemetery: () => void }) 
             <span className="font-bold text-white text-lg">Bucket</span>
           </div>
           <div className="flex items-center gap-2">
+            <UserControls />
             <SyncButton />
           </div>
         </div>
@@ -355,6 +356,7 @@ const Bucket = ({ onNavigateToCemetery }: { onNavigateToCemetery: () => void }) 
 
         {/* Right: Controls */}
         <div className="flex items-center gap-2">
+          <UserControls />
           <SyncButton />
 
           <Button
@@ -513,7 +515,10 @@ const Cemetery = ({ onNavigateBack }: { onNavigateBack: () => void }) => {
           <span className="text-xl">🪦</span>
           <h1 className="font-bold text-white text-lg">Cemetery</h1>
         </div>
-        <SyncButton />
+        <div className="flex items-center gap-2">
+          <UserControls />
+          <SyncButton />
+        </div>
       </div>
 
       {/* Content */}
