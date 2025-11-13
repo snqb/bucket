@@ -144,7 +144,7 @@ export const Task = (props: Props) => {
           />
 
           {/* Content */}
-          <div className="relative p-4">
+          <div className="relative p-3">
           {isEditing ? (
             <div className="flex items-center gap-2">
               <input
@@ -174,12 +174,12 @@ export const Task = (props: Props) => {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {/* Title and description */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <DialogTrigger asChild>
                   <p
-                    className="cursor-pointer text-base font-medium text-white hover:text-blue-400 transition-colors"
+                    className="cursor-pointer text-sm font-medium text-white hover:text-blue-400 transition-colors leading-tight"
                     onDoubleClick={() => setIsEditing(true)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
@@ -190,72 +190,47 @@ export const Task = (props: Props) => {
                 </DialogTrigger>
                 {lastDescriptionLine && (
                   <DialogTrigger asChild>
-                    <p className="cursor-pointer truncate text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                    <p className="cursor-pointer truncate text-xs text-gray-400 hover:text-blue-400 transition-colors">
                       {lastDescriptionLine}
                     </p>
                   </DialogTrigger>
                 )}
               </div>
 
-              {/* Progress controls - compact and fluid */}
-              <div className="flex items-center justify-between gap-4">
-                {/* Left: Progress percentage with icon */}
-                <div className="flex items-center gap-3">
-                  <div className="relative">
-                    <div className="text-3xl font-bold text-white">
-                      {localProgress}
-                      <span className="text-base font-normal text-gray-400">%</span>
-                    </div>
-                    {localProgress === 100 && (
-                      <div className="absolute -top-1 -right-1 text-xl">🎯</div>
-                    )}
-                  </div>
+              {/* Visual progress bar with blocks */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 flex gap-0.5">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 flex-1 rounded-sm transition-colors ${
+                        i < Math.floor(localProgress / 10)
+                          ? 'bg-blue-500'
+                          : 'bg-gray-700'
+                      }`}
+                    />
+                  ))}
                 </div>
-
-                {/* Right: Quick actions */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const newProgress = Math.max(0, localProgress - 10);
-                      setLocalProgress(newProgress);
-                      saveProgress(newProgress);
-                    }}
-                    className="h-9 w-9 rounded-full bg-gray-800/80 p-0 hover:bg-gray-700 transition-all hover:scale-110"
-                    aria-label="Decrease progress"
-                  >
-                    <Minus className="h-4 w-4" />
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setLocalProgress(50);
-                      saveProgress(50);
-                    }}
-                    className="h-9 px-3 rounded-full bg-gray-800/80 text-xs hover:bg-gray-700 transition-all hover:scale-105"
-                    aria-label="Set to 50%"
-                  >
-                    50%
-                  </Button>
-
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      const newProgress = Math.min(100, localProgress + 10);
-                      setLocalProgress(newProgress);
-                      saveProgress(newProgress);
-                    }}
-                    className="h-9 w-9 rounded-full bg-gray-800/80 p-0 hover:bg-gray-700 transition-all hover:scale-110"
-                    aria-label="Increase progress"
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
+                <div className="text-sm font-mono font-bold text-white w-10 text-right">
+                  {localProgress}%
                 </div>
               </div>
 
-              {/* Slider - cleaner and more prominent */}
-              <div className="mt-2">
+              {/* Unified control buttons */}
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const newProgress = Math.max(0, localProgress - 10);
+                    setLocalProgress(newProgress);
+                    saveProgress(newProgress);
+                  }}
+                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 rounded border border-gray-700"
+                  aria-label="Decrease progress"
+                >
+                  <Minus className="h-3.5 w-3.5" />
+                </Button>
+
                 <Slider
                   value={[localProgress]}
                   onValueChange={(value) => {
@@ -264,9 +239,22 @@ export const Task = (props: Props) => {
                   }}
                   max={100}
                   step={1}
-                  className="w-full"
+                  className="flex-1"
                   aria-label={`Progress: ${localProgress}%`}
                 />
+
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    const newProgress = Math.min(100, localProgress + 10);
+                    setLocalProgress(newProgress);
+                    saveProgress(newProgress);
+                  }}
+                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 rounded border border-gray-700"
+                  aria-label="Increase progress"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                </Button>
               </div>
             </div>
           )}
