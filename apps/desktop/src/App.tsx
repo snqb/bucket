@@ -26,14 +26,22 @@ import {
 } from "@bucket/core";
 
 // External dependencies
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { Link, Route, Switch, useLocation } from "wouter";
-import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
+import {
+  Trash2,
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  X,
+  Edit2,
+  Plus
+} from "lucide-react";
 
 function App() {
   const { isAuthenticated, isLoading, authenticate } = useAuth();
   const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false);
+  const [currentView, setCurrentView] = useState<'bucket' | 'cemetery'>('bucket');
 
   // Auto-authenticate on first visit
   useEffect(() => {
@@ -47,6 +55,8 @@ function App() {
           await authenticate(tempPassphrase);
         } catch (error) {
           console.error('Auto-auth failed:', error);
+        } finally {
+          // Always set to false when done, whether success or failure
           setIsAutoAuthenticating(false);
         }
       }
@@ -67,67 +77,24 @@ function App() {
 
   return (
     <>
-      <div className="fixed left-4 top-4 z-50">
-        <SyncButton />
-      </div>
-
       <DataRecovery />
-
-      <Switch>
-        <Route path="/" component={Bucket} />
-        <Route path="/cemetery" component={Cemetery} />
-      </Switch>
+      {currentView === 'bucket' ? (
+        <Bucket onNavigateToCemetery={() => setCurrentView('cemetery')} />
+      ) : (
+        <Cemetery onNavigateBack={() => setCurrentView('bucket')} />
+      )}
     </>
   );
 }
 
-const Bucket = () => {
+const Bucket = ({ onNavigateToCemetery }: { onNavigateToCemetery: () => void }) => {
   const lists = useLists();
   const actions = useActions();
-  const { isLoading } = useAuth();
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
-  const [showMap, setShowMap] = useState(false);
-  const [editingListId, setEditingListId] = useState<string | null>(null);
-  const [editingListTitle, setEditingListTitle] = useState("");
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [editingMobileTitle, setEditingMobileTitle] = useState(false);
-  const [mobileTitle, setMobileTitle] = useState("");
-  const [showAddListDialog, setShowAddListDialog] = useState(false);
   const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [showKeyboardHints, setShowKeyboardHints] = useState(false);
-  const [, setLocation] = useLocation();
-
-  // Better loading logic to prevent premature empty state
-  useEffect(() => {
-    const checkInitialization = async () => {
-      const hasData = hasLocalData();
-      const hasStoredUser = !!(
-        localStorage.getItem("bucket-userId") &&
-        localStorage.getItem("bucket-passphrase")
-      );
-
-      if (hasData) {
-        // Have data, show immediately
-        setIsInitializing(false);
-      } else if (hasStoredUser) {
-        // User exists but no data yet, wait longer for potential sync
-        console.log(
-          "🔄 User exists but no data, waiting for potential sync...",
-        );
-        const timer = setTimeout(() => {
-          console.log("⏰ Done waiting, showing UI");
-          setIsInitializing(false);
-        }, 2500);
-        return () => clearTimeout(timer);
-      } else {
-        // First-time user, shorter delay
-        const timer = setTimeout(() => setIsInitializing(false), 500);
-        return () => clearTimeout(timer);
-      }
-    };
-
-    checkInitialization();
-  }, []);
+  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [isWideLayout, setIsWideLayout] = useState(window.innerWidth >= 700);
 
   // Reset current screen index if it's out of bounds
   useEffect(() => {
@@ -136,14 +103,15 @@ const Bucket = () => {
     }
   }, [lists, currentScreenIndex]);
 
-  const handleMapClick = () => {
-    setShowMap(!showMap);
-  };
+  // Auto-detect window size for responsive layout
+  useEffect(() => {
+    const handleResize = () => {
+      setIsWideLayout(window.innerWidth >= 700);
+    };
 
-  const handleScreenSelect = (index: number) => {
-    setCurrentScreenIndex(index);
-    setShowMap(false);
-  };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handlePreviousScreen = () => {
     if (lists && lists.length > 0) {
@@ -157,6 +125,13 @@ const Bucket = () => {
     }
   };
 
+  const handleAddTask = () => {
+    if (newTaskTitle.trim() && currentScreen) {
+      actions.createTask(String(currentScreen.id), newTaskTitle.trim());
+      setNewTaskTitle('');
+    }
+  };
+
   // Define commands for command palette
   const commands: Command[] = [
     {
@@ -165,7 +140,10 @@ const Bucket = () => {
       description: "Add a new list to your bucket",
       icon: "📝",
       shortcut: "N",
-      action: () => setShowAddListDialog(true),
+      action: () => {
+        const name = prompt("List name:");
+        if (name) actions.createList(name);
+      },
       category: "Actions",
     },
     {
@@ -174,17 +152,8 @@ const Bucket = () => {
       description: "View deleted tasks",
       icon: "🪦",
       shortcut: "C",
-      action: () => setLocation("/cemetery"),
+      action: () => onNavigateToCemetery(),
       category: "Navigation",
-    },
-    {
-      id: "toggle-map",
-      label: "Toggle Map View",
-      description: "Show/hide list overview",
-      icon: "🗺️",
-      shortcut: "M",
-      action: () => setShowMap(!showMap),
-      category: "Views",
     },
     {
       id: "prev-list",
@@ -232,18 +201,16 @@ const Bucket = () => {
       },
       {
         key: "n",
-        handler: () => setShowAddListDialog(true),
+        handler: () => {
+          const name = prompt("List name:");
+          if (name) actions.createList(name);
+        },
         description: "Create new list",
       },
       {
         key: "c",
-        handler: () => setLocation("/cemetery"),
+        handler: () => onNavigateToCemetery(),
         description: "Open cemetery",
-      },
-      {
-        key: "m",
-        handler: () => setShowMap(!showMap),
-        description: "Toggle map view",
       },
       {
         key: "h",
@@ -268,8 +235,6 @@ const Bucket = () => {
       {
         key: "Escape",
         handler: () => {
-          setShowMap(false);
-          setShowAddListDialog(false);
           setShowCommandPalette(false);
           setShowKeyboardHints(false);
         },
@@ -281,122 +246,63 @@ const Bucket = () => {
 
   const currentScreen = lists?.[currentScreenIndex];
 
-  // More intelligent loading state
-  const shouldShowLoading = () => {
-    const hasData = hasLocalData();
-    const hasStoredUser = !!(
-      localStorage.getItem("bucket-userId") &&
-      localStorage.getItem("bucket-passphrase")
-    );
-
-    // Show loading if:
-    // 1. Auth is still loading AND no local data exists
-    // 2. Still initializing AND (no data OR expecting data but don't have it)
-    return (
-      (isLoading && !hasData) || (isInitializing && (!hasData || hasStoredUser))
-    );
-  };
-
-  if (shouldShowLoading()) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="font-bold mb-4 text-4xl">...</div>
-          <div className="text-sm text-gray-400">
-            {hasLocalData() ? "Syncing..." : "Loading..."}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle case when no lists exist - with additional safety check
+  // Handle case when no lists exist
   if (!lists || lists.length === 0) {
-    const hasStoredUser = !!(
-      localStorage.getItem("bucket-userId") &&
-      localStorage.getItem("bucket-passphrase")
-    );
-
-    // If user exists but no lists, show warning
-    if (hasStoredUser && !isInitializing) {
-      console.warn("⚠️ User has credentials but no lists found");
-    }
 
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="w-full max-w-md text-center px-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.5 }}
-          >
-            <div className="font-bold mb-6 text-8xl">🪣</div>
-          </motion.div>
-          <h2 className="font-bold mb-3 text-3xl text-white">
-            Welcome to Bucket!
-          </h2>
-          <p className="mb-8 text-gray-400 leading-relaxed">
-            {hasStoredUser ? (
-              <>
-                Your lists will appear here once synced.
-                <br />
-                Check your connection or try syncing manually.
-              </>
-            ) : (
-              <>
-                Track progress with 0-100% bars instead of checkboxes.
-                <br />
-                Create your first list to get started!
-              </>
-            )}
-          </p>
-
-          <div className="mb-6 space-y-3">
-            <SyncImport />
-            <div className="text-center">
-              <SyncStatus />
-            </div>
+      <div className="flex h-screen w-screen flex-col bg-black">
+        {/* Unified Top Bar - Empty State */}
+        <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-3">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🪣</span>
+            <span className="font-bold text-white text-lg">Bucket</span>
           </div>
+          <div className="flex items-center gap-2">
+            <SyncButton />
+          </div>
+        </div>
 
-          <AddListDialog
-            onAdd={(name) => actions.createList(name)}
-            variant="button"
-            className="p-6 text-lg shadow-lg"
-          />
+        {/* Content */}
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-md text-center px-6">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", duration: 0.5 }}
+            >
+              <div className="font-bold mb-6 text-8xl">🪣</div>
+            </motion.div>
+            <h2 className="font-bold mb-3 text-3xl text-white">
+              Welcome to Bucket!
+            </h2>
+            <p className="mb-8 text-gray-400 leading-relaxed">
+              Track progress with 0-100% bars instead of checkboxes.
+              <br />
+              Create your first list to get started!
+            </p>
 
-          {!hasStoredUser && (
-            <div className="mt-8 space-y-2 text-left rounded-lg border border-gray-700 bg-gray-900 bg-opacity-50 p-4">
-              <p className="text-sm text-gray-400">💡 Quick tips:</p>
-              <ul className="text-xs text-gray-500 space-y-1">
-                <li>• Tasks use progress bars (0-100%), not checkboxes</li>
-                <li>• Reach 100% to auto-complete with confetti 🎊</li>
-                <li>• Deleted tasks go to cemetery for recovery</li>
-                <li>• Everything syncs across your devices</li>
-              </ul>
+            <div className="mb-6 space-y-3">
+              <SyncImport />
+              <div className="text-center">
+                <SyncStatus />
+              </div>
             </div>
-          )}
+
+            <Button
+              onClick={() => {
+                const name = prompt("List name:");
+                if (name) actions.createList(name);
+              }}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Create First List
+            </Button>
+          </div>
         </div>
       </div>
     );
   }
-
-  const handleEditList = (listId: string, currentTitle: string) => {
-    setEditingListId(listId);
-    setEditingListTitle(currentTitle);
-  };
-
-  const handleSaveEdit = () => {
-    if (editingListId && editingListTitle.trim()) {
-      actions.updateListTitle(editingListId, editingListTitle.trim());
-    }
-    setEditingListId(null);
-    setEditingListTitle("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingListId(null);
-    setEditingListTitle("");
-  };
 
   return (
     <div className="flex h-screen w-screen flex-col bg-black">
@@ -413,285 +319,172 @@ const Bucket = () => {
         onClose={() => setShowKeyboardHints(false)}
       />
 
-      {/* Desktop Grid View - Always visible on desktop */}
-      <div className="hidden md:flex md:h-screen md:w-screen md:flex-col md:bg-black">
-        <div className="p-6 pb-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => setShowKeyboardHints(true)}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-700 bg-gray-900/50 text-gray-400 hover:text-white hover:border-gray-600 hover:bg-gray-800 transition-all text-sm"
-              title="Keyboard shortcuts (press ?)"
-            >
-              <span className="text-base">⌨️</span>
-              <span className="hidden lg:inline">Shortcuts</span>
-              <kbd className="px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs">?</kbd>
-            </button>
+      {/* Unified Top Bar */}
+      <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-3 py-2 shrink-0">
+        {/* Left: Navigation */}
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            onClick={handlePreviousScreen}
+            disabled={!lists || lists.length <= 1}
+            className="h-7 w-7 p-0 bg-gray-800 hover:bg-gray-700 disabled:opacity-30"
+            aria-label="Previous list"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </Button>
 
-            <div className="flex items-center gap-3">
-              <div className="flex gap-2">
-                <Link
-                  to="/cemetery"
-                  className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                  aria-label="View cemetery"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Link>
-                <AddListDialog
-                  onAdd={(name) => actions.createList(name)}
-                  open={showAddListDialog}
-                  onOpenChange={setShowAddListDialog}
-                />
-              </div>
+          <Button
+            size="sm"
+            onClick={handleNextScreen}
+            disabled={!lists || lists.length <= 1}
+            className="h-7 w-7 p-0 bg-gray-800 hover:bg-gray-700 disabled:opacity-30"
+            aria-label="Next list"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </Button>
+
+          {currentScreen && (
+            <div className="flex items-center gap-2 ml-1">
+              <span className="text-lg">{currentScreen.emoji}</span>
+              <span className="font-semibold text-white text-sm">
+                {currentScreen.title}
+              </span>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="flex-1 overflow-auto p-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  xl:grid-cols-4">
-            {lists?.map((list) => (
-              <div key={String(list.id)} className="group relative">
-                <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
-                  <Button
-                    size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
-                    onClick={() =>
-                      handleEditList(String(list.id), String(list.title))
-                    }
-                    aria-label="Edit list"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
-                    onClick={() => {
-                      if (confirm(`Delete ${list.title}?`)) {
-                        actions.deleteList(String(list.id));
-                      }
-                    }}
-                    aria-label="Delete list"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-                {editingListId === String(list.id) ? (
-                  <div className="min-h-[200px] rounded-lg border border-blue-500 bg-gray-800 bg-opacity-50 p-4">
-                    <input
-                      type="text"
-                      value={editingListTitle}
-                      onChange={(e) => setEditingListTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit();
-                        if (e.key === "Escape") handleCancelEdit();
-                      }}
-                      className="mb-2 w-full rounded bg-gray-700 p-2 text-sm text-white"
-                      autoFocus
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={handleSaveEdit}
-                        className="bg-green-600 text-white"
-                      >
-                        ✓
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleCancelEdit}
-                        className="bg-red-600 text-white"
-                      >
-                        ✕
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setCurrentScreenIndex(lists?.indexOf(list) || 0);
-                      setShowMap(false);
-                    }}
-                    className="block w-full min-h-[200px] rounded-lg border border-gray-700 bg-gray-800 bg-opacity-50 p-4 text-left hover:border-blue-500 hover:bg-opacity-70 transition-all cursor-pointer"
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="text-4xl">{list.emoji}</span>
-                      <h3 className="text-lg font-semibold text-white">{list.title}</h3>
-                    </div>
-                    <p className="text-sm text-gray-400">Click to open →</p>
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Right: Controls */}
+        <div className="flex items-center gap-2">
+          <SyncButton />
 
-        <div className="border-t border-gray-700 p-4">
-          <UserControls />
+          <Button
+            size="sm"
+            onClick={onNavigateToCemetery}
+            className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
+            aria-label="Cemetery"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+
+          <Button
+            size="sm"
+            onClick={() => setShowKeyboardHints(true)}
+            className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
+            title="Keyboard shortcuts (?)"
+          >
+            <span className="text-sm">?</span>
+          </Button>
         </div>
       </div>
 
-      {/* Mobile Views - Toggle between single screen and grid */}
-      <div className="md:hidden">
-        {showMap ? (
-          <div className="flex h-screen w-screen flex-col bg-black">
-            <div className="border-b border-gray-700 p-4">
-              <div className="flex items-center justify-between">
-                <h1 className="font-bold text-2xl text-white">All Lists</h1>
-                <div className="flex items-center gap-4">
-                  <SyncStatus />
-                  <div className="flex gap-2">
-                    <Link
-                      to="/cemetery"
-                      className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      aria-label="View cemetery"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Link>
-                    <AddListDialog onAdd={(name) => actions.createList(name)} />
-                    <Button
-                      className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handleMapClick}
-                      aria-label="Close map view"
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto bg-black">
+        {currentScreen && !isWideLayout && (
+          <Screen
+            className="h-full w-full p-4"
+            key={String(currentScreen.id)}
+            list={currentScreen as any}
+            actions={actions}
+          />
+        )}
+
+        {currentScreen && isWideLayout && (
+          <div className="grid h-full grid-cols-2 gap-4 p-4">
+            {/* Left: Current list tasks */}
+            <div className="overflow-auto">
+              <Screen
+                className="h-full w-full"
+                key={String(currentScreen.id)}
+                list={currentScreen as any}
+                actions={actions}
+              />
             </div>
 
-            <div className="grid flex-1 grid-cols-2 gap-4 overflow-auto p-4">
-              {lists?.map((list, index) => (
-                <MobileListCard
-                  key={String(list.id)}
-                  list={list}
-                  index={index}
-                  onSelect={() => handleScreenSelect(index)}
-                  onEdit={(newTitle) =>
-                    actions.updateListTitle(String(list.id), newTitle)
-                  }
-                  onDelete={() => actions.deleteList(String(list.id))}
-                  onEmojiChange={(emoji) =>
-                    actions.updateListEmoji(String(list.id), emoji)
-                  }
-                />
-              ))}
-            </div>
-
-            <div className="border-t border-gray-700 p-4">
-              <UserControls />
-            </div>
-          </div>
-        ) : (
-          <div className="flex h-screen w-screen flex-col bg-black">
-            <div className="border-b border-gray-700 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-2">
-                    <Button
-                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handlePreviousScreen}
-                      disabled={!lists || lists.length <= 1}
-                      aria-label="Previous list"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handleNextScreen}
-                      disabled={!lists || lists.length <= 1}
-                      aria-label="Next list"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {currentScreen && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{currentScreen.emoji}</span>
-                      {editingMobileTitle ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={mobileTitle}
-                            onChange={(e) => setMobileTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                if (mobileTitle.trim()) {
-                                  actions.updateListTitle(
-                                    String(currentScreen.id),
-                                    mobileTitle.trim()
-                                  );
-                                }
-                                setEditingMobileTitle(false);
-                              }
-                              if (e.key === "Escape") {
-                                setMobileTitle(String(currentScreen.title));
-                                setEditingMobileTitle(false);
-                              }
-                            }}
-                            className="font-bold rounded px-2 py-1 text-xl text-white bg-gray-700 border border-gray-600"
-                            autoFocus
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              if (mobileTitle.trim()) {
-                                actions.updateListTitle(
-                                  String(currentScreen.id),
-                                  mobileTitle.trim()
-                                );
-                              }
-                              setEditingMobileTitle(false);
-                            }}
-                            className="h-6 w-6 bg-green-600 p-0 text-white"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <h1
-                          onClick={() => {
-                            setMobileTitle(String(currentScreen.title));
-                            setEditingMobileTitle(true);
-                          }}
-                          className="font-bold cursor-pointer rounded px-1 text-2xl text-white hover:bg-gray-700"
-                        >
-                          {currentScreen.title}
-                        </h1>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <SyncStatus />
-                  <Button
-                    className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                    onClick={handleMapClick}
-                    aria-label="Show all lists"
+            {/* Right: List overview */}
+            <div className="overflow-auto">
+              <div className="space-y-2">
+                <h3 className="text-lg font-bold text-white mb-3">All Lists</h3>
+                {lists?.map((list, index) => (
+                  <div
+                    key={String(list.id)}
+                    className={`group relative w-full rounded-lg border p-3 transition-all ${
+                      index === currentScreenIndex
+                        ? 'border-blue-500 bg-blue-500/10'
+                        : 'border-gray-700 bg-gray-800/50 hover:border-gray-600'
+                    }`}
                   >
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </div>
+                    <button
+                      onClick={() => setCurrentScreenIndex(index)}
+                      className="w-full text-left"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-2xl">{list.emoji}</span>
+                        <span className="font-medium text-white text-sm">{list.title}</span>
+                      </div>
+                    </button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        if (confirm(`Delete "${list.title}"?`)) {
+                          actions.deleteList(String(list.id));
+                          if (index === currentScreenIndex && lists.length > 1) {
+                            setCurrentScreenIndex(Math.max(0, index - 1));
+                          }
+                        }
+                      }}
+                      className="absolute right-2 top-2 h-6 w-6 p-0 bg-red-600/80 hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      aria-label="Delete list"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  onClick={() => {
+                    const name = prompt("List name:");
+                    if (name) actions.createList(name);
+                  }}
+                  className="w-full bg-gray-800 hover:bg-gray-700 text-white py-2"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  New List
+                </Button>
               </div>
-            </div>
-
-            <div className="flex-1 overflow-hidden">
-              {currentScreen && (
-                <Screen
-                  className="h-full w-full border-0 p-8"
-                  key={String(currentScreen.id)}
-                  list={currentScreen as any}
-                  actions={actions}
-                />
-              )}
             </div>
           </div>
         )}
+      </div>
+
+      {/* Fixed Bottom Input */}
+      <div className="border-t border-gray-800 bg-gray-900 p-3 shrink-0">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleAddTask();
+          }}
+          className="flex gap-2"
+        >
+          <input
+            type="text"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            placeholder="Add task... (Cmd+N)"
+            className="flex-1 rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          />
+          <Button
+            type="submit"
+            disabled={!newTaskTitle.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </form>
       </div>
     </div>
   );
 };
 
-const Cemetery = () => {
+const Cemetery = ({ onNavigateBack }: { onNavigateBack: () => void }) => {
   const cemetery = useCemeteryItems();
   const lists = useLists();
   const actions = useActions();
@@ -706,20 +499,21 @@ const Cemetery = () => {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-black">
-      {/* Header */}
-      <div className="border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <h1 className="font-bold text-2xl text-white">Cemetery</h1>
-          <div className="flex items-center gap-4">
-            <SyncStatus />
-            <Link
-              to="/"
-              className="flex size-8 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-            >
-              🪣
-            </Link>
-          </div>
+      {/* Unified Top Bar */}
+      <div className="flex items-center justify-between border-b border-gray-800 bg-gray-900 px-4 py-2.5 shrink-0">
+        <div className="flex items-center gap-3">
+          <Button
+            size="sm"
+            onClick={onNavigateBack}
+            className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700"
+            aria-label="Back to lists"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <span className="text-xl">🪦</span>
+          <h1 className="font-bold text-white text-lg">Cemetery</h1>
         </div>
+        <SyncButton />
       </div>
 
       {/* Content */}
@@ -732,17 +526,17 @@ const Cemetery = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-2 max-w-2xl mx-auto">
             {cemetery.map((item) => (
               <div
                 key={String(item.id)}
-                className="rounded border border-gray-700 bg-gray-800 bg-opacity-50 p-3"
+                className="rounded-lg border border-gray-700 bg-gray-800/50 p-3"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="font-medium text-white">{item.originalTitle}</div>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-white truncate">{item.originalTitle}</div>
                     {item.originalDescription && (
-                      <div className="text-sm text-gray-500">{item.originalDescription}</div>
+                      <div className="text-sm text-gray-500 truncate">{item.originalDescription}</div>
                     )}
                     <div className="mt-1 text-xs text-gray-400">
                       Progress: {item.originalProgress}% • {item.deletionReason}
@@ -751,16 +545,16 @@ const Cemetery = () => {
                       Deleted {new Date(Number(item.deletedAt)).toLocaleString()}
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button
                       size="sm"
                       onClick={() => {
                         setSelectedItem(String(item.id));
                         setRestoreToList(String(item.id));
                       }}
-                      className="bg-green-600 text-white hover:bg-green-700"
+                      className="bg-green-600 text-white hover:bg-green-700 text-xs"
                     >
-                      ↺ Restore
+                      ↺
                     </Button>
                     <Button
                       size="sm"
@@ -770,9 +564,9 @@ const Cemetery = () => {
                         }
                       }}
                       variant="outline"
-                      className="border-red-600 text-red-400 hover:bg-red-900 hover:bg-opacity-20"
+                      className="border-red-600 text-red-400 hover:bg-red-900/20 text-xs"
                     >
-                      × Delete
+                      ×
                     </Button>
                   </div>
                 </div>
@@ -787,7 +581,7 @@ const Cemetery = () => {
                           key={String(list.id)}
                           size="sm"
                           onClick={() => handleRestore(String(item.id), String(list.id))}
-                          className="bg-blue-600 text-white hover:bg-blue-700"
+                          className="bg-blue-600 text-white hover:bg-blue-700 text-xs"
                         >
                           {list.emoji} {list.title}
                         </Button>
@@ -799,7 +593,7 @@ const Cemetery = () => {
                           setSelectedItem(null);
                         }}
                         variant="outline"
-                        className="border-gray-600"
+                        className="border-gray-600 text-xs"
                       >
                         Cancel
                       </Button>
@@ -812,159 +606,6 @@ const Cemetery = () => {
         )}
       </div>
     </div>
-  );
-};
-
-const MobileListCard = ({
-  list,
-  index,
-  onSelect,
-  onEdit,
-  onDelete,
-  onEmojiChange,
-}: {
-  list: any;
-  index: number;
-  onSelect: () => void;
-  onEdit: (newTitle: string) => void;
-  onDelete: () => void;
-  onEmojiChange: (emoji: string) => void;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(list.title);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
-
-  const handleTouchStart = () => {
-    const timer = setTimeout(() => {
-      setIsExpanded(true);
-    }, 500); // 500ms long press
-    setLongPressTimer(timer);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    if (!isExpanded) {
-      onSelect();
-    }
-  };
-
-  const handleSave = () => {
-    if (editTitle.trim()) {
-      onEdit(editTitle.trim());
-    }
-    setIsEditing(false);
-    setIsExpanded(false);
-  };
-
-  const handleCancel = () => {
-    setEditTitle(list.title);
-    setIsEditing(false);
-    setIsExpanded(false);
-  };
-
-  return (
-    <motion.div
-      className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onClick={isExpanded ? undefined : onSelect}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      animate={{
-        scale: isExpanded ? 1.05 : 1,
-        zIndex: isExpanded ? 10 : 1,
-        backgroundColor: isExpanded
-          ? "rgba(59, 130, 246, 0.2)"
-          : "rgba(31, 41, 55, 0.5)",
-      }}
-      transition={{ duration: 0.2 }}
-    >
-      <div
-        className="mb-2 text-2xl transition-transform"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isExpanded) {
-            const newEmoji = randomEmoji();
-            onEmojiChange(newEmoji);
-          }
-        }}
-      >
-        {list.emoji}
-      </div>
-
-      {isEditing ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full rounded bg-gray-700 p-1 text-sm text-white"
-            autoFocus
-          />
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              onClick={handleSave}
-              className="bg-green-600 text-xs text-white"
-            >
-              ✓
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleCancel}
-              className="bg-red-600 text-xs text-white"
-            >
-              ✕
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <div className="font-medium truncate text-sm">{list.title}</div>
-      )}
-
-      {isExpanded && !isEditing && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute inset-0 flex flex-col items-center justify-center space-y-3 rounded bg-gray-800 bg-opacity-90 p-4"
-        >
-          <Button
-            size="sm"
-            onClick={() => setIsEditing(true)}
-            className="w-full bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              if (confirm(`Delete ${list.title}?`)) {
-                onDelete();
-              }
-            }}
-            className="w-full bg-red-600 text-white hover:bg-red-700"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => setIsExpanded(false)}
-            className="w-full bg-gray-600 text-white hover:bg-gray-700"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Close
-          </Button>
-        </motion.div>
-      )}
-    </motion.div>
   );
 };
 
