@@ -505,7 +505,19 @@ const Bucket = () => {
                     </div>
                   </div>
                 ) : (
-                  <Screen className="w-full" list={list as any} actions={actions} />
+                  <button
+                    onClick={() => {
+                      setCurrentScreenIndex(lists?.indexOf(list) || 0);
+                      setShowMap(false);
+                    }}
+                    className="block w-full min-h-[200px] rounded-lg border border-gray-700 bg-gray-800 bg-opacity-50 p-4 text-left hover:border-blue-500 hover:bg-opacity-70 transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="text-4xl">{list.emoji}</span>
+                      <h3 className="text-lg font-semibold text-white">{list.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-400">Click to open →</p>
+                  </button>
                 )}
               </div>
             ))}
