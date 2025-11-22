@@ -15,7 +15,6 @@
     "test:run": "pnpm --filter @bucket/web test:run",
     "test:server": "pnpm --filter @bucket/server test",
     "clean": "pnpm -r clean && rm -rf node_modules",
-    "sync-server": "pnpm --filter @bucket/server dev",
     "start:server": "pnpm --filter @bucket/server start"
   },
   "devDependencies": {

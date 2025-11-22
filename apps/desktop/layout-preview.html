@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Layout Preview - Choose Your Favorite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 2rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #9ca3af;
+            margin-bottom: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+        }
+
+        .layout-option {
+            background: #111;
+            border: 2px solid #374151;
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .layout-option:hover {
+            border-color: #4b5563;
+            transform: scale(1.02);
+        }
+
+        .layout-option.selected {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        .layout-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .layout-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .layout-height {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .task-samples {
+            background: #1f2937;
+            border-radius: 8px;
+            padding: 0.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .task-card {
+            background: #0a0a0a;
+            border: 1px solid #374151;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .task-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .progress-bg {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.15), transparent);
+            pointer-events: none;
+            transition: width 0.3s;
+        }
+
+        .selected-indicator {
+            display: none;
+            font-size: 0.75rem;
+            color: #3b82f6;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .layout-option.selected .selected-indicator {
+            display: block;
+        }
+
+        .selection-summary {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            min-width: 400px;
+            text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .selection-summary.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .selection-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .selection-text {
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Task Layout Options</h1>
+        <p class="subtitle">Click any layout to select it. Each shows 4 sample tasks with different lengths and progress values.</p>
+
+        <div class="grid" id="layoutGrid"></div>
+
+        <div class="selection-summary" id="selectionSummary">
+            <div class="selection-title">Selected: <span id="selectedName"></span></div>
+            <div class="selection-text">This layout will be implemented in the main Task component when you're ready!</div>
+        </div>
+    </div>
+
+    <script>
+        const sampleTasks = [
+            { title: "Test native HTML slider", progress: 89 },
+            { title: "elixir with full monitoring", progress: 45 },
+            { title: "Short task", progress: 20 },
+            { title: "A very long task title that goes on and on", progress: 75 }
+        ];
+
+        const layouts = [
+            {
+                id: 1,
+                name: "Compact Stack",
+                height: "60px",
+                render: (task) => `
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 16px;">
+                        <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${task.title}</p>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; height: 8px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 4px;"></div>
+                            <span style="font-size: 0.75rem; font-family: monospace; font-weight: bold; width: 40px; text-align: right;">${task.progress}%</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 2,
+                name: "Title with Percentage Badge",
+                height: "65px",
+                render: (task) => `
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 16px;">
+                        <div style="display: flex; align-items: center; justify-content: space-between;">
+                            <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${task.title}</p>
+                            <span style="margin-left: 8px; padding: 2px 8px; background: #3b82f6; border-radius: 4px; font-size: 0.75rem; font-family: monospace; font-weight: bold;">${task.progress}%</span>
+                        </div>
+                        <div style="height: 12px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 6px;"></div>
+                    </div>
+                `
+            },
+            {
+                id: 3,
+                name: "Mini Progress Pill",
+                height: "60px",
+                render: (task) => {
+                    const dots = Array.from({length: 10}, (_, i) =>
+                        `<div style="width: 6px; height: 6px; border-radius: 50%; background: ${i < task.progress / 10 ? '#3b82f6' : '#374151'};"></div>`
+                    ).join('');
+                    return `
+                        <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 16px;">
+                            <div style="display: flex; align-items: center; justify-between;">
+                                <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${task.title}</p>
+                                <div style="margin-left: 8px; display: flex; gap: 2px;">${dots}</div>
+                            </div>
+                            <div style="height: 10px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 5px;"></div>
+                        </div>
+                    `;
+                }
+            },
+            {
+                id: 4,
+                name: "Overlaid Slider Background",
+                height: "40px",
+                render: (task) => `
+                    <div style="position: relative; padding: 8px 16px;">
+                        <div class="progress-bg" style="width: ${task.progress}%;"></div>
+                        <div style="position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                            <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${task.title}</p>
+                            <div style="width: 128px; height: 6px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 3px; opacity: 0.4;"></div>
+                            <span style="font-size: 0.75rem; font-family: monospace; font-weight: bold; width: 40px; text-align: right;">${task.progress}%</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 5,
+                name: "Split View with Divider",
+                height: "40px",
+                render: (task) => `
+                    <div style="display: flex; align-items: center; gap: 12px; padding: 8px 16px;">
+                        <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 40%;">${task.title}</p>
+                        <div style="width: 1px; height: 24px; background: #374151;"></div>
+                        <div style="flex: 1; min-width: 120px; height: 8px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 4px;"></div>
+                        <span style="font-size: 0.75rem; font-family: monospace; font-weight: bold; width: 40px; text-align: right;">${task.progress}%</span>
+                    </div>
+                `
+            },
+            {
+                id: 6,
+                name: "Percentage as Subtitle",
+                height: "60px",
+                render: (task) => `
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 16px;">
+                        <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${task.title}</p>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.75rem; font-family: monospace; color: #9ca3af; width: 40px;">${task.progress}%</span>
+                            <div style="flex: 1; height: 8px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 4px;"></div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 7,
+                name: "Condensed Title + Big Slider",
+                height: "55px",
+                render: (task) => `
+                    <div style="display: flex; flex-direction: column; gap: 4px; padding: 8px 16px;">
+                        <p style="font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; color: #d1d5db; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${task.title}</p>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="flex: 1; height: 14px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 7px;"></div>
+                            <span style="font-size: 0.875rem; font-family: monospace; font-weight: bold; width: 40px; text-align: right;">${task.progress}%</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 8,
+                name: "Gradient Transition",
+                height: "50px",
+                render: (task) => `
+                    <div style="position: relative; padding: 8px 16px;">
+                        <div style="position: absolute; inset: 0; background: linear-gradient(to right, transparent, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.2)); width: ${task.progress}%; opacity: ${task.progress > 0 ? 1 : 0};"></div>
+                        <div style="position: relative; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; align-items: center; justify-between;">
+                                <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1;">${task.title}</p>
+                                <span style="margin-left: 8px; font-size: 0.75rem; font-family: monospace; font-weight: bold; color: #60a5fa;">${task.progress}%</span>
+                            </div>
+                            <div style="height: 4px; background: #374151; border-radius: 2px; overflow: hidden;">
+                                <div style="height: 100%; width: ${task.progress}%; background: linear-gradient(to right, #3b82f6, #60a5fa);"></div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 9,
+                name: "Title Over Faint Slider",
+                height: "65px",
+                render: (task) => `
+                    <div style="position: relative; padding: 12px 16px;">
+                        <div style="position: absolute; top: 50%; left: 16px; right: 16px; transform: translateY(-50%);">
+                            <div style="height: 8px; background: #1f2937; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; width: ${task.progress}%; background: rgba(59, 130, 246, 0.3);"></div>
+                            </div>
+                        </div>
+                        <div style="position: relative; display: flex; align-items: center; justify-between;">
+                            <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; padding: 0 8px; background: rgba(10, 10, 10, 0.8); border-radius: 4px;">${task.title}</p>
+                            <span style="margin-left: 8px; font-size: 0.75rem; font-family: monospace; font-weight: bold; padding: 0 8px; background: rgba(10, 10, 10, 0.8); border-radius: 4px;">${task.progress}%</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                id: 10,
+                name: "Corner Percentage",
+                height: "55px",
+                render: (task) => `
+                    <div style="display: flex; flex-direction: column; gap: 6px; padding: 8px 16px;">
+                        <div style="display: flex; align-items: start; justify-between;">
+                            <p style="font-size: 0.875rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; padding-right: 8px;">${task.title}</p>
+                            <span style="font-size: 0.625rem; font-family: monospace; font-weight: bold; color: #9ca3af;">${task.progress}%</span>
+                        </div>
+                        <div style="width: 80%; margin: 0 auto; height: 10px; background: linear-gradient(to right, #3b82f6 ${task.progress}%, #374151 ${task.progress}%); border-radius: 5px;"></div>
+                    </div>
+                `
+            }
+        ];
+
+        let selectedLayout = null;
+
+        function renderLayouts() {
+            const grid = document.getElementById('layoutGrid');
+
+            layouts.forEach(layout => {
+                const option = document.createElement('div');
+                option.className = 'layout-option';
+                option.onclick = () => selectLayout(layout.id);
+
+                const tasksHTML = sampleTasks.map(task =>
+                    `<div class="task-card" style="height: ${layout.height};">
+                        ${layout.render(task)}
+                    </div>`
+                ).join('');
+
+                option.innerHTML = `
+                    <div class="layout-header">
+                        <div class="layout-title">${layout.id}. ${layout.name}</div>
+                        <div class="layout-height">${layout.height}</div>
+                    </div>
+                    <div class="task-samples">
+                        ${tasksHTML}
+                    </div>
+                    <div class="selected-indicator">✓ Selected - Click again to deselect</div>
+                `;
+
+                grid.appendChild(option);
+            });
+        }
+
+        function selectLayout(id) {
+            const options = document.querySelectorAll('.layout-option');
+            const summary = document.getElementById('selectionSummary');
+            const selectedName = document.getElementById('selectedName');
+
+            if (selectedLayout === id) {
+                selectedLayout = null;
+                options[id - 1].classList.remove('selected');
+                summary.classList.remove('visible');
+            } else {
+                selectedLayout = id;
+                options.forEach((opt, idx) => {
+                    if (idx === id - 1) {
+                        opt.classList.add('selected');
+                    } else {
+                        opt.classList.remove('selected');
+                    }
+                });
+
+                const layout = layouts.find(l => l.id === id);
+                selectedName.textContent = `Option ${id} - ${layout.name}`;
+                summary.classList.add('visible');
+            }
+        }
+
+        renderLayouts();
+    </script>
+</body>
+</html>

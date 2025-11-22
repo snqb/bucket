@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>100 Task Variants</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <style>
+    body { background: #000; color: #fff; }
+    .variant-card { min-height: 120px; }
+  </style>
+</head>
+<body class="p-8">
+  <h1 class="text-4xl font-bold mb-8 text-center">100 Task Interaction Variants</h1>
+  <div id="variants" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+  <script>
+    const variants = [
+      // 1-10: Slider variations
+      { name: "Horizontal Slider", render: (p, setP) => `
+        <input type="range" value="${p}" min="0" max="100"
+          onchange="this.dataset.setProgress(this.value)"
+          class="w-full" />
+      `},
+      { name: "Vertical Slider", render: (p, setP) => `
+        <input type="range" value="${p}" min="0" max="100" orient="vertical"
+          onchange="this.dataset.setProgress(this.value)"
+          class="h-24 mx-auto block" style="writing-mode: bt-lr; -webkit-appearance: slider-vertical;" />
+      `},
+      { name: "Circular Dial", render: (p, setP) => `
+        <svg width="80" height="80" class="mx-auto cursor-pointer" onclick="
+          const rect = this.getBoundingClientRect();
+          const x = event.clientX - rect.left - 40;
+          const y = event.clientY - rect.top - 40;
+          const angle = Math.atan2(y, x) * 180 / Math.PI;
+          const normalized = (angle + 90 + 360) % 360;
+          this.dataset.setProgress(Math.round(normalized / 3.6));
+        ">
+          <circle cx="40" cy="40" r="35" fill="none" stroke="#333" stroke-width="8"/>
+          <circle cx="40" cy="40" r="35" fill="none" stroke="#3b82f6" stroke-width="8"
+            stroke-dasharray="${2 * Math.PI * 35}"
+            stroke-dashoffset="${2 * Math.PI * 35 * (1 - p/100)}"
+            transform="rotate(-90 40 40)"/>
+          <text x="40" y="45" text-anchor="middle" fill="white" font-size="16">${p}%</text>
+        </svg>
+      `},
+      { name: "Progress Bar Click", render: (p, setP) => `
+        <div class="w-full h-8 bg-gray-700 rounded cursor-pointer" onclick="
+          const rect = this.getBoundingClientRect();
+          const x = event.clientX - rect.left;
+          const percent = Math.round((x / rect.width) * 100);
+          this.dataset.setProgress(percent);
+        ">
+          <div class="h-full bg-blue-500 rounded transition-all" style="width: ${p}%"></div>
+        </div>
+      `},
+      { name: "+/- Buttons", render: (p, setP) => `
+        <div class="flex items-center justify-center gap-2">
+          <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 10))"
+            class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">-10</button>
+          <span class="text-2xl font-bold w-16 text-center">${p}%</span>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 10))"
+            class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600">+10</button>
+        </div>
+      `},
+      { name: "Segment Buttons", render: (p, setP) => `
+        <div class="grid grid-cols-4 gap-1">
+          ${[0, 25, 50, 75, 100].map(v => `
+            <button onclick="this.dataset.setProgress(${v})"
+              class="px-2 py-1 ${p >= v ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${v}%
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Number Input", render: (p, setP) => `
+        <input type="number" value="${p}" min="0" max="100"
+          onchange="this.dataset.setProgress(Math.max(0, Math.min(100, parseInt(this.value) || 0)))"
+          class="w-full px-3 py-2 bg-gray-800 rounded text-center text-xl" />
+      `},
+      { name: "Grid Cells", render: (p, setP) => `
+        <div class="grid grid-cols-10 gap-1">
+          ${Array(10).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(i + 1) * 10})"
+              class="aspect-square ${p >= (i + 1) * 10 ? 'bg-blue-500' : 'bg-gray-700'} rounded cursor-pointer hover:bg-blue-600">
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "Pie Segments", render: (p, setP) => `
+        <svg width="80" height="80" class="mx-auto">
+          ${Array(4).fill(0).map((_, i) => {
+            const angle = i * 90;
+            const nextAngle = (i + 1) * 90;
+            const largeArc = 0;
+            const x1 = 40 + 35 * Math.cos((angle - 90) * Math.PI / 180);
+            const y1 = 40 + 35 * Math.sin((angle - 90) * Math.PI / 180);
+            const x2 = 40 + 35 * Math.cos((nextAngle - 90) * Math.PI / 180);
+            const y2 = 40 + 35 * Math.sin((nextAngle - 90) * Math.PI / 180);
+            return `<path d="M 40 40 L ${x1} ${y1} A 35 35 0 ${largeArc} 1 ${x2} ${y2} Z"
+              fill="${p >= (i + 1) * 25 ? '#3b82f6' : '#333'}"
+              class="cursor-pointer hover:opacity-80"
+              onclick="this.dataset.setProgress(${(i + 1) * 25})" />`;
+          }).join('')}
+        </svg>
+      `},
+      { name: "Draggable Handle", render: (p, setP) => `
+        <div class="relative w-full h-8 bg-gray-700 rounded">
+          <div class="absolute top-0 left-0 h-full bg-blue-500 rounded" style="width: ${p}%"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 w-4 h-full bg-white rounded cursor-grab active:cursor-grabbing"
+            style="left: ${p}%"
+            onmousedown="
+              const parent = this.parentElement;
+              const move = (e) => {
+                const rect = parent.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
+                parent.dataset.setProgress(Math.round(percent));
+              };
+              document.addEventListener('mousemove', move);
+              document.addEventListener('mouseup', () => document.removeEventListener('mousemove', move), {once: true});
+            ">
+          </div>
+        </div>
+      `},
+
+      // 11-20: Button variations
+      { name: "Big +/-", render: (p, setP) => `
+        <div class="flex gap-2">
+          <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 1))"
+            class="flex-1 py-4 bg-red-600 rounded text-3xl hover:bg-red-700">−</button>
+          <div class="flex items-center justify-center w-20 text-2xl font-bold">${p}%</div>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 1))"
+            class="flex-1 py-4 bg-green-600 rounded text-3xl hover:bg-green-700">+</button>
+        </div>
+      `},
+      { name: "Numpad Style", render: (p, setP) => `
+        <div class="grid grid-cols-3 gap-1 max-w-[150px] mx-auto">
+          ${[7,8,9,4,5,6,1,2,3].map(n => `
+            <button onclick="this.dataset.setProgress(${n * 10})"
+              class="aspect-square ${p === n * 10 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600">
+              ${n}
+            </button>
+          `).join('')}
+          <button onclick="this.dataset.setProgress(0)"
+            class="col-span-3 py-2 ${p === 0 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600">
+            0
+          </button>
+        </div>
+      `},
+      { name: "Percentage Steps", render: (p, setP) => `
+        <div class="flex flex-wrap gap-1 justify-center">
+          ${[10,20,30,40,50,60,70,80,90,100].map(v => `
+            <button onclick="this.dataset.setProgress(${v})"
+              class="px-3 py-1 ${p === v ? 'bg-blue-500' : 'bg-gray-700'} rounded text-sm hover:bg-blue-600">
+              ${v}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Color Picker", render: (p, setP) => `
+        <input type="color"
+          value="${'#' + Math.round((p / 100) * 255).toString(16).padStart(2, '0') + '0000'}"
+          onchange="this.dataset.setProgress(Math.round(parseInt(this.value.slice(1,3), 16) / 2.55))"
+          class="w-full h-12 cursor-pointer" />
+      `},
+      { name: "Emoji Selector", render: (p, setP) => `
+        <div class="flex justify-center gap-2 text-2xl">
+          ${['😴','😐','🙂','😊','🎉'].map((e, i) => `
+            <button onclick="this.dataset.setProgress(${i * 25})"
+              class="${p >= i * 25 ? 'opacity-100' : 'opacity-30'} hover:opacity-100">
+              ${e}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Stars Rating", render: (p, setP) => `
+        <div class="flex justify-center gap-1 text-2xl">
+          ${Array(5).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 20})"
+              class="hover:scale-110 transition-transform">
+              ${p >= (i + 1) * 20 ? '⭐' : '☆'}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Arrow Keys", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-2xl font-bold mb-2">${p}%</div>
+          <div class="grid grid-cols-3 gap-1 w-24 mx-auto">
+            <div></div>
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 5))"
+              class="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600">↑</button>
+            <div></div>
+            <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 5))"
+              class="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600">←</button>
+            <div></div>
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 5))"
+              class="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600">→</button>
+            <div></div>
+            <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 5))"
+              class="px-3 py-2 bg-gray-700 rounded hover:bg-gray-600">↓</button>
+          </div>
+        </div>
+      `},
+      { name: "Volume Style", render: (p, setP) => `
+        <div class="flex items-end justify-center gap-1 h-20">
+          ${Array(10).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 10})"
+              class="w-4 ${p >= (i + 1) * 10 ? 'bg-blue-500' : 'bg-gray-700'} rounded-t hover:bg-blue-600"
+              style="height: ${(i + 1) * 10}%">
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Toggle Switches", render: (p, setP) => `
+        <div class="space-y-1">
+          ${[25,50,75,100].map(v => `
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" ${p >= v ? 'checked' : ''}
+                onchange="this.dataset.setProgress(this.checked ? ${v} : ${v - 25})"
+                class="w-4 h-4" />
+              <span class="text-sm">${v}%</span>
+            </label>
+          `).join('')}
+        </div>
+      `},
+      { name: "Thermometer", render: (p, setP) => `
+        <div class="w-8 h-32 mx-auto bg-gray-700 rounded-full relative cursor-pointer"
+          onclick="const rect = this.getBoundingClientRect(); const y = rect.bottom - event.clientY;
+            this.dataset.setProgress(Math.round((y / rect.height) * 100));">
+          <div class="absolute bottom-0 w-full bg-red-500 rounded-full transition-all"
+            style="height: ${p}%"></div>
+          <div class="absolute inset-0 flex items-center justify-center text-xs font-bold">${p}%</div>
+        </div>
+      `},
+
+      // 21-30: Interactive gestures
+      { name: "Swipe Right", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center cursor-grab active:cursor-grabbing relative overflow-hidden"
+          ontouchstart="this.dataset.startX = event.touches[0].clientX"
+          ontouchmove="
+            const diff = event.touches[0].clientX - parseInt(this.dataset.startX || 0);
+            const percent = Math.max(0, Math.min(100, ${p} + Math.round(diff / 2)));
+            this.querySelector('.indicator').style.width = percent + '%';
+          "
+          ontouchend="
+            const diff = event.touches[0].clientX - parseInt(this.dataset.startX || 0);
+            this.dataset.setProgress(Math.max(0, Math.min(100, ${p} + Math.round(diff / 2))));
+          ">
+          <div class="indicator absolute left-0 top-0 h-full bg-blue-500 rounded transition-all" style="width: ${p}%"></div>
+          <span class="relative z-10">Swipe →</span>
+        </div>
+      `},
+      { name: "Double Tap +10", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center text-2xl font-bold cursor-pointer"
+          onclick="
+            if (!this.dataset.lastTap || Date.now() - parseInt(this.dataset.lastTap) > 300) {
+              this.dataset.lastTap = Date.now();
+            } else {
+              this.dataset.setProgress(Math.min(100, ${p} + 10));
+              delete this.dataset.lastTap;
+            }
+          ">
+          ${p}% <span class="text-sm ml-2">(double tap)</span>
+        </div>
+      `},
+      { name: "Long Press", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center cursor-pointer"
+          onmousedown="
+            this.dataset.timer = setTimeout(() => {
+              this.dataset.setProgress(Math.min(100, ${p} + 20));
+            }, 1000);
+          "
+          onmouseup="clearTimeout(this.dataset.timer)"
+          onmouseleave="clearTimeout(this.dataset.timer)">
+          Hold to +20
+        </div>
+      `},
+      { name: "Shake (Click)", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center text-2xl font-bold cursor-pointer animate-bounce"
+          onclick="this.dataset.setProgress((${p} + 17) % 101)">
+          ${p}% 🎲
+        </div>
+      `},
+      { name: "Rotate Square", render: (p, setP) => `
+        <div class="w-24 h-24 mx-auto cursor-pointer relative"
+          onclick="const rect = this.getBoundingClientRect(); const x = event.clientX - rect.left - rect.width/2;
+            const y = event.clientY - rect.top - rect.height/2; const angle = Math.atan2(y, x) * 180 / Math.PI;
+            this.dataset.setProgress(Math.round(((angle + 90 + 360) % 360) / 3.6));">
+          <div class="w-full h-full bg-blue-500 rounded flex items-center justify-center text-xl font-bold"
+            style="transform: rotate(${p * 3.6}deg)">
+            ${p}%
+          </div>
+        </div>
+      `},
+      { name: "Multi-touch", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center gap-2">
+          <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 5))"
+            class="px-4 py-2 bg-gray-600 rounded">👈</button>
+          <span class="text-xl font-bold">${p}%</span>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 5))"
+            class="px-4 py-2 bg-gray-600 rounded">👉</button>
+        </div>
+      `},
+      { name: "Wheel Scroll", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center text-xl font-bold cursor-ns-resize"
+          onwheel="event.preventDefault();
+            this.dataset.setProgress(Math.max(0, Math.min(100, ${p} + (event.deltaY < 0 ? 5 : -5))))">
+          ${p}% (scroll)
+        </div>
+      `},
+      { name: "Tap Tempo", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center cursor-pointer"
+          onclick="this.dataset.setProgress((${p} + 10) % 110)">
+          Tap ${Math.floor(p / 10)} times
+        </div>
+      `},
+      { name: "Pinch Zoom", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center gap-2">
+          <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 10))"
+            class="px-3 py-2 bg-gray-600 rounded text-xl">🤏</button>
+          <span class="text-xl font-bold">${p}%</span>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 10))"
+            class="px-3 py-2 bg-gray-600 rounded text-xl">👐</button>
+        </div>
+      `},
+      { name: "Voice Command", render: (p, setP) => `
+        <div class="h-16 bg-gray-700 rounded flex items-center justify-center gap-2">
+          <button onclick="this.dataset.setProgress(25)" class="px-2 py-1 bg-gray-600 rounded text-xs">Low</button>
+          <button onclick="this.dataset.setProgress(50)" class="px-2 py-1 bg-gray-600 rounded text-xs">Mid</button>
+          <button onclick="this.dataset.setProgress(75)" class="px-2 py-1 bg-gray-600 rounded text-xs">High</button>
+          <button onclick="this.dataset.setProgress(100)" class="px-2 py-1 bg-gray-600 rounded text-xs">Full</button>
+        </div>
+      `},
+
+      // 31-40: Visual metaphors
+      { name: "Battery", render: (p, setP) => `
+        <div class="w-24 h-12 mx-auto border-2 border-white rounded relative cursor-pointer"
+          onclick="const rect = this.getBoundingClientRect();
+            this.dataset.setProgress(Math.round(((event.clientX - rect.left) / rect.width) * 100));">
+          <div class="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-4 bg-white -mr-2"></div>
+          <div class="h-full ${p > 20 ? 'bg-green-500' : 'bg-red-500'} transition-all"
+            style="width: ${p}%"></div>
+        </div>
+      `},
+      { name: "Fuel Gauge", render: (p, setP) => `
+        <svg width="100" height="60" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress(Math.round(Math.random() * 100))">
+          <path d="M 10 50 Q 50 10 90 50" fill="none" stroke="#333" stroke-width="8"/>
+          <path d="M 10 50 Q 50 10 90 50" fill="none" stroke="#3b82f6" stroke-width="8"
+            stroke-dasharray="100" stroke-dashoffset="${100 - p}"/>
+          <text x="50" y="55" text-anchor="middle" fill="white" font-size="14">${p}%</text>
+        </svg>
+      `},
+      { name: "Hourglass", render: (p, setP) => `
+        <svg width="60" height="80" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress((${p} + 25) % 125)">
+          <path d="M 20 10 L 40 10 L 40 30 L 30 40 L 40 50 L 40 70 L 20 70 L 20 50 L 30 40 L 20 30 Z"
+            fill="none" stroke="white" stroke-width="2"/>
+          <rect x="20" y="${70 - p * 0.6}" width="20" height="${p * 0.6}" fill="#3b82f6"/>
+        </svg>
+      `},
+      { name: "Pizza Slices", render: (p, setP) => `
+        <div class="flex justify-center gap-1 text-2xl">
+          ${Array(8).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 12.5})"
+              class="hover:scale-110 transition-transform">
+              ${p >= (i + 1) * 12.5 ? '🍕' : '⚪'}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Water Level", render: (p, setP) => `
+        <div class="w-24 h-32 mx-auto bg-gray-700 rounded relative overflow-hidden cursor-pointer"
+          onclick="const rect = this.getBoundingClientRect(); const y = rect.bottom - event.clientY;
+            this.dataset.setProgress(Math.round((y / rect.height) * 100));">
+          <div class="absolute bottom-0 w-full bg-blue-400 transition-all"
+            style="height: ${p}%; opacity: 0.7"></div>
+          <div class="absolute inset-0 flex items-center justify-center text-sm font-bold z-10">${p}%</div>
+        </div>
+      `},
+      { name: "Loading Bar", render: (p, setP) => `
+        <div class="space-y-2">
+          <div class="w-full h-4 bg-gray-700 rounded overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all animate-pulse"
+              style="width: ${p}%"></div>
+          </div>
+          <div class="flex justify-between text-xs">
+            <button onclick="this.dataset.setProgress(0)" class="text-gray-400 hover:text-white">Reset</button>
+            <button onclick="this.dataset.setProgress(100)" class="text-gray-400 hover:text-white">Complete</button>
+          </div>
+        </div>
+      `},
+      { name: "Speedometer", render: (p, setP) => `
+        <svg width="100" height="70" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress(Math.min(100, ${p} + 20))">
+          <path d="M 10 60 A 40 40 0 0 1 90 60" fill="none" stroke="#333" stroke-width="10"/>
+          <path d="M 10 60 A 40 40 0 0 1 90 60" fill="none" stroke="#3b82f6" stroke-width="10"
+            stroke-dasharray="126" stroke-dashoffset="${126 - (126 * p / 100)}"/>
+          <line x1="50" y1="60" x2="${50 + 35 * Math.cos((p * 1.8 - 90) * Math.PI / 180)}"
+            y2="${60 + 35 * Math.sin((p * 1.8 - 90) * Math.PI / 180)}"
+            stroke="white" stroke-width="2"/>
+        </svg>
+      `},
+      { name: "Heart Rate", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-4xl mb-2">${Array(Math.floor(p / 20)).fill('❤️').join('')}</div>
+          <div class="flex justify-center gap-1">
+            ${Array(5).fill(0).map((_, i) => `
+              <button onclick="this.dataset.setProgress(${(i + 1) * 20})"
+                class="w-6 h-6 rounded-full ${p >= (i + 1) * 20 ? 'bg-red-500' : 'bg-gray-700'} hover:bg-red-600">
+              </button>
+            `).join('')}
+          </div>
+        </div>
+      `},
+      { name: "Traffic Light", render: (p, setP) => `
+        <div class="w-16 h-36 mx-auto bg-gray-800 rounded-lg p-2 space-y-2">
+          <button onclick="this.dataset.setProgress(100)"
+            class="w-full aspect-square rounded-full ${p >= 75 ? 'bg-green-500' : 'bg-gray-700'}"></button>
+          <button onclick="this.dataset.setProgress(50)"
+            class="w-full aspect-square rounded-full ${p >= 25 && p < 75 ? 'bg-yellow-500' : 'bg-gray-700'}"></button>
+          <button onclick="this.dataset.setProgress(0)"
+            class="w-full aspect-square rounded-full ${p < 25 ? 'bg-red-500' : 'bg-gray-700'}"></button>
+        </div>
+      `},
+      { name: "Moon Phases", render: (p, setP) => `
+        <div class="flex justify-center gap-2 text-2xl">
+          ${['🌑','🌒','🌓','🌔','🌕'].map((e, i) => `
+            <button onclick="this.dataset.setProgress(${i * 25})"
+              class="${p >= i * 25 ? 'scale-125' : 'opacity-30'} hover:opacity-100 transition-all">
+              ${e}
+            </button>
+          `).join('')}
+        </div>
+      `},
+
+      // 41-50: Game-like interactions
+      { name: "Whack-a-Mole", render: (p, setP) => `
+        <div class="grid grid-cols-3 gap-1">
+          ${Array(9).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 11))"
+              class="aspect-square bg-gray-700 rounded hover:bg-blue-500 flex items-center justify-center text-2xl">
+              ${Math.random() > 0.7 ? '🦫' : '⚫'}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Catch Falling", render: (p, setP) => `
+        <div class="h-20 bg-gray-700 rounded relative overflow-hidden cursor-pointer"
+          onclick="this.dataset.setProgress(Math.min(100, ${p} + 5))">
+          <div class="absolute" style="top: ${Math.random() * 60}px; left: ${Math.random() * 80}%">⭐</div>
+          <div class="absolute bottom-0 left-0 right-0 text-center text-2xl">🧺</div>
+        </div>
+      `},
+      { name: "Shooting Gallery", render: (p, setP) => `
+        <div class="grid grid-cols-5 gap-1">
+          ${Array(5).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 20))"
+              class="aspect-square bg-gray-700 rounded hover:bg-red-500 flex items-center justify-center text-xl">
+              🎯
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Dice Roll", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-6xl mb-2">🎲</div>
+          <button onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))"
+            class="px-4 py-2 bg-blue-500 rounded hover:bg-blue-600">
+            Roll
+          </button>
+        </div>
+      `},
+      { name: "Slot Machine", render: (p, setP) => `
+        <div class="flex justify-center gap-1 text-3xl">
+          ${Array(3).fill(0).map(() => ['🍒','🍋','🍊','⭐'][Math.floor(Math.random() * 4)]).join('')}
+        </div>
+        <button onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))"
+          class="w-full mt-2 py-1 bg-yellow-500 rounded text-xs hover:bg-yellow-600">
+          Spin
+        </button>
+      `},
+      { name: "Memory Match", render: (p, setP) => `
+        <div class="grid grid-cols-4 gap-1">
+          ${Array(4).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress((${p} + 25) % 125)"
+              class="aspect-square ${p === i * 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600 text-xs">
+              ${p === i * 25 ? '✓' : '?'}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Tic-Tac-Toe", render: (p, setP) => `
+        <div class="grid grid-cols-3 gap-1 max-w-[120px] mx-auto">
+          ${Array(9).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${Math.floor((i + 1) * 11.11)})"
+              class="aspect-square ${p >= (i + 1) * 11.11 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600 text-xl">
+              ${p >= (i + 1) * 11.11 ? 'X' : ''}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Simon Says", render: (p, setP) => `
+        <div class="grid grid-cols-2 gap-2 max-w-[100px] mx-auto">
+          ${['🔴','🔵','🟢','🟡'].map((c, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="aspect-square rounded ${p >= (i + 1) * 25 ? 'bg-white' : 'bg-gray-700'} text-2xl flex items-center justify-center hover:scale-110 transition-transform">
+              ${c}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Rock Paper Scissors", render: (p, setP) => `
+        <div class="flex justify-center gap-2 text-3xl">
+          ${['✊','✋','✌️'].map((e, i) => `
+            <button onclick="this.dataset.setProgress(${i * 33})"
+              class="hover:scale-110 transition-transform ${p >= i * 33 ? 'opacity-100' : 'opacity-30'}">
+              ${e}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Trivia Quiz", render: (p, setP) => `
+        <div class="space-y-1">
+          ${['A','B','C','D'].map((l, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="w-full py-2 ${p === (i + 1) * 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-sm hover:bg-blue-600">
+              ${l}. Answer ${i + 1}
+            </button>
+          `).join('')}
+        </div>
+      `},
+
+      // 51-60: Creative inputs
+      { name: "Draw Canvas", render: (p, setP) => `
+        <canvas width="200" height="60" class="border border-gray-700 rounded mx-auto cursor-crosshair"
+          onmousedown="this.dataset.drawing = true"
+          onmouseup="this.dataset.drawing = false; const ctx = this.getContext('2d');
+            const data = ctx.getImageData(0, 0, 200, 60).data;
+            const filled = data.filter((v, i) => i % 4 === 3 && v > 0).length;
+            this.dataset.setProgress(Math.round((filled / (200 * 60)) * 100));"
+          onmousemove="if (this.dataset.drawing) {
+            const ctx = this.getContext('2d'); ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(event.offsetX - 2, event.offsetY - 2, 4, 4);
+          }">
+        </canvas>
+      `},
+      { name: "Type Speed", render: (p, setP) => `
+        <input type="text" placeholder="Type here..."
+          oninput="this.dataset.setProgress(Math.min(100, this.value.length * 10))"
+          class="w-full px-3 py-2 bg-gray-800 rounded" />
+      `},
+      { name: "Countdown Timer", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-3xl font-bold mb-2">${Math.floor(p / 10)}:${(p % 10) * 6}</div>
+          <div class="flex gap-1 justify-center">
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 10))"
+              class="px-3 py-1 bg-gray-700 rounded text-xs">+1m</button>
+            <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 10))"
+              class="px-3 py-1 bg-gray-700 rounded text-xs">-1m</button>
+          </div>
+        </div>
+      `},
+      { name: "Password Strength", render: (p, setP) => `
+        <div class="space-y-2">
+          <input type="password" placeholder="Enter password..."
+            oninput="const strength = Math.min(100, this.value.length * 8);
+              this.dataset.setProgress(strength);"
+            class="w-full px-3 py-2 bg-gray-800 rounded text-sm" />
+          <div class="h-2 bg-gray-700 rounded overflow-hidden">
+            <div class="h-full ${p < 30 ? 'bg-red-500' : p < 70 ? 'bg-yellow-500' : 'bg-green-500'}"
+              style="width: ${p}%"></div>
+          </div>
+        </div>
+      `},
+      { name: "Signature Pad", render: (p, setP) => `
+        <div class="border border-gray-700 rounded p-2 text-center">
+          <div class="text-xs mb-1">Sign here</div>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 33))"
+            class="px-3 py-1 bg-gray-700 rounded text-xs">
+            ✍️ Sign
+          </button>
+        </div>
+      `},
+      { name: "QR Scanner", render: (p, setP) => `
+        <div class="text-center space-y-2">
+          <div class="text-4xl">📷</div>
+          <button onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))"
+            class="px-3 py-1 bg-blue-500 rounded text-xs">
+            Scan QR
+          </button>
+        </div>
+      `},
+      { name: "Voice Meter", render: (p, setP) => `
+        <div class="flex items-center gap-2">
+          <div class="text-2xl">🎤</div>
+          <div class="flex-1 flex items-end gap-1 h-12">
+            ${Array(10).fill(0).map((_, i) => `
+              <div class="flex-1 ${p >= (i + 1) * 10 ? 'bg-green-500' : 'bg-gray-700'} rounded-t"
+                style="height: ${(i + 1) * 10}%"></div>
+            `).join('')}
+          </div>
+        </div>
+      `},
+      { name: "Barcode Input", render: (p, setP) => `
+        <div class="space-y-2">
+          <div class="flex justify-center gap-0.5">
+            ${Array(8).fill(0).map(() => `
+              <div class="w-1 h-12 ${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}"></div>
+            `).join('')}
+          </div>
+          <input type="text" placeholder="Barcode..."
+            oninput="this.dataset.setProgress(Math.min(100, this.value.length * 10))"
+            class="w-full px-2 py-1 bg-gray-800 rounded text-xs" />
+        </div>
+      `},
+      { name: "Fingerprint", render: (p, setP) => `
+        <div class="text-center">
+          <button onclick="this.dataset.setProgress(100)"
+            class="text-6xl hover:scale-110 transition-transform">
+            👆
+          </button>
+          <div class="text-xs mt-1">${p === 100 ? 'Verified!' : 'Tap to scan'}</div>
+        </div>
+      `},
+      { name: "Location Pin", render: (p, setP) => `
+        <div class="relative h-20 bg-gray-700 rounded overflow-hidden cursor-pointer"
+          onclick="const rect = this.getBoundingClientRect();
+            const x = ((event.clientX - rect.left) / rect.width) * 100;
+            this.dataset.setProgress(Math.round(x));">
+          <div class="absolute text-3xl" style="left: ${p}%; top: 50%; transform: translate(-50%, -50%)">
+            📍
+          </div>
+        </div>
+      `},
+
+      // 61-70: Time-based
+      { name: "Clock Face", render: (p, setP) => `
+        <svg width="80" height="80" class="mx-auto cursor-pointer"
+          onclick="const rect = this.getBoundingClientRect(); const x = event.clientX - rect.left - 40;
+            const y = event.clientY - rect.top - 40; const angle = Math.atan2(y, x) * 180 / Math.PI;
+            this.dataset.setProgress(Math.round(((angle + 90 + 360) % 360) / 3.6));">
+          <circle cx="40" cy="40" r="35" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+          ${Array(12).fill(0).map((_, i) => {
+            const angle = i * 30 - 90;
+            const x = 40 + 30 * Math.cos(angle * Math.PI / 180);
+            const y = 40 + 30 * Math.sin(angle * Math.PI / 180);
+            return `<text x="${x}" y="${y + 4}" text-anchor="middle" fill="white" font-size="8">${i || 12}</text>`;
+          }).join('')}
+          <line x1="40" y1="40" x2="${40 + 25 * Math.cos((p * 3.6 - 90) * Math.PI / 180)}"
+            y2="${40 + 25 * Math.sin((p * 3.6 - 90) * Math.PI / 180)}"
+            stroke="#3b82f6" stroke-width="2"/>
+        </svg>
+      `},
+      { name: "Calendar Days", render: (p, setP) => `
+        <div class="grid grid-cols-7 gap-0.5 text-xs">
+          ${Array(28).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${Math.round((i + 1) * 3.57)})"
+              class="aspect-square ${p >= (i + 1) * 3.57 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600 text-[8px]">
+              ${i + 1}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Season Selector", render: (p, setP) => `
+        <div class="grid grid-cols-2 gap-2">
+          ${[['❄️','Winter',0],['🌸','Spring',25],['☀️','Summer',50],['🍂','Fall',75]].map(([e,l,v]) => `
+            <button onclick="this.dataset.setProgress(${v})"
+              class="py-2 ${p >= v && p < v + 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${e} ${l}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Alarm Clock", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-3xl mb-2">⏰</div>
+          <div class="text-xl font-bold mb-2">${String(Math.floor(p / 4.17)).padStart(2, '0')}:${String(Math.floor((p % 4.17) * 14.4)).padStart(2, '0')}</div>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="w-full" />
+        </div>
+      `},
+      { name: "Pomodoro Timer", render: (p, setP) => `
+        <div class="text-center space-y-2">
+          <div class="text-2xl font-bold">${Math.floor(25 * (1 - p / 100))}:00</div>
+          <div class="flex gap-1 justify-center">
+            <button onclick="this.dataset.setProgress(0)" class="px-2 py-1 bg-green-500 rounded text-xs">Start</button>
+            <button onclick="this.dataset.setProgress(50)" class="px-2 py-1 bg-yellow-500 rounded text-xs">Pause</button>
+            <button onclick="this.dataset.setProgress(100)" class="px-2 py-1 bg-red-500 rounded text-xs">Stop</button>
+          </div>
+        </div>
+      `},
+      { name: "Age Selector", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-4xl mb-2">${Math.floor(p / 1.25)}</div>
+          <div class="text-xs text-gray-400 mb-2">years old</div>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="w-full" />
+        </div>
+      `},
+      { name: "Week Progress", render: (p, setP) => `
+        <div class="flex justify-center gap-1">
+          ${['M','T','W','T','F','S','S'].map((d, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 14.28})"
+              class="w-8 h-8 ${p >= (i + 1) * 14.28 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${d}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Year Progress", render: (p, setP) => `
+        <div class="space-y-1">
+          <div class="flex justify-between text-xs text-gray-400">
+            <span>Jan</span>
+            <span>Dec</span>
+          </div>
+          <div class="h-4 bg-gray-700 rounded overflow-hidden cursor-pointer"
+            onclick="const rect = this.getBoundingClientRect();
+              this.dataset.setProgress(Math.round(((event.clientX - rect.left) / rect.width) * 100));">
+            <div class="h-full bg-gradient-to-r from-blue-400 to-blue-600" style="width: ${p}%"></div>
+          </div>
+        </div>
+      `},
+      { name: "Stopwatch", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-3xl font-mono mb-2">${(p * 0.6).toFixed(1)}s</div>
+          <div class="flex gap-1 justify-center">
+            <button onclick="this.dataset.setProgress(0)" class="px-3 py-1 bg-gray-700 rounded text-xs">Reset</button>
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 5))" class="px-3 py-1 bg-blue-500 rounded text-xs">Lap</button>
+          </div>
+        </div>
+      `},
+      { name: "Sunrise/Sunset", render: (p, setP) => `
+        <div class="h-16 relative overflow-hidden rounded"
+          style="background: linear-gradient(to bottom,
+            ${p < 50 ? '#1a1a2e' : '#87CEEB'} 0%,
+            ${p < 50 ? '#16213e' : '#FFA500'} 100%)">
+          <div class="absolute text-4xl" style="bottom: ${p}%; left: 50%; transform: translateX(-50%)">
+            ${p < 50 ? '🌙' : '☀️'}
+          </div>
+        </div>
+      `},
+
+      // 71-80: Comparisons & relative
+      { name: "Before/After", render: (p, setP) => `
+        <div class="flex gap-2">
+          <button onclick="this.dataset.setProgress(0)"
+            class="flex-1 py-2 ${p === 0 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs">Before</button>
+          <div class="flex items-center justify-center w-16 text-xl font-bold">${p}%</div>
+          <button onclick="this.dataset.setProgress(100)"
+            class="flex-1 py-2 ${p === 100 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs">After</button>
+        </div>
+      `},
+      { name: "Yes/No", render: (p, setP) => `
+        <div class="flex gap-2">
+          <button onclick="this.dataset.setProgress(0)"
+            class="flex-1 py-4 ${p < 50 ? 'bg-red-500' : 'bg-gray-700'} rounded hover:bg-red-600">
+            ✕ No
+          </button>
+          <button onclick="this.dataset.setProgress(100)"
+            class="flex-1 py-4 ${p >= 50 ? 'bg-green-500' : 'bg-gray-700'} rounded hover:bg-green-600">
+            ✓ Yes
+          </button>
+        </div>
+      `},
+      { name: "Agree Scale", render: (p, setP) => `
+        <div class="space-y-1">
+          ${['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'].map((l, i) => `
+            <button onclick="this.dataset.setProgress(${i * 25})"
+              class="w-full py-1 ${p === i * 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-[10px] hover:bg-blue-600">
+              ${l}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Priority Levels", render: (p, setP) => `
+        <div class="space-y-1">
+          ${[['Low',25,'bg-green-600'],['Medium',50,'bg-yellow-600'],['High',75,'bg-orange-600'],['Critical',100,'bg-red-600']].map(([l,v,c]) => `
+            <button onclick="this.dataset.setProgress(${v})"
+              class="w-full py-2 ${p === v ? c : 'bg-gray-700'} rounded text-xs hover:opacity-80">
+              ${l}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Size Selector", render: (p, setP) => `
+        <div class="flex justify-center gap-2">
+          ${['XS','S','M','L','XL'].map((s, i) => `
+            <button onclick="this.dataset.setProgress(${i * 20})"
+              class="w-10 h-10 ${p >= i * 20 && p < (i + 1) * 20 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${s}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Temperature", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-3xl mb-2">${Math.round((p / 100) * 50 - 10)}°C</div>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="w-full" />
+          <div class="flex justify-between text-xs text-gray-400 mt-1">
+            <span>❄️ Cold</span>
+            <span>🔥 Hot</span>
+          </div>
+        </div>
+      `},
+      { name: "Volume Level", render: (p, setP) => `
+        <div class="flex items-center gap-2">
+          <button onclick="this.dataset.setProgress(0)" class="text-xl">🔇</button>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="flex-1" />
+          <button onclick="this.dataset.setProgress(100)" class="text-xl">🔊</button>
+        </div>
+      `},
+      { name: "Brightness", render: (p, setP) => `
+        <div class="space-y-2">
+          <div class="h-16 rounded flex items-center justify-center text-4xl"
+            style="background: rgba(255, 255, 255, ${p / 100})">
+            💡
+          </div>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="w-full" />
+        </div>
+      `},
+      { name: "Zoom Level", render: (p, setP) => `
+        <div class="text-center">
+          <div class="text-6xl mb-2" style="font-size: ${16 + (p / 100) * 32}px">🔍</div>
+          <input type="range" value="${p}" min="0" max="100"
+            onchange="this.dataset.setProgress(this.value)"
+            class="w-full" />
+        </div>
+      `},
+      { name: "Speed Control", render: (p, setP) => `
+        <div class="flex justify-center gap-2">
+          ${['0.5x','1x','1.5x','2x'].map((s, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="px-3 py-2 ${p >= (i + 1) * 25 && p < (i + 2) * 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${s}
+            </button>
+          `).join('')}
+        </div>
+      `},
+
+      // 81-90: Unique patterns
+      { name: "Binary Toggle", render: (p, setP) => `
+        <div class="flex justify-center gap-1 font-mono text-xs">
+          ${Array(8).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${p} ^ ${1 << i})"
+              class="w-6 h-6 ${(p >> i) & 1 ? 'bg-green-500' : 'bg-gray-700'} rounded hover:bg-green-600">
+              ${(p >> i) & 1}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Morse Code", render: (p, setP) => `
+        <div class="flex justify-center gap-1">
+          ${['·','−','·','−','·'].map((s, i) => `
+            <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 20))"
+              class="w-8 h-8 ${p >= (i + 1) * 20 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600">
+              ${s}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Rubik's Cube", render: (p, setP) => `
+        <div class="grid grid-cols-3 gap-0.5 w-20 h-20 mx-auto">
+          ${Array(9).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(i + 1) * 11})"
+              class="${p >= (i + 1) * 11 ? 'bg-red-500' : 'bg-gray-700'} rounded cursor-pointer hover:opacity-80">
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "DNA Helix", render: (p, setP) => `
+        <svg width="100" height="60" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress((${p} + 10) % 110)">
+          ${Array(10).fill(0).map((_, i) => {
+            const x = i * 10;
+            const y1 = 20 + 15 * Math.sin((i + p / 10) * 0.5);
+            const y2 = 40 - 15 * Math.sin((i + p / 10) * 0.5);
+            return `<circle cx="${x + 10}" cy="${y1}" r="3" fill="${p >= i * 10 ? '#3b82f6' : '#333'}"/>
+                    <circle cx="${x + 10}" cy="${y2}" r="3" fill="${p >= i * 10 ? '#3b82f6' : '#333'}"/>`;
+          }).join('')}
+        </svg>
+      `},
+      { name: "Constellation", render: (p, setP) => `
+        <svg width="100" height="60" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))">
+          ${Array(8).fill(0).map((_, i) => {
+            const x = 10 + (i % 4) * 30;
+            const y = 10 + Math.floor(i / 4) * 40;
+            return `<circle cx="${x}" cy="${y}" r="2" fill="${p >= (i + 1) * 12.5 ? '#FFD700' : '#333'}"/>`;
+          }).join('')}
+        </svg>
+      `},
+      { name: "Tetris Blocks", render: (p, setP) => `
+        <div class="grid grid-cols-4 gap-1 max-w-[100px] mx-auto">
+          ${Array(16).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(i + 1) * 6.25})"
+              class="aspect-square ${p >= (i + 1) * 6.25 ? 'bg-purple-500' : 'bg-gray-700'} rounded-sm cursor-pointer hover:bg-purple-600">
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "Domino Chain", render: (p, setP) => `
+        <div class="flex justify-center gap-1">
+          ${Array(8).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(i + 1) * 12.5})"
+              class="w-3 h-12 ${p >= (i + 1) * 12.5 ? 'bg-white rotate-12' : 'bg-gray-700'} rounded cursor-pointer hover:bg-white transition-transform">
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "Puzzle Pieces", render: (p, setP) => `
+        <div class="grid grid-cols-3 gap-2 max-w-[120px] mx-auto">
+          ${Array(9).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 11})"
+              class="aspect-square ${p >= (i + 1) * 11 ? 'bg-blue-500' : 'bg-gray-700'} rounded hover:bg-blue-600 text-xs">
+              🧩
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Chain Links", render: (p, setP) => `
+        <div class="flex justify-center items-center gap-0">
+          ${Array(5).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 20})"
+              class="text-2xl ${p >= (i + 1) * 20 ? 'opacity-100' : 'opacity-30'} hover:opacity-100">
+              🔗
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Origami Folds", render: (p, setP) => `
+        <div class="space-y-1">
+          ${Array(4).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="h-3 ${p >= (i + 1) * 25 ? 'bg-blue-500' : 'bg-gray-700'} rounded cursor-pointer hover:bg-blue-600"
+              style="width: ${100 - i * 20}%; margin-left: ${i * 10}%">
+            </div>
+          `).join('')}
+        </div>
+      `},
+
+      // 91-100: Final creative variants
+      { name: "Playlist", render: (p, setP) => `
+        <div class="space-y-1">
+          ${Array(4).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="w-full py-1 ${p === (i + 1) * 25 ? 'bg-green-500' : 'bg-gray-700'} rounded text-xs hover:bg-green-600 flex items-center gap-1 justify-center">
+              ${p === (i + 1) * 25 ? '▶️' : '⏸️'} Track ${i + 1}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Card Deck", render: (p, setP) => `
+        <div class="flex justify-center gap-1">
+          ${['♠️','♥️','♦️','♣️'].map((s, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="w-12 h-16 ${p >= (i + 1) * 25 ? 'bg-white text-black' : 'bg-gray-700 text-white'} rounded text-2xl flex items-center justify-center hover:scale-110 transition-transform">
+              ${s}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Layers Stack", render: (p, setP) => `
+        <div class="space-y-1">
+          ${Array(5).fill(0).map((_, i) => `
+            <div onclick="this.dataset.setProgress(${(5 - i) * 20})"
+              class="h-3 ${p >= (5 - i) * 20 ? 'bg-blue-500' : 'bg-gray-700'} rounded cursor-pointer hover:bg-blue-600"
+              style="width: ${(5 - i) * 20}%; margin: 0 auto">
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "Undo/Redo", render: (p, setP) => `
+        <div class="flex items-center justify-center gap-4">
+          <button onclick="this.dataset.setProgress(Math.max(0, ${p} - 10))"
+            class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 text-xl">
+            ↶
+          </button>
+          <span class="text-xl font-bold">${p}%</span>
+          <button onclick="this.dataset.setProgress(Math.min(100, ${p} + 10))"
+            class="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 text-xl">
+            ↷
+          </button>
+        </div>
+      `},
+      { name: "Recipe Steps", render: (p, setP) => `
+        <div class="space-y-1">
+          ${['Prep','Cook','Serve','Done'].map((s, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="w-full py-2 ${p >= (i + 1) * 25 ? 'bg-green-500' : 'bg-gray-700'} rounded text-xs hover:bg-green-600">
+              ${p >= (i + 1) * 25 ? '✓' : ''} ${s}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Social Mood", render: (p, setP) => `
+        <div class="flex justify-center gap-2 text-3xl">
+          ${['😢','😕','😐','🙂','😄'].map((e, i) => `
+            <button onclick="this.dataset.setProgress(${i * 25})"
+              class="${p >= i * 25 && p < (i + 1) * 25 ? 'scale-125' : 'opacity-30'} hover:opacity-100 hover:scale-110 transition-all">
+              ${e}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Wifi Strength", render: (p, setP) => `
+        <div class="flex items-end justify-center gap-1">
+          ${Array(4).fill(0).map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(i + 1) * 25})"
+              class="w-4 ${p >= (i + 1) * 25 ? 'bg-green-500' : 'bg-gray-700'} rounded-t hover:bg-green-600"
+              style="height: ${(i + 1) * 25}%">
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Elevator Floors", render: (p, setP) => `
+        <div class="grid grid-cols-2 gap-1 max-w-[80px] mx-auto">
+          ${Array(8).fill(0).reverse().map((_, i) => `
+            <button onclick="this.dataset.setProgress(${(8 - i) * 12.5})"
+              class="aspect-square ${p >= (8 - i) * 12.5 ? 'bg-blue-500' : 'bg-gray-700'} rounded text-xs hover:bg-blue-600">
+              ${8 - i}
+            </button>
+          `).join('')}
+        </div>
+      `},
+      { name: "Traffic Density", render: (p, setP) => `
+        <div class="h-16 relative bg-gray-700 rounded overflow-hidden cursor-pointer"
+          onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))">
+          ${Array(Math.floor(p / 10)).fill(0).map(() => `
+            <div class="absolute w-6 h-3 bg-yellow-500 rounded-sm"
+              style="left: ${Math.random() * 80}%; top: ${Math.random() * 80}%">
+              🚗
+            </div>
+          `).join('')}
+        </div>
+      `},
+      { name: "Stock Chart", render: (p, setP) => `
+        <svg width="100" height="60" class="mx-auto cursor-pointer"
+          onclick="this.dataset.setProgress(Math.floor(Math.random() * 101))">
+          <polyline points="${Array(10).fill(0).map((_, i) => {
+            const x = i * 10;
+            const y = 50 - (p * 0.4) + (Math.random() * 20 - 10);
+            return `${x},${y}`;
+          }).join(' ')}" fill="none" stroke="#3b82f6" stroke-width="2"/>
+        </svg>
+      `}
+    ];
+
+    // Create variant cards
+    const container = document.getElementById('variants');
+    variants.forEach((variant, i) => {
+      const card = document.createElement('div');
+      card.className = 'variant-card bg-gray-900 rounded-lg p-4 border border-gray-800';
+      card.innerHTML = `
+        <div class="text-xs text-gray-400 mb-2">#${i + 1}: ${variant.name}</div>
+        <div class="mb-2 text-center text-lg font-bold task-title">Sample Task</div>
+        <div class="variant-content" data-index="${i}" data-progress="0"></div>
+      `;
+      container.appendChild(card);
+    });
+
+    // Initialize all variants
+    function updateVariant(index) {
+      const content = document.querySelector(`[data-index="${index}"]`);
+      const progress = parseInt(content.dataset.progress);
+      const html = variants[index].render(progress, (newProgress) => {
+        content.dataset.progress = Math.max(0, Math.min(100, newProgress));
+        updateVariant(index);
+      });
+
+      content.innerHTML = html;
+
+      // Attach setProgress to all interactive elements
+      content.querySelectorAll('[onclick], [onchange], [onmousedown], [onwheel], [ontouchstart]').forEach(el => {
+        el.dataset.setProgress = (val) => {
+          content.dataset.progress = Math.max(0, Math.min(100, parseInt(val)));
+          updateVariant(index);
+        };
+      });
+    }
+
+    // Initialize all variants
+    variants.forEach((_, i) => updateVariant(i));
+  </script>
+</body>
+</html>

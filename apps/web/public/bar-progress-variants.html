@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bar Progress Variants</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {}
+      }
+    }
+  </script>
+  <style>
+    body { background: #000; color: #fff; }
+    .bar {
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .bar:hover {
+      transform: scaleY(1.1);
+      filter: brightness(1.2);
+    }
+    .bar.filled {
+      background: rgb(59, 130, 246);
+    }
+    .bar.empty {
+      background: rgb(55, 65, 81);
+    }
+  </style>
+</head>
+<body class="p-8">
+  <h1 class="text-4xl font-bold mb-8 text-center">Bar Progress Variants</h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+
+    <!-- Variant 1: 20 Thin Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#1: 20 Thin Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-20" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-20">0%</div>
+    </div>
+
+    <!-- Variant 2: 30 Extra Thin Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#2: 30 Extra Thin Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-0.5 mb-2">
+        <div id="bars-30" class="flex gap-0.5 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-30">0%</div>
+    </div>
+
+    <!-- Variant 3: 50 Super Thin Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#3: 50 Super Thin Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-0.5 mb-2">
+        <div id="bars-50" class="flex gap-0.5 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-50">0%</div>
+    </div>
+
+    <!-- Variant 4: 25 Bars with Vertical Layout -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#4: 25 Bars (Vertical)</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-end justify-center h-40 gap-1 mb-2">
+        <div id="bars-25-vertical" class="flex items-end gap-1 h-full"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-25">0%</div>
+    </div>
+
+    <!-- Variant 5: 20 Bars with Gradient -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#5: 20 Bars (Gradient)</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-20-gradient" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-20-gradient">0%</div>
+    </div>
+
+    <!-- Variant 6: 40 Micro Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#6: 40 Micro Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-px mb-2">
+        <div id="bars-40" class="flex gap-px flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-40">0%</div>
+    </div>
+
+    <!-- Variant 7: 20 Bars with Color Transition -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#7: 20 Bars (Red→Green)</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-20-color" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-20-color">0%</div>
+    </div>
+
+    <!-- Variant 8: 20 Bars Rounded -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#8: 20 Rounded Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-20-rounded" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-20-rounded">0%</div>
+    </div>
+
+    <!-- Variant 9: 15 Wide Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#9: 15 Wide Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-15" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-15">0%</div>
+    </div>
+
+    <!-- Variant 10: 100 Tiny Bars (Like LED strip) -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#10: 100 LED-Style Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-px mb-2">
+        <div id="bars-100" class="flex gap-px flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-100">0%</div>
+    </div>
+
+    <!-- Variant 11: 20 Bars with Glow Effect -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#11: 20 Bars (Glow)</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-1 mb-2">
+        <div id="bars-20-glow" class="flex gap-1 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-20-glow">0%</div>
+    </div>
+
+    <!-- Variant 12: 10 Chunky Bars -->
+    <div class="bg-gray-800 rounded-xl p-6">
+      <div class="text-sm text-gray-400 mb-2">#12: 10 Chunky Bars</div>
+      <div class="text-xl font-bold mb-4">Sample Task</div>
+      <div class="flex items-center gap-2 mb-2">
+        <div id="bars-10" class="flex gap-2 flex-1"></div>
+      </div>
+      <div class="text-center text-2xl font-mono" id="progress-10">0%</div>
+    </div>
+
+  </div>
+
+  <script>
+    const variants = [
+      { id: 'bars-20', count: 20, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-30', count: 30, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-50', count: 50, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-25-vertical', count: 25, type: 'vertical', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-20-gradient', count: 20, type: 'horizontal', gradient: true, color: false, rounded: false, glow: false },
+      { id: 'bars-40', count: 40, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-20-color', count: 20, type: 'horizontal', gradient: false, color: true, rounded: false, glow: false },
+      { id: 'bars-20-rounded', count: 20, type: 'horizontal', gradient: false, color: false, rounded: true, glow: false },
+      { id: 'bars-15', count: 15, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-100', count: 100, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+      { id: 'bars-20-glow', count: 20, type: 'horizontal', gradient: false, color: false, rounded: false, glow: true },
+      { id: 'bars-10', count: 10, type: 'horizontal', gradient: false, color: false, rounded: false, glow: false },
+    ];
+
+    variants.forEach(variant => {
+      const container = document.getElementById(variant.id);
+      const progressEl = document.getElementById(`progress-${variant.id.replace('bars-', '')}`);
+      let progress = 0;
+
+      // Create bars
+      for (let i = 0; i < variant.count; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'bar empty';
+
+        if (variant.type === 'vertical') {
+          bar.style.width = '100%';
+          bar.style.height = '0%';
+          bar.style.minHeight = '2px';
+        } else {
+          bar.style.height = '32px';
+          bar.style.flex = '1';
+          bar.style.minWidth = '2px';
+        }
+
+        if (variant.rounded) {
+          bar.style.borderRadius = '4px';
+        }
+
+        if (variant.glow) {
+          bar.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0)';
+        }
+
+        bar.addEventListener('click', () => {
+          const clickedProgress = Math.round(((i + 1) / variant.count) * 100);
+          progress = clickedProgress;
+          updateBars();
+        });
+
+        container.appendChild(bar);
+      }
+
+      function updateBars() {
+        const bars = container.querySelectorAll('.bar');
+        const filledCount = Math.round((progress / 100) * variant.count);
+
+        bars.forEach((bar, index) => {
+          if (index < filledCount) {
+            bar.classList.remove('empty');
+            bar.classList.add('filled');
+
+            if (variant.type === 'vertical') {
+              const heightPercent = 100;
+              bar.style.height = `${heightPercent}%`;
+            }
+
+            if (variant.gradient) {
+              const hue = (index / variant.count) * 240; // Blue to blue gradient
+              bar.style.background = `hsl(${hue}, 80%, 50%)`;
+            }
+
+            if (variant.color) {
+              // Red to green transition
+              const percent = index / filledCount;
+              const red = Math.round(220 * (1 - percent));
+              const green = Math.round(180 * percent);
+              bar.style.background = `rgb(${red}, ${green}, 70)`;
+            }
+
+            if (variant.glow) {
+              bar.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.8)';
+            }
+          } else {
+            bar.classList.remove('filled');
+            bar.classList.add('empty');
+
+            if (variant.type === 'vertical') {
+              bar.style.height = '0%';
+            }
+
+            if (variant.gradient || variant.color) {
+              bar.style.background = 'rgb(55, 65, 81)';
+            }
+
+            if (variant.glow) {
+              bar.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0)';
+            }
+          }
+        });
+
+        progressEl.textContent = `${progress}%`;
+      }
+
+      updateBars();
+    });
+  </script>
+</body>
+</html>

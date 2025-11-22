@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Description Preview Variants - 10 Options</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Mono Variable', monospace;
+      background: #000;
+      color: #fff;
+    }
+
+    /* Option 5: Rotating text animation */
+    @keyframes rotateText {
+      0%, 45% { opacity: 1; }
+      50%, 95% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    .rotate-text {
+      animation: rotateText 6s infinite;
+    }
+
+    /* Option 6: Bottom edge indicator */
+    .description-indicator {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    }
+  </style>
+</head>
+<body class="p-8">
+  <div class="max-w-4xl mx-auto space-y-12">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl font-bold mb-2">Description Preview Variants</h1>
+      <p class="text-gray-400">10 different approaches to show task descriptions</p>
+    </div>
+
+    <!-- Option 1: Subtle fade-in below title -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">1. Subtle fade-in below title (single line)</h2>
+      <p class="text-sm text-gray-400 mb-4">Shows first 40-50 chars below task title in smaller, dimmer text</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 60%, transparent 60%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>
+              <div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>
+              <div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>
+              <!-- 60 blue bars -->
+              <script>for(let i=0;i<57;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <!-- 40 gray bars -->
+              <script>for(let i=0;i<40;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex flex-col justify-center px-4 pointer-events-none">
+              <div class="flex items-center justify-between">
+                <div class="max-w-[70%]">
+                  <p class="text-sm font-bold text-white truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                    Write quarterly report
+                  </p>
+                  <p class="text-xs text-gray-400 truncate mt-0.5" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">
+                    Need to include Q3 metrics and analysis...
+                  </p>
+                </div>
+                <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">60%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 2: Icon indicator only -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">2. Icon indicator only</h2>
+      <p class="text-sm text-gray-400 mb-4">Small 📝 icon appears next to title when description exists</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 45%, transparent 45%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<45;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<55;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <div class="flex items-center gap-1.5 max-w-[70%]">
+                <p class="text-sm font-bold text-white truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                  Review pull requests
+                </p>
+                <span class="text-xs">📝</span>
+              </div>
+              <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">45%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 3: Tooltip on hover -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">3. Tooltip on hover (desktop only)</h2>
+      <p class="text-sm text-gray-400 mb-4">Hover over task title shows first 100 chars in tooltip</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600 group">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 80%, transparent 80%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<80;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<20;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-sm font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Prepare presentation
+              </p>
+              <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">80%</span>
+            </div>
+
+            <!-- Tooltip (shows on hover) -->
+            <div class="absolute left-4 top-12 bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs text-gray-300 max-w-xs opacity-0 group-hover:opacity-100 transition-opacity z-10 pointer-events-none shadow-lg">
+              Create slides for Monday's team meeting. Include Q3 results and roadmap for Q4. Don't forget...
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 4: Expand on hover -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">4. Expand on hover (desktop)</h2>
+      <p class="text-sm text-gray-400 mb-4">Task card height expands from h-10 to h-16 on hover</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600 transition-all hover:h-16 h-10">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 30%, transparent 30%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative h-full">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<30;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<70;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-sm font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Update documentation
+              </p>
+              <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">30%</span>
+            </div>
+          </div>
+
+          <!-- Expanded content (visible on hover) -->
+          <div class="px-4 pb-2 opacity-0 hover:opacity-100 transition-opacity">
+            <p class="text-xs text-gray-400 line-clamp-2">
+              Update the API docs with new endpoints. Add examples for authentication flow. Fix typos in getting started guide.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 5: Rotating text -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">5. Rotating text in percentage area</h2>
+      <p class="text-sm text-gray-400 mb-4">Alternates between showing progress % and first 20 chars every 3 seconds</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 55%, transparent 55%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<55;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<45;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-sm font-bold text-white truncate max-w-[60%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Fix critical bug
+              </p>
+              <div class="relative ml-2 w-24 text-right">
+                <span class="absolute right-0 text-sm font-mono font-bold text-gray-300 rotate-text" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">55%</span>
+                <span class="absolute right-0 text-xs text-gray-400 rotate-text" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9); animation-delay: 3s;">Memory leak in...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 6: Bottom edge preview bar -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">6. Bottom edge preview bar</h2>
+      <p class="text-sm text-gray-400 mb-4">Thin colored line at bottom when description exists</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 70%, transparent 70%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<70;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<30;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-sm font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Schedule interviews
+              </p>
+              <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">70%</span>
+            </div>
+          </div>
+
+          <!-- Bottom indicator -->
+          <div class="description-indicator"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 7: Split progress/description view -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">7. Split progress/description view</h2>
+      <p class="text-sm text-gray-400 mb-4">Top half: progress, Bottom half: description preview</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="relative">
+          <!-- Top half: Progress -->
+          <div class="relative w-full h-5 cursor-pointer select-none border-b border-gray-700/50">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<85;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<15;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-xs font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Deploy to production
+              </p>
+              <span class="text-xs font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">85%</span>
+            </div>
+          </div>
+
+          <!-- Bottom half: Description -->
+          <div class="h-5 px-4 flex items-center">
+            <p class="text-xs text-gray-400 truncate" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">
+              Run final tests, backup database, deploy v2.1.0
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 8: Engraved description preview -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">8. Engraved description preview below title</h2>
+      <p class="text-sm text-gray-400 mb-4">Shows first 30 chars right below title with same engraved style</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 50%, transparent 50%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<50;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<50;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex flex-col justify-center px-4 pointer-events-none">
+              <div class="flex items-start justify-between">
+                <div class="flex-1 min-w-0 max-w-[70%]">
+                  <p class="text-sm font-bold text-white truncate leading-tight" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                    Team standup meeting
+                  </p>
+                  <p class="text-xs text-gray-400 truncate leading-tight mt-0.5" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">
+                    Discuss sprint progress...
+                  </p>
+                </div>
+                <span class="text-sm font-mono font-bold text-gray-300 ml-2 flex-shrink-0" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">50%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 9: Icon badge with truncated text -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">9. Icon badge with truncated text</h2>
+      <p class="text-sm text-gray-400 mb-4">Small badge on right side with first word or "..."</p>
+
+      <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+        <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 65%, transparent 65%, transparent 100%); opacity: 0.15;"></div>
+
+        <div class="relative">
+          <div class="relative w-full h-10 cursor-pointer select-none">
+            <div class="flex gap-px h-full">
+              <script>for(let i=0;i<65;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+              <script>for(let i=0;i<35;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+            </div>
+
+            <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+              <p class="text-sm font-bold text-white truncate max-w-[60%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                Call with client
+              </p>
+              <div class="flex items-center gap-2 ml-2">
+                <span class="text-xs px-2 py-0.5 bg-amber-600/30 text-amber-300 rounded border border-amber-600/50">
+                  Important
+                </span>
+                <span class="text-sm font-mono font-bold text-gray-300" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">65%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Option 10: Progress bar color change -->
+    <div class="space-y-3">
+      <h2 class="text-xl font-bold text-blue-400">10. Progress bar color change</h2>
+      <p class="text-sm text-gray-400 mb-4">Purple progress bars when description exists (vs blue normally)</p>
+
+      <div class="space-y-2">
+        <!-- With description (purple) -->
+        <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600">
+          <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(168, 85, 247) 0%, rgb(168, 85, 247) 75%, transparent 75%, transparent 100%); opacity: 0.15;"></div>
+
+          <div class="relative">
+            <div class="relative w-full h-10 cursor-pointer select-none">
+              <div class="flex gap-px h-full">
+                <script>for(let i=0;i<75;i++){document.write('<div class="flex-1 bg-purple-500" style="min-width: 1px;"></div>')}</script>
+                <script>for(let i=0;i<25;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+              </div>
+
+              <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+                <p class="text-sm font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                  Review code changes (has notes)
+                </p>
+                <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">75%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Without description (blue) -->
+        <div class="relative w-full select-none rounded-xl overflow-hidden bg-gray-800/90 border border-gray-600 opacity-60">
+          <div class="absolute inset-0" style="background: linear-gradient(to right, rgb(59, 130, 246) 0%, rgb(59, 130, 246) 75%, transparent 75%, transparent 100%); opacity: 0.15;"></div>
+
+          <div class="relative">
+            <div class="relative w-full h-10 cursor-pointer select-none">
+              <div class="flex gap-px h-full">
+                <script>for(let i=0;i<75;i++){document.write('<div class="flex-1 bg-blue-500" style="min-width: 1px;"></div>')}</script>
+                <script>for(let i=0;i<25;i++){document.write('<div class="flex-1 bg-gray-400" style="min-width: 1px;"></div>')}</script>
+              </div>
+
+              <div class="absolute inset-0 flex items-center justify-between px-4 pointer-events-none">
+                <p class="text-sm font-bold text-white truncate max-w-[70%]" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.5);">
+                  Simple task (no notes)
+                </p>
+                <span class="text-sm font-mono font-bold text-gray-300 ml-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.9);">75%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center text-gray-500 text-sm py-8">
+      All 10 variants visualized. Choose your favorite!
+    </div>
+  </div>
+</body>
+</html>
