@@ -1,8 +1,8 @@
 # Railway deployment configuration
 [build]
 builder = "NIXPACKS"
-buildCommand = "cd packages/server && pnpm install && pnpm build"
-startCommand = "cd packages/server && pnpm start"
+buildCommand = "npm i -g pnpm && pnpm install && pnpm build"
+startCommand = "npm i -g pnpm && pnpm start"
 
 [deploy]
 healthcheckPath = "/health"

@@ -1,7 +1,7 @@
 [build]
 builder = "NIXPACKS"
-buildCommand = "pnpm install && pnpm build"
-startCommand = "pnpm preview --port 5173"
+buildCommand = "npm i -g pnpm && pnpm install && pnpm build"
+startCommand = "npm i -g pnpm && pnpm preview --port 5173"
 
 [deploy]
 healthcheckPath = "/"

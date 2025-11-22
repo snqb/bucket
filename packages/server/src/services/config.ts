@@ -37,7 +37,7 @@ export class ConfigService {
       nodeEnv: process.env.NODE_ENV || 'development',
       dbPath:
         process.env.NODE_ENV === 'production'
-          ? '/data/storage.db'
+          ? '/app/data/storage.db'
           : process.env.DB_PATH || './data/storage.db',
       jwtSecret: process.env.JWT_SECRET!,
       jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
