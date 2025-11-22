@@ -131,9 +131,20 @@ export const Task = (props: Props) => {
       )}
       <Dialog modal={false}>
         <motion.div
-          className="w-full select-none rounded-lg border border-gray-700 bg-gray-900/50 p-4 hover:border-gray-600 transition-colors"
+          className="relative w-full select-none rounded-lg border border-gray-700 overflow-hidden hover:border-gray-600 transition-all"
           style={{ opacity }}
         >
+          {/* Progress background fill */}
+          <div
+            className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-blue-500/15 to-transparent transition-all duration-300"
+            style={{
+              width: `${localProgress}%`,
+              opacity: localProgress > 0 ? 1 : 0,
+            }}
+          />
+
+          {/* Content */}
+          <div className="relative p-3">
           {isEditing ? (
             <div className="flex items-center gap-2">
               <input
@@ -163,12 +174,12 @@ export const Task = (props: Props) => {
               </Button>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2">
               {/* Title and description */}
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-1">
                 <DialogTrigger asChild>
                   <p
-                    className="cursor-pointer text-base font-medium text-white hover:text-blue-400 transition-colors"
+                    className="cursor-pointer text-sm font-medium text-white hover:text-blue-400 transition-colors leading-tight"
                     onDoubleClick={() => setIsEditing(true)}
                     onTouchStart={handleTouchStart}
                     onTouchEnd={handleTouchEnd}
@@ -179,15 +190,34 @@ export const Task = (props: Props) => {
                 </DialogTrigger>
                 {lastDescriptionLine && (
                   <DialogTrigger asChild>
-                    <p className="cursor-pointer truncate text-sm text-gray-400 hover:text-blue-400 transition-colors">
+                    <p className="cursor-pointer truncate text-xs text-gray-400 hover:text-blue-400 transition-colors">
                       {lastDescriptionLine}
                     </p>
                   </DialogTrigger>
                 )}
               </div>
 
-              {/* Progress bar - much larger and more visible */}
-              <div className="flex items-center gap-3">
+              {/* Visual progress bar with blocks */}
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex-1 flex gap-0.5">
+                  {Array.from({ length: 10 }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`h-2 flex-1 rounded-sm transition-colors ${
+                        i < Math.floor(localProgress / 10)
+                          ? 'bg-blue-500'
+                          : 'bg-gray-700'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="text-sm font-mono font-bold text-white w-10 text-right">
+                  {localProgress}%
+                </div>
+              </div>
+
+              {/* Unified control buttons */}
+              <div className="flex items-center gap-2">
                 <Button
                   size="sm"
                   onClick={() => {
@@ -195,25 +225,23 @@ export const Task = (props: Props) => {
                     setLocalProgress(newProgress);
                     saveProgress(newProgress);
                   }}
-                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
+                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 rounded border border-gray-700"
                   aria-label="Decrease progress"
                 >
-                  <Minus className="h-4 w-4" />
+                  <Minus className="h-3.5 w-3.5" />
                 </Button>
 
-                <div className="flex-1">
-                  <Slider
-                    value={[localProgress]}
-                    onValueChange={(value) => {
-                      setLocalProgress(value[0]);
-                      saveProgress(value[0]);
-                    }}
-                    max={100}
-                    step={1}
-                    className="flex-1"
-                    aria-label={`Progress: ${localProgress}%`}
-                  />
-                </div>
+                <Slider
+                  value={[localProgress]}
+                  onValueChange={(value) => {
+                    setLocalProgress(value[0]);
+                    saveProgress(value[0]);
+                  }}
+                  max={100}
+                  step={1}
+                  className="flex-1"
+                  aria-label={`Progress: ${localProgress}%`}
+                />
 
                 <Button
                   size="sm"
@@ -222,18 +250,15 @@ export const Task = (props: Props) => {
                     setLocalProgress(newProgress);
                     saveProgress(newProgress);
                   }}
-                  className="h-8 w-8 bg-gray-700 p-0 hover:bg-gray-600 transition-colors"
+                  className="h-8 w-8 p-0 bg-gray-800 hover:bg-gray-700 rounded border border-gray-700"
                   aria-label="Increase progress"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-3.5 w-3.5" />
                 </Button>
-
-                <span className="w-12 text-right text-sm font-medium text-gray-300">
-                  {localProgress}%
-                </span>
               </div>
             </div>
           )}
+          </div>
         </motion.div>
 
       <DialogPortal>

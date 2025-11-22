@@ -10,6 +10,9 @@ import {
   useKeyboardShortcuts,
   AddListDialog,
   Button,
+  CommandPalette,
+  KeyboardHints,
+  type Command,
 } from "@bucket/ui";
 
 // Core logic from @bucket/core
@@ -90,6 +93,8 @@ const Bucket = () => {
   const [editingMobileTitle, setEditingMobileTitle] = useState(false);
   const [mobileTitle, setMobileTitle] = useState("");
   const [showAddListDialog, setShowAddListDialog] = useState(false);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+  const [showKeyboardHints, setShowKeyboardHints] = useState(false);
   const [, setLocation] = useLocation();
 
   // Better loading logic to prevent premature empty state
@@ -152,9 +157,79 @@ const Bucket = () => {
     }
   };
 
+  // Define commands for command palette
+  const commands: Command[] = [
+    {
+      id: "new-list",
+      label: "Create New List",
+      description: "Add a new list to your bucket",
+      icon: "📝",
+      shortcut: "N",
+      action: () => setShowAddListDialog(true),
+      category: "Actions",
+    },
+    {
+      id: "cemetery",
+      label: "Open Cemetery",
+      description: "View deleted tasks",
+      icon: "🪦",
+      shortcut: "C",
+      action: () => setLocation("/cemetery"),
+      category: "Navigation",
+    },
+    {
+      id: "toggle-map",
+      label: "Toggle Map View",
+      description: "Show/hide list overview",
+      icon: "🗺️",
+      shortcut: "M",
+      action: () => setShowMap(!showMap),
+      category: "Views",
+    },
+    {
+      id: "prev-list",
+      label: "Previous List",
+      description: "Navigate to previous list",
+      icon: "←",
+      shortcut: "H or ←",
+      action: () => handlePreviousScreen(),
+      category: "Navigation",
+    },
+    {
+      id: "next-list",
+      label: "Next List",
+      description: "Navigate to next list",
+      icon: "→",
+      shortcut: "L or →",
+      action: () => handleNextScreen(),
+      category: "Navigation",
+    },
+    {
+      id: "keyboard-shortcuts",
+      label: "Show Keyboard Shortcuts",
+      description: "View all available shortcuts",
+      icon: "⌨️",
+      shortcut: "?",
+      action: () => setShowKeyboardHints(true),
+      category: "Help",
+    },
+  ];
+
   // Keyboard shortcuts
   useKeyboardShortcuts(
     [
+      {
+        key: "k",
+        meta: true,
+        handler: () => setShowCommandPalette(true),
+        description: "Open command palette",
+      },
+      {
+        key: "?",
+        shift: true,
+        handler: () => setShowKeyboardHints(!showKeyboardHints),
+        description: "Toggle keyboard shortcuts",
+      },
       {
         key: "n",
         handler: () => setShowAddListDialog(true),
@@ -171,6 +246,16 @@ const Bucket = () => {
         description: "Toggle map view",
       },
       {
+        key: "h",
+        handler: () => handlePreviousScreen(),
+        description: "Previous list",
+      },
+      {
+        key: "l",
+        handler: () => handleNextScreen(),
+        description: "Next list",
+      },
+      {
         key: "ArrowLeft",
         handler: () => handlePreviousScreen(),
         description: "Previous list",
@@ -185,6 +270,8 @@ const Bucket = () => {
         handler: () => {
           setShowMap(false);
           setShowAddListDialog(false);
+          setShowCommandPalette(false);
+          setShowKeyboardHints(false);
         },
         description: "Close dialogs",
       },
@@ -313,10 +400,33 @@ const Bucket = () => {
 
   return (
     <div className="flex h-screen w-screen flex-col bg-black">
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={showCommandPalette}
+        onClose={() => setShowCommandPalette(false)}
+        commands={commands}
+      />
+
+      {/* Keyboard Hints */}
+      <KeyboardHints
+        isOpen={showKeyboardHints}
+        onClose={() => setShowKeyboardHints(false)}
+      />
+
       {/* Desktop Grid View - Always visible on desktop */}
       <div className="hidden md:flex md:h-screen md:w-screen md:flex-col md:bg-black">
         <div className="p-6 pb-4">
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setShowKeyboardHints(true)}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-700 bg-gray-900/50 text-gray-400 hover:text-white hover:border-gray-600 hover:bg-gray-800 transition-all text-sm"
+              title="Keyboard shortcuts (press ?)"
+            >
+              <span className="text-base">⌨️</span>
+              <span className="hidden lg:inline">Shortcuts</span>
+              <kbd className="px-1.5 py-0.5 bg-gray-800 border border-gray-700 rounded text-xs">?</kbd>
+            </button>
+
             <div className="flex items-center gap-3">
               <div className="flex gap-2">
                 <Link

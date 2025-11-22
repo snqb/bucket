@@ -1,0 +1,22 @@
+[build]
+builder = "NIXPACKS"
+buildCommand = "cd packages/server && pnpm install && pnpm build"
+startCommand = "cd packages/server && pnpm start"
+
+[deploy]
+healthcheckPath = "/health"
+healthcheckTimeout = 30
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[globalEnv]
+NODE_ENV = "production"
+
+# Optional: If you want to deploy multiple services
+# [[services]]
+# name = "server"
+# source = "packages/server"
+#
+# [[services]]
+# name = "web"
+# source = "apps/web"

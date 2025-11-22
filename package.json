@@ -6,13 +6,17 @@
   "scripts": {
     "dev": "pnpm --filter @bucket/web dev",
     "dev:desktop": "pnpm --filter @bucket/desktop dev",
+    "dev:server": "pnpm --filter @bucket/server dev",
     "build": "pnpm -r build",
     "build:web": "pnpm --filter @bucket/web build",
     "build:desktop": "pnpm --filter @bucket/desktop build",
-    "test": "pnpm --filter @bucket/web test",
+    "build:server": "pnpm --filter @bucket/server build",
+    "test": "pnpm --filter @bucket/web test && pnpm --filter @bucket/server test",
     "test:run": "pnpm --filter @bucket/web test:run",
+    "test:server": "pnpm --filter @bucket/server test",
     "clean": "pnpm -r clean && rm -rf node_modules",
-    "sync-server": "node sync-db/server.js"
+    "sync-server": "pnpm --filter @bucket/server dev",
+    "start:server": "pnpm --filter @bucket/server start"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
