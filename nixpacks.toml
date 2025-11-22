@@ -1,14 +1,14 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "pnpm"]
+nixPkgs = ["nodejs-22_x", "pnpm"]
 
 [phases.install]
 cmds = [
-  "pnpm install --filter=@bucket/server"
+  "pnpm install"
 ]
 
 [phases.build]
 cmds = [
-  "pnpm --filter @bucket/server build"
+  "pnpm build"
 ]
 
 [phases.start]
