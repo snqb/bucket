@@ -240,6 +240,14 @@ function NewListButton() {
 }
 
 function RoomSetup() {
+  // Auto-join from ?join=ROOMID (QR code link)
+  const joinParam = new URLSearchParams(location.search).get("join");
+  if (joinParam?.trim()) {
+    history.replaceState(null, "", location.pathname);
+    setRoomId(joinParam.trim());
+    return null;
+  }
+
   const [input, setInput] = useState("");
   return (
     <div class="flex h-screen items-center justify-center">
@@ -319,7 +327,7 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
       <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 space-y-4 max-w-xs w-full mx-4" onClick={(e) => e.stopPropagation()}>
         <div class="text-center text-sm font-bold">Sync another device</div>
         <div class="flex justify-center" ref={svgRef}>
-          <QrSvg data={roomId} size={200} />
+          <QrSvg data={`${location.origin}?join=${roomId}`} size={200} />
         </div>
         <div
           class="text-center font-mono text-xs text-gray-400 bg-gray-800 rounded px-3 py-2 cursor-pointer hover:text-white select-all"
