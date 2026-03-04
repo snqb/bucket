@@ -1,26 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "useDefineForClassFields": true,
-    "lib": ["DOM", "DOM.Iterable", "ESNext", "WebWorker"],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "esModuleInterop": false,
-    "allowSyntheticDefaultImports": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true,
+    "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
-    "paths": {
-      "~/*": ["./*"],
-      "@/*": ["./src/*"]
-    },
-    "types": ["vite-plugin-pwa", "vite-plugin-pwa/client"]
+    "jsxImportSource": "preact",
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
   },
-  "include": ["src", "@types/*.ts"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
 }

@@ -1,872 +1,373 @@
-import ReloadPrompt from "./ReloadPrompt";
-import { SyncStatus } from "./SyncStatus";
-import { SyncButton } from "./SyncButton";
-import { DataRecovery } from "./DataRecovery";
-import { UserAuth } from "./UserAuth";
-import { UserControls } from "./UserControls";
-import { AddListDialog } from "./components/AddListDialog";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
-
-import { motion } from "framer-motion";
-import { useEffect, useState, useRef } from "react";
-import Screen from "./Screen";
-import { Button } from "./components/ui/button";
+import { useState, useRef, useCallback, useMemo } from "preact/hooks";
 import {
-  useLists,
-  useCemeteryItems,
-  useActions,
-  useAuth,
-} from "./tinybase-hooks";
-import { hasLocalData } from "./tinybase-store";
-import { randomEmoji } from "./emojis";
-import { Link, Route, Switch, useLocation } from "wouter";
-import { Trash2, ChevronLeft, ChevronRight, Menu, X, Edit2 } from "lucide-react";
+  getLists,
+  getTasksForList,
+  createList,
+  createTask,
+  updateTask,
+  deleteTask,
+  deleteList,
+  getSyncStatus,
+  getRoomId,
+  setRoomId,
+  generateRoomId,
+  type Task,
+  type List,
+} from "./store";
+import { useStore } from "./hooks";
+import { encode } from "uqr";
 
-function App() {
-  console.log("🚨 App function called");
-  const { isAuthenticated, isLoading, authenticate } = useAuth();
-  console.log(`🔍 useAuth returned: isAuthenticated=${isAuthenticated}, isLoading=${isLoading}`);
-  const [isAutoAuthenticating, setIsAutoAuthenticating] = useState(false);
-  const hasAttemptedAuth = useRef(false);
+// --- Helpers ---
 
-  // Auto-authenticate on first visit - run only once
-  useEffect(() => {
-    console.log(`🔐 Auth state: isLoading=${isLoading}, isAuthenticated=${isAuthenticated}, isAutoAuthenticating=${isAutoAuthenticating}, hasAttemptedAuth=${hasAttemptedAuth.current}`);
+const hash = (s: string) => {
+  let h = 0;
+  for (const c of s) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+};
 
-    const autoAuth = async () => {
-      // Only attempt auth once and only if not already authenticated
-      if (!hasAttemptedAuth.current && !isLoading && !isAuthenticated) {
-        console.log("🔑 Starting auto-authentication...");
-        hasAttemptedAuth.current = true;
-        setIsAutoAuthenticating(true);
-        try {
-          // Generate anonymous passphrase and auto-login
-          const { generatePassphrase } = await import('./tinybase-store');
-          const tempPassphrase = generatePassphrase();
-          await authenticate(tempPassphrase);
-          console.log('✅ Auto-authentication successful');
-        } catch (error) {
-          console.error('❌ Auto-auth failed:', error);
-        } finally {
-          setIsAutoAuthenticating(false);
-          console.log('🏁 Auto-authentication complete, isAutoAuthenticating now false');
-        }
-      }
-    };
-    autoAuth();
-  }, [isLoading, isAuthenticated, authenticate]);
+const listBg = (title: string) =>
+  `hsla(${hash(title) % 360}, 40%, 25%, 0.1)`;
 
-  console.log(`🎯 Render check: isLoading=${isLoading}, isAutoAuthenticating=${isAutoAuthenticating}`);
+const NOTE_EMOJI = ["📝", "✏️", "💭", "🗒️", "💬", "🔖", "📌", "🏷️", "💡", "🪶", "📎", "🖊️"];
+const taskEmoji = (id: string) => NOTE_EMOJI[hash(id) % NOTE_EMOJI.length];
 
-  if (isLoading || isAutoAuthenticating) {
-    console.log(`⏳ Showing loading screen: isLoading=${isLoading}, isAutoAuthenticating=${isAutoAuthenticating}`);
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="font-bold mb-4 text-4xl">...</div>
-          <div className="text-sm text-gray-400">Loading...</div>
-        </div>
-      </div>
-    );
-  }
+// --- Components ---
 
-  console.log("🎉 Past loading screen, rendering main app");
+function SyncDot() {
+  const status = useStore(getSyncStatus);
+  const color =
+    status === "connected"
+      ? "bg-green-500"
+      : status === "connecting"
+        ? "bg-yellow-500 animate-pulse"
+        : "bg-gray-600";
+  return <div class={`w-2 h-2 rounded-full ${color}`} title={status} />;
+}
 
+function Adder({ onAdd }: { onAdd: (text: string) => void }) {
+  const [value, setValue] = useState("");
+  const submit = () => {
+    const t = value.trim();
+    if (!t) return;
+    onAdd(t);
+    setValue("");
+  };
   return (
-    <>
-      <div className="fixed left-4 top-4 z-50">
-        <SyncButton />
-      </div>
-
-      <DataRecovery />
-
-      <Switch>
-        <Route path="/" component={Bucket} />
-        <Route path="/cemetery" component={Cemetery} />
-      </Switch>
-
-      <ReloadPrompt />
-    </>
+    <input
+      class="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-2 text-sm placeholder:text-gray-500 outline-none focus:border-gray-500"
+      placeholder="Add a task..."
+      value={value}
+      onInput={(e) => setValue((e.target as HTMLInputElement).value)}
+      onKeyDown={(e) => e.key === "Enter" && submit()}
+    />
   );
 }
 
-const Bucket = () => {
-  const lists = useLists();
-  const actions = useActions();
-  const { isLoading } = useAuth();
-  const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
-  const [showMap, setShowMap] = useState(false);
-  const [editingListId, setEditingListId] = useState<string | null>(null);
-  const [editingListTitle, setEditingListTitle] = useState("");
-  const [isInitializing, setIsInitializing] = useState(true);
-  const [editingMobileTitle, setEditingMobileTitle] = useState(false);
-  const [mobileTitle, setMobileTitle] = useState("");
-  const [showAddListDialog, setShowAddListDialog] = useState(false);
-  const [, setLocation] = useLocation();
+function TaskBar({ task }: { task: Task }) {
+  const [progress, setProgress] = useState(task.progress);
+  const [open, setOpen] = useState(false);
+  const [desc, setDesc] = useState(task.description);
+  const saveRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Better loading logic to prevent premature empty state
-  useEffect(() => {
-    const checkInitialization = async () => {
-      console.log("🚀 Starting initialization check...");
-      const hasData = hasLocalData();
-      const hasStoredUser = !!(
-        localStorage.getItem("bucket-userId") &&
-        localStorage.getItem("bucket-passphrase")
-      );
+  if (task.progress !== progress && !saveRef.current) setProgress(task.progress);
 
-      console.log(`📊 hasData: ${hasData}, hasStoredUser: ${hasStoredUser}`);
-
-      if (hasData) {
-        // Have data, show immediately
-        console.log("✅ Has data, showing UI immediately");
-        setIsInitializing(false);
-      } else if (hasStoredUser) {
-        // User exists but no data yet, wait longer for potential sync
-        console.log(
-          "🔄 User exists but no data, waiting for potential sync...",
-        );
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            console.log("⏰ Done waiting, showing UI");
-            setIsInitializing(false);
-            resolve(undefined);
-          }, 2500)
-        );
-      } else {
-        // First-time user, shorter delay
-        console.log("👋 First-time user, short delay");
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            console.log("⏰ Short delay done, showing UI");
-            setIsInitializing(false);
-            resolve(undefined);
-          }, 500)
-        );
-      }
-    };
-
-    checkInitialization();
-  }, []);
-
-  // Reset current screen index if it's out of bounds
-  useEffect(() => {
-    if (lists && lists.length > 0 && currentScreenIndex >= lists.length) {
-      setCurrentScreenIndex(0);
-    }
-  }, [lists, currentScreenIndex]);
-
-  const handleMapClick = () => {
-    setShowMap(!showMap);
-  };
-
-  const handleScreenSelect = (index: number) => {
-    setCurrentScreenIndex(index);
-    setShowMap(false);
-  };
-
-  const handlePreviousScreen = () => {
-    if (lists && lists.length > 0) {
-      setCurrentScreenIndex((prev) => (prev - 1 + lists.length) % lists.length);
-    }
-  };
-
-  const handleNextScreen = () => {
-    if (lists && lists.length > 0) {
-      setCurrentScreenIndex((prev) => (prev + 1) % lists.length);
-    }
-  };
-
-  // Keyboard shortcuts
-  useKeyboardShortcuts(
-    [
-      {
-        key: "n",
-        handler: () => setShowAddListDialog(true),
-        description: "Create new list",
-      },
-      {
-        key: "c",
-        handler: () => setLocation("/cemetery"),
-        description: "Open cemetery",
-      },
-      {
-        key: "m",
-        handler: () => setShowMap(!showMap),
-        description: "Toggle map view",
-      },
-      {
-        key: "ArrowLeft",
-        handler: () => handlePreviousScreen(),
-        description: "Previous list",
-      },
-      {
-        key: "ArrowRight",
-        handler: () => handleNextScreen(),
-        description: "Next list",
-      },
-      {
-        key: "Escape",
-        handler: () => {
-          setShowMap(false);
-          setShowAddListDialog(false);
-        },
-        description: "Close dialogs",
-      },
-    ],
-    !!lists && lists.length > 0
+  const setP = useCallback(
+    (p: number) => {
+      setProgress(p);
+      clearTimeout(saveRef.current);
+      saveRef.current = setTimeout(() => {
+        saveRef.current = undefined;
+        if (p >= 100) {
+          deleteTask(task.id);
+        } else {
+          updateTask(task.id, { progress: p });
+        }
+      }, 300);
+    },
+    [task.id],
   );
 
-  const currentScreen = lists?.[currentScreenIndex];
-
-  // More intelligent loading state
-  const shouldShowLoading = () => {
-    const hasData = hasLocalData();
-    const hasStoredUser = !!(
-      localStorage.getItem("bucket-userId") &&
-      localStorage.getItem("bucket-passphrase")
-    );
-
-    // Show loading if:
-    // 1. Auth is still loading AND no local data exists
-    // 2. Still initializing AND (no data OR expecting data but don't have it)
-    return (
-      (isLoading && !hasData) || (isInitializing && (!hasData || hasStoredUser))
-    );
+  const handleBarClick = (e: MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const pct = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
+    setP(pct);
   };
 
-  if (shouldShowLoading()) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="text-center">
-          <div className="font-bold mb-4 text-4xl">...</div>
-          <div className="text-sm text-gray-400">
-            {hasLocalData() ? "Syncing..." : "Loading..."}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Handle case when no lists exist - with additional safety check
-  if (!lists || lists.length === 0) {
-    const hasStoredUser = !!(
-      localStorage.getItem("bucket-userId") &&
-      localStorage.getItem("bucket-passphrase")
-    );
-
-    // If user exists but no lists, show warning
-    if (hasStoredUser && !isInitializing) {
-      console.warn("⚠️ User has credentials but no lists found");
-    }
-
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-black">
-        <div className="w-full max-w-md text-center px-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", duration: 0.5 }}
-          >
-            <div className="font-bold mb-6 text-8xl">🪣</div>
-          </motion.div>
-          <h2 className="font-bold mb-3 text-3xl text-white">
-            Welcome to Bucket!
-          </h2>
-          <p className="mb-8 text-gray-400 leading-relaxed">
-            {hasStoredUser ? (
-              <>
-                Your lists will appear here once synced.
-                <br />
-                Check your connection or try syncing manually.
-              </>
-            ) : (
-              <>
-                Track progress with 0-100% bars instead of checkboxes.
-                <br />
-                Create your first list to get started!
-              </>
-            )}
-          </p>
-
-          <div className="mb-6">
-            <SyncStatus />
-          </div>
-
-          <AddListDialog
-            onAdd={(name) => actions.createList(name)}
-            variant="button"
-            className="p-6 text-lg shadow-lg"
-          />
-
-          {!hasStoredUser && (
-            <div className="mt-8 space-y-2 text-left rounded-lg border border-gray-700 bg-gray-900 bg-opacity-50 p-4">
-              <p className="text-sm text-gray-400">💡 Quick tips:</p>
-              <ul className="text-xs text-gray-500 space-y-1">
-                <li>• Tasks use progress bars (0-100%), not checkboxes</li>
-                <li>• Reach 100% to auto-complete with confetti 🎊</li>
-                <li>• Deleted tasks go to cemetery for recovery</li>
-                <li>• Everything syncs across your devices</li>
-              </ul>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  const handleEditList = (listId: string, currentTitle: string) => {
-    setEditingListId(listId);
-    setEditingListTitle(currentTitle);
+  const handleBarDrag = (e: MouseEvent) => {
+    if (e.buttons !== 1) return;
+    handleBarClick(e);
   };
 
-  const handleSaveEdit = () => {
-    if (editingListId && editingListTitle.trim()) {
-      actions.updateListTitle(editingListId, editingListTitle.trim());
-    }
-    setEditingListId(null);
-    setEditingListTitle("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingListId(null);
-    setEditingListTitle("");
-  };
+  const opacity = 1 - progress / 150;
+  const lastLine = task.description?.split("\n").filter(Boolean).pop();
 
   return (
-    <div className="flex h-screen w-screen flex-col bg-black">
-      {/* Desktop Grid View - Always visible on desktop */}
-      <div className="hidden md:flex md:h-screen md:w-screen md:flex-col md:bg-black">
-        <div className="border-b border-gray-700 p-4">
-          <div className="flex items-center justify-between">
-            <h1 className="font-bold text-2xl text-white">All Lists</h1>
-            <div className="flex items-center gap-4">
-              <SyncStatus />
-              <div className="flex gap-2">
-                <Link
-                  to="/cemetery"
-                  className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                  aria-label="View cemetery"
-                >
-                  <Trash2 className="h-5 w-5" />
-                </Link>
-                <AddListDialog
-                  onAdd={(name) => actions.createList(name)}
-                  open={showAddListDialog}
-                  onOpenChange={setShowAddListDialog}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-auto p-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3  xl:grid-cols-4">
-            {lists?.map((list) => (
-              <div key={String(list.id)} className="group relative">
-                <div className="absolute -right-2 -top-2 z-10 hidden gap-1 group-hover:flex">
-                  <Button
-                    size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
-                    onClick={() =>
-                      handleEditList(String(list.id), String(list.title))
-                    }
-                    aria-label="Edit list"
-                  >
-                    <Edit2 className="h-3 w-3" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    className="h-6 w-6 bg-black bg-opacity-70 p-0 text-white hover:bg-gray-900"
-                    onClick={() => {
-                      if (confirm(`Delete ${list.title}?`)) {
-                        actions.deleteList(String(list.id));
-                      }
-                    }}
-                    aria-label="Delete list"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-                {editingListId === String(list.id) ? (
-                  <div className="min-h-[200px] rounded-lg border border-blue-500 bg-gray-800 bg-opacity-50 p-4">
-                    <input
-                      type="text"
-                      value={editingListTitle}
-                      onChange={(e) => setEditingListTitle(e.target.value)}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") handleSaveEdit();
-                        if (e.key === "Escape") handleCancelEdit();
-                      }}
-                      className="mb-2 w-full rounded bg-gray-700 p-2 text-sm text-white"
-                      autoFocus
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={handleSaveEdit}
-                        className="bg-green-600 text-white"
-                      >
-                        ✓
-                      </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleCancelEdit}
-                        className="bg-red-600 text-white"
-                      >
-                        ✕
-                      </Button>
-                    </div>
-                  </div>
-                ) : (
-                  <Screen className="w-full" list={list as any} actions={actions} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="border-t border-gray-700 p-4">
-          <UserControls />
-        </div>
-      </div>
-
-      {/* Mobile Views - Toggle between single screen and grid */}
-      <div className="md:hidden">
-        {showMap ? (
-          <div className="flex h-screen w-screen flex-col bg-black">
-            <div className="border-b border-gray-700 p-4">
-              <div className="flex items-center justify-between">
-                <h1 className="font-bold text-2xl text-white">All Lists</h1>
-                <div className="flex items-center gap-4">
-                  <SyncStatus />
-                  <div className="flex gap-2">
-                    <Link
-                      to="/cemetery"
-                      className="font-bold flex size-10 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      aria-label="View cemetery"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Link>
-                    <AddListDialog onAdd={(name) => actions.createList(name)} />
-                    <Button
-                      className="size-10 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handleMapClick}
-                      aria-label="Close map view"
-                    >
-                      <X className="h-5 w-5" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid flex-1 grid-cols-2 gap-4 overflow-auto p-4">
-              {lists?.map((list, index) => (
-                <MobileListCard
-                  key={String(list.id)}
-                  list={list}
-                  index={index}
-                  onSelect={() => handleScreenSelect(index)}
-                  onEdit={(newTitle) =>
-                    actions.updateListTitle(String(list.id), newTitle)
-                  }
-                  onDelete={() => actions.deleteList(String(list.id))}
-                  onEmojiChange={(emoji) =>
-                    actions.updateListEmoji(String(list.id), emoji)
-                  }
-                />
-              ))}
-            </div>
-
-            <div className="border-t border-gray-700 p-4">
-              <UserControls />
-            </div>
-          </div>
-        ) : (
-          <div className="flex h-screen w-screen flex-col bg-black">
-            <div className="border-b border-gray-700 p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex gap-2">
-                    <Button
-                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handlePreviousScreen}
-                      disabled={!lists || lists.length <= 1}
-                      aria-label="Previous list"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                      onClick={handleNextScreen}
-                      disabled={!lists || lists.length <= 1}
-                      aria-label="Next list"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  {currentScreen && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl">{currentScreen.emoji}</span>
-                      {editingMobileTitle ? (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="text"
-                            value={mobileTitle}
-                            onChange={(e) => setMobileTitle(e.target.value)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                if (mobileTitle.trim()) {
-                                  actions.updateListTitle(
-                                    String(currentScreen.id),
-                                    mobileTitle.trim()
-                                  );
-                                }
-                                setEditingMobileTitle(false);
-                              }
-                              if (e.key === "Escape") {
-                                setMobileTitle(String(currentScreen.title));
-                                setEditingMobileTitle(false);
-                              }
-                            }}
-                            className="font-bold rounded px-2 py-1 text-xl text-white bg-gray-700 border border-gray-600"
-                            autoFocus
-                          />
-                          <Button
-                            size="sm"
-                            onClick={() => {
-                              if (mobileTitle.trim()) {
-                                actions.updateListTitle(
-                                  String(currentScreen.id),
-                                  mobileTitle.trim()
-                                );
-                              }
-                              setEditingMobileTitle(false);
-                            }}
-                            className="h-6 w-6 bg-green-600 p-0 text-white"
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <h1
-                          onClick={() => {
-                            setMobileTitle(String(currentScreen.title));
-                            setEditingMobileTitle(true);
-                          }}
-                          className="font-bold cursor-pointer rounded px-1 text-2xl text-white hover:bg-gray-700"
-                        >
-                          {currentScreen.title}
-                        </h1>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-4">
-                  <SyncStatus />
-                  <Button
-                    className="size-8 bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-                    onClick={handleMapClick}
-                    aria-label="Show all lists"
-                  >
-                    <Menu className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-hidden">
-              {currentScreen && (
-                <Screen
-                  className="h-full w-full border-0 p-8"
-                  key={String(currentScreen.id)}
-                  list={currentScreen as any}
-                  actions={actions}
-                />
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const Cemetery = () => {
-  const cemetery = useCemeteryItems();
-  const lists = useLists();
-  const actions = useActions();
-  const [restoreToList, setRestoreToList] = useState<string | null>(null);
-  const [selectedItem, setSelectedItem] = useState<string | null>(null);
-
-  const handleRestore = (itemId: string, listId: string) => {
-    actions.restoreFromCemetery(itemId, listId);
-    setRestoreToList(null);
-    setSelectedItem(null);
-  };
-
-  return (
-    <div className="flex h-screen w-screen flex-col bg-black">
-      {/* Header */}
-      <div className="border-b border-gray-700 p-4">
-        <div className="flex items-center justify-between">
-          <h1 className="font-bold text-2xl text-white">Cemetery</h1>
-          <div className="flex items-center gap-4">
-            <SyncStatus />
-            <Link
-              to="/"
-              className="flex size-8 items-center justify-center bg-blue-500 bg-opacity-50 text-white hover:bg-blue-600 hover:bg-opacity-70"
-            >
-              🪣
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="flex-1 overflow-auto p-4">
-        {!cemetery || cemetery.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center">
-              <div className="font-bold mb-4 text-6xl">⌫</div>
-              <div className="text-xl text-gray-300">No deleted items</div>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {cemetery.map((item) => (
-              <div
-                key={String(item.id)}
-                className="rounded border border-gray-700 bg-gray-800 bg-opacity-50 p-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="font-medium text-white">{item.originalTitle}</div>
-                    {item.originalDescription && (
-                      <div className="text-sm text-gray-500">{item.originalDescription}</div>
-                    )}
-                    <div className="mt-1 text-xs text-gray-400">
-                      Progress: {item.originalProgress}% • {item.deletionReason}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      Deleted {new Date(Number(item.deletedAt)).toLocaleString()}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        setSelectedItem(String(item.id));
-                        setRestoreToList(String(item.id));
-                      }}
-                      className="bg-green-600 text-white hover:bg-green-700"
-                    >
-                      ↺ Restore
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => {
-                        if (confirm('Permanently delete this item?')) {
-                          actions.permanentlyDelete(String(item.id));
-                        }
-                      }}
-                      variant="outline"
-                      className="border-red-600 text-red-400 hover:bg-red-900 hover:bg-opacity-20"
-                    >
-                      × Delete
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Restore to list selector */}
-                {restoreToList === String(item.id) && (
-                  <div className="mt-3 border-t border-gray-700 pt-3">
-                    <p className="mb-2 text-sm text-gray-300">Restore to which list?</p>
-                    <div className="flex flex-wrap gap-2">
-                      {lists?.map((list) => (
-                        <Button
-                          key={String(list.id)}
-                          size="sm"
-                          onClick={() => handleRestore(String(item.id), String(list.id))}
-                          className="bg-blue-600 text-white hover:bg-blue-700"
-                        >
-                          {list.emoji} {list.title}
-                        </Button>
-                      ))}
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setRestoreToList(null);
-                          setSelectedItem(null);
-                        }}
-                        variant="outline"
-                        className="border-gray-600"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const MobileListCard = ({
-  list,
-  index,
-  onSelect,
-  onEdit,
-  onDelete,
-  onEmojiChange,
-}: {
-  list: any;
-  index: number;
-  onSelect: () => void;
-  onEdit: (newTitle: string) => void;
-  onDelete: () => void;
-  onEmojiChange: (emoji: string) => void;
-}) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(list.title);
-  const [longPressTimer, setLongPressTimer] = useState<NodeJS.Timeout | null>(
-    null,
-  );
-
-  const handleTouchStart = () => {
-    const timer = setTimeout(() => {
-      setIsExpanded(true);
-    }, 500); // 500ms long press
-    setLongPressTimer(timer);
-  };
-
-  const handleTouchEnd = () => {
-    if (longPressTimer) {
-      clearTimeout(longPressTimer);
-      setLongPressTimer(null);
-    }
-    if (!isExpanded) {
-      onSelect();
-    }
-  };
-
-  const handleSave = () => {
-    if (editTitle.trim()) {
-      onEdit(editTitle.trim());
-    }
-    setIsEditing(false);
-    setIsExpanded(false);
-  };
-
-  const handleCancel = () => {
-    setEditTitle(list.title);
-    setIsEditing(false);
-    setIsExpanded(false);
-  };
-
-  return (
-    <motion.div
-      className="group relative aspect-square cursor-pointer border border-gray-600 bg-gray-800 bg-opacity-50 p-4 transition-colors"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-      onClick={isExpanded ? undefined : onSelect}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      animate={{
-        scale: isExpanded ? 1.05 : 1,
-        zIndex: isExpanded ? 10 : 1,
-        backgroundColor: isExpanded
-          ? "rgba(59, 130, 246, 0.2)"
-          : "rgba(31, 41, 55, 0.5)",
-      }}
-      transition={{ duration: 0.2 }}
-    >
+    <div style={{ opacity }}>
       <div
-        className="mb-2 text-2xl transition-transform"
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isExpanded) {
-            const newEmoji = randomEmoji();
-            onEmojiChange(newEmoji);
-          }
-        }}
+        class={`relative h-7 cursor-pointer select-none border border-gray-700 overflow-hidden ${lastLine || open ? "rounded-t" : "rounded"}`}
+        onClick={handleBarClick}
+        onMouseMove={handleBarDrag}
       >
-        {list.emoji}
+        <div class="absolute inset-0 flex gap-px pointer-events-none">
+          {Array.from({ length: 50 }, (_, i) => {
+            const filled = progress >= Math.round(((i + 1) / 50) * 100);
+            return (
+              <div
+                key={i}
+                class={`flex-1 transition-colors ${filled ? "bg-blue-500" : "bg-gray-700/40"}`}
+                style="min-width:2px"
+              />
+            );
+          })}
+        </div>
+        <div class="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
+          <div class="flex items-center gap-1.5 truncate max-w-[70%]">
+            {!lastLine && (
+              <span
+                class="text-xs pointer-events-auto cursor-pointer hover:scale-125 transition-transform"
+                onClick={(e) => { e.stopPropagation(); setOpen(true); }}
+                title="Add notes"
+              >
+                {taskEmoji(task.id)}
+              </span>
+            )}
+            <span
+              class="text-xs font-bold truncate pointer-events-auto cursor-pointer hover:text-blue-400"
+              style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
+              onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
+            >
+              {task.title}
+            </span>
+          </div>
+          <span
+            class="text-xs font-bold text-gray-300 tabular-nums"
+            style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
+          >
+            {progress}%
+          </span>
+        </div>
       </div>
 
-      {isEditing ? (
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
-            className="w-full rounded bg-gray-700 p-1 text-sm text-white"
-            autoFocus
+      {lastLine && !open && (
+        <div
+          class="px-3 py-1 text-xs text-gray-500 truncate border-x border-b border-gray-700 rounded-b cursor-pointer hover:text-gray-400"
+          onClick={() => setOpen(true)}
+        >
+          {lastLine}
+        </div>
+      )}
+
+      {open && (
+        <div class="border-x border-b border-gray-700 rounded-b p-3 space-y-2 bg-gray-900/50">
+          <textarea
+            class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs text-gray-300 resize-none outline-none focus:border-gray-500"
+            rows={3}
+            placeholder="Notes..."
+            value={desc}
+            onInput={(e) => setDesc((e.target as HTMLTextAreaElement).value)}
+            onBlur={() => updateTask(task.id, { description: desc })}
           />
-          <div className="flex gap-1">
-            <Button
-              size="sm"
-              onClick={handleSave}
-              className="bg-green-600 text-xs text-white"
-            >
-              ✓
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleCancel}
-              className="bg-red-600 text-xs text-white"
-            >
-              ✕
-            </Button>
+          <div class="flex gap-2">
+            <button class="text-xs text-red-400 hover:text-red-300" onClick={() => deleteTask(task.id)}>Delete</button>
+            <button class="text-xs text-gray-400 hover:text-gray-300 ml-auto" onClick={() => setOpen(false)}>Close</button>
           </div>
         </div>
-      ) : (
-        <div className="font-medium truncate text-sm">{list.title}</div>
       )}
-
-      {isExpanded && !isEditing && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="absolute inset-0 flex flex-col items-center justify-center space-y-3 rounded bg-gray-800 bg-opacity-90 p-4"
-        >
-          <Button
-            size="sm"
-            onClick={() => setIsEditing(true)}
-            className="w-full bg-blue-600 text-white hover:bg-blue-700"
-          >
-            <Edit2 className="h-4 w-4 mr-2" />
-            Edit
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => {
-              if (confirm(`Delete ${list.title}?`)) {
-                onDelete();
-              }
-            }}
-            className="w-full bg-red-600 text-white hover:bg-red-700"
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => setIsExpanded(false)}
-            className="w-full bg-gray-600 text-white hover:bg-gray-700"
-          >
-            <X className="h-4 w-4 mr-2" />
-            Close
-          </Button>
-        </motion.div>
-      )}
-    </motion.div>
+    </div>
   );
-};
+}
 
-export default App;
+function ListPanel({ list }: { list: List }) {
+  const tasks = useStore(() => getTasksForList(list.id));
+  return (
+    <div class="p-5 space-y-2" style={{ background: listBg(list.title) }}>
+      <div class="flex items-center gap-2 pb-2 border-b border-gray-700/50">
+        <span class="text-lg">{list.emoji}</span>
+        <h2 class="font-bold text-sm truncate flex-1">{list.title}</h2>
+        <button
+          class="text-gray-500 hover:text-red-400 text-xs"
+          onClick={() => { if (confirm(`Delete "${list.title}"?`)) deleteList(list.id); }}
+        >
+          ✕
+        </button>
+      </div>
+      <div class="space-y-2">
+        {tasks.map((t) => <TaskBar key={t.id} task={t} />)}
+      </div>
+      <Adder onAdd={(title) => createTask(list.id, title)} />
+    </div>
+  );
+}
+
+function NewListButton() {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const create = () => {
+    const t = name.trim();
+    if (!t) return;
+    createList(t);
+    setName("");
+    setOpen(false);
+  };
+  if (!open)
+    return (
+      <button
+        class="w-full p-4 border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 text-sm"
+        onClick={() => setOpen(true)}
+      >
+        + New List
+      </button>
+    );
+  return (
+    <div class="p-4 border border-gray-700 space-y-2">
+      <input
+        class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
+        placeholder="List name..."
+        value={name}
+        autoFocus
+        onInput={(e) => setName((e.target as HTMLInputElement).value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") create();
+          if (e.key === "Escape") setOpen(false);
+        }}
+      />
+      <div class="flex gap-2">
+        <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={create}>Create</button>
+        <button class="px-3 py-1 text-gray-400 text-xs hover:text-white" onClick={() => setOpen(false)}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+function RoomSetup() {
+  const [input, setInput] = useState("");
+  return (
+    <div class="flex h-screen items-center justify-center">
+      <div class="max-w-sm w-full px-6 space-y-6 text-center">
+        <div class="text-7xl">🪣</div>
+        <h1 class="text-2xl font-bold">Bucket</h1>
+        <p class="text-sm text-gray-400">Track progress with bars, not checkboxes.</p>
+        <button
+          class="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-bold"
+          onClick={() => setRoomId(generateRoomId())}
+        >
+          Start Fresh
+        </button>
+        <div class="text-xs text-gray-500">— or sync with another device —</div>
+        <div class="flex gap-2">
+          <input
+            class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
+            placeholder="Paste room ID..."
+            value={input}
+            onInput={(e) => setInput((e.target as HTMLInputElement).value)}
+            onKeyDown={(e) => e.key === "Enter" && input.trim() && setRoomId(input.trim())}
+          />
+          <button
+            class="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600"
+            onClick={() => input.trim() && setRoomId(input.trim())}
+          >
+            Join
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function App() {
+  const roomId = useStore(getRoomId);
+  if (!roomId) return <RoomSetup />;
+  return <Bucket roomId={roomId} />;
+}
+
+function QrSvg({ data, size = 200 }: { data: string; size?: number }) {
+  const { data: grid, size: qrSize } = useMemo(() => encode(data), [data]);
+  const cellSize = size / qrSize;
+  const rects: string[] = [];
+  for (let y = 0; y < qrSize; y++) {
+    for (let x = 0; x < qrSize; x++) {
+      if ((grid as unknown as boolean[][])[y][x]) {
+        rects.push(`<rect x="${x * cellSize}" y="${y * cellSize}" width="${cellSize}" height="${cellSize}"/>`);
+      }
+    }
+  }
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"><rect width="${size}" height="${size}" fill="white"/><g fill="black">${rects.join("")}</g></svg>`;
+  return <div dangerouslySetInnerHTML={{ __html: svg }} />;
+}
+
+function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
+  const svgRef = useRef<HTMLDivElement>(null);
+
+  const save = () => {
+    const svg = svgRef.current?.querySelector("svg");
+    if (!svg) return;
+    const blob = new Blob([svg.outerHTML], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `bucket-${roomId}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const copy = () => {
+    navigator.clipboard.writeText(roomId);
+  };
+
+  return (
+    <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={onClose}>
+      <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 space-y-4 max-w-xs w-full mx-4" onClick={(e) => e.stopPropagation()}>
+        <div class="text-center text-sm font-bold">Sync another device</div>
+        <div class="flex justify-center" ref={svgRef}>
+          <QrSvg data={roomId} size={200} />
+        </div>
+        <div
+          class="text-center font-mono text-xs text-gray-400 bg-gray-800 rounded px-3 py-2 cursor-pointer hover:text-white select-all"
+          onClick={copy}
+          title="Click to copy"
+        >
+          {roomId}
+        </div>
+        <div class="flex gap-2">
+          <button class="flex-1 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={save}>
+            💾 Save QR
+          </button>
+          <button class="flex-1 py-2 bg-gray-700 text-white text-xs rounded hover:bg-gray-600" onClick={copy}>
+            📋 Copy ID
+          </button>
+        </div>
+        <button class="w-full text-xs text-gray-500 hover:text-gray-300" onClick={onClose}>Close</button>
+      </div>
+    </div>
+  );
+}
+
+function Bucket({ roomId }: { roomId: string }) {
+  const lists = useStore(getLists);
+  const [showQr, setShowQr] = useState(false);
+
+  return (
+    <div class="min-h-screen flex flex-col">
+      {showQr && <RoomQr roomId={roomId} onClose={() => setShowQr(false)} />}
+      <header class="flex items-center justify-between p-3 border-b border-gray-800">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">🪣</span>
+          <SyncDot />
+        </div>
+        <button
+          class="text-xs text-gray-500 hover:text-gray-300"
+          onClick={() => setShowQr(true)}
+          title="Show QR code to sync"
+        >
+          ⊞
+        </button>
+      </header>
+      <main class="flex-1 p-4">
+        <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {lists.map((list) => <ListPanel key={list.id} list={list} />)}
+          <NewListButton />
+        </div>
+      </main>
+    </div>
+  );
+}
