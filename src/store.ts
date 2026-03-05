@@ -1,12 +1,14 @@
 /**
  * Bucket store — Yjs-based offline-first CRDT state.
  *
- * Data lives in a single Y.Doc with two Y.Maps:
- *   lists: Map<id, { id, title, emoji, createdAt }>
- *   tasks: Map<id, { id, listId, title, description, progress, createdAt }>
+ * Each list and task is a nested Y.Map inside a parent Y.Map,
+ * so concurrent edits to different fields merge without data loss.
  *
- * Offline: IndexedDB persister (y-indexeddb)
- * Sync:    WebSocket provider (y-websocket) — connects when roomId is set
+ *   lists: Y.Map<id → Y.Map { id, title, emoji, createdAt }>
+ *   tasks: Y.Map<id → Y.Map { id, listId, title, description, progress, createdAt }>
+ *
+ * Offline: IndexedDB (y-indexeddb)
+ * Sync:    WebSocket (y-websocket) — connects when roomId is set
  */
 
 import * as Y from "yjs";
@@ -34,8 +36,22 @@ export type Task = {
 // --- Y.Doc ---
 
 export const doc = new Y.Doc();
-export const yLists = doc.getMap<List>("lists");
-export const yTasks = doc.getMap<Task>("tasks");
+const yLists = doc.getMap("lists"); // Map<id → Y.Map>
+const yTasks = doc.getMap("tasks"); // Map<id → Y.Map>
+
+// --- Nested Y.Map helpers ---
+
+function ymapToObj<T>(ymap: Y.Map<unknown>): T {
+  const obj: Record<string, unknown> = {};
+  ymap.forEach((val, key) => { obj[key] = val; });
+  return obj as T;
+}
+
+function setFields(ymap: Y.Map<unknown>, fields: Record<string, unknown>) {
+  for (const [k, v] of Object.entries(fields)) {
+    if (ymap.get(k) !== v) ymap.set(k, v);
+  }
+}
 
 // --- Persistence & Sync ---
 
@@ -49,17 +65,14 @@ const WS_URL =
     ? `wss://${location.hostname.replace("bucket", "bucket-sync")}`
     : "ws://localhost:8040");
 
-/** Initialize offline persistence + optional sync for a room */
 export function connect(roomId: string) {
   if (currentRoom === roomId) return;
   disconnect();
   currentRoom = roomId;
 
-  // Offline first — IndexedDB
   persistence = new IndexeddbPersistence(`bucket-${roomId}`, doc);
   persistence.once("synced", () => console.log("💾 IndexedDB loaded"));
 
-  // Online sync — WebSocket (fails gracefully offline)
   try {
     wsProvider = new WebsocketProvider(WS_URL, roomId, doc, {
       connect: true,
@@ -91,7 +104,7 @@ export function getSyncStatus(): "connected" | "connecting" | "disconnected" {
       : "disconnected";
 }
 
-// --- Room ID (identity) ---
+// --- Room ID ---
 
 const ROOM_KEY = "bucket-room";
 
@@ -105,7 +118,9 @@ export function setRoomId(id: string) {
 }
 
 export function generateRoomId(): string {
-  return crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  const arr = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(arr, (b) => chars[b % chars.length]).join("");
 }
 
 // --- CRUD ---
@@ -115,39 +130,40 @@ const uid = () =>
 
 export function createList(title: string, emoji = "📋"): string {
   const id = uid();
-  yLists.set(id, { id, title, emoji, createdAt: Date.now() });
+  const ymap = new Y.Map();
+  setFields(ymap, { id, title, emoji, createdAt: Date.now() });
+  yLists.set(id, ymap);
   return id;
 }
 
 export function deleteList(id: string) {
-  // Delete tasks in this list
-  yTasks.forEach((task, taskId) => {
-    if (task.listId === id) yTasks.delete(taskId);
+  yTasks.forEach((_task, taskId) => {
+    const tm = yTasks.get(taskId) as Y.Map<unknown> | undefined;
+    if (tm && tm.get("listId") === id) yTasks.delete(taskId);
   });
   yLists.delete(id);
 }
 
 export function updateList(id: string, updates: Partial<List>) {
-  const list = yLists.get(id);
-  if (list) yLists.set(id, { ...list, ...updates });
+  const ymap = yLists.get(id) as Y.Map<unknown> | undefined;
+  if (ymap) {
+    doc.transact(() => setFields(ymap, updates));
+  }
 }
 
 export function createTask(listId: string, title: string): string {
   const id = uid();
-  yTasks.set(id, {
-    id,
-    listId,
-    title,
-    description: "",
-    progress: 0,
-    createdAt: Date.now(),
-  });
+  const ymap = new Y.Map();
+  setFields(ymap, { id, listId, title, description: "", progress: 0, createdAt: Date.now() });
+  yTasks.set(id, ymap);
   return id;
 }
 
 export function updateTask(id: string, updates: Partial<Task>) {
-  const task = yTasks.get(id);
-  if (task) yTasks.set(id, { ...task, ...updates });
+  const ymap = yTasks.get(id) as Y.Map<unknown> | undefined;
+  if (ymap) {
+    doc.transact(() => setFields(ymap, updates));
+  }
 }
 
 export function deleteTask(id: string) {
@@ -164,20 +180,28 @@ export function subscribe(fn: Listener): () => void {
   return () => listeners.delete(fn);
 }
 
-// Fire listeners on any Y.Map change
 yLists.observeDeep(() => listeners.forEach((fn) => fn()));
 yTasks.observeDeep(() => listeners.forEach((fn) => fn()));
 
-// --- Snapshots (for rendering) ---
+// --- Snapshots ---
 
 export function getLists(): List[] {
-  return Array.from(yLists.values()).sort((a, b) => a.createdAt - b.createdAt);
+  const out: List[] = [];
+  yLists.forEach((val) => {
+    if (val instanceof Y.Map) out.push(ymapToObj<List>(val));
+  });
+  return out.sort((a, b) => a.createdAt - b.createdAt);
 }
 
 export function getTasksForList(listId: string): Task[] {
-  return Array.from(yTasks.values())
-    .filter((t) => t.listId === listId)
-    .sort((a, b) => a.createdAt - b.createdAt);
+  const out: Task[] = [];
+  yTasks.forEach((val) => {
+    if (val instanceof Y.Map) {
+      const t = ymapToObj<Task>(val);
+      if (t.listId === listId) out.push(t);
+    }
+  });
+  return out.sort((a, b) => a.createdAt - b.createdAt);
 }
 
 // --- Boot ---
