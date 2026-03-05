@@ -12,6 +12,10 @@ export default defineConfig({
       manifest: {
         name: "Bucket",
         short_name: "Bucket",
+        description: "Track progress with bars, not checkboxes.",
+        display: "standalone",
+        start_url: "/",
+        scope: "/",
         theme_color: "#000000",
         background_color: "#000000",
         icons: [

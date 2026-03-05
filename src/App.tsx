@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useMemo } from "preact/hooks";
+import { useState, useRef, useCallback, useMemo, useEffect } from "preact/hooks";
 import {
   getLists,
   getTasksForList,
@@ -16,6 +16,36 @@ import {
 } from "./store";
 import { useStore } from "./hooks";
 import { encode } from "uqr";
+
+// --- PWA Install Prompt ---
+
+let deferredPrompt: any = null;
+const installListeners = new Set<() => void>();
+
+if (typeof window !== "undefined") {
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installListeners.forEach((fn) => fn());
+  });
+}
+
+function useInstallPrompt() {
+  const [canInstall, setCanInstall] = useState(!!deferredPrompt);
+  useEffect(() => {
+    const update = () => setCanInstall(!!deferredPrompt);
+    installListeners.add(update);
+    return () => { installListeners.delete(update); };
+  }, []);
+  const install = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    setCanInstall(false);
+  };
+  return { canInstall, install };
+}
 
 // --- Helpers ---
 
@@ -239,6 +269,93 @@ function NewListButton() {
   );
 }
 
+// --- QR Scanner ---
+
+function QrScanner({ onScan, onClose }: { onScan: (data: string) => void; onClose: () => void }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [error, setError] = useState("");
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    let stopped = false;
+    const hasBarcodeDetector = "BarcodeDetector" in window;
+
+    if (!hasBarcodeDetector) {
+      setError("QR scanning not supported in this browser. Paste the room ID instead.");
+      return;
+    }
+
+    (async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "environment" },
+        });
+        if (stopped) { stream.getTracks().forEach((t) => t.stop()); return; }
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play();
+        }
+
+        const detector = new (window as any).BarcodeDetector({ formats: ["qr_code"] });
+        const scan = async () => {
+          if (stopped || !videoRef.current) return;
+          try {
+            const barcodes = await detector.detect(videoRef.current);
+            if (barcodes.length > 0) {
+              const raw = barcodes[0].rawValue;
+              // Extract room ID from URL or raw string
+              const match = raw.match(/[?&]join=([a-z0-9]+)/i);
+              onScan(match ? match[1] : raw);
+              return;
+            }
+          } catch {}
+          requestAnimationFrame(scan);
+        };
+        scan();
+      } catch (e: any) {
+        setError(e.message || "Camera access denied");
+      }
+    })();
+
+    return () => {
+      stopped = true;
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+    };
+  }, []);
+
+  return (
+    <div class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
+      <div class="max-w-sm w-full mx-4 space-y-4">
+        <div class="text-center text-sm font-bold">Scan QR to join</div>
+        {error ? (
+          <div class="text-center text-sm text-red-400 p-4 border border-red-800 rounded">{error}</div>
+        ) : (
+          <div class="relative rounded-lg overflow-hidden border border-gray-700">
+            <video
+              ref={videoRef}
+              class="w-full aspect-square object-cover"
+              playsInline
+              muted
+            />
+            <div class="absolute inset-0 border-2 border-blue-500/50 rounded-lg pointer-events-none" />
+            <div class="absolute inset-[25%] border-2 border-white/30 rounded pointer-events-none" />
+          </div>
+        )}
+        <button
+          class="w-full py-2 text-sm text-gray-400 hover:text-white"
+          onClick={() => {
+            streamRef.current?.getTracks().forEach((t) => t.stop());
+            onClose();
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function RoomSetup() {
   // Auto-join from ?join=ROOMID (QR code link)
   const joinParam = new URLSearchParams(location.search).get("join");
@@ -249,19 +366,38 @@ function RoomSetup() {
   }
 
   const [input, setInput] = useState("");
+  const [scanning, setScanning] = useState(false);
+  const { canInstall, install } = useInstallPrompt();
+
+  const handleScan = (data: string) => {
+    setScanning(false);
+    if (data.trim()) setRoomId(data.trim());
+  };
+
   return (
     <div class="flex h-screen items-center justify-center">
+      {scanning && <QrScanner onScan={handleScan} onClose={() => setScanning(false)} />}
       <div class="max-w-sm w-full px-6 space-y-6 text-center">
         <div class="text-7xl">🪣</div>
         <h1 class="text-2xl font-bold">Bucket</h1>
         <p class="text-sm text-gray-400">Track progress with bars, not checkboxes.</p>
+
         <button
           class="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-bold"
           onClick={() => setRoomId(generateRoomId())}
         >
           Start Fresh
         </button>
+
         <div class="text-xs text-gray-500">— or sync with another device —</div>
+
+        <button
+          class="w-full py-3 bg-gray-800 border border-gray-700 text-white rounded hover:bg-gray-700 text-sm"
+          onClick={() => setScanning(true)}
+        >
+          📷 Scan QR Code
+        </button>
+
         <div class="flex gap-2">
           <input
             class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
@@ -277,6 +413,15 @@ function RoomSetup() {
             Join
           </button>
         </div>
+
+        {canInstall && (
+          <button
+            class="w-full py-2 text-xs text-gray-500 hover:text-white border border-dashed border-gray-700 rounded hover:border-gray-500"
+            onClick={install}
+          >
+            📲 Install App
+          </button>
+        )}
       </div>
     </div>
   );
@@ -353,6 +498,7 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
 function Bucket({ roomId }: { roomId: string }) {
   const lists = useStore(getLists);
   const [showQr, setShowQr] = useState(false);
+  const { canInstall, install } = useInstallPrompt();
 
   return (
     <div class="min-h-screen flex flex-col">
@@ -362,13 +508,24 @@ function Bucket({ roomId }: { roomId: string }) {
           <span class="text-lg">🪣</span>
           <SyncDot />
         </div>
-        <button
-          class="text-xs text-gray-500 hover:text-gray-300"
-          onClick={() => setShowQr(true)}
-          title="Show QR code to sync"
-        >
-          ⊞
-        </button>
+        <div class="flex items-center gap-3">
+          {canInstall && (
+            <button
+              class="text-xs text-gray-500 hover:text-gray-300"
+              onClick={install}
+              title="Install app"
+            >
+              📲
+            </button>
+          )}
+          <button
+            class="text-xs text-gray-500 hover:text-gray-300"
+            onClick={() => setShowQr(true)}
+            title="Sync / share"
+          >
+            ⊞
+          </button>
+        </div>
       </header>
       <main class="flex-1 p-4">
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

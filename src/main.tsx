@@ -9,5 +9,12 @@ boot();
 render(<App />, document.getElementById("app")!);
 
 if ("serviceWorker" in navigator) {
-  registerSW({ onNeedRefresh() {}, onOfflineReady() {} });
+  registerSW({
+    onNeedRefresh() {
+      if (confirm("New version available. Reload?")) location.reload();
+    },
+    onOfflineReady() {
+      console.log("🪣 Ready to work offline");
+    },
+  });
 }
