@@ -97,7 +97,9 @@ function TaskBar({ task }: { task: Task }) {
   const [progress, setProgress] = useState(task.progress);
   const [open, setOpen] = useState(false);
   const [desc, setDesc] = useState(task.description);
+  const barRef = useRef<HTMLDivElement>(null);
   const saveRef = useRef<ReturnType<typeof setTimeout>>();
+  const dragging = useRef(false);
 
   if (task.progress !== progress && !saveRef.current) setProgress(task.progress);
 
@@ -117,16 +119,42 @@ function TaskBar({ task }: { task: Task }) {
     [task.id],
   );
 
-  const handleBarClick = (e: MouseEvent) => {
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const pct = Math.max(0, Math.min(100, Math.round(((e.clientX - rect.left) / rect.width) * 100)));
-    setP(pct);
-  };
+  const pctFromX = useCallback((clientX: number) => {
+    const rect = barRef.current?.getBoundingClientRect();
+    if (!rect) return 0;
+    return Math.max(0, Math.min(100, Math.round(((clientX - rect.left) / rect.width) * 100)));
+  }, []);
 
-  const handleBarDrag = (e: MouseEvent) => {
-    if (e.buttons !== 1) return;
-    handleBarClick(e);
-  };
+  // Touch: swipe to set progress
+  const onTouchStart = useCallback((e: TouchEvent) => {
+    dragging.current = true;
+    setP(pctFromX(e.touches[0].clientX));
+  }, [pctFromX, setP]);
+
+  const onTouchMove = useCallback((e: TouchEvent) => {
+    if (!dragging.current) return;
+    e.preventDefault();
+    setP(pctFromX(e.touches[0].clientX));
+  }, [pctFromX, setP]);
+
+  const onTouchEnd = useCallback(() => { dragging.current = false; }, []);
+
+  // Mouse: click/drag to set progress
+  const onMouseDown = useCallback((e: MouseEvent) => {
+    dragging.current = true;
+    setP(pctFromX(e.clientX));
+  }, [pctFromX, setP]);
+
+  const onMouseMove = useCallback((e: MouseEvent) => {
+    if (!dragging.current) return;
+    setP(pctFromX(e.clientX));
+  }, [pctFromX, setP]);
+
+  useEffect(() => {
+    const up = () => { dragging.current = false; };
+    window.addEventListener("mouseup", up);
+    return () => window.removeEventListener("mouseup", up);
+  }, []);
 
   const opacity = 1 - progress / 150;
   const lastLine = task.description?.split("\n").filter(Boolean).pop();
@@ -134,9 +162,13 @@ function TaskBar({ task }: { task: Task }) {
   return (
     <div style={{ opacity }}>
       <div
-        class={`relative h-7 cursor-pointer select-none border border-gray-700 overflow-hidden ${lastLine || open ? "rounded-t" : "rounded"}`}
-        onClick={handleBarClick}
-        onMouseMove={handleBarDrag}
+        ref={barRef}
+        class={`relative h-7 cursor-pointer select-none border border-gray-700 overflow-hidden touch-none ${lastLine || open ? "rounded-t" : "rounded"}`}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
       >
         <div class="absolute inset-0 flex gap-px pointer-events-none">
           {Array.from({ length: 50 }, (_, i) => {
@@ -162,9 +194,8 @@ function TaskBar({ task }: { task: Task }) {
               </span>
             )}
             <span
-              class="text-xs font-bold truncate pointer-events-auto cursor-pointer hover:text-blue-400"
+              class="text-xs font-bold truncate"
               style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
-              onClick={(e) => { e.stopPropagation(); setOpen(!open); }}
             >
               {task.title}
             </span>
