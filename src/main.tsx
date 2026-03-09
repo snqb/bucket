@@ -1,5 +1,5 @@
 import { render } from "preact";
-import { App } from "./app";
+import { App } from "./App";
 import { boot } from "./store";
 import { registerSW } from "virtual:pwa-register";
 import "@fontsource-variable/noto-sans-mono";
