@@ -41,6 +41,7 @@ const MAX_CONNS = parseInt(process.env.MAX_CONNS || "200", 10);
 const MAX_CONNS_PER_IP = parseInt(process.env.MAX_CONNS_PER_IP || "5", 10);
 const IDLE_MS = 10 * 60 * 1000;
 const PERSIST_MS = 2000;
+const PING_MS = 30_000; // ping every 30s to keep connection alive through proxies
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(BACKUP_DIR, { recursive: true });
@@ -122,15 +123,18 @@ function getRoom(name) {
   }
 
   let persistTimer = null;
+  const persistNow = () => {
+    try {
+      const tmp = file + ".tmp";
+      fs.writeFileSync(tmp, Y.encodeStateAsUpdate(doc));
+      fs.renameSync(tmp, file); // atomic on POSIX
+    } catch (e) {
+      console.error(`⚠️ Write failed for ${name}:`, e.message);
+    }
+  };
   const persist = () => {
     clearTimeout(persistTimer);
-    persistTimer = setTimeout(() => {
-      try {
-        fs.writeFileSync(file, Y.encodeStateAsUpdate(doc));
-      } catch (e) {
-        console.error(`⚠️ Write failed for ${name}:`, e.message);
-      }
-    }, PERSIST_MS);
+    persistTimer = setTimeout(persistNow, PERSIST_MS);
   };
   doc.on("update", persist);
 
@@ -142,6 +146,7 @@ function getRoom(name) {
     persistTimer,
     file,
     persist,
+    persistNow,
   };
   rooms.set(name, room);
   console.log(`📂 Room ${name} (${rooms.size} active)`);
@@ -153,7 +158,9 @@ function flushRoom(name) {
   if (!room) return;
   clearTimeout(room.persistTimer);
   try {
-    fs.writeFileSync(room.file, Y.encodeStateAsUpdate(room.doc));
+    const tmp = room.file + ".tmp";
+    fs.writeFileSync(tmp, Y.encodeStateAsUpdate(room.doc));
+    fs.renameSync(tmp, room.file);
   } catch (e) {
     console.error(`⚠️ Flush failed for ${name}:`, e.message);
   }
@@ -357,21 +364,43 @@ wss.on("connection", (ws, req) => {
 
   ws.on("message", (data) => handleMessage(ws, room, data));
 
+  // Ping/pong keepalive — prevents Cloudflare/Railway proxy from killing idle connections
+  ws.isAlive = true;
+  ws.on("pong", () => { ws.isAlive = true; });
+
   ws.on("close", () => {
     room.conns.delete(ws);
     room.doc.off("update", onUpdate);
     room.awareness.off("update", onAwareness);
     untrackConn(ip, ws);
     console.log(`- ${roomName} [${ip}] (${room.conns.size} in room)`);
+
+    // Flush immediately when last client leaves — don't gamble on the debounce timer
+    if (room.conns.size === 0) {
+      clearTimeout(room.persistTimer);
+      room.persistNow();
+    }
   });
 });
 
+// Ping/pong interval — kill dead connections, keep alive ones alive through proxies
+const pingInterval = setInterval(() => {
+  wss.clients.forEach((ws) => {
+    if (ws.isAlive === false) return ws.terminate();
+    ws.isAlive = false;
+    ws.ping();
+  });
+}, PING_MS);
+
 // Graceful shutdown
-process.on("SIGTERM", () => {
+function shutdown() {
   console.log("Shutting down — flushing all rooms...");
+  clearInterval(pingInterval);
   for (const [name] of rooms) flushRoom(name);
   process.exit(0);
-});
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 server.listen(PORT, () => {
   console.log(`🪣 Bucket sync: ws://0.0.0.0:${PORT}`);
