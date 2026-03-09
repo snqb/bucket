@@ -7,7 +7,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 ARG VITE_SYNC_URL
 ENV VITE_SYNC_URL=$VITE_SYNC_URL
-RUN pnpm build
+RUN pnpm build && ls -la dist/*.png dist/*.jpg dist/*.svg 2>&1 || echo "NO ICONS IN DIST"
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
