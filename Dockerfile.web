@@ -5,9 +5,17 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
+# Railway upload drops binary files — fetch public assets from git if missing
+RUN if [ ! -f public/pwa-192x192.png ]; then \
+      apk add --no-cache git && \
+      git clone --depth 1 --filter=blob:none --sparse https://github.com/snqb/bucket.git /tmp/repo && \
+      cd /tmp/repo && git sparse-checkout set public && \
+      cp -r /tmp/repo/public/* /app/public/ && \
+      rm -rf /tmp/repo; \
+    fi
 ARG VITE_SYNC_URL
 ENV VITE_SYNC_URL=$VITE_SYNC_URL
-RUN ls -la public/ 2>&1 || echo "NO PUBLIC DIR" && pnpm build
+RUN pnpm build
 
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
