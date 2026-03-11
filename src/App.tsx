@@ -11,11 +11,41 @@ import {
   getRoomId,
   setRoomId,
   generateRoomId,
+  generateEncKey,
+  getEncKeyStr,
+  leaveRoom,
+  restoreTask,
+  restoreList,
   type Task,
   type List,
 } from "./store";
 import { useStore } from "./hooks";
+import { t, getLang, setLang, onLangChange } from "./i18n";
 import { encode } from "uqr";
+
+// --- Helpers ---
+
+const isIOS =
+  typeof navigator !== "undefined" &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+const isStandalone =
+  typeof window !== "undefined" &&
+  (window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as any).standalone === true);
+
+const hash = (s: string) => {
+  let h = 0;
+  for (const c of s) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+};
+
+const listBg = (title: string) =>
+  `hsla(${hash(title) % 360}, 40%, 25%, 0.12)`;
+
+const NOTE_EMOJI = ["📝", "✏️", "💭", "🗒️", "💬", "🔖", "📌", "🏷️", "💡", "🪶", "📎", "🖊️"];
+const taskEmoji = (id: string) => NOTE_EMOJI[hash(id) % NOTE_EMOJI.length];
 
 // --- PWA Install Prompt ---
 
@@ -47,19 +77,78 @@ function useInstallPrompt() {
   return { canInstall, install };
 }
 
-// --- Helpers ---
+// --- i18n reactivity ---
 
-const hash = (s: string) => {
-  let h = 0;
-  for (const c of s) h = ((h << 5) - h + c.charCodeAt(0)) | 0;
-  return Math.abs(h);
+function useLang() {
+  const [, force] = useState(0);
+  useEffect(() => onLangChange(() => force((n) => n + 1)), []);
+  return getLang();
+}
+
+// --- Undo toast system ---
+
+type UndoEntry = {
+  id: string;
+  message: string;
+  onUndo: () => void;
+  timer: ReturnType<typeof setTimeout>;
 };
 
-const listBg = (title: string) =>
-  `hsla(${hash(title) % 360}, 40%, 25%, 0.1)`;
+let undoEntry: UndoEntry | null = null;
+const undoListeners = new Set<() => void>();
+const notifyUndo = () => undoListeners.forEach((fn) => fn());
 
-const NOTE_EMOJI = ["📝", "✏️", "💭", "🗒️", "💬", "🔖", "📌", "🏷️", "💡", "🪶", "📎", "🖊️"];
-const taskEmoji = (id: string) => NOTE_EMOJI[hash(id) % NOTE_EMOJI.length];
+function showUndo(message: string, onUndo: () => void, timeout = 5000) {
+  if (undoEntry) clearTimeout(undoEntry.timer);
+  const id = Math.random().toString(36).slice(2);
+  const timer = setTimeout(() => {
+    if (undoEntry?.id === id) { undoEntry = null; notifyUndo(); }
+  }, timeout);
+  undoEntry = { id, message, onUndo, timer };
+  notifyUndo();
+}
+
+function doUndo() {
+  if (!undoEntry) return;
+  clearTimeout(undoEntry.timer);
+  undoEntry.onUndo();
+  undoEntry = null;
+  notifyUndo();
+}
+
+function dismissUndo() {
+  if (!undoEntry) return;
+  clearTimeout(undoEntry.timer);
+  undoEntry = null;
+  notifyUndo();
+}
+
+function useUndo() {
+  const [entry, setEntry] = useState(undoEntry);
+  useEffect(() => {
+    const update = () => setEntry(undoEntry);
+    undoListeners.add(update);
+    return () => { undoListeners.delete(update); };
+  }, []);
+  return entry;
+}
+
+function UndoToast() {
+  const entry = useUndo();
+  if (!entry) return null;
+  return (
+    <div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-gray-800 border border-gray-700 rounded-lg px-4 py-3 text-sm shadow-lg safe-bottom">
+      <span class="text-gray-300">{entry.message}</span>
+      <button
+        class="px-3 py-1.5 bg-blue-600 text-white text-xs rounded font-medium hover:bg-blue-700"
+        onClick={doUndo}
+      >
+        {t("undo")}
+      </button>
+      <button class="text-gray-500 hover:text-white" onClick={dismissUndo}>✕</button>
+    </div>
+  );
+}
 
 // --- Components ---
 
@@ -71,21 +160,35 @@ function SyncDot() {
       : status === "connecting"
         ? "bg-yellow-500 animate-pulse"
         : "bg-gray-600";
-  return <div class={`w-2 h-2 rounded-full ${color}`} title={status} />;
+  return <div class={`w-2.5 h-2.5 rounded-full ${color}`} title={status} />;
+}
+
+function LangToggle() {
+  const lang = useLang();
+  return (
+    <button
+      class="text-xs text-gray-500 hover:text-gray-300 font-mono"
+      onClick={() => setLang(lang === "en" ? "ru" : "en")}
+      title="Switch language"
+    >
+      {lang === "en" ? "RU" : "EN"}
+    </button>
+  );
 }
 
 function Adder({ onAdd }: { onAdd: (text: string) => void }) {
+  useLang();
   const [value, setValue] = useState("");
   const submit = () => {
-    const t = value.trim();
-    if (!t) return;
-    onAdd(t);
+    const v = value.trim();
+    if (!v) return;
+    onAdd(v);
     setValue("");
   };
   return (
     <input
-      class="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-2 text-sm placeholder:text-gray-500 outline-none focus:border-gray-500"
-      placeholder="Add a task..."
+      class="w-full bg-gray-900/50 border border-gray-700 rounded px-3 py-2.5 text-sm placeholder:text-gray-500 outline-none focus:border-gray-500"
+      placeholder={t("addTask")}
       value={value}
       onInput={(e) => setValue((e.target as HTMLInputElement).value)}
       onKeyDown={(e) => e.key === "Enter" && submit()}
@@ -94,29 +197,38 @@ function Adder({ onAdd }: { onAdd: (text: string) => void }) {
 }
 
 function TaskBar({ task }: { task: Task }) {
+  useLang();
   const [progress, setProgress] = useState(task.progress);
   const [open, setOpen] = useState(false);
   const [desc, setDesc] = useState(task.description);
+  const [title, setTitle] = useState(task.title);
   const barRef = useRef<HTMLDivElement>(null);
   const saveRef = useRef<ReturnType<typeof setTimeout>>();
   const dragging = useRef(false);
 
+  // Sync from external changes
   if (task.progress !== progress && !saveRef.current) setProgress(task.progress);
+  if (task.description !== desc && !open) setDesc(task.description);
+  if (task.title !== title && !open) setTitle(task.title);
 
   const setP = useCallback(
     (p: number) => {
-      setProgress(p);
+      const clamped = Math.min(100, Math.max(0, p));
+      setProgress(clamped);
       clearTimeout(saveRef.current);
       saveRef.current = setTimeout(() => {
         saveRef.current = undefined;
-        if (p >= 100) {
+        if (clamped >= 100) {
+          // Undo-able delete
+          const snapshot = { ...task, progress: clamped };
           deleteTask(task.id);
+          showUndo(t("completed"), () => restoreTask(snapshot));
         } else {
-          updateTask(task.id, { progress: p });
+          updateTask(task.id, { progress: clamped });
         }
       }, 300);
     },
-    [task.id],
+    [task],
   );
 
   const pctFromX = useCallback((clientX: number) => {
@@ -125,7 +237,6 @@ function TaskBar({ task }: { task: Task }) {
     return Math.max(0, Math.min(100, Math.round(((clientX - rect.left) / rect.width) * 100)));
   }, []);
 
-  // Touch: swipe to set progress
   const onTouchStart = useCallback((e: TouchEvent) => {
     dragging.current = true;
     setP(pctFromX(e.touches[0].clientX));
@@ -139,7 +250,6 @@ function TaskBar({ task }: { task: Task }) {
 
   const onTouchEnd = useCallback(() => { dragging.current = false; }, []);
 
-  // Mouse: click/drag to set progress
   const onMouseDown = useCallback((e: MouseEvent) => {
     dragging.current = true;
     setP(pctFromX(e.clientX));
@@ -161,40 +271,40 @@ function TaskBar({ task }: { task: Task }) {
 
   return (
     <div style={{ opacity }}>
+      {/* Progress bar — h-10 = 40px for touch targets */}
       <div
         ref={barRef}
-        class={`relative h-7 cursor-pointer select-none border border-gray-700 overflow-hidden touch-none ${lastLine || open ? "rounded-t" : "rounded"}`}
+        class={`relative h-10 cursor-pointer select-none border border-gray-700 overflow-hidden touch-raw ${lastLine || open ? "rounded-t" : "rounded"}`}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
       >
-        <div class="absolute inset-0 flex gap-px pointer-events-none">
-          {Array.from({ length: 50 }, (_, i) => {
-            const filled = progress >= Math.round(((i + 1) / 50) * 100);
-            return (
-              <div
-                key={i}
-                class={`flex-1 transition-colors ${filled ? "bg-blue-500" : "bg-gray-700/40"}`}
-                style="min-width:2px"
-              />
-            );
-          })}
-        </div>
+        {/* Segments via CSS gradient — 3 divs instead of 50 */}
+        <div class="absolute inset-0 bg-gray-700/40" />
+        <div
+          class="absolute inset-y-0 left-0 bg-blue-500"
+          style={`width:${progress}%;transition:width 50ms linear`}
+        />
+        <div
+          class="absolute inset-0 pointer-events-none"
+          style="background:repeating-linear-gradient(90deg,transparent 0,transparent calc(2% - 1px),rgba(0,0,0,0.35) calc(2% - 1px),rgba(0,0,0,0.35) 2%)"
+        />
+
         <div class="absolute inset-0 flex items-center justify-between px-3 pointer-events-none">
           <div class="flex items-center gap-1.5 truncate max-w-[70%]">
             {!lastLine && (
               <span
                 class="text-xs pointer-events-auto cursor-pointer hover:scale-125 transition-transform"
                 onClick={(e) => { e.stopPropagation(); setOpen(true); }}
-                title="Add notes"
+                title={t("notes")}
               >
                 {taskEmoji(task.id)}
               </span>
             )}
             <span
-              class="text-xs font-bold truncate"
+              class="text-sm font-bold truncate"
               style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
             >
               {task.title}
@@ -209,28 +319,49 @@ function TaskBar({ task }: { task: Task }) {
         </div>
       </div>
 
+      {/* Note preview */}
       {lastLine && !open && (
         <div
-          class="px-3 py-1 text-xs text-gray-500 truncate border-x border-b border-gray-700 rounded-b cursor-pointer hover:text-gray-400"
+          class="px-3 py-1.5 text-xs text-gray-500 truncate border-x border-b border-gray-700 rounded-b cursor-pointer hover:text-gray-400"
           onClick={() => setOpen(true)}
         >
           {lastLine}
         </div>
       )}
 
+      {/* Detail panel — title editing + notes + delete */}
       {open && (
         <div class="border-x border-b border-gray-700 rounded-b p-3 space-y-2 bg-gray-900/50">
+          <input
+            class="w-full bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm text-white outline-none focus:border-gray-500"
+            placeholder={t("taskTitle")}
+            value={title}
+            onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
+            onBlur={() => title.trim() && updateTask(task.id, { title: title.trim() })}
+          />
           <textarea
-            class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-xs text-gray-300 resize-none outline-none focus:border-gray-500"
+            class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-300 resize-none outline-none focus:border-gray-500"
             rows={3}
-            placeholder="Notes..."
+            placeholder={t("notes")}
             value={desc}
             onInput={(e) => setDesc((e.target as HTMLTextAreaElement).value)}
             onBlur={() => updateTask(task.id, { description: desc })}
           />
-          <div class="flex gap-2">
-            <button class="text-xs text-red-400 hover:text-red-300" onClick={() => deleteTask(task.id)}>Delete</button>
-            <button class="text-xs text-gray-400 hover:text-gray-300 ml-auto" onClick={() => setOpen(false)}>Close</button>
+          <div class="flex gap-3">
+            <button
+              class="text-xs text-red-400 hover:text-red-300 py-1"
+              onClick={() => {
+                const snapshot = { ...task };
+                deleteTask(task.id);
+                setOpen(false);
+                showUndo(t("completed"), () => restoreTask(snapshot));
+              }}
+            >
+              {t("del")}
+            </button>
+            <button class="text-xs text-gray-400 hover:text-gray-300 ml-auto py-1" onClick={() => setOpen(false)}>
+              {t("close")}
+            </button>
           </div>
         </div>
       )}
@@ -239,17 +370,49 @@ function TaskBar({ task }: { task: Task }) {
 }
 
 function ListPanel({ list }: { list: List }) {
+  useLang();
   const tasks = useStore(() => getTasksForList(list.id));
+  const [confirming, setConfirming] = useState(false);
+  const confirmTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const avg = tasks.length > 0
+    ? Math.round(tasks.reduce((s, t) => s + t.progress, 0) / tasks.length)
+    : 0;
+
+  const handleDelete = () => {
+    if (!confirming) {
+      setConfirming(true);
+      confirmTimer.current = setTimeout(() => setConfirming(false), 3000);
+      return;
+    }
+    clearTimeout(confirmTimer.current);
+    // Undo-able list delete
+    const listSnapshot = { ...list };
+    const taskSnapshots = tasks.map((t) => ({ ...t }));
+    deleteList(list.id);
+    showUndo(`${list.emoji} ${list.title}`, () => {
+      restoreList(listSnapshot);
+      taskSnapshots.forEach((t) => restoreTask(t));
+    });
+  };
+
   return (
-    <div class="p-5 space-y-2" style={{ background: listBg(list.title) }}>
+    <div class="p-5 space-y-2 rounded-lg" style={{ background: listBg(list.title) }}>
       <div class="flex items-center gap-2 pb-2 border-b border-gray-700/50">
         <span class="text-lg">{list.emoji}</span>
         <h2 class="font-bold text-sm truncate flex-1">{list.title}</h2>
+        {tasks.length > 0 && (
+          <span class="text-xs text-gray-500 tabular-nums">{t("avg")} {avg}%</span>
+        )}
         <button
-          class="text-gray-500 hover:text-red-400 text-xs"
-          onClick={() => { if (confirm(`Delete "${list.title}"?`)) deleteList(list.id); }}
+          class={`text-xs py-1 px-1.5 rounded transition-colors ${
+            confirming
+              ? "text-red-400 bg-red-900/30 font-medium"
+              : "text-gray-500 hover:text-red-400"
+          }`}
+          onClick={handleDelete}
         >
-          ✕
+          {confirming ? t("confirmDelete") : "✕"}
         </button>
       </div>
       <div class="space-y-2">
@@ -261,29 +424,30 @@ function ListPanel({ list }: { list: List }) {
 }
 
 function NewListButton() {
+  useLang();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const create = () => {
-    const t = name.trim();
-    if (!t) return;
-    createList(t);
+    const v = name.trim();
+    if (!v) return;
+    createList(v);
     setName("");
     setOpen(false);
   };
   if (!open)
     return (
       <button
-        class="w-full p-4 border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 text-sm"
+        class="w-full p-4 border border-dashed border-gray-700 text-gray-500 hover:text-white hover:border-gray-500 text-sm rounded-lg"
         onClick={() => setOpen(true)}
       >
-        + New List
+        {t("newList")}
       </button>
     );
   return (
-    <div class="p-4 border border-gray-700 space-y-2">
+    <div class="p-4 border border-gray-700 rounded-lg space-y-2">
       <input
-        class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
-        placeholder="List name..."
+        class="w-full bg-gray-900 border border-gray-600 rounded px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+        placeholder={t("listName")}
         value={name}
         autoFocus
         onInput={(e) => setName((e.target as HTMLInputElement).value)}
@@ -293,8 +457,8 @@ function NewListButton() {
         }}
       />
       <div class="flex gap-2">
-        <button class="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={create}>Create</button>
-        <button class="px-3 py-1 text-gray-400 text-xs hover:text-white" onClick={() => setOpen(false)}>Cancel</button>
+        <button class="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={create}>{t("create")}</button>
+        <button class="px-3 py-2 text-gray-400 text-xs hover:text-white" onClick={() => setOpen(false)}>{t("cancel")}</button>
       </div>
     </div>
   );
@@ -303,16 +467,23 @@ function NewListButton() {
 // --- QR Scanner ---
 
 function QrScanner({ onScan, onClose }: { onScan: (data: string) => void; onClose: () => void }) {
+  useLang();
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState("");
   const streamRef = useRef<MediaStream | null>(null);
 
   useEffect(() => {
+    // iOS doesn't support BarcodeDetector — show instructions instead
+    if (isIOS) {
+      setError(t("qrIOS"));
+      return;
+    }
+
     let stopped = false;
     const hasBarcodeDetector = "BarcodeDetector" in window;
 
     if (!hasBarcodeDetector) {
-      setError("QR scanning not supported in this browser. Paste the room ID instead.");
+      setError(t("qrUnsupported"));
       return;
     }
 
@@ -335,7 +506,6 @@ function QrScanner({ onScan, onClose }: { onScan: (data: string) => void; onClos
             const barcodes = await detector.detect(videoRef.current);
             if (barcodes.length > 0) {
               const raw = barcodes[0].rawValue;
-              // Extract room ID from URL or raw string
               const match = raw.match(/[?&]join=([a-z0-9]+)/i);
               onScan(match ? match[1] : raw);
               return;
@@ -356,11 +526,11 @@ function QrScanner({ onScan, onClose }: { onScan: (data: string) => void; onClos
   }, []);
 
   return (
-    <div class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50">
+    <div class="fixed inset-0 bg-black/90 flex flex-col items-center justify-center z-50 safe-top safe-bottom">
       <div class="max-w-sm w-full mx-4 space-y-4">
-        <div class="text-center text-sm font-bold">Scan QR to join</div>
+        <div class="text-center text-sm font-bold">{t("scanQR")}</div>
         {error ? (
-          <div class="text-center text-sm text-red-400 p-4 border border-red-800 rounded">{error}</div>
+          <div class="text-center text-sm text-gray-300 p-4 border border-gray-700 rounded">{error}</div>
         ) : (
           <div class="relative rounded-lg overflow-hidden border border-gray-700">
             <video
@@ -374,25 +544,30 @@ function QrScanner({ onScan, onClose }: { onScan: (data: string) => void; onClos
           </div>
         )}
         <button
-          class="w-full py-2 text-sm text-gray-400 hover:text-white"
+          class="w-full py-3 text-sm text-gray-400 hover:text-white"
           onClick={() => {
             streamRef.current?.getTracks().forEach((t) => t.stop());
             onClose();
           }}
         >
-          Cancel
+          {t("cancel")}
         </button>
       </div>
     </div>
   );
 }
 
+// --- Room Setup ---
+
 function RoomSetup() {
-  // Auto-join from ?join=ROOMID (QR code link)
+  useLang();
+
+  // Auto-join from ?join=ROOMID or ?join=ROOMID#k=ENCKEY
   const joinParam = new URLSearchParams(location.search).get("join");
   if (joinParam?.trim()) {
+    const keyMatch = location.hash.match(/k=([A-Za-z0-9_-]+)/);
     history.replaceState(null, "", location.pathname);
-    setRoomId(joinParam.trim());
+    setRoomId(joinParam.trim(), keyMatch?.[1]);
     return null;
   }
 
@@ -400,69 +575,84 @@ function RoomSetup() {
   const [scanning, setScanning] = useState(false);
   const { canInstall, install } = useInstallPrompt();
 
-  const handleScan = (data: string) => {
-    setScanning(false);
-    if (data.trim()) setRoomId(data.trim());
+  const handleJoin = (raw: string) => {
+    const trimmed = raw.trim();
+    if (!trimmed) return;
+    const colon = trimmed.indexOf(":");
+    if (colon > 0) {
+      setRoomId(trimmed.slice(0, colon), trimmed.slice(colon + 1));
+    } else {
+      setRoomId(trimmed);
+    }
   };
 
+  const handleScan = (data: string) => {
+    setScanning(false);
+    handleJoin(data);
+  };
+
+  const showIOSHint = isIOS && !isStandalone && !canInstall;
+
   return (
-    <div class="flex h-screen items-center justify-center">
+    <div class="flex h-dvh items-center justify-center safe-top safe-bottom safe-x">
       {scanning && <QrScanner onScan={handleScan} onClose={() => setScanning(false)} />}
       <div class="max-w-sm w-full px-6 space-y-6 text-center">
         <div class="text-7xl">🪣</div>
         <h1 class="text-2xl font-bold">Bucket</h1>
-        <p class="text-sm text-gray-400">Track progress with bars, not checkboxes.</p>
+        <p class="text-sm text-gray-400">{t("tagline")}</p>
 
         <button
-          class="w-full py-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm font-bold"
-          onClick={() => setRoomId(generateRoomId())}
+          class="w-full py-3.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-bold active:scale-[0.98] transition-transform"
+          onClick={() => setRoomId(generateRoomId(), generateEncKey())}
         >
-          Start Fresh
+          {t("startFresh")}
         </button>
 
-        <div class="text-xs text-gray-500">— or sync with another device —</div>
+        <div class="text-xs text-gray-500">{t("orSync")}</div>
 
         <button
-          class="w-full py-3 bg-gray-800 border border-gray-700 text-white rounded hover:bg-gray-700 text-sm"
+          class="w-full py-3.5 bg-gray-800 border border-gray-700 text-white rounded-lg hover:bg-gray-700 text-sm active:scale-[0.98] transition-transform"
           onClick={() => setScanning(true)}
         >
-          📷 Scan QR Code
+          {t("scanQR")}
         </button>
 
         <div class="flex gap-2">
           <input
-            class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
-            placeholder="Paste room ID..."
+            class="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-500"
+            placeholder={t("pasteRoom")}
             value={input}
             onInput={(e) => setInput((e.target as HTMLInputElement).value)}
-            onKeyDown={(e) => e.key === "Enter" && input.trim() && setRoomId(input.trim())}
+            onKeyDown={(e) => e.key === "Enter" && handleJoin(input)}
           />
           <button
-            class="px-4 py-2 bg-gray-700 text-white rounded text-sm hover:bg-gray-600"
-            onClick={() => input.trim() && setRoomId(input.trim())}
+            class="px-4 py-2.5 bg-gray-700 text-white rounded-lg text-sm hover:bg-gray-600"
+            onClick={() => handleJoin(input)}
           >
-            Join
+            {t("join")}
           </button>
         </div>
 
-        {canInstall && (
-          <button
-            class="w-full py-2 text-xs text-gray-500 hover:text-white border border-dashed border-gray-700 rounded hover:border-gray-500"
-            onClick={install}
-          >
-            📲 Install App
-          </button>
-        )}
+        <div class="flex items-center justify-center gap-4 pt-2">
+          {canInstall && (
+            <button
+              class="text-xs text-gray-500 hover:text-white border border-dashed border-gray-700 rounded px-3 py-2 hover:border-gray-500"
+              onClick={install}
+            >
+              {t("install")}
+            </button>
+          )}
+          {showIOSHint && (
+            <div class="text-xs text-gray-600">{t("iosHint")}</div>
+          )}
+          <LangToggle />
+        </div>
       </div>
     </div>
   );
 }
 
-export function App() {
-  const roomId = useStore(getRoomId);
-  if (!roomId) return <RoomSetup />;
-  return <Bucket roomId={roomId} />;
-}
+// --- QR SVG ---
 
 function QrSvg({ data, size = 200 }: { data: string; size?: number }) {
   const { data: grid, size: qrSize } = useMemo(() => encode(data), [data]);
@@ -479,8 +669,14 @@ function QrSvg({ data, size = 200 }: { data: string; size?: number }) {
   return <div dangerouslySetInnerHTML={{ __html: svg }} />;
 }
 
+// --- Room QR / Share ---
+
 function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
+  useLang();
   const svgRef = useRef<HTMLDivElement>(null);
+  const encKey = getEncKeyStr();
+  const shareUrl = `${location.origin}?join=${roomId}${encKey ? "#k=" + encKey : ""}`;
+  const copyStr = encKey ? `${roomId}:${encKey}` : roomId;
 
   const save = () => {
     const svg = svgRef.current?.querySelector("svg");
@@ -494,71 +690,102 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
     URL.revokeObjectURL(url);
   };
 
-  const copy = () => {
-    navigator.clipboard.writeText(roomId);
+  const copy = () => navigator.clipboard.writeText(copyStr);
+
+  const handleLeave = () => {
+    if (confirm(t("leaveConfirm"))) {
+      onClose();
+      leaveRoom();
+    }
   };
 
   return (
-    <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50" onClick={onClose}>
+    <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 safe-top safe-bottom" onClick={onClose}>
       <div class="bg-gray-900 border border-gray-700 rounded-lg p-6 space-y-4 max-w-xs w-full mx-4" onClick={(e) => e.stopPropagation()}>
-        <div class="text-center text-sm font-bold">Sync another device</div>
+        <div class="text-center text-sm font-bold">{t("sync")}</div>
         <div class="flex justify-center" ref={svgRef}>
-          <QrSvg data={`${location.origin}?join=${roomId}`} size={200} />
+          <QrSvg data={shareUrl} size={200} />
         </div>
         <div
-          class="text-center font-mono text-xs text-gray-400 bg-gray-800 rounded px-3 py-2 cursor-pointer hover:text-white select-all"
+          class="text-center font-mono text-xs text-gray-400 bg-gray-800 rounded px-3 py-2 cursor-pointer hover:text-white select-all break-all"
           onClick={copy}
           title="Click to copy"
         >
           {roomId}
+          {encKey && <span class="text-green-500/70 ml-1">🔒</span>}
         </div>
         <div class="flex gap-2">
-          <button class="flex-1 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={save}>
-            💾 Save QR
+          <button class="flex-1 py-2.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={save}>
+            {t("saveQR")}
           </button>
-          <button class="flex-1 py-2 bg-gray-700 text-white text-xs rounded hover:bg-gray-600" onClick={copy}>
-            📋 Copy ID
+          <button class="flex-1 py-2.5 bg-gray-700 text-white text-xs rounded hover:bg-gray-600" onClick={copy}>
+            {t("copyID")}
           </button>
         </div>
-        <button class="w-full text-xs text-gray-500 hover:text-gray-300" onClick={onClose}>Close</button>
+        <button
+          class="w-full text-xs text-red-400/70 hover:text-red-400 py-1"
+          onClick={handleLeave}
+        >
+          {t("leave")}
+        </button>
+        <button class="w-full text-xs text-gray-500 hover:text-gray-300" onClick={onClose}>{t("close")}</button>
       </div>
     </div>
   );
 }
 
+// --- Main App ---
+
+export function App() {
+  const roomId = useStore(getRoomId);
+  if (!roomId) return <RoomSetup />;
+  return <Bucket roomId={roomId} />;
+}
+
 function Bucket({ roomId }: { roomId: string }) {
+  useLang();
   const lists = useStore(getLists);
   const [showQr, setShowQr] = useState(false);
   const { canInstall, install } = useInstallPrompt();
 
   return (
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-dvh flex flex-col">
       {showQr && <RoomQr roomId={roomId} onClose={() => setShowQr(false)} />}
-      <header class="flex items-center justify-between p-3 border-b border-gray-800">
+      <UndoToast />
+
+      <header class="flex items-center justify-between p-3 border-b border-gray-800 safe-top safe-x">
         <div class="flex items-center gap-2">
           <span class="text-lg">🪣</span>
           <SyncDot />
         </div>
         <div class="flex items-center gap-3">
+          <LangToggle />
           {canInstall && (
             <button
               class="text-xs text-gray-500 hover:text-gray-300"
               onClick={install}
-              title="Install app"
+              title={t("install")}
             >
               📲
             </button>
           )}
           <button
-            class="text-xs text-gray-500 hover:text-gray-300"
+            class="text-sm text-gray-500 hover:text-gray-300 px-1"
             onClick={() => setShowQr(true)}
-            title="Sync / share"
+            title={t("sync")}
           >
-            ⊞
+            ⚙
           </button>
         </div>
       </header>
-      <main class="flex-1 p-4">
+
+      <main class="flex-1 p-4 safe-x safe-bottom">
+        {lists.length === 0 && (
+          <div class="text-center text-gray-600 mt-16 mb-8 space-y-2">
+            <div class="text-4xl">📋</div>
+            <p class="text-sm">{t("emptyHint")}</p>
+          </div>
+        )}
         <div class="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {lists.map((list) => <ListPanel key={list.id} list={list} />)}
           <NewListButton />

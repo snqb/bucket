@@ -13,6 +13,7 @@
     "@fontsource-variable/noto-sans-mono": "^5.2.10",
     "lib0": "^0.2.117",
     "preact": "^10.25.4",
+    "tweetnacl": "^1.0.3",
     "uqr": "^0.1.2",
     "ws": "^8.19.0",
     "y-indexeddb": "^9.0.12",

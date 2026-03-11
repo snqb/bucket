@@ -104,6 +104,28 @@ function validateRoom(room) {
   return /^[a-z0-9]{6,32}$/i.test(room);
 }
 
+function recoverFromBackup(name, doc) {
+  try {
+    const dirs = fs.readdirSync(BACKUP_DIR)
+      .filter(d => /^\d{4}-\d{2}-\d{2}$/.test(d))
+      .sort()
+      .reverse();
+    for (const dir of dirs) {
+      const backupFile = path.join(BACKUP_DIR, dir, `${name}.yjs`);
+      if (fs.existsSync(backupFile)) {
+        try {
+          Y.applyUpdate(doc, fs.readFileSync(backupFile));
+          console.log(`✅ Recovered ${name} from backup ${dir}`);
+          return true;
+        } catch {
+          continue; // this backup also corrupt, try older
+        }
+      }
+    }
+  } catch {}
+  return false;
+}
+
 function getRoom(name) {
   let room = rooms.get(name);
   if (room) {
@@ -118,7 +140,10 @@ function getRoom(name) {
     try {
       Y.applyUpdate(doc, fs.readFileSync(file));
     } catch (e) {
-      console.error(`⚠️ Corrupt data for ${name}, starting fresh`);
+      console.error(`⚠️ Corrupt data for ${name}, trying backup...`);
+      if (!recoverFromBackup(name, doc)) {
+        console.error(`⚠️ No backup for ${name}, starting fresh`);
+      }
     }
   }
 
