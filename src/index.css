@@ -31,6 +31,12 @@ body.light .hover\:text-gray-300:hover { color: #374151; }
 body.light .hover\:text-gray-400:hover { color: #6b7280; }
 body.light .hover\:border-gray-500:hover { border-color: #9ca3af; }
 body.light .focus\:border-gray-500:focus { border-color: #9ca3af; }
+body.light .bg-blue-600 { background-color: #2563eb; }
+body.light .hover\:bg-blue-700:hover { background-color: #1d4ed8; }
+body.light .bg-blue-500 { background-color: #3b82f6; }
+body.light .segment-lines {
+  background: repeating-linear-gradient(90deg,transparent 0,transparent calc(2% - 1px),rgba(0,0,0,0.1) calc(2% - 1px),rgba(0,0,0,0.1) 2%) !important;
+}
 
 /* dvh fallback for iOS URL bar */
 .h-dvh { height: 100vh; height: 100dvh; }

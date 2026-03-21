@@ -364,7 +364,7 @@ function TaskBar({ task }: { task: Task }) {
           style={`width:${progress}%;transition:width 50ms linear`}
         />
         <div
-          class="absolute inset-0 pointer-events-none"
+          class="absolute inset-0 pointer-events-none segment-lines"
           style="background:repeating-linear-gradient(90deg,transparent 0,transparent calc(2% - 1px),rgba(0,0,0,0.35) calc(2% - 1px),rgba(0,0,0,0.35) 2%)"
         />
 
