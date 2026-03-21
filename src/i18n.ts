@@ -34,6 +34,12 @@ const S = {
     leaveConfirm: "Leave this room?",
     iosHint: "Tap ⎋ share → \"Add to Home Screen\"",
     taskTitle: "Task name...",
+    dueDate: "Due date",
+    overdue: "overdue",
+    dueToday: "today",
+    dueTomorrow: "tomorrow",
+    dueIn: "in",
+    days: "d",
   },
   ru: {
     tagline: "Прогресс-бары вместо галочек.",
@@ -68,6 +74,12 @@ const S = {
     leaveConfirm: "Выйти из комнаты?",
     iosHint: "Нажмите ⎋ → «На экран Домой»",
     taskTitle: "Название задачи...",
+    dueDate: "Срок",
+    overdue: "просрочено",
+    dueToday: "сегодня",
+    dueTomorrow: "завтра",
+    dueIn: "через",
+    days: "д",
   },
 } as const;
 

@@ -469,6 +469,7 @@ async function handleRest(req, res) {
             title: body.title || "Untitled",
             description: body.description || "",
             progress: body.progress ?? 0,
+            dueDate: body.dueDate || "",
             createdAt: Date.now(),
           }, keyBytes);
           yTasks.set(id, ymap);
@@ -480,7 +481,7 @@ async function handleRest(req, res) {
         if (!ymap) return json(res, 404, { error: "Task not found" });
         const body = await readBody(req);
         const allowed = {};
-        for (const k of ["title", "description", "progress", "listId"]) {
+        for (const k of ["title", "description", "progress", "listId", "dueDate"]) {
           if (body[k] !== undefined) allowed[k] = k === "progress" ? Number(body[k]) : body[k];
         }
         room.doc.transact(() => setEncFields(ymap, allowed, keyBytes));

@@ -7,6 +7,31 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Light theme */
+body.light {
+  @apply bg-gray-50 text-gray-900;
+}
+body.light .bg-black { background-color: #f9fafb; }
+body.light .bg-gray-900 { background-color: #f3f4f6; }
+body.light .bg-gray-900\/50 { background-color: rgba(243,244,246,0.5); }
+body.light .bg-gray-800 { background-color: #e5e7eb; }
+body.light .bg-gray-700\/40 { background-color: rgba(209,213,219,0.4); }
+body.light .border-gray-700 { border-color: #d1d5db; }
+body.light .border-gray-700\/50 { border-color: rgba(209,213,219,0.5); }
+body.light .border-gray-800 { border-color: #e5e7eb; }
+body.light .border-gray-600 { border-color: #9ca3af; }
+body.light .text-white { color: #111827; }
+body.light .text-gray-300 { color: #374151; }
+body.light .text-gray-400 { color: #6b7280; }
+body.light .text-gray-500 { color: #9ca3af; }
+body.light .text-gray-600 { color: #d1d5db; }
+body.light .placeholder\:text-gray-500::placeholder { color: #9ca3af; }
+body.light .hover\:text-white:hover { color: #111827; }
+body.light .hover\:text-gray-300:hover { color: #374151; }
+body.light .hover\:text-gray-400:hover { color: #6b7280; }
+body.light .hover\:border-gray-500:hover { border-color: #9ca3af; }
+body.light .focus\:border-gray-500:focus { border-color: #9ca3af; }
+
 /* dvh fallback for iOS URL bar */
 .h-dvh { height: 100vh; height: 100dvh; }
 .min-h-dvh { min-height: 100vh; min-height: 100dvh; }

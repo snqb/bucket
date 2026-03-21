@@ -77,6 +77,47 @@ function useInstallPrompt() {
   return { canInstall, install };
 }
 
+// --- Theme ---
+
+const THEME_KEY = "bucket-theme";
+type Theme = "dark" | "light" | "auto";
+
+function detectTheme(): Theme {
+  return (localStorage.getItem(THEME_KEY) as Theme) || "auto";
+}
+
+function applyTheme(theme: Theme) {
+  const isDark = theme === "dark" || (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  document.body.classList.toggle("light", !isDark);
+}
+
+function setTheme(theme: Theme) {
+  localStorage.setItem(THEME_KEY, theme);
+  applyTheme(theme);
+}
+
+// Apply on load
+if (typeof window !== "undefined") {
+  applyTheme(detectTheme());
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    if (detectTheme() === "auto") applyTheme("auto");
+  });
+}
+
+// --- Due date helpers ---
+
+function dueLabel(dueDate: string): { text: string; color: string } | null {
+  if (!dueDate) return null;
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const due = new Date(dueDate + "T00:00:00");
+  const diff = Math.round((due.getTime() - now.getTime()) / 86400000);
+  if (diff < 0) return { text: t("overdue"), color: "text-red-400" };
+  if (diff === 0) return { text: t("dueToday"), color: "text-yellow-400" };
+  if (diff === 1) return { text: t("dueTomorrow"), color: "text-blue-400" };
+  return { text: `${t("dueIn")} ${diff}${t("days")}`, color: "text-gray-400" };
+}
+
 // --- i18n reactivity ---
 
 function useLang() {
@@ -176,6 +217,25 @@ function LangToggle() {
   );
 }
 
+function ThemeToggle() {
+  const [theme, setT] = useState(detectTheme);
+  const cycle = () => {
+    const next: Theme = theme === "dark" ? "light" : theme === "light" ? "auto" : "dark";
+    setTheme(next);
+    setT(next);
+  };
+  const icon = theme === "dark" ? "🌙" : theme === "light" ? "☀️" : "🌗";
+  return (
+    <button
+      class="text-xs text-gray-500 hover:text-gray-300"
+      onClick={cycle}
+      title={`Theme: ${theme}`}
+    >
+      {icon}
+    </button>
+  );
+}
+
 function Adder({ onAdd }: { onAdd: (text: string) => void }) {
   useLang();
   const [value, setValue] = useState("");
@@ -202,6 +262,7 @@ function TaskBar({ task }: { task: Task }) {
   const [open, setOpen] = useState(false);
   const [desc, setDesc] = useState(task.description);
   const [title, setTitle] = useState(task.title);
+  const [due, setDue] = useState(task.dueDate || "");
   const barRef = useRef<HTMLDivElement>(null);
   const saveRef = useRef<ReturnType<typeof setTimeout>>();
   const dragging = useRef(false);
@@ -210,6 +271,7 @@ function TaskBar({ task }: { task: Task }) {
   if (task.progress !== progress && !saveRef.current) setProgress(task.progress);
   if (task.description !== desc && !open) setDesc(task.description);
   if (task.title !== title && !open) setTitle(task.title);
+  if ((task.dueDate || "") !== due && !open) setDue(task.dueDate || "");
 
   const setP = useCallback(
     (p: number) => {
@@ -270,6 +332,7 @@ function TaskBar({ task }: { task: Task }) {
 
   const opacity = 1 - progress / 150;
   const lastLine = task.description?.split("\n").filter(Boolean).pop();
+  const dueBadge = dueLabel(task.dueDate || "");
 
   return (
     <div style={{ opacity }}>
@@ -323,12 +386,22 @@ function TaskBar({ task }: { task: Task }) {
               {task.title}
             </span>
           </div>
-          <span
-            class="text-xs font-bold text-gray-300 tabular-nums"
-            style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
-          >
-            {progress}%
-          </span>
+          <div class="flex items-center gap-2">
+            {dueBadge && (
+              <span
+                class={`text-[10px] font-medium ${dueBadge.color}`}
+                style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
+              >
+                {dueBadge.text}
+              </span>
+            )}
+            <span
+              class="text-xs font-bold text-gray-300 tabular-nums"
+              style="text-shadow:0 1px 3px rgba(0,0,0,.9)"
+            >
+              {progress}%
+            </span>
+          </div>
         </div>
       </div>
 
@@ -352,6 +425,25 @@ function TaskBar({ task }: { task: Task }) {
             onInput={(e) => setTitle((e.target as HTMLInputElement).value)}
             onBlur={() => title.trim() && updateTask(task.id, { title: title.trim() })}
           />
+          <div class="flex gap-2 items-center">
+            <label class="text-xs text-gray-400 shrink-0">{t("dueDate")}</label>
+            <input
+              type="date"
+              class="flex-1 bg-gray-800 border border-gray-700 rounded px-2 py-1.5 text-sm text-gray-300 outline-none focus:border-gray-500"
+              value={due}
+              onInput={(e) => {
+                const v = (e.target as HTMLInputElement).value;
+                setDue(v);
+                updateTask(task.id, { dueDate: v });
+              }}
+            />
+            {due && (
+              <button
+                class="text-xs text-gray-500 hover:text-gray-300"
+                onClick={() => { setDue(""); updateTask(task.id, { dueDate: "" }); }}
+              >✕</button>
+            )}
+          </div>
           <textarea
             class="w-full bg-gray-800 border border-gray-700 rounded p-2 text-sm text-gray-300 resize-none outline-none focus:border-gray-500"
             rows={3}
@@ -659,6 +751,7 @@ function RoomSetup() {
             <div class="text-xs text-gray-600">{t("iosHint")}</div>
           )}
           <LangToggle />
+          <ThemeToggle />
         </div>
       </div>
     </div>
@@ -801,6 +894,7 @@ function Bucket({ roomId }: { roomId: string }) {
         </div>
         <div class="flex items-center gap-3">
           <LangToggle />
+          <ThemeToggle />
           {canInstall && (
             <button
               class="text-xs text-gray-500 hover:text-gray-300"

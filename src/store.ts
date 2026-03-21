@@ -36,6 +36,7 @@ export type Task = {
   title: string;
   description: string;
   progress: number;
+  dueDate: string; // ISO date string "YYYY-MM-DD" or ""
   createdAt: number;
 };
 
@@ -233,7 +234,7 @@ export function updateList(id: string, updates: Partial<List>) {
 export function createTask(listId: string, title: string): string {
   const id = uid();
   const ymap = new Y.Map();
-  setFields(ymap, { id, listId, title, description: "", progress: 0, createdAt: Date.now() });
+  setFields(ymap, { id, listId, title, description: "", progress: 0, dueDate: "", createdAt: Date.now() });
   yTasks.set(id, ymap);
   return id;
 }
