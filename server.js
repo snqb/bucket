@@ -33,6 +33,7 @@ import * as encoding from "lib0/encoding";
 import * as decoding from "lib0/decoding";
 import fs from "fs";
 import path from "path";
+import nacl from "tweetnacl";
 
 const PORT = parseInt(process.env.PORT || "8040", 10);
 const DATA_DIR = process.env.DATA_DIR || "./data";
@@ -286,16 +287,249 @@ function handleMessage(ws, room, data) {
   }
 }
 
+// --- Encryption helpers (mirrors client store.ts) ---
+
+const ENC_FIELDS = new Set(["title", "description", "emoji"]);
+const ENC_PREFIX = "\x01";
+
+function toB64(bytes) {
+  return Buffer.from(bytes).toString("base64url");
+}
+function fromB64(s) {
+  return new Uint8Array(Buffer.from(s, "base64url"));
+}
+
+function encryptField(plain, keyBytes) {
+  if (!keyBytes) return plain;
+  const nonce = nacl.randomBytes(24);
+  const msg = new TextEncoder().encode(plain);
+  const box = nacl.secretbox(msg, nonce, keyBytes);
+  const full = new Uint8Array(24 + box.length);
+  full.set(nonce);
+  full.set(box, 24);
+  return ENC_PREFIX + toB64(full);
+}
+
+function decryptField(val, keyBytes) {
+  if (!keyBytes || typeof val !== "string" || val[0] !== ENC_PREFIX) return val;
+  try {
+    const full = fromB64(val.slice(1));
+    const nonce = full.slice(0, 24);
+    const box = full.slice(24);
+    const msg = nacl.secretbox.open(box, nonce, keyBytes);
+    if (!msg) return val;
+    return new TextDecoder().decode(msg);
+  } catch {
+    return val;
+  }
+}
+
+function ymapToObj(ymap, keyBytes) {
+  // Handle both Y.Map (nested CRDT) and plain objects (legacy)
+  if (ymap instanceof Y.Map) {
+    const obj = {};
+    ymap.forEach((val, key) => {
+      obj[key] = ENC_FIELDS.has(key) && typeof val === "string" ? decryptField(val, keyBytes) : val;
+    });
+    return obj;
+  }
+  if (ymap && typeof ymap === "object") {
+    const obj = { ...ymap };
+    for (const k of ENC_FIELDS) {
+      if (typeof obj[k] === "string") obj[k] = decryptField(obj[k], keyBytes);
+    }
+    return obj;
+  }
+  return null;
+}
+
+function setEncFields(ymap, fields, keyBytes) {
+  if (ymap instanceof Y.Map) {
+    for (const [k, v] of Object.entries(fields)) {
+      if (keyBytes && ENC_FIELDS.has(k)) {
+        ymap.set(k, encryptField(String(v), keyBytes));
+      } else {
+        ymap.set(k, v);
+      }
+    }
+  }
+  // Plain objects: can't mutate in-place on a Y.Map parent — would need to replace the whole entry.
+  // For PATCH on legacy data, convert to Y.Map first.
+}
+
+function parseEncKey(req) {
+  const hdr = req.headers["x-enc-key"];
+  if (!hdr) return null;
+  try { return fromB64(hdr); } catch { return null; }
+}
+
+// --- REST API ---
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = "";
+    req.on("data", (c) => { data += c; if (data.length > 1e5) reject(new Error("Too large")); });
+    req.on("end", () => { try { resolve(JSON.parse(data)); } catch { reject(new Error("Invalid JSON")); } });
+  });
+}
+
+function json(res, code, obj) {
+  res.writeHead(code, { "Content-Type": "application/json" });
+  res.end(JSON.stringify(obj));
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+async function handleRest(req, res) {
+  const url = new URL(req.url, "http://localhost");
+  const parts = url.pathname.split("/").filter(Boolean); // ["room", roomId, "tasks"|"lists", taskId?]
+
+  // CORS for skill/CLI usage
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, X-Enc-Key");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS");
+  if (req.method === "OPTIONS") { res.writeHead(204); res.end(); return true; }
+
+  if (parts[0] !== "room" || !parts[1] || !validateRoom(parts[1])) return false;
+
+  const roomName = parts[1];
+  const resource = parts[2]; // "tasks" | "lists"
+  const itemId = parts[3];
+  const keyBytes = parseEncKey(req);
+
+  // Load room (creates Y.Doc from disk if not in memory)
+  const room = getRoom(roomName);
+
+  const yLists = room.doc.getMap("lists");
+  const yTasks = room.doc.getMap("tasks");
+
+  try {
+    // --- Lists ---
+    if (resource === "lists") {
+      if (req.method === "GET") {
+        const out = [];
+        yLists.forEach((val) => { const o = ymapToObj(val, keyBytes); if (o) out.push(o); });
+        out.sort((a, b) => a.createdAt - b.createdAt);
+        return json(res, 200, out);
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        const id = uid();
+        const ymap = new Y.Map();
+        room.doc.transact(() => {
+          setEncFields(ymap, { id, title: body.title || "Untitled", emoji: body.emoji || "📋", createdAt: Date.now() }, keyBytes);
+          yLists.set(id, ymap);
+        });
+        return json(res, 201, { id });
+      }
+      if (req.method === "PATCH" && itemId) {
+        const ymap = yLists.get(itemId);
+        if (!ymap) return json(res, 404, { error: "List not found" });
+        const body = await readBody(req);
+        const allowed = {};
+        if (body.title !== undefined) allowed.title = body.title;
+        if (body.emoji !== undefined) allowed.emoji = body.emoji;
+        room.doc.transact(() => setEncFields(ymap, allowed, keyBytes));
+        return json(res, 200, { ok: true });
+      }
+      if (req.method === "DELETE" && itemId) {
+        room.doc.transact(() => {
+          yTasks.forEach((_val, taskId) => {
+            const tm = yTasks.get(taskId);
+            if (tm instanceof Y.Map && tm.get("listId") === itemId) yTasks.delete(taskId);
+          });
+          yLists.delete(itemId);
+        });
+        return json(res, 200, { ok: true });
+      }
+    }
+
+    // --- Tasks ---
+    if (resource === "tasks") {
+      if (req.method === "GET") {
+        const listFilter = url.searchParams.get("list");
+        const out = [];
+        yTasks.forEach((val) => {
+          const t = ymapToObj(val, keyBytes);
+          if (t && (!listFilter || t.listId === listFilter)) out.push(t);
+        });
+        out.sort((a, b) => a.createdAt - b.createdAt);
+        return json(res, 200, out);
+      }
+      if (req.method === "POST") {
+        const body = await readBody(req);
+        if (!body.listId) return json(res, 400, { error: "listId required" });
+        const id = uid();
+        const ymap = new Y.Map();
+        room.doc.transact(() => {
+          setEncFields(ymap, {
+            id, listId: body.listId,
+            title: body.title || "Untitled",
+            description: body.description || "",
+            progress: body.progress ?? 0,
+            createdAt: Date.now(),
+          }, keyBytes);
+          yTasks.set(id, ymap);
+        });
+        return json(res, 201, { id });
+      }
+      if (req.method === "PATCH" && itemId) {
+        const ymap = yTasks.get(itemId);
+        if (!ymap) return json(res, 404, { error: "Task not found" });
+        const body = await readBody(req);
+        const allowed = {};
+        for (const k of ["title", "description", "progress", "listId"]) {
+          if (body[k] !== undefined) allowed[k] = k === "progress" ? Number(body[k]) : body[k];
+        }
+        room.doc.transact(() => setEncFields(ymap, allowed, keyBytes));
+        return json(res, 200, { ok: true });
+      }
+      if (req.method === "DELETE" && itemId) {
+        yTasks.delete(itemId);
+        return json(res, 200, { ok: true });
+      }
+    }
+
+    // --- Room overview ---
+    if (!resource && req.method === "GET") {
+      const lists = [];
+      yLists.forEach((val) => { const o = ymapToObj(val, keyBytes); if (o) lists.push(o); });
+      lists.sort((a, b) => a.createdAt - b.createdAt);
+      const tasks = [];
+      yTasks.forEach((val) => { const o = ymapToObj(val, keyBytes); if (o) tasks.push(o); });
+      tasks.sort((a, b) => a.createdAt - b.createdAt);
+      return json(res, 200, { lists, tasks });
+    }
+
+  } catch (e) {
+    return json(res, 400, { error: e.message });
+  }
+
+  return json(res, 405, { error: "Method not allowed" });
+}
+
 // --- HTTP + WebSocket ---
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   if (req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
     res.end(JSON.stringify({ ok: true, rooms: rooms.size, conns: totalConns() }));
-  } else {
-    res.writeHead(404);
-    res.end();
+    return;
   }
+
+  // REST API: /room/:id/...
+  try {
+    const handled = await handleRest(req, res);
+    if (handled !== false) return;
+  } catch (e) {
+    if (!res.headersSent) { res.writeHead(500); res.end(JSON.stringify({ error: e.message })); }
+    return;
+  }
+
+  res.writeHead(404);
+  res.end();
 });
 
 function totalConns() {

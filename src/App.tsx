@@ -219,10 +219,12 @@ function TaskBar({ task }: { task: Task }) {
       saveRef.current = setTimeout(() => {
         saveRef.current = undefined;
         if (clamped >= 100) {
+          // Haptic feedback
+          if (navigator.vibrate) navigator.vibrate(50);
           // Undo-able delete
           const snapshot = { ...task, progress: clamped };
           deleteTask(task.id);
-          showUndo(t("completed"), () => restoreTask(snapshot));
+          showUndo(`✅ ${task.title}`, () => restoreTask(snapshot));
         } else {
           updateTask(task.id, { progress: clamped });
         }
@@ -271,10 +273,21 @@ function TaskBar({ task }: { task: Task }) {
 
   return (
     <div style={{ opacity }}>
-      {/* Progress bar — h-10 = 40px for touch targets */}
+      {/* Progress bar — h-11 = 44px for iOS HIG touch targets */}
       <div
         ref={barRef}
-        class={`relative h-10 cursor-pointer select-none border border-gray-700 overflow-hidden touch-raw ${lastLine || open ? "rounded-t" : "rounded"}`}
+        class={`relative h-11 cursor-pointer select-none border border-gray-700 overflow-hidden touch-raw ${lastLine || open ? "rounded-t" : "rounded"}`}
+        role="slider"
+        aria-label={`${task.title} — ${progress}%`}
+        aria-valuenow={progress}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowRight") setP(Math.min(100, progress + 5));
+          else if (e.key === "ArrowLeft") setP(Math.max(0, progress - 5));
+          else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setOpen(!open); }
+        }}
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -678,6 +691,8 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
   const shareUrl = `${location.origin}?join=${roomId}${encKey ? "#k=" + encKey : ""}`;
   const copyStr = encKey ? `${roomId}:${encKey}` : roomId;
 
+  const [copied, setCopied] = useState("");
+
   const save = () => {
     const svg = svgRef.current?.querySelector("svg");
     if (!svg) return;
@@ -690,7 +705,27 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
     URL.revokeObjectURL(url);
   };
 
-  const copy = () => navigator.clipboard.writeText(copyStr);
+  const copy = () => {
+    navigator.clipboard.writeText(copyStr);
+    setCopied("id");
+    setTimeout(() => setCopied(""), 1500);
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    setCopied("link");
+    setTimeout(() => setCopied(""), 1500);
+  };
+
+  const share = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Bucket", url: shareUrl });
+      } catch {}
+    } else {
+      copyLink();
+    }
+  };
 
   const handleLeave = () => {
     if (confirm(t("leaveConfirm"))) {
@@ -714,12 +749,18 @@ function RoomQr({ roomId, onClose }: { roomId: string; onClose: () => void }) {
           {roomId}
           {encKey && <span class="text-green-500/70 ml-1">🔒</span>}
         </div>
+        <button
+          class="w-full py-2.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 font-medium"
+          onClick={share}
+        >
+          {copied === "link" ? "✓ " : "🔗 "}{t("shareLink")}
+        </button>
         <div class="flex gap-2">
-          <button class="flex-1 py-2.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700" onClick={save}>
+          <button class="flex-1 py-2.5 bg-gray-700 text-white text-xs rounded hover:bg-gray-600" onClick={save}>
             {t("saveQR")}
           </button>
           <button class="flex-1 py-2.5 bg-gray-700 text-white text-xs rounded hover:bg-gray-600" onClick={copy}>
-            {t("copyID")}
+            {copied === "id" ? "✓" : ""} {t("copyID")}
           </button>
         </div>
         <button

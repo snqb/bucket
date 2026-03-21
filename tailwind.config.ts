@@ -5,7 +5,8 @@ export default {
   content: ["./index.html", "./src/**/*.{ts,tsx}"],
   theme: {
     fontFamily: {
-      sans: ["'Noto Sans Mono Variable'", "monospace"],
+      sans: ["-apple-system", "BlinkMacSystemFont", "'Segoe UI'", "Roboto", "sans-serif"],
+      mono: ["'Noto Sans Mono Variable'", "monospace"],
     },
   },
 } satisfies Config;
