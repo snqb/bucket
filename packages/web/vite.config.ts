@@ -5,6 +5,9 @@ import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
   cacheDir: ".vite",
+  build: {
+    target: "esnext",
+  },
   optimizeDeps: {
     exclude: ["@evolu/sqlite-wasm", "kysely", "@evolu/react-web"],
   },
