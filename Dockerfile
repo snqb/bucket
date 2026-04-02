@@ -6,6 +6,7 @@ COPY packages/core/package.json packages/core/
 COPY packages/web/package.json packages/web/
 RUN pnpm install --frozen-lockfile
 COPY packages/ packages/
+# bust: icons
 RUN pnpm --filter @bucket/web build
 
 FROM nginx:alpine
