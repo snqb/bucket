@@ -5,8 +5,11 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY packages/core/package.json packages/core/
 COPY packages/web/package.json packages/web/
 RUN pnpm install --frozen-lockfile
-COPY packages/ packages/
-RUN ls packages/web/public/ && pnpm --filter @bucket/web build
+COPY packages/core/ packages/core/
+COPY packages/web/src/ packages/web/src/
+COPY packages/web/public/ packages/web/public/
+COPY packages/web/index.html packages/web/tsconfig.json packages/web/vite.config.ts packages/web/
+RUN pnpm --filter @bucket/web build
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
