@@ -3,6 +3,8 @@ type Lang = "en" | "ru";
 const S = {
   en: {
     tagline: "Track progress with bars, not checkboxes.",
+    startFresh: "Start Fresh",
+    orSync: "or sync with another device",
     install: "📲 Install App",
     addTask: "Add a task...",
     newList: "+ New List",
@@ -38,6 +40,8 @@ const S = {
   },
   ru: {
     tagline: "Прогресс-бары вместо галочек.",
+    startFresh: "Начать",
+    orSync: "или синхронизировать",
     install: "📲 Установить",
     addTask: "Добавить задачу...",
     newList: "+ Новый список",

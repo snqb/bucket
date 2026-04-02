@@ -469,15 +469,87 @@ const Settings: FC<{ onClose: () => void }> = ({ onClose }) => {
   );
 };
 
+// ── Welcome Screen ────────────────────────────────────────────
+
+const ONBOARDED_KEY = "bucket-onboarded";
+
+const Welcome: FC = () => {
+  useLang();
+  const evoluInstance = useEvolu();
+  const { canInstall, install } = useInstallPrompt();
+  const showIOSHint = isIOS && !isStandalone && !canInstall;
+
+  const handleStart = () => {
+    localStorage.setItem(ONBOARDED_KEY, "1");
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  const handleRestore = () => {
+    const mnemonic = window.prompt(t("restoreFromMnemonic"));
+    if (!mnemonic) return;
+    const result = E.Mnemonic.from(mnemonic.trim());
+    if (!result.ok) { alert("Invalid mnemonic"); return; }
+    void evoluInstance.restoreAppOwner(result.value);
+    localStorage.setItem(ONBOARDED_KEY, "1");
+    window.dispatchEvent(new Event("storage"));
+  };
+
+  return (
+    <div className="flex h-dvh items-center justify-center safe-top safe-bottom safe-x">
+      <div className="max-w-sm w-full px-6 space-y-6 text-center">
+        <div className="text-7xl">🪣</div>
+        <h1 className="text-2xl font-bold">Bucket</h1>
+        <p className="text-sm text-text-dim">{t("tagline")}</p>
+
+        <button
+          className="w-full py-3.5 bg-accent text-white rounded-lg text-sm font-bold active:scale-[0.98] transition-transform"
+          onClick={handleStart}
+        >
+          {t("startFresh")}
+        </button>
+
+        <div className="text-xs text-text-dim">— {t("orSync")} —</div>
+
+        <button
+          className="w-full py-3.5 bg-surface border border-border rounded-lg text-sm active:scale-[0.98] transition-transform"
+          onClick={handleRestore}
+        >
+          {t("restoreFromMnemonic")}
+        </button>
+
+        <div className="flex items-center justify-center gap-4 pt-2">
+          {canInstall && (
+            <button className="text-xs text-text-dim border border-dashed border-border rounded px-3 py-2 hover:border-text-dim"
+              onClick={install}>{t("install")}</button>
+          )}
+          {showIOSHint && <div className="text-xs text-text-dim">{t("iosHint")}</div>}
+          <LangToggle />
+          <ThemeToggle />
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ── App Shell ─────────────────────────────────────────────────
 
-export const App: FC = () => (
-  <EvoluProvider value={evolu}>
-    <Suspense fallback={<div className="flex items-center justify-center h-screen text-text-dim">Loading…</div>}>
-      <Bucket />
-    </Suspense>
-  </EvoluProvider>
-);
+export const App: FC = () => {
+  const [onboarded, setOnboarded] = useState(() => localStorage.getItem(ONBOARDED_KEY) === "1");
+
+  useEffect(() => {
+    const handler = () => setOnboarded(localStorage.getItem(ONBOARDED_KEY) === "1");
+    window.addEventListener("storage", handler);
+    return () => window.removeEventListener("storage", handler);
+  }, []);
+
+  return (
+    <EvoluProvider value={evolu}>
+      <Suspense fallback={<div className="flex items-center justify-center h-screen text-text-dim">Loading…</div>}>
+        {onboarded ? <Bucket /> : <Welcome />}
+      </Suspense>
+    </EvoluProvider>
+  );
+};
 
 // ── Main ──────────────────────────────────────────────────────
 
