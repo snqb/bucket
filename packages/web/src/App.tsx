@@ -4,6 +4,7 @@ import { useQuery } from "@evolu/react";
 import type { ListId, TaskId } from "@bucket/core";
 import { evolu, useEvolu, EvoluProvider, authResult } from "./evolu.ts";
 import { t, getLang, setLang, onLangChange } from "./i18n.ts";
+import { migrateFromV1 } from "./migrate.ts";
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -396,6 +397,8 @@ const Settings: FC<{ onClose: () => void }> = ({ onClose }) => {
   const evoluInstance = useEvolu();
   const appOwner = use(evoluInstance.appOwner);
   const [showMnemonic, setShowMnemonic] = useState(false);
+  const [migrating, setMigrating] = useState(false);
+  const [migrateResult, setMigrateResult] = useState("");
 
   const handleRestore = () => {
     const mnemonic = window.prompt(t("restoreFromMnemonic"));
@@ -407,6 +410,25 @@ const Settings: FC<{ onClose: () => void }> = ({ onClose }) => {
 
   const handleReset = () => {
     if (confirm(t("resetConfirm"))) void evoluInstance.resetAppOwner();
+  };
+
+  const handleMigrate = async () => {
+    const roomId = window.prompt("v1 Room ID:");
+    if (!roomId?.trim()) return;
+    setMigrating(true);
+    setMigrateResult("");
+    try {
+      const result = await migrateFromV1(
+        evoluInstance as any,
+        "https://bucket-sync.esen.works",
+        roomId.trim(),
+      );
+      setMigrateResult(`✅ ${result.lists} lists, ${result.tasks} tasks`);
+    } catch (e: any) {
+      setMigrateResult(`❌ ${e.message}`);
+    } finally {
+      setMigrating(false);
+    }
   };
 
   return (
@@ -428,6 +450,15 @@ const Settings: FC<{ onClose: () => void }> = ({ onClose }) => {
         <button className="w-full py-2.5 bg-accent text-white text-sm rounded font-medium" onClick={handleRestore}>
           {t("restoreFromMnemonic")}
         </button>
+
+        {/* v1 Migration */}
+        <div className="border-t border-border pt-3">
+          <button className="w-full py-2.5 bg-surface-2 text-sm rounded border border-border"
+            onClick={handleMigrate} disabled={migrating}>
+            {migrating ? "Importing..." : "📦 Import from v1"}
+          </button>
+          {migrateResult && <p className="text-xs text-center mt-2">{migrateResult}</p>}
+        </div>
 
         <button className="w-full text-xs text-red-400/70 hover:text-red-400 py-1" onClick={handleReset}>
           {t("resetAll")}
