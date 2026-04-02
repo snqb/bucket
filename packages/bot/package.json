@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx --watch src/bot.ts",
-    "start": "node --loader tsx src/bot.ts"
+    "dev": "node --import tsx/esm --watch src/bot.ts",
+    "start": "node --import tsx/esm src/bot.ts"
   },
   "dependencies": {
     "@bucket/core": "workspace:*",
