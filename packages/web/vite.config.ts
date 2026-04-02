@@ -33,6 +33,8 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,svg,png,ico,wasm}"],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
+        skipWaiting: true,
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3MB for sqlite wasm
       },
     }),
   ],
