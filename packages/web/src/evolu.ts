@@ -19,8 +19,7 @@ export const evolu = E.createEvolu(evoluReactWebDeps)(Schema, {
         externalAppOwner: authResult.owner,
       }
     : {}),
-  // Self-hosted relay (uncomment when deployed):
-  // transports: [{ type: "WebSocket", url: "wss://bucket-sync.esen.works" }],
+  transports: [{ type: "WebSocket", url: "wss://relay-production-1075.up.railway.app" }],
 } as E.EvoluConfig);
 
 export const useEvolu = createUseEvolu(evolu);

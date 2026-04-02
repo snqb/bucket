@@ -11,7 +11,7 @@ const relay = await createNodeJsRelay({
   console: createConsole(),
 })({
   port,
-  enableLogging: true,
+  enableLogging: false,
   isOwnerWithinQuota: (_ownerId, requiredBytes) => {
     const maxBytes = 10 * 1024 * 1024; // 10MB per owner
     return requiredBytes <= maxBytes;
