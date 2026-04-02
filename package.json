@@ -4,5 +4,10 @@
     "dev": "pnpm --filter @bucket/web dev",
     "build": "pnpm --filter @bucket/web build"
   },
-  "packageManager": "pnpm@10.6.5"
+  "packageManager": "pnpm@10.6.5",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
 }

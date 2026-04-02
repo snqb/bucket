@@ -6,10 +6,8 @@ COPY packages/core/package.json packages/core/
 COPY packages/web/package.json packages/web/
 RUN pnpm install --frozen-lockfile
 COPY packages/core/ packages/core/
-COPY packages/web/src/ packages/web/src/
-COPY packages/web/public/ packages/web/public/
-COPY packages/web/index.html packages/web/tsconfig.json packages/web/vite.config.ts packages/web/
-RUN pnpm --filter @bucket/web build
+COPY packages/web/ packages/web/
+RUN pnpm --filter @bucket/web build && ls -la packages/web/dist/*.png 2>/dev/null && echo "BUILD_TS=$(date +%s)"
 
 FROM nginx:alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
