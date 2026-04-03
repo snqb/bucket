@@ -187,7 +187,9 @@ const TaskBar: FC<{ task: TaskRow }> = ({ task }) => {
   const saveRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const dragging = useRef(false);
   const startXRef = useRef(0);
+  const startYRef = useRef(0);
   const didDragRef = useRef(false);
+  const directionRef = useRef<"none" | "h" | "v">("none"); // lock scroll vs drag direction
 
   // Sync from external
   if (progress !== localProgress && !saveRef.current) setLocalProgress(progress);
@@ -218,16 +220,25 @@ const TaskBar: FC<{ task: TaskRow }> = ({ task }) => {
   }, []);
 
   const onTouchStart = useCallback((e: React.TouchEvent) => {
-    dragging.current = true; didDragRef.current = false; startXRef.current = e.touches[0].clientX;
+    dragging.current = true; didDragRef.current = false; directionRef.current = "none";
+    startXRef.current = e.touches[0].clientX; startYRef.current = e.touches[0].clientY;
   }, []);
   const onTouchMove = useCallback((e: React.TouchEvent) => {
     if (!dragging.current) return;
+    const dx = Math.abs(e.touches[0].clientX - startXRef.current);
+    const dy = Math.abs(e.touches[0].clientY - startYRef.current);
+    // Lock direction on first significant move
+    if (directionRef.current === "none" && (dx > 8 || dy > 8)) {
+      directionRef.current = dx > dy ? "h" : "v";
+    }
+    // Vertical = let browser scroll
+    if (directionRef.current !== "h") return;
     e.preventDefault();
-    if (Math.abs(e.touches[0].clientX - startXRef.current) > 5) { didDragRef.current = true; setP(pctFromX(e.touches[0].clientX)); }
+    if (dx > 5) { didDragRef.current = true; setP(pctFromX(e.touches[0].clientX)); }
   }, [pctFromX, setP]);
   const onTouchEnd = useCallback(() => {
     if (!dragging.current) return;
-    const wasDrag = didDragRef.current; dragging.current = false;
+    const wasDrag = didDragRef.current; dragging.current = false; directionRef.current = "none";
     if (!wasDrag) setOpen((o) => !o);
   }, []);
 
