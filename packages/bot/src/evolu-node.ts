@@ -1,8 +1,8 @@
 /**
  * Headless Evolu client for Node.js.
  *
- * Creates an in-process Evolu instance (no Web Workers) using better-sqlite3.
- * Syncs via the same relay as the web app. Restore from mnemonic to share data.
+ * - With mnemonic: restores identity (syncs with web app)
+ * - Without: fresh identity, prints mnemonic for you to copy
  */
 
 import * as E from "@evolu/common";
@@ -12,19 +12,8 @@ import { Schema } from "@bucket/core";
 
 const RELAY_URL = "wss://relay-production-1075.up.railway.app";
 
-/** Create a headless Evolu instance for Node.js, restored from mnemonic */
-export async function createNodeEvolu(mnemonic: string) {
-  const mnemonicResult = E.Mnemonic.from(mnemonic);
-  if (!mnemonicResult.ok) {
-    throw new Error(`Invalid mnemonic`);
-  }
-
-  // In-process DbWorker using better-sqlite3 (no web workers)
-  const createDbWorker: E.CreateEvolu extends (deps: infer D) => any
-    ? D extends { createDbWorker: infer F }
-      ? F
-      : never
-    : never = (_name: any) =>
+function makeEvoluDeps() {
+  const createDbWorker = (_name: any) =>
     createDbWorkerForPlatform({
       console: E.createConsole(),
       createSqliteDriver: createBetterSqliteDriver,
@@ -34,26 +23,37 @@ export async function createNodeEvolu(mnemonic: string) {
       time: E.createTime(),
     });
 
-  const evolu = E.createEvolu({
+  return {
     console: E.createConsole(),
     createDbWorker,
     randomBytes: E.createRandomBytes(),
-    reloadApp: () => {}, // no-op
+    reloadApp: () => {},
     time: E.createTime(),
-  })(Schema, {
-    name: E.SimpleName.orThrow("bucket-bot"),
+  };
+}
+
+export async function createNodeEvolu(mnemonic?: string, name = "bucket-bot") {
+  const evolu = E.createEvolu(makeEvoluDeps())(Schema, {
+    name: E.SimpleName.orThrow(name),
     transports: [{ type: "WebSocket", url: RELAY_URL }],
   });
 
-  // Subscribe to errors
   evolu.subscribeError(() => {
     const error = evolu.getError();
     if (error) console.error("[evolu]", error);
   });
 
-  // Restore from mnemonic → establishes same identity as web app
-  await evolu.restoreAppOwner(mnemonicResult.value, { reload: false });
-  console.log("✅ Evolu restored from mnemonic");
+  if (mnemonic) {
+    const m = E.Mnemonic.from(mnemonic);
+    if (!m.ok) throw new Error("Invalid mnemonic");
+    await evolu.restoreAppOwner(m.value, { reload: false });
+    console.log("✅ Restored from mnemonic");
+  } else {
+    // Fresh — wait for auto-generated owner, print mnemonic
+    const owner = await evolu.appOwner;
+    console.log("\n🔑 NEW MNEMONIC (paste into web app Settings → Restore):");
+    console.log(`\n  ${owner?.mnemonic}\n`);
+  }
 
   return evolu;
 }
