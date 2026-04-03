@@ -1,12 +1,15 @@
 /**
  * Headless Evolu client for Node.js.
  *
- * - With mnemonic: restores identity (syncs with web app)
- * - Without: fresh identity, prints mnemonic for you to copy
+ * Creates Evolu with owner derived directly from mnemonic — no reset needed.
+ * This avoids the evolu_message_quarantine bug in restoreAppOwner.
  */
 
 import * as E from "@evolu/common";
-import { createDbWorkerForPlatform } from "@evolu/common/local-first";
+import {
+  createDbWorkerForPlatform,
+  type AppOwner,
+} from "@evolu/common/local-first";
 import { createBetterSqliteDriver } from "@evolu/nodejs";
 import { Schema } from "@bucket/core";
 
@@ -32,27 +35,42 @@ function makeEvoluDeps() {
   };
 }
 
+/** Derive AppOwner from mnemonic without going through restoreAppOwner (which has a quarantine table bug) */
+function ownerFromMnemonic(mnemonic: string): AppOwner {
+  const m = E.Mnemonic.from(mnemonic);
+  if (!m.ok) throw new Error("Invalid mnemonic");
+  // @ts-ignore — accessing internal but stable API
+  const secret = E.mnemonicToOwnerSecret(m.value);
+  // @ts-ignore
+  return E.createAppOwner(secret);
+}
+
 export async function createNodeEvolu(mnemonic?: string, name = "bucket-bot") {
+  const owner = mnemonic ? ownerFromMnemonic(mnemonic) : undefined;
+
   const evolu = E.createEvolu(makeEvoluDeps())(Schema, {
     name: E.SimpleName.orThrow(name),
     transports: [{ type: "WebSocket", url: RELAY_URL }],
-  });
+    maxDrift: 60 * 60 * 1000, // 1 hour — relay may have stale timestamps from test runs
+    ...(owner
+      ? {
+          encryptionKey: owner.encryptionKey,
+          externalAppOwner: owner,
+        }
+      : {}),
+  } as E.EvoluConfig);
 
   evolu.subscribeError(() => {
     const error = evolu.getError();
     if (error) console.error("[evolu]", error);
   });
 
-  if (mnemonic) {
-    const m = E.Mnemonic.from(mnemonic);
-    if (!m.ok) throw new Error("Invalid mnemonic");
-    await evolu.restoreAppOwner(m.value, { reload: false });
-    console.log("✅ Restored from mnemonic");
-  } else {
-    // Fresh — wait for auto-generated owner, print mnemonic
-    const owner = await evolu.appOwner;
+  if (!mnemonic) {
+    const o = await evolu.appOwner;
     console.log("\n🔑 NEW MNEMONIC (paste into web app Settings → Restore):");
-    console.log(`\n  ${owner?.mnemonic}\n`);
+    console.log(`\n  ${o?.mnemonic}\n`);
+  } else {
+    console.log("✅ Evolu initialized with mnemonic");
   }
 
   return evolu;

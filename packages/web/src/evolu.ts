@@ -19,6 +19,7 @@ export const evolu = E.createEvolu(evoluReactWebDeps)(Schema, {
         externalAppOwner: authResult.owner,
       }
     : {}),
+  maxDrift: 60 * 60 * 1000, // 1 hour — bot may have slightly different timestamps
   transports: [{ type: "WebSocket", url: "wss://relay-production-1075.up.railway.app" }],
 } as E.EvoluConfig);
 
