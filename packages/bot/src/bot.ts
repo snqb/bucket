@@ -1,12 +1,10 @@
 /**
  * Bucket Telegram Bot
  *
- * Send a message → creates task in the default "Bucket" list.
- * /lists — show all lists
- * /move — move a task between lists (inline buttons)
+ * Send text → task. Everything else is buttons.
  */
 
-import { Bot, InlineKeyboard, type Context } from "grammy";
+import { Bot, InlineKeyboard, Keyboard } from "grammy";
 import * as E from "@evolu/common";
 import type { ListId, TaskId } from "@bucket/core";
 import { createNodeEvolu } from "./evolu-node.ts";
@@ -21,11 +19,7 @@ if (!MNEMONIC) throw new Error("BUCKET_MNEMONIC env required");
 
 // ── Evolu ─────────────────────────────────────────────────────
 
-const { evolu, ready } = createNodeEvolu(MNEMONIC);
-
-// Wait for mnemonic restore before starting
-await ready;
-console.log("✅ Evolu restored from mnemonic");
+const evolu = await createNodeEvolu(MNEMONIC);
 
 // ── Queries ───────────────────────────────────────────────────
 
@@ -50,208 +44,215 @@ const allTasksQ = evolu.createQuery((db) =>
 
 // ── Helpers ───────────────────────────────────────────────────
 
-const DEFAULT_LIST_NAME = "Bucket";
-const DEFAULT_LIST_EMOJI = "🪣";
+const DEFAULT_LIST = "Bucket";
+const DEFAULT_EMOJI = "🪣";
 
-async function getLists() {
-  return evolu.loadQuery(listsQ);
-}
+const getLists = () => evolu.loadQuery(listsQ);
+const getTasks = () => evolu.loadQuery(allTasksQ);
 
-async function getTasks() {
-  return evolu.loadQuery(allTasksQ);
-}
-
-/** Find or create the default "Bucket" list */
-async function ensureDefaultList(): Promise<ListId> {
+async function ensureBucketList(): Promise<ListId> {
   const lists = await getLists();
-  const existing = lists.find(
-    (l) => l.title.toLowerCase() === DEFAULT_LIST_NAME.toLowerCase(),
+  const found = lists.find(
+    (l) => l.title?.toLowerCase() === DEFAULT_LIST.toLowerCase(),
   );
-  if (existing) return existing.id as ListId;
+  if (found) return found.id as ListId;
 
-  // Create it
-  const { id } = evolu.insert("list", {
-    title: DEFAULT_LIST_NAME as any,
-    emoji: DEFAULT_LIST_EMOJI as any,
+  const r = evolu.insert("list", {
+    title: DEFAULT_LIST as any,
+    emoji: DEFAULT_EMOJI as any,
     position: 0 as any,
   });
-  return id as ListId;
+  if (!r.ok) throw new Error("Failed to create Bucket list");
+  return r.value.id;
 }
 
-function progressBar(p: number): string {
-  const filled = Math.round(p / 10);
-  return "▓".repeat(filled) + "░".repeat(10 - filled);
+function bar(p: number): string {
+  const n = Math.round(p / 10);
+  return "▓".repeat(n) + "░".repeat(10 - n);
 }
+
+/** The persistent reply keyboard — always visible */
+const mainKb = new Keyboard()
+  .text("🪣 Bucket").text("📋 Lists").row()
+  .text("↗️ Move").row()
+  .resized()
+  .persistent();
 
 // ── Bot ───────────────────────────────────────────────────────
 
 const bot = new Bot(BOT_TOKEN);
 
-// /start
-bot.command("start", async (ctx) => {
-  await ctx.reply(
-    "🪣 *Bucket Bot*\n\n" +
-      "Send me any text → I'll add it as a task.\n\n" +
-      "Commands:\n" +
-      "/lists — show all lists\n" +
-      "/tasks — show tasks in Bucket\n" +
-      "/move — move a task to another list",
-    { parse_mode: "Markdown" },
-  );
-});
+// /start — show keyboard
+bot.command("start", (ctx) =>
+  ctx.reply("🪣 Send me anything — it becomes a task.", {
+    reply_markup: mainKb,
+  }),
+);
 
-// /lists — show all lists with task counts
-bot.command("lists", async (ctx) => {
+// ── Button: 🪣 Bucket — show tasks in default list ───────────
+
+bot.hears("🪣 Bucket", async (ctx) => {
   const [lists, tasks] = await Promise.all([getLists(), getTasks()]);
-  if (lists.length === 0) {
-    await ctx.reply("No lists yet. Send me a message to create your first task!");
-    return;
+  const list = lists.find(
+    (l) => l.title?.toLowerCase() === DEFAULT_LIST.toLowerCase(),
+  );
+  if (!list) return ctx.reply("Bucket list is empty. Send me something!");
+
+  const listTasks = tasks.filter((t) => t.listId === list.id);
+  if (!listTasks.length) {
+    return ctx.reply("🪣 Empty. Send me text to add tasks.", {
+      reply_markup: mainKb,
+    });
   }
 
-  const lines = lists.map((l) => {
-    const count = tasks.filter((t) => t.listId === l.id).length;
-    const emoji = l.emoji ?? "📋";
-    return `${emoji} *${l.title}* — ${count} task${count !== 1 ? "s" : ""}`;
+  // Show tasks with inline ✅ buttons
+  const kb = new InlineKeyboard();
+  const lines: string[] = [];
+  for (const t of listTasks.slice(0, 30)) {
+    const p = t.progress ?? 0;
+    lines.push(`${bar(p)} ${p}% ${t.title}`);
+    kb.text("✅", `done:${t.id}`).text("🗑", `del:${t.id}`).row();
+  }
+
+  await ctx.reply(`🪣 *Bucket*\n\n${lines.join("\n")}`, {
+    parse_mode: "Markdown",
+    reply_markup: kb,
   });
-
-  await ctx.reply(lines.join("\n"), { parse_mode: "Markdown" });
 });
 
-// /tasks — show tasks in the default Bucket list
-bot.command("tasks", async (ctx) => {
+// ── Button: 📋 Lists — show all lists ────────────────────────
+
+bot.hears("📋 Lists", async (ctx) => {
   const [lists, tasks] = await Promise.all([getLists(), getTasks()]);
-  const bucketList = lists.find(
-    (l) => l.title.toLowerCase() === DEFAULT_LIST_NAME.toLowerCase(),
-  );
+  if (!lists.length) return ctx.reply("No lists yet.", { reply_markup: mainKb });
 
-  const listId = ctx.match?.trim()
-    ? lists.find((l) => l.title.toLowerCase() === ctx.match!.trim().toLowerCase())?.id
-    : bucketList?.id;
-
-  if (!listId) {
-    await ctx.reply("List not found. Use /lists to see available lists.");
-    return;
+  const kb = new InlineKeyboard();
+  const lines: string[] = [];
+  for (const l of lists) {
+    const n = tasks.filter((t) => t.listId === l.id).length;
+    lines.push(`${l.emoji ?? "📋"} *${l.title}* — ${n}`);
+    kb.text(`${l.emoji ?? "📋"} ${l.title}`, `list:${l.id}`).row();
   }
+
+  await ctx.reply(`${lines.join("\n")}\n\n↓ Tap to view`, {
+    parse_mode: "Markdown",
+    reply_markup: kb,
+  });
+});
+
+// Callback: view a specific list's tasks
+bot.callbackQuery(/^list:(.+)$/, async (ctx) => {
+  const listId = ctx.match![1];
+  const [lists, tasks] = await Promise.all([getLists(), getTasks()]);
+  const list = lists.find((l) => l.id === listId);
+  if (!list) return ctx.answerCallbackQuery("List not found");
 
   const listTasks = tasks.filter((t) => t.listId === listId);
-  const list = lists.find((l) => l.id === listId);
-  if (listTasks.length === 0) {
-    await ctx.reply(`${list?.emoji ?? "📋"} *${list?.title}* is empty.`, {
+  if (!listTasks.length) {
+    await ctx.editMessageText(`${list.emoji ?? "📋"} *${list.title}* — empty`, {
       parse_mode: "Markdown",
     });
-    return;
+    return ctx.answerCallbackQuery();
   }
 
-  const lines = listTasks.map((t) => {
+  const kb = new InlineKeyboard();
+  const lines: string[] = [];
+  for (const t of listTasks.slice(0, 30)) {
     const p = t.progress ?? 0;
-    return `${progressBar(p)} ${p}% — ${t.title}`;
-  });
+    lines.push(`${bar(p)} ${p}% ${t.title}`);
+    kb.text("✅", `done:${t.id}`).text("🗑", `del:${t.id}`).row();
+  }
 
-  await ctx.reply(
-    `${list?.emoji ?? "📋"} *${list?.title}*\n\n${lines.join("\n")}`,
-    { parse_mode: "Markdown" },
+  await ctx.editMessageText(
+    `${list.emoji ?? "📋"} *${list.title}*\n\n${lines.join("\n")}`,
+    { parse_mode: "Markdown", reply_markup: kb },
   );
+  await ctx.answerCallbackQuery();
 });
 
-// /move — pick a task, then pick destination list
-bot.command("move", async (ctx) => {
-  const tasks = await getTasks();
-  if (tasks.length === 0) {
-    await ctx.reply("No tasks to move.");
-    return;
-  }
+// ── Button: ↗️ Move — pick task, pick destination ─────────────
 
-  // Show tasks as inline buttons (limit 20)
+bot.hears("↗️ Move", async (ctx) => {
+  const tasks = await getTasks();
+  if (!tasks.length)
+    return ctx.reply("No tasks to move.", { reply_markup: mainKb });
+
   const kb = new InlineKeyboard();
   for (const t of tasks.slice(0, 20)) {
-    kb.text(`${t.title.slice(0, 30)}`, `move:pick:${t.id}`).row();
+    kb.text(t.title!.slice(0, 40), `mv:${t.id}`).row();
   }
-
-  await ctx.reply("Pick a task to move:", { reply_markup: kb });
+  await ctx.reply("Pick task:", { reply_markup: kb });
 });
 
-// Callback: picked a task → show destination lists
-bot.callbackQuery(/^move:pick:(.+)$/, async (ctx) => {
+bot.callbackQuery(/^mv:(.+)$/, async (ctx) => {
   const taskId = ctx.match![1];
   const lists = await getLists();
 
   const kb = new InlineKeyboard();
   for (const l of lists) {
-    kb.text(`${l.emoji ?? "📋"} ${l.title}`, `move:to:${taskId}:${l.id}`).row();
+    kb.text(`${l.emoji ?? "📋"} ${l.title}`, `to:${taskId}:${l.id}`).row();
   }
-
-  await ctx.editMessageText("Move to which list?", { reply_markup: kb });
+  await ctx.editMessageText("Move to:", { reply_markup: kb });
   await ctx.answerCallbackQuery();
 });
 
-// Callback: move confirmed
-bot.callbackQuery(/^move:to:(.+):(.+)$/, async (ctx) => {
-  const taskId = ctx.match![1] as TaskId;
-  const listId = ctx.match![2] as ListId;
-
-  evolu.update("task", { id: taskId, listId });
+bot.callbackQuery(/^to:(.+):(.+)$/, async (ctx) => {
+  const [, taskId, listId] = ctx.match!;
+  evolu.update("task", { id: taskId as TaskId, listId: listId as ListId });
 
   const lists = await getLists();
   const list = lists.find((l) => l.id === listId);
-
   await ctx.editMessageText(
-    `✅ Moved to ${list?.emoji ?? "📋"} ${list?.title ?? "list"}`,
+    `✅ → ${list?.emoji ?? "📋"} ${list?.title ?? "list"}`,
   );
   await ctx.answerCallbackQuery();
 });
 
-// /done <search> — mark a task done (set progress=100, soft delete)
-bot.command("done", async (ctx) => {
-  const search = ctx.match?.trim().toLowerCase();
-  if (!search) {
-    await ctx.reply("Usage: /done <task name>");
-    return;
-  }
+// ── Inline: ✅ done / 🗑 delete ──────────────────────────────
 
-  const tasks = await getTasks();
-  const task = tasks.find((t) => t.title.toLowerCase().includes(search));
-  if (!task) {
-    await ctx.reply(`No task matching "${search}"`);
-    return;
-  }
-
-  evolu.update("task", { id: task.id as TaskId, isDeleted: E.sqliteTrue });
-  await ctx.reply(`✅ Done: ${task.title}`);
+bot.callbackQuery(/^done:(.+)$/, async (ctx) => {
+  const taskId = ctx.match![1] as TaskId;
+  evolu.update("task", { id: taskId, isDeleted: E.sqliteTrue });
+  await ctx.answerCallbackQuery("✅ Done");
+  // Remove the button row — edit message to refresh
+  try {
+    const tasks = await getTasks();
+    const text = ctx.callbackQuery.message?.text ?? "";
+    // Just acknowledge, user can tap 🪣 Bucket to refresh
+    await ctx.editMessageText(text + "\n\n_updated_", {
+      parse_mode: "Markdown",
+    });
+  } catch {}
 });
 
-// /del — same as done (soft delete)
-bot.command("del", async (ctx) => {
-  const search = ctx.match?.trim().toLowerCase();
-  if (!search) {
-    await ctx.reply("Usage: /del <task name>");
-    return;
-  }
-
-  const tasks = await getTasks();
-  const task = tasks.find((t) => t.title.toLowerCase().includes(search));
-  if (!task) {
-    await ctx.reply(`No task matching "${search}"`);
-    return;
-  }
-
-  evolu.update("task", { id: task.id as TaskId, isDeleted: E.sqliteTrue });
-  await ctx.reply(`🗑️ Deleted: ${task.title}`);
+bot.callbackQuery(/^del:(.+)$/, async (ctx) => {
+  const taskId = ctx.match![1] as TaskId;
+  evolu.update("task", { id: taskId, isDeleted: E.sqliteTrue });
+  await ctx.answerCallbackQuery("🗑 Deleted");
+  try {
+    const text = ctx.callbackQuery.message?.text ?? "";
+    await ctx.editMessageText(text + "\n\n_updated_", {
+      parse_mode: "Markdown",
+    });
+  } catch {}
 });
 
-// Default: any text message → create task in Bucket list
+// ── Default: text → task ──────────────────────────────────────
+
 bot.on("message:text", async (ctx) => {
-  // Skip if it looks like a command
   if (ctx.message.text.startsWith("/")) return;
 
-  const listId = await ensureDefaultList();
+  const listId = await ensureBucketList();
+  const title = ctx.message.text.trim().slice(0, 100);
+  if (!title) return;
 
-  evolu.insert("task", {
-    title: ctx.message.text.trim().slice(0, 100) as any,
+  const r = evolu.insert("task", {
+    title: title as any,
     listId,
     progress: 0 as any,
   });
 
-  await ctx.reply(`📌 Added to 🪣 Bucket`);
+  await ctx.reply(r.ok ? "📌" : "❌", { reply_markup: mainKb });
 });
 
 // ── Start ─────────────────────────────────────────────────────
